@@ -4,7 +4,7 @@ namespace Website.Classes
 {
     public struct ProductGroup
     {
-        public string Caption;
-        public IEnumerable<ProductDTO> Products;
+        public string Caption { get; set; }
+        public IEnumerable<ProductDTO> Products { get; set; }
     }
 }
