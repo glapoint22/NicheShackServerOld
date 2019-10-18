@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -122,7 +123,8 @@ namespace Website.Controllers
                 };
 
                 // Return with the token data
-                return Ok(await GenerateTokenData<TokenDataDetail>(customer, claims));
+                await GenerateTokenData(customer, claims);
+                return Ok();
             }
 
             return Unauthorized();
@@ -254,9 +256,10 @@ namespace Website.Controllers
         // ..................................................................................Refresh.....................................................................
         [HttpGet]
         [Route("Refresh")]
-        public async Task<ActionResult> Refresh(string refresh)
+        public async Task<ActionResult> Refresh()
         {
             string accessToken = GetAccessTokenFromHeader();
+            string refresh = Request.Cookies["refresh"];
 
             if (accessToken != null)
             {
@@ -281,7 +284,8 @@ namespace Website.Controllers
                                 Customer customer = await userManager.FindByIdAsync(customerId);
 
                                 // Generate a new token and refresh token
-                                return Ok(await GenerateTokenData<TokenData>(customer, principal.Claims));
+                                await GenerateTokenData(customer, principal.Claims);
+                                return Ok();
                             }
                         }
                     }
@@ -326,9 +330,9 @@ namespace Website.Controllers
 
 
         // ..................................................................................Generate Token Data.....................................................................
-        private async Task<T> GenerateTokenData<T>(Customer customer, IEnumerable<Claim> claims)
+        private async Task GenerateTokenData(Customer customer, IEnumerable<Claim> claims)
         {
-            ITokenData<T> tokenData;
+            
 
             // Generate the access token
             JwtSecurityToken accessToken = GenerateAccessToken(claims);
@@ -339,19 +343,35 @@ namespace Website.Controllers
 
             // If type of T is TokenData
             // This will return access token and refresh token info
-            if (typeof(T) == typeof(TokenData))
+            //if (typeof(T) == typeof(TokenData))
+            //{
+            //    tokenData = (ITokenData<T>)new TokenData();
+            //}
+            //else
+            //{
+            //    // Type of T is TokenDataDetail
+            //    // This will return access token, refresh token, and customer info
+            //    tokenData = (ITokenData<T>)new TokenDataDetail();
+            //}
+            CookieOptions cookieOptions = new CookieOptions();
+
+            if (claims.FirstOrDefault(x => x.Type == ClaimTypes.IsPersistent).Value == "True")
             {
-                tokenData = (ITokenData<T>)new TokenData();
-            }
-            else
-            {
-                // Type of T is TokenDataDetail
-                // This will return access token, refresh token, and customer info
-                tokenData = (ITokenData<T>)new TokenDataDetail();
+                cookieOptions.Expires = refreshToken.Expiration;
             }
 
 
-            return tokenData.GetTokenData(accessToken, refreshToken, customer);
+            Response.Cookies.Append("access", new JwtSecurityTokenHandler().WriteToken(accessToken), cookieOptions);
+            Response.Cookies.Append("refresh", refreshToken.Id, cookieOptions);
+            Response.Cookies.Append("expiration", accessToken.ValidTo.ToString() + " UTC", cookieOptions);
+
+
+            //return new TokenData
+            //{
+            //    AccessTokenExpiration = accessToken.ValidTo.ToString() + " UTC",
+            //    AccessToken = new JwtSecurityTokenHandler().WriteToken(accessToken),
+            //    RefreshToken = refreshToken.Id,
+            //};
         }
 
 

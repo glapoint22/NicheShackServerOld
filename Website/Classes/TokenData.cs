@@ -17,7 +17,7 @@ namespace Website.Classes
             {
                 AccessTokenExpiration = accessToken.ValidTo.ToString() + " UTC",
                 AccessToken = new JwtSecurityTokenHandler().WriteToken(accessToken),
-                RefreshToken = Uri.EscapeDataString(refreshToken.Id),
+                RefreshToken = refreshToken.Id,
             };
         }
     }
