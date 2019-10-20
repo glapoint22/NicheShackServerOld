@@ -8,14 +8,12 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
 using Website.Classes;
-using Website.Interfaces;
 using Website.Models;
 using Website.Repositories;
 
@@ -119,12 +117,11 @@ namespace Website.Controllers
                     new Claim(ClaimTypes.NameIdentifier, customer.Id),
                     new Claim(JwtRegisteredClaimNames.Iss, configuration["TokenValidation:Site"]),
                     new Claim(JwtRegisteredClaimNames.Aud, configuration["TokenValidation:Site"]),
-                    new Claim(ClaimTypes.IsPersistent, signIn.IsPersistent.ToString())
+                    new Claim("isPersistent", signIn.IsPersistent.ToString())
                 };
 
                 // Return with the token data
-                await GenerateTokenData(customer, claims);
-                return Ok();
+                return Ok(await GenerateTokenData(customer, claims));
             }
 
             return Unauthorized();
@@ -284,8 +281,7 @@ namespace Website.Controllers
                                 Customer customer = await userManager.FindByIdAsync(customerId);
 
                                 // Generate a new token and refresh token
-                                await GenerateTokenData(customer, principal.Claims);
-                                return Ok();
+                                return Ok(await GenerateTokenData(customer, principal.Claims));
                             }
                         }
                     }
@@ -330,10 +326,8 @@ namespace Website.Controllers
 
 
         // ..................................................................................Generate Token Data.....................................................................
-        private async Task GenerateTokenData(Customer customer, IEnumerable<Claim> claims)
+        private async Task<TokenData> GenerateTokenData(Customer customer, IEnumerable<Claim> claims)
         {
-            
-
             // Generate the access token
             JwtSecurityToken accessToken = GenerateAccessToken(claims);
 
@@ -341,37 +335,12 @@ namespace Website.Controllers
             RefreshToken refreshToken = await GenerateRefreshToken(customer.Id);
 
 
-            // If type of T is TokenData
-            // This will return access token and refresh token info
-            //if (typeof(T) == typeof(TokenData))
-            //{
-            //    tokenData = (ITokenData<T>)new TokenData();
-            //}
-            //else
-            //{
-            //    // Type of T is TokenDataDetail
-            //    // This will return access token, refresh token, and customer info
-            //    tokenData = (ITokenData<T>)new TokenDataDetail();
-            //}
-            CookieOptions cookieOptions = new CookieOptions();
-
-            if (claims.FirstOrDefault(x => x.Type == ClaimTypes.IsPersistent).Value == "True")
+            // Return the token data
+            return new TokenData
             {
-                cookieOptions.Expires = refreshToken.Expiration;
-            }
-
-
-            Response.Cookies.Append("access", new JwtSecurityTokenHandler().WriteToken(accessToken), cookieOptions);
-            Response.Cookies.Append("refresh", refreshToken.Id, cookieOptions);
-            Response.Cookies.Append("expiration", accessToken.ValidTo.ToString() + " UTC", cookieOptions);
-
-
-            //return new TokenData
-            //{
-            //    AccessTokenExpiration = accessToken.ValidTo.ToString() + " UTC",
-            //    AccessToken = new JwtSecurityTokenHandler().WriteToken(accessToken),
-            //    RefreshToken = refreshToken.Id,
-            //};
+                AccessToken = new JwtSecurityTokenHandler().WriteToken(accessToken),
+                RefreshToken = refreshToken.Id
+            };
         }
 
 
@@ -472,7 +441,7 @@ namespace Website.Controllers
 
 
 
-        // ..................................................................................Get Token From Header.....................................................................
+        // ..................................................................................Get Access Token From Header.....................................................................
         private string GetAccessTokenFromHeader()
         {
             StringValues value;
