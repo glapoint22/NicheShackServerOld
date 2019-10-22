@@ -1,6 +1,6 @@
 ﻿namespace Website.Classes
 {
-    public struct CustomerDTO
+    public class CustomerDTO
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }

@@ -46,7 +46,7 @@ namespace Website.Controllers
             // Add the new customer to the database
             IdentityResult result = await userManager.CreateAsync(customer, account.Password);
 
-            
+
             if (result.Succeeded)
             {
                 // Create the new list and add it to the database
@@ -151,7 +151,7 @@ namespace Website.Controllers
                 // If succeeded, return with the new updated name
                 if (result.Succeeded)
                 {
-                    return Ok(new 
+                    return Ok(new
                     {
                         customer.FirstName,
                         customer.LastName
@@ -190,7 +190,7 @@ namespace Website.Controllers
                 // If the update was successful, return the customer data with the new email
                 if (result.Succeeded)
                 {
-                    return Ok(new 
+                    return Ok(new
                     {
                         updatedEmail.Email
                     });
@@ -300,8 +300,10 @@ namespace Website.Controllers
         // ..................................................................................Sign Out.....................................................................
         [HttpGet]
         [Route("SignOut")]
-        public async Task<ActionResult> SignOut(string refresh)
+        public async Task<ActionResult> SignOut()
         {
+            string refresh = Request.Cookies["refresh"];
+
             if (refresh != null)
             {
                 RefreshToken refreshToken = await unitOfWork.RefreshTokens.Get(x => x.Id == refresh);
@@ -314,7 +316,45 @@ namespace Website.Controllers
 
             }
 
+            Response.Cookies.Delete("access");
+            Response.Cookies.Delete("refresh");
+
             return NoContent();
+        }
+
+
+
+
+
+        // ..................................................................................Get Customer.....................................................................
+        [HttpGet]
+        [Route("GetCustomer")]
+        public async Task<ActionResult> GetCustomer()
+        {
+            CustomerDTO customerDTO = null;
+
+            if (Request.Cookies["access"] != null)
+            {
+                Claim claim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+                if(claim != null)
+                {
+                    Customer customer = await userManager.FindByIdAsync(claim.Value);
+
+                    if (customer != null)
+                    {
+                        customerDTO = new CustomerDTO
+                        {
+                            FirstName = customer.FirstName,
+                            LastName = customer.LastName,
+                            Email = customer.Email
+                        };
+                    }
+                }
+                
+            }
+
+            return Ok(customerDTO);
         }
 
 
