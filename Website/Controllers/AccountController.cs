@@ -124,7 +124,7 @@ namespace Website.Controllers
                 return Ok(await GenerateTokenData(customer, claims));
             }
 
-            return Unauthorized();
+            return Conflict("Your password and email do not match. Please try again.");
         }
 
 
@@ -198,7 +198,7 @@ namespace Website.Controllers
 
                     if(result.Errors.Count(x => x.Code == "DuplicateEmail") == 1)
                     {
-                        error = "The email address, \"" + updatedEmail.Email.ToLower() + "\", already exists with another Niche Shack account. Please use another email address.";
+                        error = "The email address, \"" + updatedEmail.Email.ToLower() + ",\" already exists with another Niche Shack account. Please use another email address.";
                     }
 
                     return Conflict(error);
