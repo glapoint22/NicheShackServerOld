@@ -82,16 +82,14 @@ namespace Website.Controllers
             }
             else
             {
-                // There was a problem adding the customer to the database. Return with errors
-                foreach (IdentityError error in result.Errors)
+                string error = string.Empty;
+
+                if (result.Errors.Count(x => x.Code == "DuplicateEmail") == 1)
                 {
-                    if (error.Code == "DuplicateEmail")
-                    {
-                        error.Description = "The email address, \"" + account.Email.ToLower() + "\", already exists with another Niche Shack account. Please use another email address.";
-                    }
-                    ModelState.AddModelError(error.Code, error.Description);
+                    error = "The email address, \"" + account.Email.ToLower() + ",\" already exists with another Niche Shack account. Please use another email address.";
                 }
-                return Conflict(ModelState);
+
+                return Conflict(error);
             }
         }
 
