@@ -148,14 +148,9 @@ namespace Website.Controllers
                 // Update the name in the database
                 IdentityResult result = await userManager.UpdateAsync(customer);
 
-                // If succeeded, return with the new updated name
                 if (result.Succeeded)
                 {
-                    return Ok(new
-                    {
-                        customer.FirstName,
-                        customer.LastName
-                    });
+                    return Ok();
                 }
             }
 
@@ -183,30 +178,30 @@ namespace Website.Controllers
             // If the customer is found...
             if (customer != null)
             {
+                if(!await userManager.CheckPasswordAsync(customer, updatedEmail.Password))
+                {
+                    return Conflict("Your password and current email do not match.");
+                }
+
                 // Update the new email in the database
                 IdentityResult result = await userManager.SetEmailAsync(customer, updatedEmail.Email);
 
 
-                // If the update was successful, return the customer data with the new email
+                // If the update was successful, return ok
                 if (result.Succeeded)
                 {
-                    return Ok(new
-                    {
-                        updatedEmail.Email
-                    });
+                    return Ok();
                 }
                 else
                 {
-                    // The update was not successful. Return with errors
-                    foreach (IdentityError error in result.Errors)
+                    string error = string.Empty;
+
+                    if(result.Errors.Count(x => x.Code == "DuplicateEmail") == 1)
                     {
-                        if (error.Code == "DuplicateEmail")
-                        {
-                            error.Description = "The email address, \"" + updatedEmail.Email.ToLower() + "\", already exists with another Niche Shack account. Please use another email address.";
-                        }
-                        ModelState.AddModelError(error.Code, error.Description);
+                        error = "The email address, \"" + updatedEmail.Email.ToLower() + "\", already exists with another Niche Shack account. Please use another email address.";
                     }
-                    return Conflict(ModelState);
+
+                    return Conflict(error);
                 }
             }
 
