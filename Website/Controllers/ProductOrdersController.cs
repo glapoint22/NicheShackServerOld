@@ -23,7 +23,7 @@ namespace Website.Controllers
         // ..................................................................................Get Orders.....................................................................
         [HttpGet]
         [Authorize(Policy = "Account Policy")]
-        public async Task<ActionResult> GetOrders(string filter = "last30", string search = "")
+        public async Task<ActionResult> GetOrders(string filter = "last-30", string search = "")
         {
             // Get the customer id from the claims
             string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;

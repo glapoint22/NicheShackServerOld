@@ -58,7 +58,7 @@ namespace Website.Classes
                 // Get orders in a given time frame
                 switch (filter)
                 {
-                    case "last30":
+                    case "last-30":
                         source = source.Where(x => x.Date <= DateTime.UtcNow && x.Date > DateTime.UtcNow.AddDays(-30));
                         break;
                     case "6-months":
