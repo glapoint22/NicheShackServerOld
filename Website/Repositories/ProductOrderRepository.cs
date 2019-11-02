@@ -77,7 +77,7 @@ namespace Website.Repositories
                 .WhereAny(searchWordsArray.Select(w => (Expression<Func<OrderProduct, bool>>)(x => EF.Functions.Like(x.Title, w))).ToArray())
                 .Select(x => new OrderProductQueryResultDTO
                 {
-                    Date = x.ProductOrder.Date.ToString("D"),
+                    Date = x.ProductOrder.Date.ToString("MMMM dd, yyyy"),
                     Title = x.Title,
                     Image = x.IsMain ? x.ProductOrder.Product.Image : null,
                     Hoplink = x.ProductOrder.Product.Hoplink,
