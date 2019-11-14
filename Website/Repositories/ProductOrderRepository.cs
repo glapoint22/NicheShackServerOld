@@ -39,7 +39,7 @@ namespace Website.Repositories
                     Discount = x.Discount,
                     Tax = x.Tax,
                     Total = x.Total,
-                    ProductUrlTitle = x.Product.UrlTitle,
+                    ProductId = x.Product.Id,
                     Hoplink = x.Product.Hoplink,
                     Products = x.OrderProducts
                         .Where(y => y.OrderId == x.Id)

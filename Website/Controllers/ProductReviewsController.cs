@@ -90,22 +90,16 @@ namespace Website.Controllers
         public async Task<ActionResult> WriteReview(string productId)
         {
             // Get the customer Id from the access token
-            string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            //string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
-            // Get the user name for the review
-            string userName = await unitOfWork.Customers.Get(x => x.Id == customerId, x => x.ReviewName);
+            //// Get the user name for the review
+            //string userName = await unitOfWork.Customers.Get(x => x.Id == customerId, x => x.ReviewName);
 
-            return Ok(new
+            return Ok(await unitOfWork.Products.Get(x => x.Id == productId, x => new
             {
-                // This will be used to showcase the product when writing the review
-                product = await unitOfWork.Products.Get(x => x.Id == productId, x => new
-                {
-                    id = x.Id,
-                    title = x.Title,
-                    image = x.Image
-                }),
-                userName
-            });
+                title = x.Title,
+                image = x.Image
+            }));
         }
 
 
