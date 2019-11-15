@@ -89,17 +89,19 @@ namespace Website.Controllers
         [Authorize(Policy = "Account Policy")]
         public async Task<ActionResult> WriteReview(string productId)
         {
-            // Get the customer Id from the access token
-            //string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
-
-            //// Get the user name for the review
-            //string userName = await unitOfWork.Customers.Get(x => x.Id == customerId, x => x.ReviewName);
-
-            return Ok(await unitOfWork.Products.Get(x => x.Id == productId, x => new
+            // Get the product based on the product id
+            var product = await unitOfWork.Products.Get(x => x.Id == productId, x => new
             {
                 title = x.Title,
                 image = x.Image
-            }));
+            });
+
+
+            // If product is null, retun a 404 error
+            if (product == null) return NoContent();
+
+            // Return the product
+            return Ok(product);
         }
 
 

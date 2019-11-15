@@ -41,6 +41,7 @@ namespace Website.Repositories
                     Total = x.Total,
                     ProductId = x.Product.Id,
                     Hoplink = x.Product.Hoplink,
+                    UrlTitle = x.Product.UrlTitle,
                     Products = x.OrderProducts
                         .Where(y => y.OrderId == x.Id)
                         .OrderByDescending(y => y.IsMain)
@@ -81,7 +82,9 @@ namespace Website.Repositories
                     Title = x.Title,
                     Image = x.IsMain ? x.ProductOrder.Product.Image : null,
                     Hoplink = x.ProductOrder.Product.Hoplink,
-                    OrderNumber = x.OrderId
+                    OrderNumber = x.OrderId,
+                    ProductId = x.ProductOrder.ProductId,
+                    UrlTitle = x.ProductOrder.Product.UrlTitle
                 })
                 .ToListAsync();
         }

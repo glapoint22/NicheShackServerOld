@@ -24,6 +24,7 @@ namespace Website.Classes
         public double Total { get; set; }
         public string ProductId { get; set; }
         public string Hoplink { get; set; }
+        public string UrlTitle { get; set; }
         public IEnumerable<OrderProductInfoDTO> Products { get; set; }
 
 
