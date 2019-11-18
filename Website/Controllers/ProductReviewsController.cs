@@ -23,11 +23,26 @@ namespace Website.Controllers
 
         // ..................................................................................Get Reviews.....................................................................
         [HttpGet]
-        public async Task<ActionResult> GetReviews(string productId, string sortBy, int page = 1)
+        public async Task<ActionResult> GetReviews(string productId, string sortBy = "", int page = 1)
         {
             return Ok(await unitOfWork.ProductReviews.GetReviews(productId, sortBy, page));
         }
 
+
+
+        // ................................................................................Get Review Options...................................................................
+        [Route("ReviewOptions")]
+        [HttpGet]
+        public ActionResult GetReviewOptions()
+        {
+            ProductReviewDTO productReviewDTO = new ProductReviewDTO();
+
+            return Ok(new
+            {
+                sortOptions = productReviewDTO.GetSortOptions(),
+                reviewsPerPage = productReviewDTO.GetReviewsPerPage()
+            });
+        }
 
 
 
@@ -40,8 +55,6 @@ namespace Website.Controllers
         [HttpGet]
         public async Task<ActionResult> GetReviewsDetail(string productId, string sortBy, int page = 1)
         {
-            ProductReviewDTO productReviewDTO = new ProductReviewDTO();
-
             // Get the product that is in review
             var product = await unitOfWork.Products.Get(x => x.Id == productId, x => new
             {
@@ -71,12 +84,10 @@ namespace Website.Controllers
                     positiveReview = await unitOfWork.ProductReviews.GetPositiveReview(product.id),
                     negativeReview = await unitOfWork.ProductReviews.GetNegativeReview(product.id),
                     reviews = await unitOfWork.ProductReviews.GetReviews(product.id, sortBy, page),
-                    sortOptions = productReviewDTO.GetSortOptions(),
-                    reviewsPerPage = productReviewDTO.GetReviewsPerPage()
                 });
             }
 
-            return BadRequest();
+            return NoContent();
         }
 
 

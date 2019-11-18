@@ -43,10 +43,8 @@ namespace Website.Controllers
         // ..................................................................................Get Product Detail.....................................................................
         [Route("ProductDetail")]
         [HttpGet]
-        public async Task<ActionResult> GetProductDetail(string id, string sortBy)
+        public async Task<ActionResult> GetProductDetail(string id)
         {
-            ProductReviewDTO productReviewDTO = new ProductReviewDTO();
-
             // Get the product based on the id
             ProductDetailDTO product = await unitOfWork.Products.Get(x => x.Id == id, new ProductDetailDTO());
             
@@ -55,8 +53,11 @@ namespace Website.Controllers
             {
                 var response = new
                 {
-                    product,
-                    media = await unitOfWork.Media.GetCollection(x => x.ProductId == product.Id, new ProductMediaDTO()),
+                    productInfo = new
+                    {
+                        product,
+                        media = await unitOfWork.Media.GetCollection(x => x.ProductId == product.Id, new ProductMediaDTO())
+                    },
                     content = await unitOfWork.ProductContent.GetCollection(x => x.ProductId == product.Id, x => new
                     {
                         Type = new {
@@ -67,15 +68,12 @@ namespace Website.Controllers
                         PriceIndices = x.PriceIndices.Select(y => y.Index).ToList()
                     }),
                     pricePoints = await unitOfWork.PricePoints.GetCollection(x => x.ProductId == product.Id, x => string.Format(x.Description, x.Price)),
-                    reviews = await unitOfWork.ProductReviews.GetReviews(product.Id, sortBy, 1),
-                    sortOptions = productReviewDTO.GetSortOptions(),
-                    reviewsPerPage = productReviewDTO.GetReviewsPerPage()
                 };
 
                 return Ok(response);
             }
 
-            return NotFound();
+            return NoContent();
         }
 
 

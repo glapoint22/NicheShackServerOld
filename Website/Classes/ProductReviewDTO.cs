@@ -15,7 +15,7 @@ namespace Website.Classes
         public string Title { get; set; }
         public double Rating { get; set; }
         public string Username { get; set; }
-        public DateTime Date { get; set; }
+        public string Date { get; set; }
         public bool IsVerified { get; set; }
         public string Text { get; set; }
         public int Likes { get; set; }
@@ -69,7 +69,7 @@ namespace Website.Classes
                 ProductId = x.ProductId,
                 Rating = x.Rating,
                 Username = x.Customer.ReviewName,
-                Date = x.Date,
+                Date = x.Date.ToString("MMMM dd, yyyy"),
                 IsVerified = x.IsVerified,
                 Text = x.Text,
                 Likes = x.Likes,
