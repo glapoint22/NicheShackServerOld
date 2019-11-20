@@ -28,7 +28,11 @@ namespace Website.Controllers
             // Return the product's description and media
             var quickLookProduct = new
             {
-                description = await unitOfWork.Products.Get(x => x.Id == id, x => x.Description),
+                product = await unitOfWork.Products.Get(x => x.Id == id, x => new { 
+                    description = x.Description,
+                    hoplink = x.Hoplink,
+                    shareImage = x.ShareImage
+                }),
                 media = await unitOfWork.Media.GetCollection(x => x.ProductId == id, new ProductMediaDTO())
             };
 
