@@ -20,6 +20,32 @@ namespace Website.Controllers
 
 
 
+        // ..................................................................................Get Product.....................................................................
+        [Route("Product")]
+        [HttpGet]
+        public async Task<ActionResult> Get(string id)
+        {
+            return Ok(await unitOfWork.Products.Get(x => x.Id == id, x => new
+            {
+                id = x.Id,
+                title = x.Title,
+                minPrice = x.MinPrice,
+                maxPrice = x.MaxPrice,
+                image = x.Image,
+                rating = x.Rating,
+                totalReviews = x.TotalReviews,
+                oneStar = x.OneStar,
+                twoStars = x.TwoStars,
+                threeStars = x.ThreeStars,
+                fourStars = x.FourStars,
+                fiveStars = x.FiveStars
+            }));
+
+
+        }
+
+
+
         // ..................................................................................Get Quick Look Product.....................................................................
         [Route("QuickLookProduct")]
         [HttpGet]
@@ -28,7 +54,8 @@ namespace Website.Controllers
             // Return the product's description and media
             var quickLookProduct = new
             {
-                product = await unitOfWork.Products.Get(x => x.Id == id, x => new { 
+                product = await unitOfWork.Products.Get(x => x.Id == id, x => new
+                {
                     description = x.Description,
                     hoplink = x.Hoplink,
                     shareImage = x.ShareImage
@@ -51,7 +78,7 @@ namespace Website.Controllers
         {
             // Get the product based on the id
             ProductDetailDTO product = await unitOfWork.Products.Get(x => x.Id == id, new ProductDetailDTO());
-            
+
             // If the product is found in the database, return the product with other product details
             if (product != null)
             {
@@ -64,7 +91,8 @@ namespace Website.Controllers
                     },
                     content = await unitOfWork.ProductContent.GetCollection(x => x.ProductId == product.Id, x => new
                     {
-                        Type = new {
+                        Type = new
+                        {
                             x.ProductContentType.Name,
                             x.ProductContentType.Image
                         },

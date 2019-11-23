@@ -23,10 +23,12 @@ namespace Website.Controllers
 
         // ..................................................................................Get Reviews.....................................................................
         [HttpGet]
-        public async Task<ActionResult> GetReviews(string productId, string sortBy = "", int page = 1)
+        public async Task<ActionResult> GetReviews(string productId, int page, string sortBy = "")
         {
             return Ok(await unitOfWork.ProductReviews.GetReviews(productId, sortBy, page));
         }
+
+
 
 
 
@@ -50,44 +52,16 @@ namespace Website.Controllers
 
 
 
-        // ................................................................................Get Reviews Detail...................................................................
-        [Route("ReviewsDetail")]
+        // .........................................................................Get Positive Negative Reviews...............................................................
+        [Route("PositiveNegativeReviews")]
         [HttpGet]
-        public async Task<ActionResult> GetReviewsDetail(string productId, string sortBy, int page = 1)
+        public async Task<ActionResult> GetPositiveNegativeReviews(string productId)
         {
-            // Get the product that is in review
-            var product = await unitOfWork.Products.Get(x => x.Id == productId, x => new
+            return Ok(new
             {
-                id = x.Id,
-                title = x.Title,
-                urlTitle = x.UrlTitle,
-                rating = x.Rating,
-                totalReviews = x.TotalReviews,
-                minPrice = x.MinPrice,
-                maxPrice = x.MaxPrice,
-                image = x.Image,
-                shareImage = x.ShareImage,
-                oneStar = x.OneStar,
-                twoStars = x.TwoStars,
-                threeStars = x.ThreeStars,
-                fourStars = x.FourStars,
-                fiveStars = x.FiveStars
+                positiveReview = await unitOfWork.ProductReviews.GetPositiveReview(productId),
+                negativeReview = await unitOfWork.ProductReviews.GetNegativeReview(productId),
             });
-
-
-            // If product is not null
-            if (product != null)
-            {
-                return Ok(new
-                {
-                    product,
-                    positiveReview = await unitOfWork.ProductReviews.GetPositiveReview(product.id),
-                    negativeReview = await unitOfWork.ProductReviews.GetNegativeReview(product.id),
-                    reviews = await unitOfWork.ProductReviews.GetReviews(product.id, sortBy, page),
-                });
-            }
-
-            return NoContent();
         }
 
 
