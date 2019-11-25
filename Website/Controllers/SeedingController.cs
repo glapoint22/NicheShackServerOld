@@ -96,7 +96,7 @@ namespace Website.Controllers
 
 
                 // Product content
-                int numProductContent = random.Next(1, 6);
+                int numProductContent = random.Next(numPricePoints, 7);
                 List<ProductContent> productContent = new List<ProductContent>();
 
                 for (int i = 0; i < numProductContent; i++)
@@ -106,7 +106,7 @@ namespace Website.Controllers
                     List<PriceIndex> priceIndices = new List<PriceIndex>();
                     for (int j = 0; j < pricePoints.Count; j++)
                     {
-                        if (random.Next(2) == 1)
+                        if (random.Next(2) == 1 || i < pricePoints.Count)
                         {
                             priceIndices.Add(new PriceIndex
                             {
@@ -148,31 +148,31 @@ namespace Website.Controllers
 
 
                 // Product media
-                if (random.Next(2) == 1)
-                {
-                    int numMedia = random.Next(1, 11);
-                    List<ProductMedia> productMedia = new List<ProductMedia>();
-                    for (int i = 0; i < numMedia; i++)
-                    {
-                        string url = GetProductMedia();
+                //if (random.Next(2) == 1)
+                //{
+                //    int numMedia = random.Next(1, 11);
+                //    List<ProductMedia> productMedia = new List<ProductMedia>();
+                //    for (int i = 0; i < numMedia; i++)
+                //    {
+                //        string url = GetProductMedia();
 
-                        int result = productMedia.FindIndex(x => x.Url == url && x.ProductId == product.Id);
+                //        int result = productMedia.FindIndex(x => x.Url == url && x.ProductId == product.Id);
 
-                        if (result == -1)
-                        {
-                            productMedia.Add(new ProductMedia
-                            {
-                                ProductId = product.Id,
-                                Url = url,
-                                Thumbnail = "someImage.png",
-                                Type = 0
-                            });
-                        }
+                //        if (result == -1)
+                //        {
+                //            productMedia.Add(new ProductMedia
+                //            {
+                //                ProductId = product.Id,
+                //                Url = url,
+                //                Thumbnail = "someImage.png",
+                //                Type = 0
+                //            });
+                //        }
 
-                    }
+                //    }
 
-                    product.ProductMedia = productMedia;
-                }
+                //    product.ProductMedia = productMedia;
+                //}
 
                 unitOfWork.Products.Update(product);
 
