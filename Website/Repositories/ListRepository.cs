@@ -64,6 +64,7 @@ namespace Website.Repositories
                     .Contains(x.CollaboratorId))
                 .Select(x => new ListProductDTO
                 {
+                    Id = x.Product.Id,
                     Title = x.Product.Title,
                     Rating = x.Product.Rating,
                     TotalReviews = x.Product.TotalReviews,

@@ -38,7 +38,7 @@ namespace Website.Controllers
             // If the passed in list id is not empty, make sure that list exists for this customer
             if (listId != string.Empty && !await unitOfWork.Collaborators.Any(x => x.ListId == listId && x.CustomerId == customerId))
             {
-                return NotFound();
+                return NoContent();
             }
 
             // Get this customer's lists

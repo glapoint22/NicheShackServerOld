@@ -9,6 +9,7 @@ namespace Website.Classes
     {
         private readonly string sortBy;
 
+        public string Id { get; set; }
         public string Title { get; set; }
         public double Rating { get; set; }
         public int TotalReviews { get; set; }
