@@ -24,6 +24,30 @@ namespace Website.Controllers
 
 
 
+        // ..................................................................................Get Sort Options......................................................................
+        [HttpGet]
+        [Authorize(Policy = "Account Policy")]
+        [Route("SortOptions")]
+        public async Task<ActionResult> GetSortOptions(string listId = "")
+        {
+            
+            // Get the customer Id from the access token
+            string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+
+            // If the passed in list id is not empty, make sure that list exists for this customer
+            if (listId != string.Empty && !await unitOfWork.Collaborators.Any(x => x.ListId == listId && x.CustomerId == customerId))
+            {
+                return NoContent();
+            }
+
+            return Ok(new ListProductDTO().GetSortOptions());
+        }
+
+
+
+
+
         // ..................................................................................Get Lists......................................................................
         [HttpGet]
         [Authorize(Policy = "Account Policy")]
@@ -43,6 +67,8 @@ namespace Website.Controllers
 
             // Get this customer's lists
             List<ListDTO> lists = (List<ListDTO>)await unitOfWork.Lists.GetLists(customerId);
+
+            if (lists.Count == 0) return Ok(lists);
 
             // If we have no list id, mark the first list as selected
             if (listId == string.Empty)
@@ -87,7 +113,7 @@ namespace Website.Controllers
                 }).ToList() : null,
                 isOwner,
                 isCollaborator = collaborators.Any(x => x.CustomerId == customerId && x.ListId == selectedListId && !x.IsOwner),
-                sortOptions = new ListProductDTO().GetSortOptions(),
+                //sortOptions = new ListProductDTO().GetSortOptions(),
                 ownerName = collaborators.Where(x => x.IsOwner).Select(x => x.Name).SingleOrDefault()
             });
         }
