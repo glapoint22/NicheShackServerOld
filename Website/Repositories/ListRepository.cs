@@ -53,14 +53,14 @@ namespace Website.Repositories
 
 
         // ................................................................................Get List Products.....................................................................
-        public async Task<IEnumerable<ListProductDTO>> GetListProducts(IEnumerable<Collaborator> collaborators, string customerId, string sort)
+        public async Task<IEnumerable<ListProductDTO>> GetListProducts(IEnumerable<Guid> collaboratorIds, string customerId, string sort, bool shared = false)
         {
             // Gets products based on collaborators from a list.
             var products = await context.ListProducts
                 .AsNoTracking()
                 .SortBy(new ListProductDTO(sort))
-                .Where(x => collaborators
-                    .Select(y => y.Id)
+                .Where(x => collaboratorIds
+                    //.Select(y => y.Id)
                     .Contains(x.CollaboratorId))
                 .Select(x => new ListProductDTO
                 {
@@ -71,7 +71,7 @@ namespace Website.Repositories
                     MinPrice = x.Product.MinPrice,
                     MaxPrice = x.Product.MaxPrice,
                     DateAdded = x.DateAdded.ToString("MMMM dd, yyyy"),
-                    Collaborator = x.Collaborator.CustomerId == customerId ? "you" : x.Collaborator.Customer.FirstName,
+                    Collaborator = !shared ? (x.Collaborator.CustomerId == customerId ? "you" : x.Collaborator.Customer.FirstName) : null,
                     Hoplink = x.Product.Hoplink,
                     Image = x.Product.Image,
                     UrlTitle = x.Product.UrlTitle

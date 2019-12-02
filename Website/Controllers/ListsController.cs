@@ -24,24 +24,13 @@ namespace Website.Controllers
 
 
 
-        // ..................................................................................Get Sort Options......................................................................
+        // ..................................................................................List Exists......................................................................
         [HttpGet]
-        [Authorize(Policy = "Account Policy")]
-        [Route("SortOptions")]
-        public async Task<ActionResult> GetSortOptions(string listId = "")
+        //[Authorize(Policy = "Account Policy")]
+        [Route("ListExists")]
+        public async Task<ActionResult> ListExists(string listId)
         {
-            
-            // Get the customer Id from the access token
-            string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
-
-
-            // If the passed in list id is not empty, make sure that list exists for this customer
-            if (listId != string.Empty && !await unitOfWork.Collaborators.Any(x => x.ListId == listId && x.CustomerId == customerId))
-            {
-                return NoContent();
-            }
-
-            return Ok(new ListProductDTO().GetSortOptions());
+            return Ok(await unitOfWork.Collaborators.Any(x => x.ListId == listId && x.IsOwner));
         }
 
 
@@ -51,47 +40,38 @@ namespace Website.Controllers
         // ..................................................................................Get Lists......................................................................
         [HttpGet]
         [Authorize(Policy = "Account Policy")]
-        public async Task<ActionResult> GetLists(string listId = "", string sort = "")
+        public async Task<ActionResult> GetLists()
         {
-            int listIndex = 0;
+            // Get the customer Id from the access token
+            string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
+            
+            return Ok(new { 
+                lists = (List<ListDTO>)await unitOfWork.Lists.GetLists(customerId),
+                sortOptions = new ListProductDTO().GetSortOptions()
+            });
+        }
+
+
+
+
+
+
+
+        // ..................................................................................Get List Data......................................................................
+        [HttpGet]
+        [Route("ListData")]
+        [Authorize(Policy = "Account Policy")]
+        public async Task<ActionResult> GetListData(string listId)
+        {
             // Get the customer Id from the access token
             string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
 
-            // If the passed in list id is not empty, make sure that list exists for this customer
-            if (listId != string.Empty && !await unitOfWork.Collaborators.Any(x => x.ListId == listId && x.CustomerId == customerId))
-            {
-                return NoContent();
-            }
-
-            // Get this customer's lists
-            List<ListDTO> lists = (List<ListDTO>)await unitOfWork.Lists.GetLists(customerId);
-
-            if (lists.Count == 0) return Ok(lists);
-
-            // If we have no list id, mark the first list as selected
-            if (listId == string.Empty)
-            {
-                lists[0].Selected = true;
-            }
-            else
-            {
-                // Get the index of the list that matches the passed in list id
-                listIndex = lists.FindIndex(x => x.Id == listId);
-
-                // Set this list as selected
-                lists[listIndex].Selected = true;
-            }
-
-            // Get the id of the selected list
-            string selectedListId = lists[listIndex].Id;
-
             // Get all collaborators from the selected list
             IEnumerable<Collaborator> collaborators = await unitOfWork.Collaborators
-                    .GetCollection(x => x.ListId == selectedListId, x => new Collaborator
+                    .GetCollection(x => x.ListId == listId, x => new Collaborator
                     {
-                        Id = x.Id,
                         CustomerId = x.CustomerId,
                         ListId = x.ListId,
                         IsOwner = x.IsOwner,
@@ -99,12 +79,10 @@ namespace Website.Controllers
                     });
 
             // Is the customer the owner of this list?
-            bool isOwner = collaborators.Any(x => x.CustomerId == customerId && x.ListId == selectedListId && x.IsOwner);
+            bool isOwner = collaborators.Any(x => x.CustomerId == customerId && x.ListId == listId && x.IsOwner);
 
             return Ok(new
             {
-                lists,
-                products = await unitOfWork.Lists.GetListProducts(collaborators, customerId, sort),
                 // If the customer is the owner of this list, get collaborators (excluding the owner)
                 collaborators = isOwner ? collaborators.Where(x => !x.IsOwner).Select(x => new
                 {
@@ -112,12 +90,31 @@ namespace Website.Controllers
                     name = x.Name
                 }).ToList() : null,
                 isOwner,
-                isCollaborator = collaborators.Any(x => x.CustomerId == customerId && x.ListId == selectedListId && !x.IsOwner),
-                //sortOptions = new ListProductDTO().GetSortOptions(),
+                isCollaborator = collaborators.Any(x => x.CustomerId == customerId && x.ListId == listId && !x.IsOwner),
                 ownerName = collaborators.Where(x => x.IsOwner).Select(x => x.Name).SingleOrDefault()
             });
         }
 
+
+
+
+
+
+
+        // ..................................................................................Get List Products......................................................................
+        [HttpGet]
+        [Route("Products")]
+        public async Task<ActionResult> GetListProducts(string listId, string sort = "")
+        {
+            // Get the customer Id
+            string customerId = await unitOfWork.Collaborators.Get(x => x.ListId == listId && x.IsOwner, x => x.CustomerId);
+
+            // Get all collaborator ids from this list
+            IEnumerable<Guid> collaboratorIds = await unitOfWork.Collaborators
+                    .GetCollection(x => x.ListId == listId, x => x.Id);
+
+            return Ok(await unitOfWork.Lists.GetListProducts(collaboratorIds, customerId, sort));
+        }
 
 
 
@@ -138,7 +135,7 @@ namespace Website.Controllers
             string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
 
-            
+
             // Create the new list and add it to the database
             List newList = new List
             {
