@@ -26,14 +26,24 @@ namespace Website.Controllers
 
         // ..................................................................................List Exists......................................................................
         [HttpGet]
-        //[Authorize(Policy = "Account Policy")]
+        [Authorize(Policy = "Account Policy")]
         [Route("ListExists")]
         public async Task<ActionResult> ListExists(string listId)
         {
-            return Ok(await unitOfWork.Collaborators.Any(x => x.ListId == listId && x.IsOwner));
+            string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+            return Ok(await unitOfWork.Collaborators.Any(x => x.ListId == listId && x.CustomerId == customerId));
         }
 
 
+
+        // ..................................................................................Get List Owner......................................................................
+        [HttpGet]
+        [Route("ListOwner")]
+        public async Task<ActionResult> GetListOwner(string listId)
+        {
+            return Ok(await unitOfWork.Collaborators.Get(x => x.ListId == listId && x.IsOwner, x => x.Customer.FirstName));
+        }
 
 
 
@@ -46,12 +56,20 @@ namespace Website.Controllers
             string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
             
-            return Ok(new { 
-                lists = (List<ListDTO>)await unitOfWork.Lists.GetLists(customerId),
-                sortOptions = new ListProductDTO().GetSortOptions()
-            });
+            return Ok(await unitOfWork.Lists.GetLists(customerId));
         }
 
+
+
+
+
+        // ..................................................................................Get Sort Options......................................................................
+        [HttpGet]
+        [Route("SortOptions")]
+        public ActionResult GetSortOptions()
+        {
+            return Ok(new ListProductDTO().GetSortOptions());
+        }
 
 
 
@@ -90,7 +108,6 @@ namespace Website.Controllers
                     name = x.Name
                 }).ToList() : null,
                 isOwner,
-                isCollaborator = collaborators.Any(x => x.CustomerId == customerId && x.ListId == listId && !x.IsOwner),
                 ownerName = collaborators.Where(x => x.IsOwner).Select(x => x.Name).SingleOrDefault()
             });
         }
@@ -251,11 +268,11 @@ namespace Website.Controllers
 
 
 
-        // .........................................................................Delete Collaborator.....................................................................
+        // .........................................................................Remove Collaborator.....................................................................
         [Route("Collaborator")]
         [HttpDelete]
         [Authorize(Policy = "Account Policy")]
-        public async Task<ActionResult> DeleteCollaborator(string customerId, string listId)
+        public async Task<ActionResult> RemoveCollaborator(string customerId, string listId)
         {
             // Make sure we are the owner of the list
             if (!await unitOfWork.Collaborators.Any(x => x.ListId == listId && x.CustomerId == User.FindFirst(ClaimTypes.NameIdentifier).Value && x.IsOwner))

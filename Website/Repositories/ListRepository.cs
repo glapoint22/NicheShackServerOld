@@ -53,7 +53,7 @@ namespace Website.Repositories
 
 
         // ................................................................................Get List Products.....................................................................
-        public async Task<IEnumerable<ListProductDTO>> GetListProducts(IEnumerable<Guid> collaboratorIds, string customerId, string sort, bool shared = false)
+        public async Task<IEnumerable<ListProductDTO>> GetListProducts(IEnumerable<Guid> collaboratorIds, string customerId, string sort)
         {
             // Gets products based on collaborators from a list.
             var products = await context.ListProducts
@@ -71,7 +71,7 @@ namespace Website.Repositories
                     MinPrice = x.Product.MinPrice,
                     MaxPrice = x.Product.MaxPrice,
                     DateAdded = x.DateAdded.ToString("MMMM dd, yyyy"),
-                    Collaborator = !shared ? (x.Collaborator.CustomerId == customerId ? "you" : x.Collaborator.Customer.FirstName) : null,
+                    Collaborator = x.Collaborator.CustomerId == customerId ? "you" : x.Collaborator.Customer.FirstName,
                     Hoplink = x.Product.Hoplink,
                     Image = x.Product.Image,
                     UrlTitle = x.Product.UrlTitle
