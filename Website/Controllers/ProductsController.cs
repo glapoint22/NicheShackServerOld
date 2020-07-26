@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Website.Classes;
 using Website.Repositories;
+using Website.ViewModels;
 
 namespace Website.Controllers
 {
@@ -28,10 +29,10 @@ namespace Website.Controllers
             return Ok(await unitOfWork.Products.Get(x => x.Id == id, x => new
             {
                 id = x.Id,
-                title = x.Title,
-                minPrice = x.MinPrice,
-                maxPrice = x.MaxPrice,
-                image = x.Image,
+                title = x.Name,
+                //minPrice = x.MinPrice,
+                //maxPrice = x.MaxPrice,
+                //image = x.Image,
                 rating = x.Rating,
                 totalReviews = x.TotalReviews,
                 oneStar = x.OneStar,
@@ -58,9 +59,9 @@ namespace Website.Controllers
                 {
                     description = x.Description,
                     hoplink = x.Hoplink,
-                    shareImage = x.ShareImage
+                    //shareImage = x.ShareImage
                 }),
-                media = await unitOfWork.Media.GetCollection(x => x.ProductId == id, new ProductMediaDTO())
+                media = await GetMedia(id)
             };
 
             return Ok(quickLookProduct);
@@ -68,16 +69,35 @@ namespace Website.Controllers
 
 
 
+        public async Task<IEnumerable<MediaViewModel>> GetMedia(string id)
+        {
+            var mediaIds = await unitOfWork.ProductMedia.GetCollection(x => x.ProductId == id, x => x.MediaId);
+
+            return await unitOfWork.Media.GetCollection(x => mediaIds.Contains(x.Id), x => new MediaViewModel
+            {
+                name = x.Name,
+                url = x.Url,
+                thumbnail = x.Thumbnail,
+                type = x.Type
+            });
+        }
 
 
 
-        // ..................................................................................Get Product Detail.....................................................................
-        [Route("ProductDetail")]
+            // ..................................................................................Get Product Detail.....................................................................
+            [Route("ProductDetail")]
         [HttpGet]
         public async Task<ActionResult> GetProductDetail(string id)
         {
             // Get the product based on the id
             ProductDetailDTO product = await unitOfWork.Products.Get(x => x.Id == id, new ProductDetailDTO());
+
+            var iconId = await unitOfWork.ProductContent.Get(x => x.ProductId == id, x => x.IconId);
+
+
+
+
+           
 
             // If the product is found in the database, return the product with other product details
             if (product != null)
@@ -87,19 +107,19 @@ namespace Website.Controllers
                     productInfo = new
                     {
                         product,
-                        media = await unitOfWork.Media.GetCollection(x => x.ProductId == product.Id, new ProductMediaDTO())
+                        media = await GetMedia(id)
                     },
                     content = await unitOfWork.ProductContent.GetCollection(x => x.ProductId == product.Id, x => new
                     {
-                        Type = new
+                        Icon = unitOfWork.Media.Get(y => y.Id == x.IconId, y => new
                         {
-                            x.ProductContentType.Name,
-                            x.ProductContentType.Image
-                        },
-                        x.Title,
+                            y.Name,
+                            y.Url
+                        }),
+                        x.Name,
                         PriceIndices = x.PriceIndices.Select(y => y.Index).ToList()
                     }),
-                    pricePoints = await unitOfWork.PricePoints.GetCollection(x => x.ProductId == product.Id, x => string.Format(x.Description, x.Price)),
+                    //pricePoints = await unitOfWork.PricePoints.GetCollection(x => x.ProductId == product.Id, x => string.Format(x.Description, x.Price)),
                 };
 
                 return Ok(response);

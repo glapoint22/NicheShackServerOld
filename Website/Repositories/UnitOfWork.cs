@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using Website.Models;
+using DataAccess.Models;
 
 namespace Website.Repositories
 {
@@ -13,13 +13,14 @@ namespace Website.Repositories
 
 
         // Generic repositories
-        public IRepository<ProductMedia> Media { get; private set; }
+        public IRepository<ProductMedia> ProductMedia { get; private set; }
         public IRepository<ProductContent> ProductContent { get; private set; }
         public IRepository<ProductPricePoint> PricePoints { get; private set; }
         public IRepository<RefreshToken> RefreshTokens { get; private set; }
         public IRepository<ListCollaborator> Collaborators { get; }
         public IRepository<Customer> Customers { get; }
         public IRepository<ListProduct> ListProducts { get; }
+        public IRepository<Media> Media { get; }
 
 
         // Declare the Nicheshack context
@@ -36,13 +37,14 @@ namespace Website.Repositories
             ProductOrders = new ProductOrderRepository(context);
 
             // Generic repositories
-            Media = new Repository<ProductMedia>(context);
+            ProductMedia = new Repository<ProductMedia>(context);
             ProductContent = new Repository<ProductContent>(context);
             PricePoints = new Repository<ProductPricePoint>(context);
             RefreshTokens = new Repository<RefreshToken>(context);
             Collaborators = new Repository<ListCollaborator>(context);
             Customers = new Repository<Customer>(context);
             ListProducts = new Repository<ListProduct>(context);
+            Media = new Repository<Media>(context);
         }
 
 

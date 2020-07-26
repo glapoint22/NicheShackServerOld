@@ -5,7 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Website.Classes;
-using Website.Models;
+using DataAccess.Models;
 using static Website.Classes.Enums;
 
 namespace Website.Repositories
@@ -41,7 +41,7 @@ namespace Website.Repositories
                     Total = x.Total,
                     ProductId = x.Product.Id,
                     Hoplink = x.Product.Hoplink,
-                    UrlTitle = x.Product.UrlTitle,
+                    UrlTitle = x.Product.UrlName,
                     Products = x.OrderProducts
                         .Where(y => y.OrderId == x.Id)
                         .OrderByDescending(y => y.IsMain)
@@ -51,7 +51,7 @@ namespace Website.Repositories
                             Type = ((OrderProductTypes)y.Type).ToString(),
                             Quantity = y.Type == 0 ? y.Quantity : 0,
                             Price = y.Price,
-                            Image = y.IsMain ? y.ProductOrder.Product.Image : null
+                            //Image = y.IsMain ? y.ProductOrder.Product.Image : null
                         })
                 })
                 .ToListAsync();
@@ -80,11 +80,11 @@ namespace Website.Repositories
                 {
                     Date = x.ProductOrder.Date.ToString("MMMM dd, yyyy"),
                     Title = x.Title,
-                    Image = x.IsMain ? x.ProductOrder.Product.Image : null,
+                    //Image = x.IsMain ? x.ProductOrder.Product.Image : null,
                     Hoplink = x.ProductOrder.Product.Hoplink,
                     OrderNumber = x.OrderId,
                     ProductId = x.ProductOrder.ProductId,
-                    UrlTitle = x.ProductOrder.Product.UrlTitle
+                    UrlTitle = x.ProductOrder.Product.UrlName
                 })
                 .ToListAsync();
         }

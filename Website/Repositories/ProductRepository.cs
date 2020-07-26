@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Website.Classes;
 using Website.Interfaces;
-using Website.Models;
+using DataAccess.Models;
 
 namespace Website.Repositories
 {
@@ -30,7 +30,7 @@ namespace Website.Repositories
             return await context.Products
                 .AsNoTracking()
                 .SortBy(productDTO)
-                .ThenBy(x => x.Title)
+                .ThenBy(x => x.Name)
                 .Where(productDTO)
                 .Select(productDTO)
                 .ToListAsync();

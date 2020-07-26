@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Website.Interfaces;
-using Website.Models;
+using DataAccess.Models;
 
 namespace Website.Classes
 {
@@ -54,16 +54,16 @@ namespace Website.Classes
             switch (sortBy)
             {
                 case "price-asc":
-                    sortResult = source.OrderBy(x => x.Product.MinPrice);
+                    //sortResult = source.OrderBy(x => x.Product.MinPrice);
                     break;
                 case "price-desc":
-                    sortResult = source.OrderByDescending(x => x.Product.MinPrice);
+                    //sortResult = source.OrderByDescending(x => x.Product.MinPrice);
                     break;
                 case "rating":
                     sortResult = source.OrderByDescending(x => x.Product.Rating);
                     break;
                 case "title":
-                    sortResult = source.OrderBy(x => x.Product.Title);
+                    sortResult = source.OrderBy(x => x.Product.Name);
                     break;
                 default:
                     sortResult = source.OrderByDescending(x => x.DateAdded);

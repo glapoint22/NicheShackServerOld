@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Website.Classes;
-using Website.Models;
+using DataAccess.Models;
 
 namespace Website.Repositories
 {

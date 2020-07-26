@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Website.Classes;
-using Website.Models;
+using DataAccess.Models;
 using Website.Repositories;
 
 namespace Website.Controllers

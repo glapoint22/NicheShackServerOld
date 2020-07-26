@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Website.Interfaces;
-using Website.Models;
+using DataAccess.Models;
 
 namespace Website.Classes
 {
@@ -89,13 +89,13 @@ namespace Website.Classes
             return source.Select(x => new ProductDTO
             {
                 Id = x.Id,
-                Title = x.Title,
-                UrlTitle = x.UrlTitle,
+                Title = x.Name,
+                UrlTitle = x.UrlName,
                 Rating = x.Rating,
                 TotalReviews = x.TotalReviews,
-                MinPrice = x.MinPrice,
-                MaxPrice = x.MaxPrice,
-                Image = x.Image
+                //MinPrice = x.MinPrice,
+                //MaxPrice = x.MaxPrice,
+                //Image = x.Image
             });
         }
 
@@ -112,10 +112,10 @@ namespace Website.Classes
             switch (queryParams.Sort)
             {
                 case "price-asc":
-                    sortOption = source.OrderBy(x => x.MinPrice);
+                    //sortOption = source.OrderBy(x => x.MinPrice);
                     break;
                 case "price-desc":
-                    sortOption = source.OrderByDescending(x => x.MinPrice);
+                    //sortOption = source.OrderByDescending(x => x.MinPrice);
                     break;
                 case "rating":
                     sortOption = source.OrderByDescending(x => x.Rating);
@@ -124,12 +124,12 @@ namespace Website.Classes
                     if (queryParams.SearchWords != string.Empty)
                     {
                         // Best Match
-                        sortOption = source.OrderBy(x => x.Title.StartsWith(queryParams.SearchWords) ? (x.Title == queryParams.SearchWords ? 0 : 1) : 2);
+                        sortOption = source.OrderBy(x => x.Name.StartsWith(queryParams.SearchWords) ? (x.Name == queryParams.SearchWords ? 0 : 1) : 2);
                     }
                     else
                     {
                         // Price: Low to High
-                        sortOption = source.OrderBy(x => x.MinPrice);
+                        //sortOption = source.OrderBy(x => x.MinPrice);
                     }
 
                     break;
@@ -150,7 +150,7 @@ namespace Website.Classes
             if (queryParams.SearchWords != string.Empty)
             {
                 string[] searchWordsArray = queryParams.SearchWords.Split(' ');
-                source = source.Where(x => searchWordsArray.Any(z => x.Title.ToLower().Contains(z.ToLower())));
+                source = source.Where(x => searchWordsArray.Any(z => x.Name.ToLower().Contains(z.ToLower())));
             }
 
 
@@ -179,19 +179,19 @@ namespace Website.Classes
 
                     if (priceRange.Min == priceRange.Max)
                     {
-                        source = source.Where(x =>
-                            (x.MaxPrice > x.MinPrice && priceRange.Min >= x.MinPrice && priceRange.Min <= x.MaxPrice) ||
-                            (x.MaxPrice <= x.MinPrice && x.MinPrice == priceRange.Min)
-                        );
+                        //source = source.Where(x =>
+                        //    (x.MaxPrice > x.MinPrice && priceRange.Min >= x.MinPrice && priceRange.Min <= x.MaxPrice) ||
+                        //    (x.MaxPrice <= x.MinPrice && x.MinPrice == priceRange.Min)
+                        //);
                     }
                     else
                     {
-                        source = source.Where(x =>
-                            (x.MaxPrice > x.MinPrice && priceRange.Min >= x.MinPrice && priceRange.Min <= x.MaxPrice) ||
-                            (x.MaxPrice > x.MinPrice && priceRange.Max >= x.MinPrice && priceRange.Max <= x.MaxPrice) ||
-                            (x.MaxPrice > x.MinPrice && priceRange.Min <= x.MinPrice && priceRange.Max >= x.MaxPrice) ||
-                            (x.MaxPrice <= x.MinPrice && x.MinPrice >= priceRange.Min && x.MinPrice <= priceRange.Max)
-                        );
+                        //source = source.Where(x =>
+                        //    (x.MaxPrice > x.MinPrice && priceRange.Min >= x.MinPrice && priceRange.Min <= x.MaxPrice) ||
+                        //    (x.MaxPrice > x.MinPrice && priceRange.Max >= x.MinPrice && priceRange.Max <= x.MaxPrice) ||
+                        //    (x.MaxPrice > x.MinPrice && priceRange.Min <= x.MinPrice && priceRange.Max >= x.MaxPrice) ||
+                        //    (x.MaxPrice <= x.MinPrice && x.MinPrice >= priceRange.Min && x.MinPrice <= priceRange.Max)
+                        //);
                     }
                 }
 

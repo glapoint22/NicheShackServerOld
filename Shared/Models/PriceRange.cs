@@ -1,4 +1,4 @@
-﻿namespace Website.Models
+﻿namespace DataAccess.Models
 {
     public class PriceRange
     {

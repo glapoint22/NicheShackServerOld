@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Website.Interfaces;
-using Website.Models;
+using DataAccess.Models;
 
 namespace Website.Classes
 {

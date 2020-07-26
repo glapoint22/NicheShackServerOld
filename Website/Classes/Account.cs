@@ -1,6 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using Website.Models;
+using DataAccess.Models;
 
 namespace Website.Classes
 {

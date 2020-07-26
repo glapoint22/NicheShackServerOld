@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Website.Classes;
-using Website.Models;
+using DataAccess.Models;
 
 namespace Website.Repositories
 {
@@ -65,16 +65,16 @@ namespace Website.Repositories
                 .Select(x => new ListProductDTO
                 {
                     Id = x.Product.Id,
-                    Title = x.Product.Title,
+                    Title = x.Product.Name,
                     Rating = x.Product.Rating,
                     TotalReviews = x.Product.TotalReviews,
-                    MinPrice = x.Product.MinPrice,
-                    MaxPrice = x.Product.MaxPrice,
+                    //MinPrice = x.Product.MinPrice,
+                    //MaxPrice = x.Product.MaxPrice,
                     DateAdded = x.DateAdded.ToString("MMMM dd, yyyy"),
                     Collaborator = x.Collaborator.CustomerId == customerId ? "you" : x.Collaborator.Customer.FirstName,
                     Hoplink = x.Product.Hoplink,
-                    Image = x.Product.Image,
-                    UrlTitle = x.Product.UrlTitle
+                    //Image = x.Product.Image,
+                    UrlTitle = x.Product.UrlName
                 })
                 .ToListAsync();
 

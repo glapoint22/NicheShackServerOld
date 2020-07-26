@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Website.Classes;
-using Website.Models;
+using DataAccess.Models;
 using Website.Repositories;
 
 namespace Website.Controllers
@@ -77,8 +77,8 @@ namespace Website.Controllers
             // Get the product based on the product id
             var product = await unitOfWork.Products.Get(x => x.Id == productId, x => new
             {
-                title = x.Title,
-                image = x.Image
+                title = x.Name,
+                //image = x.Image
             });
 
 

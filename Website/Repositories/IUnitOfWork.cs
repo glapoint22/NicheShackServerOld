@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Website.Models;
+using DataAccess.Models;
 
 namespace Website.Repositories
 {
@@ -14,13 +14,15 @@ namespace Website.Repositories
 
 
         // Generic repositories
-        IRepository<ProductMedia> Media { get;  }
+        IRepository<ProductMedia> ProductMedia { get;  }
         IRepository<ProductContent> ProductContent { get; }
         IRepository<ProductPricePoint> PricePoints { get; }
         IRepository<RefreshToken> RefreshTokens { get; }
         IRepository<ListCollaborator> Collaborators { get; }
         IRepository<Customer> Customers { get; }
         IRepository<ListProduct> ListProducts { get; }
+        IRepository<Media> Media { get; }
+
 
 
         Task<int> Save();

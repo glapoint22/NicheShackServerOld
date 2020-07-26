@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using Website.Interfaces;
-using Website.Models;
+using DataAccess.Models;
 
 namespace Website.Classes
 {
@@ -16,7 +16,6 @@ namespace Website.Classes
             {
                 Id = x.Id,
                 Name = x.Name,
-                Icon = x.Icon,
                 Niches = x.Niches
                     .OrderBy(y => y.Name)
                     .Select(y => new NicheDTO

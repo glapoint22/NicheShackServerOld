@@ -14,7 +14,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
 using Website.Classes;
-using Website.Models;
+using DataAccess.Models;
 using Website.Repositories;
 
 namespace Website.Controllers

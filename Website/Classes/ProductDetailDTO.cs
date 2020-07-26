@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using Website.Interfaces;
-using Website.Models;
+using DataAccess.Models;
 
 namespace Website.Classes
 {
@@ -31,16 +31,16 @@ namespace Website.Classes
             return source.Select(x => new ProductDetailDTO
             {
                 Id = x.Id,
-                Title = x.Title,
-                UrlTitle = x.UrlTitle,
+                Title = x.Name,
+                UrlTitle = x.UrlName,
                 Rating = x.Rating,
                 TotalReviews = x.TotalReviews,
-                MinPrice = x.MinPrice,
-                MaxPrice = x.MaxPrice,
-                Image = x.Image,
+                //MinPrice = x.MinPrice,
+                //MaxPrice = x.MaxPrice,
+                //Image = x.Image,
                 Hoplink = x.Hoplink,
                 Description = x.Description,
-                ShareImage = x.ShareImage,
+                //ShareImage = x.ShareImage,
                 OneStar = x.OneStar,
                 TwoStars = x.TwoStars,
                 ThreeStars = x.ThreeStars,

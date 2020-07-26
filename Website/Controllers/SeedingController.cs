@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Website.Classes;
-using Website.Models;
+using DataAccess.Models;
 using Website.Repositories;
 
 namespace Website.Controllers
@@ -88,8 +88,8 @@ namespace Website.Controllers
                     pricePoints.Add(new ProductPricePoint
                     {
                         ProductId = product.Id,
-                        Price = Math.Round(random.NextDouble() * (20 - 5) + 5, 2),
-                        Description = GetPricePointDescription(i)
+                        //Price = Math.Round(random.NextDouble() * (20 - 5) + 5, 2),
+                        //Description = GetPricePointDescription(i)
                     });
                 }
 
@@ -130,8 +130,8 @@ namespace Website.Controllers
                     {
                         Id = productContentId,
                         ProductId = product.Id,
-                        ProductContentTypeId = random.Next(1, 5),
-                        Title = i == 0 ? product.Title : GetProductTitle(),
+                        //ProductContentTypeId = random.Next(1, 5),
+                        Name = i == 0 ? product.Name : GetProductTitle(),
                         PriceIndices = priceIndices
                     };
 
@@ -143,8 +143,8 @@ namespace Website.Controllers
                 product.ProductContent = productContent;
 
 
-                product.MinPrice = pricePoints.Min(x => x.Price);
-                product.MaxPrice = pricePoints.Count == 1 ? 0 : pricePoints.Max(x => x.Price);
+                //product.MinPrice = pricePoints.Min(x => x.Price);
+                //product.MaxPrice = pricePoints.Count == 1 ? 0 : pricePoints.Max(x => x.Price);
 
 
                 // Product media
@@ -858,10 +858,10 @@ namespace Website.Controllers
                 {
                     Id = Guid.NewGuid().ToString("N").Substring(0, 25).ToUpper(),
                     OrderId = orderId,
-                    Title = i == 0 ? product.Title : GetProductTitle(),
+                    Title = i == 0 ? product.Name : GetProductTitle(),
                     Type = random.Next(0, 3),
                     Quantity = random.Next(1, 3),
-                    Price = i == 0 ? product.MinPrice : Math.Round(random.NextDouble() * 10, 2),
+                    //Price = i == 0 ? product.MinPrice : Math.Round(random.NextDouble() * 10, 2),
                     IsMain = i == 0 ? true : false
                 };
 
