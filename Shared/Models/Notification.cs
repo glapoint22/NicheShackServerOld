@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataAccess.Models
@@ -8,21 +7,17 @@ namespace DataAccess.Models
     {
         public int Id { get; set; }
         [ForeignKey("Product")]
-        [MaxLength(10)]
-        public string ProductId { get; set; }
-        [ForeignKey("Customer")]
-        [MaxLength(10)]
-        public string CustomerId { get; set; }
-        [ForeignKey("Customer")]
-        [MaxLength(10)]
-        public string EmployeeId { get; set; }
+        public int ProductId { get; set; }
         public int Type { get; set; }
-        public DateTime CustomerTimeStamp { get; set; }
-        public string  CustomerText { get; set; }
-        public DateTime EmployeeTimeStamp { get; set; }
-        public string EmployeeText { get; set; }
         public int State { get; set; }
         public virtual Product Product { get; set; }
-        public virtual Customer Customer { get; set; }
+        public virtual ICollection<NotificationText> NotificationText { get; set; }
+
+
+        public Notification()
+        {
+            NotificationText = new HashSet<NotificationText>();
+        }
+
     }
 }

@@ -8,15 +8,19 @@ namespace DataAccess.Models
     {
         public int Id { get; set; }
         [ForeignKey("Product")]
-        [MaxLength(10)]
-        public string ProductId { get; set; }
+        [Required]
+        public int ProductId { get; set; }
         [ForeignKey("Customer")]
         [MaxLength(10)]
+        [Required]
         public string CustomerId { get; set; }
+        [Required]
+        [MaxLength(256)]
         public string Title { get; set; }
         public double Rating { get; set; }
         public DateTime Date { get; set; }
         public bool IsVerified { get; set; }
+        [Required]
         public string Text { get; set; }
         public int Likes { get; set; }
         public int Dislikes { get; set; }

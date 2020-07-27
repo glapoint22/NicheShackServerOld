@@ -11,10 +11,11 @@ namespace DataAccess.Models
         public string Id { get; set; }
         [MaxLength(10)]
         [ForeignKey("Customer")]
+        [Required]
         public string CustomerId { get; set; }
         [ForeignKey("Product")]
-        [MaxLength(10)]
-        public string ProductId { get; set; }
+        [Required]
+        public int ProductId { get; set; }
         public DateTime Date { get; set; }
         public int PaymentMethod { get; set; }
         public double Subtotal { get; set; }

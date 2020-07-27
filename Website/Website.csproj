@@ -20,7 +20,6 @@
     <Folder Include="Classes\" />
     <Folder Include="Controllers\" />
     <Folder Include="Interfaces\" />
-    <Folder Include="Migrations\" />
     <Folder Include="Repositories\" />
   </ItemGroup>
 

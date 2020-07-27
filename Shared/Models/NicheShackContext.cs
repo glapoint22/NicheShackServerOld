@@ -41,6 +41,16 @@ namespace DataAccess.Models
 
 
 
+            // Categories
+            modelBuilder.Entity<Category>(entity =>
+            {
+                entity.HasOne(x => x.Media)
+                .WithMany(x => x.Categtories)
+                .OnDelete(DeleteBehavior.Restrict);
+            });
+
+
+
             // Customers
             modelBuilder.Entity<Customer>(entity =>
             {
@@ -49,7 +59,6 @@ namespace DataAccess.Models
                     .HasMaxLength(10)
                     .IsUnicode(false);
             });
-
 
 
 
@@ -66,6 +75,10 @@ namespace DataAccess.Models
 
 
 
+
+
+
+
             // OrderProducts
             modelBuilder.Entity<OrderProduct>(entity =>
             {
@@ -75,6 +88,14 @@ namespace DataAccess.Models
 
 
 
+
+            // Products
+            modelBuilder.Entity<Product>(entity =>
+            {
+                entity.HasOne(x => x.Media)
+                .WithMany(x => x.Products)
+                .OnDelete(DeleteBehavior.Restrict);
+            });
 
 
 
@@ -96,6 +117,24 @@ namespace DataAccess.Models
 
 
 
+            // ProductContent
+            modelBuilder.Entity<ProductContent>(entity =>
+            {
+                entity.HasOne(x => x.Media)
+                .WithMany(x => x.ProductContent)
+                .OnDelete(DeleteBehavior.Restrict);
+            });
+
+
+
+
+            // ProductMedia
+            modelBuilder.Entity<ProductMedia>(entity =>
+            {
+                entity.HasOne(x => x.Media)
+                .WithMany(x => x.ProductMedia)
+                .OnDelete(DeleteBehavior.Restrict);
+            });
 
 
 
@@ -106,6 +145,11 @@ namespace DataAccess.Models
                 entity.HasKey(e => new { e.Id, e.CustomerId })
                     .HasName("PK_RefreshTokens");
             });
+
+
+
+
+           
         }
     }
 }

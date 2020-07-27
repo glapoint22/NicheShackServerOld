@@ -10,7 +10,7 @@ namespace Website.Classes
         private readonly QueryParams queryParams;
         private readonly IEnumerable<FilteredProduct> filteredProducts;
 
-        public string Id { get; set; }
+        public int Id { get; set; }
         public string Title { get; set; }
         public string UrlTitle { get; set; }
         public double Rating { get; set; }
@@ -208,7 +208,7 @@ namespace Website.Classes
                 if (filteredProducts.Count() > 0)
                 {
                     // Group the filtered products into their respective filters outputting only product ids
-                    List<List<string>> productIds = filteredProducts
+                    List<List<int>> productIds = filteredProducts
                     .GroupBy(x => x.FilterId)
                     .Select(x => x
                         .Where(a => a.FilterId == x

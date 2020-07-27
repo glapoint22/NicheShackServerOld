@@ -64,7 +64,7 @@ namespace Website.Repositories
 
 
         // ..................................................................................Get Product Ids.....................................................................
-        private async Task<IEnumerable<string>> GetProductIds(QueryParams queryParams)
+        private async Task<IEnumerable<int>> GetProductIds(QueryParams queryParams)
         {
             // Return just product ids from the queried products
             return await context.Products

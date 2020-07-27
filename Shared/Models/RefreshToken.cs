@@ -6,6 +6,7 @@ namespace DataAccess.Models
 {
     public class RefreshToken
     {
+        [MaxLength(256)]
         public string Id { get; set; }
         [ForeignKey("Customer")]
         [MaxLength(10)]

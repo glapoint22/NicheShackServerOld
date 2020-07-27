@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataAccess.Models
@@ -7,7 +8,9 @@ namespace DataAccess.Models
     {
         public int Id { get; set; }
         [ForeignKey("Media")]
-        public int ImageId { get; set; }
+        public int? ImageId { get; set; }
+        [Required]
+        [MaxLength(100)]
         public string Name { get; set; }
         public virtual Media Media { get; set; }
         public virtual ICollection<Niche> Niches { get; set; }

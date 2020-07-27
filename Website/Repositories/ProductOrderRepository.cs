@@ -47,7 +47,7 @@ namespace Website.Repositories
                         .OrderByDescending(y => y.IsMain)
                         .Select(y => new OrderProductInfoDTO
                         {
-                            Title = y.Title,
+                            Name = y.Name,
                             Type = ((OrderProductTypes)y.Type).ToString(),
                             Quantity = y.Type == 0 ? y.Quantity : 0,
                             Price = y.Price,
@@ -75,16 +75,16 @@ namespace Website.Repositories
                 .OrderByDescending(x => x.ProductOrder.Date)
                 .ThenBy(x => x.OrderId)
                 .Where(x => x.ProductOrder.CustomerId == customerId)
-                .WhereAny(searchWordsArray.Select(w => (Expression<Func<OrderProduct, bool>>)(x => EF.Functions.Like(x.Title, w))).ToArray())
+                .WhereAny(searchWordsArray.Select(w => (Expression<Func<OrderProduct, bool>>)(x => EF.Functions.Like(x.Name, w))).ToArray())
                 .Select(x => new OrderProductQueryResultDTO
                 {
                     Date = x.ProductOrder.Date.ToString("MMMM dd, yyyy"),
-                    Title = x.Title,
+                    Name = x.Name,
                     //Image = x.IsMain ? x.ProductOrder.Product.Image : null,
                     Hoplink = x.ProductOrder.Product.Hoplink,
                     OrderNumber = x.OrderId,
                     ProductId = x.ProductOrder.ProductId,
-                    UrlTitle = x.ProductOrder.Product.UrlName
+                    UrlName = x.ProductOrder.Product.UrlName
                 })
                 .ToListAsync();
         }

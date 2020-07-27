@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -7,12 +6,14 @@ namespace DataAccess.Models
 {
     public class ListCollaborator
     {
-        public Guid Id { get; set; }
+        public int Id { get; set; }
         [ForeignKey("Customer")]
         [MaxLength(10)]
+        [Required]
         public string CustomerId { get; set; }
         [ForeignKey("List")]
-        [MaxLength(32)]
+        [MaxLength(10)]
+        [Required]
         public string ListId { get; set; }
         public bool IsOwner { get; set; }
         public virtual Customer Customer { get; set; }

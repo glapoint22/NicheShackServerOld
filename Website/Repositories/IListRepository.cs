@@ -9,6 +9,6 @@ namespace Website.Repositories
     public interface IListRepository : IRepository<List>
     {
         Task<IEnumerable<ListDTO>> GetLists(string customerId);
-        Task<IEnumerable<ListProductDTO>> GetListProducts(IEnumerable<Guid> collaborators, string customerId, string sort);
+        Task<IEnumerable<ListProductDTO>> GetListProducts(IEnumerable<int> collaborators, string customerId, string sort);
     }
 }

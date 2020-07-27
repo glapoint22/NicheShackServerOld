@@ -22,7 +22,7 @@ namespace Website.Classes
         public double Discount { get; set; }
         public double Tax { get; set; }
         public double Total { get; set; }
-        public string ProductId { get; set; }
+        public int ProductId { get; set; }
         public string Hoplink { get; set; }
         public string UrlTitle { get; set; }
         public IEnumerable<OrderProductInfoDTO> Products { get; set; }

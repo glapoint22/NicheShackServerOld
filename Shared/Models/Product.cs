@@ -6,26 +6,34 @@ namespace DataAccess.Models
 {
     public class Product
     {
-        [MaxLength(10)]
-        public string Id { get; set; }
+        public int Id { get; set; }
         [ForeignKey("Vendor")]
         public int VendorId { get; set; }
         [ForeignKey("Media")]
-        public int ImageId { get; set; }
+        public int? ImageId { get; set; }
         [ForeignKey("Niche")]
         public int NicheId { get; set; }
+        [Required]
+        [MaxLength(256)]
         public string Name { get; set; }
+        [MaxLength(10)]
+        [Required]
+        public string UrlId { get; set; }
+        [Required]
+        [MaxLength(256)]
         public string UrlName { get; set; }
+        [MaxLength(256)]
         public string Hoplink { get; set; }
         public int TotalReviews { get; set; }
         public double Rating { get; set; }
         public string Description { get; set; }
+        [MaxLength(20)]
         public string Price { get; set; }
-        public double OneStar { get; set; }
-        public double TwoStars { get; set; }
-        public double ThreeStars { get; set; }
-        public double FourStars { get; set; }
-        public double FiveStars { get; set; }
+        public int OneStar { get; set; }
+        public int TwoStars { get; set; }
+        public int ThreeStars { get; set; }
+        public int FourStars { get; set; }
+        public int FiveStars { get; set; }
         public virtual Niche Niche { get; set; }
         public virtual Media Media { get; set; }
         public virtual  Vendor Vendor { get; set; }

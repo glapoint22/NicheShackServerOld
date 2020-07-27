@@ -7,9 +7,12 @@ namespace DataAccess.Models
     {
         public int Id { get; set; }
         [ForeignKey("Product")]
-        [MaxLength(10)]
-        public string ProductId { get; set; }
+        [Required]
+        public int ProductId { get; set; }
+        [Required]
         public string Content { get; set; }
+        [Required]
+        [MaxLength(256)]
         public string Subject { get; set; }
         public virtual Product Product { get; set; }
     }

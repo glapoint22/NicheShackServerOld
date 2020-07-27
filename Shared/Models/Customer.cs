@@ -1,19 +1,27 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace DataAccess.Models
 {
     public class Customer : IdentityUser
     {
+        [Required]
+        [MaxLength(100)]
         public string FirstName { get; set; }
+        [Required]
+        [MaxLength(100)]
         public string LastName { get; set; }
+        [Required]
+        [MaxLength(100)]
         public string ReviewName { get; set; }
+        [MaxLength(50)]
         public string image { get; set; }
         public virtual ICollection<ListCollaborator> ListCollaborators { get; set; }
         public virtual ICollection<RefreshToken> RefreshTokens { get; set; }
         public virtual ICollection<ProductOrder> ProductOrders { get; set; }
         public virtual ICollection<ProductReview> ProductReviews { get; set; }
-        public virtual ICollection<Notification> Notifications { get; set; }
+        public virtual ICollection<NotificationText> NotificationText { get; set; }
 
 
         public Customer()
@@ -22,7 +30,7 @@ namespace DataAccess.Models
             RefreshTokens = new HashSet<RefreshToken>();
             ProductOrders = new HashSet<ProductOrder>();
             ProductReviews = new HashSet<ProductReview>();
-            Notifications = new HashSet<Notification>();
+            NotificationText = new HashSet<NotificationText>();
         }
     }
 }

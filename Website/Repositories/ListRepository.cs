@@ -53,7 +53,7 @@ namespace Website.Repositories
 
 
         // ................................................................................Get List Products.....................................................................
-        public async Task<IEnumerable<ListProductDTO>> GetListProducts(IEnumerable<Guid> collaboratorIds, string customerId, string sort)
+        public async Task<IEnumerable<ListProductDTO>> GetListProducts(IEnumerable<int> collaboratorIds, string customerId, string sort)
         {
             // Gets products based on collaborators from a list.
             var products = await context.ListProducts

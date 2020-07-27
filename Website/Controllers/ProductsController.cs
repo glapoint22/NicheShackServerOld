@@ -26,7 +26,7 @@ namespace Website.Controllers
         [HttpGet]
         public async Task<ActionResult> Get(string id)
         {
-            return Ok(await unitOfWork.Products.Get(x => x.Id == id, x => new
+            return Ok(await unitOfWork.Products.Get(x => x.UrlId == id, x => new
             {
                 id = x.Id,
                 title = x.Name,
@@ -50,7 +50,7 @@ namespace Website.Controllers
         // ..................................................................................Get Quick Look Product.....................................................................
         [Route("QuickLookProduct")]
         [HttpGet]
-        public async Task<ActionResult> GetQuickLookProduct(string id)
+        public async Task<ActionResult> GetQuickLookProduct(int id)
         {
             // Return the product's description and media
             var quickLookProduct = new
@@ -69,7 +69,7 @@ namespace Website.Controllers
 
 
 
-        public async Task<IEnumerable<MediaViewModel>> GetMedia(string id)
+        public async Task<IEnumerable<MediaViewModel>> GetMedia(int id)
         {
             var mediaIds = await unitOfWork.ProductMedia.GetCollection(x => x.ProductId == id, x => x.MediaId);
 
@@ -90,9 +90,9 @@ namespace Website.Controllers
         public async Task<ActionResult> GetProductDetail(string id)
         {
             // Get the product based on the id
-            ProductDetailDTO product = await unitOfWork.Products.Get(x => x.Id == id, new ProductDetailDTO());
+            ProductDetailDTO product = await unitOfWork.Products.Get(x => x.UrlId == id, new ProductDetailDTO());
 
-            var iconId = await unitOfWork.ProductContent.Get(x => x.ProductId == id, x => x.IconId);
+            //var iconId = await unitOfWork.ProductContent.Get(x => x.ProductId == id, x => x.IconId);
 
 
 
@@ -107,7 +107,7 @@ namespace Website.Controllers
                     productInfo = new
                     {
                         product,
-                        media = await GetMedia(id)
+                        media = await GetMedia(product.Id)
                     },
                     content = await unitOfWork.ProductContent.GetCollection(x => x.ProductId == product.Id, x => new
                     {

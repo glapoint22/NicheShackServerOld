@@ -2,7 +2,7 @@
 {
     public struct FilteredProduct
     {
-        public string ProductId { get; set; }
+        public int ProductId { get; set; }
         public int FilterId { get; set; }
     }
 }

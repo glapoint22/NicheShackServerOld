@@ -6,13 +6,14 @@ namespace DataAccess.Models
 {
     public class ProductContent
     {
-        [MaxLength(10)]
-        public string Id { get; set; }
+        public int Id { get; set; }
         [ForeignKey("Product")]
-        [MaxLength(10)]
-        public string ProductId { get; set; }
+        [Required]
+        public int ProductId { get; set; }
         [ForeignKey("Media")]
-        public int IconId { get; set; }
+        public int? IconId { get; set; }
+        [Required]
+        [MaxLength(256)]
         public string Name { get; set; }
         public virtual Product Product { get; set; }
         public virtual Media Media { get; set; }

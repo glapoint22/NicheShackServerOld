@@ -20,7 +20,7 @@ namespace Website.Classes
         public string Text { get; set; }
         public int Likes { get; set; }
         public int Dislikes { get; set; }
-        public string ProductId { get; set; }
+        public int ProductId { get; set; }
 
 
 

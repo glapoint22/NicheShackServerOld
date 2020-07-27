@@ -127,7 +127,7 @@ namespace Website.Controllers
             string customerId = await unitOfWork.Collaborators.Get(x => x.ListId == listId && x.IsOwner, x => x.CustomerId);
 
             // Get all collaborator ids from this list
-            IEnumerable<Guid> collaboratorIds = await unitOfWork.Collaborators
+            IEnumerable<int> collaboratorIds = await unitOfWork.Collaborators
                     .GetCollection(x => x.ListId == listId, x => x.Id);
 
             return Ok(await unitOfWork.Lists.GetListProducts(collaboratorIds, customerId, sort));
@@ -156,7 +156,7 @@ namespace Website.Controllers
             // Create the new list and add it to the database
             List newList = new List
             {
-                Id = Guid.NewGuid().ToString("N").ToUpper(),
+                Id = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper(),
                 Name = list.Name,
                 Description = list.Description,
                 CollaborateId = Guid.NewGuid().ToString("N").ToUpper()
@@ -168,7 +168,7 @@ namespace Website.Controllers
             // Set the owner as the first collaborator of the list
             ListCollaborator collaborator = new ListCollaborator
             {
-                Id = Guid.NewGuid(),
+                //Id = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper(),
                 CustomerId = customerId,
                 ListId = newList.Id,
                 IsOwner = true

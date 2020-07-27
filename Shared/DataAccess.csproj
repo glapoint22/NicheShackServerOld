@@ -5,7 +5,31 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Migrations\20200726014907_Initial.cs" />
+    <Compile Remove="Migrations\20200726014907_Initial.Designer.cs" />
+    <Compile Remove="Migrations\20200726023303_Initial.cs" />
+    <Compile Remove="Migrations\20200726023303_Initial.Designer.cs" />
+    <Compile Remove="Migrations\20200726025859_Initial.cs" />
+    <Compile Remove="Migrations\20200726025859_Initial.Designer.cs" />
+    <Compile Remove="Migrations\20200726035301_Initial.cs" />
+    <Compile Remove="Migrations\20200726035301_Initial.Designer.cs" />
+    <Compile Remove="Migrations\20200726174839_Initial.cs" />
+    <Compile Remove="Migrations\20200726174839_Initial.Designer.cs" />
+    <Compile Remove="Migrations\20200726184650_Initial.cs" />
+    <Compile Remove="Migrations\20200726184650_Initial.Designer.cs" />
+    <Compile Remove="Migrations\20200726185424_Initial.cs" />
+    <Compile Remove="Migrations\20200726185424_Initial.Designer.cs" />
+    <Compile Remove="Migrations\20200726192107_Initial.cs" />
+    <Compile Remove="Migrations\20200726192107_Initial.Designer.cs" />
+    <Compile Remove="Migrations\20200726204032_test.cs" />
+    <Compile Remove="Migrations\20200726204032_test.Designer.cs" />
+    <Compile Remove="Migrations\20200726205504_AddedNullable.cs" />
+    <Compile Remove="Migrations\20200726205504_AddedNullable.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.6" />
   </ItemGroup>
 
 </Project>

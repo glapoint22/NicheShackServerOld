@@ -55,7 +55,7 @@ namespace Website.Controllers
                 }
 
 
-                await SetListProductsAsync(customer.ListCollaborators.FirstOrDefault(x => x.CustomerId == customer.Id && x.IsOwner == true).Id, products);
+                //await SetListProductsAsync(customer.ListCollaborators.FirstOrDefault(x => x.CustomerId == customer.Id && x.IsOwner == true).Id, products);
 
                 //await unitOfWork.Save();
 
@@ -101,7 +101,7 @@ namespace Website.Controllers
 
                 for (int i = 0; i < numProductContent; i++)
                 {
-                    string productContentId = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper();
+                    int productContentId = 22;
 
                     List<PriceIndex> priceIndices = new List<PriceIndex>();
                     for (int j = 0; j < pricePoints.Count; j++)
@@ -237,7 +237,7 @@ namespace Website.Controllers
             // Set the owner as the first collaborator of the list
             ListCollaborator collaborator = new ListCollaborator
             {
-                Id = Guid.NewGuid(),
+                Id = 22,
                 CustomerId = customer.Id,
                 ListId = newList.Id,
                 IsOwner = true
@@ -812,7 +812,7 @@ namespace Website.Controllers
 
 
 
-        private async Task SetListProductsAsync(Guid collaboratorId, List<Product> products)
+        private async Task SetListProductsAsync(string collaboratorId, List<Product> products)
         {
             Random random = new Random();
 
@@ -820,18 +820,18 @@ namespace Website.Controllers
 
             for (int j = 0; j < numProducts; j++)
             {
-                string ProductId = products[random.Next(0, products.Count)].Id;
-                if (!await unitOfWork.ListProducts.Any(x => x.ProductId == ProductId && x.CollaboratorId == collaboratorId))
-                {
-                    unitOfWork.ListProducts.Add(new ListProduct
-                    {
-                        ProductId = ProductId,
-                        CollaboratorId = collaboratorId,
-                        DateAdded = RandomDay()
-                    });
+                //string ProductId = products[random.Next(0, products.Count)].Id;
+                //if (!await unitOfWork.ListProducts.Any(x => x.ProductId == ProductId && x.CollaboratorId == collaboratorId))
+                //{
+                //    unitOfWork.ListProducts.Add(new ListProduct
+                //    {
+                //        ProductId = ProductId,
+                //        CollaboratorId = collaboratorId,
+                //        DateAdded = RandomDay()
+                //    });
 
-                    await unitOfWork.Save();
-                }
+                //    await unitOfWork.Save();
+                //}
             }
         }
 
@@ -858,7 +858,7 @@ namespace Website.Controllers
                 {
                     Id = Guid.NewGuid().ToString("N").Substring(0, 25).ToUpper(),
                     OrderId = orderId,
-                    Title = i == 0 ? product.Name : GetProductTitle(),
+                    Name = i == 0 ? product.Name : GetProductTitle(),
                     Type = random.Next(0, 3),
                     Quantity = random.Next(1, 3),
                     //Price = i == 0 ? product.MinPrice : Math.Round(random.NextDouble() * 10, 2),
@@ -1066,15 +1066,15 @@ namespace Website.Controllers
                 string listId = lists[random.Next(lists.Count)].Id;
                 if (!await unitOfWork.Collaborators.Any(x => x.CustomerId == customerId && x.ListId == listId))
                 {
-                    Guid collaboratorId = Guid.NewGuid();
+                    string collaboratorId = Guid.NewGuid().ToString("N").ToUpper();
 
-                    unitOfWork.Collaborators.Add(new ListCollaborator
-                    {
-                        Id = collaboratorId,
-                        CustomerId = customerId,
-                        ListId = listId,
-                        IsOwner = false
-                    });
+                    //unitOfWork.Collaborators.Add(new ListCollaborator
+                    //{
+                    //    Id = collaboratorId,
+                    //    CustomerId = customerId,
+                    //    ListId = listId,
+                    //    IsOwner = false
+                    //});
 
                     await unitOfWork.Save();
 

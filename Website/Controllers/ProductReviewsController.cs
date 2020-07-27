@@ -75,8 +75,9 @@ namespace Website.Controllers
         public async Task<ActionResult> WriteReview(string productId)
         {
             // Get the product based on the product id
-            var product = await unitOfWork.Products.Get(x => x.Id == productId, x => new
+            var product = await unitOfWork.Products.Get(x => x.UrlId == productId, x => new
             {
+                id = x.Id,
                 title = x.Name,
                 //image = x.Image
             });
@@ -99,10 +100,10 @@ namespace Website.Controllers
         [Authorize(Policy = "Account Policy")]
         public async Task<ActionResult> PostReview(ProductReview review)
         {
-            if (review.ProductId == null)
-            {
-                return BadRequest(ModelState);
-            }
+            //if (review.ProductId == null)
+            //{
+            //    return BadRequest(ModelState);
+            //}
 
             // Get the customer Id from the access token
             string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;

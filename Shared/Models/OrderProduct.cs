@@ -1,13 +1,18 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataAccess.Models
 {
     public class OrderProduct
     {
+        [MaxLength(25)]
         public string Id { get; set; } // This will be the itemNo from the instant notification
         [ForeignKey("ProductOrder")]
+        [MaxLength(21)]
         public string OrderId { get; set; }
-        public string Title { get; set; }
+        [Required]
+        [MaxLength(256)]
+        public string Name { get; set; }
         public int Type { get; set; }
         public int Quantity { get; set; }
         public double Price { get; set; }
