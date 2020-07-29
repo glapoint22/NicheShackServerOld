@@ -16,21 +16,50 @@ namespace DataAccess.Models
         public virtual DbSet<Customer> Customers { get; set; }
         public virtual DbSet<Filter> Filters { get; set; }
         public virtual DbSet<FilterOption> FilterOptions { get; set; }
+
+        public virtual DbSet<LeadPage> LeadPages { get; set; }
+
+
+        public virtual DbSet<LeadPageEmail> LeadPageEmails { get; set; }
+
+
+
         public virtual DbSet<List> Lists { get; set; }
         public virtual DbSet<ListCollaborator> ListCollaborators { get; set; }
         public virtual DbSet<ListProduct> ListProducts { get; set; }
+
+
+
+        public virtual DbSet<Media> Media { get; set; }
+
+
+
         public virtual DbSet<Niche> Niches { get; set; }
+        public virtual DbSet<Notification> Notifications { get; set; }
+        public virtual DbSet<NotificationText> NotificationText { get; set; }
         public virtual DbSet<OrderProduct> OrderProducts { get; set; }
         public virtual DbSet<PriceIndex> PriceIndices { get; set; }
         public virtual DbSet<PriceRange> PriceRanges { get; set; }
         public virtual DbSet<Product> Products { get; set; }
         public virtual DbSet<ProductContent> ProductContent { get; set; }
+
+
+        public virtual DbSet<ProductEmail> ProductEmails { get; set; }
+
+
+
+
         public virtual DbSet<ProductFilter> ProductFilters { get; set; }
+        public virtual DbSet<ProductKeyword> ProductKeywords { get; set; }
         public virtual DbSet<ProductMedia> ProductMedia { get; set; }
         public virtual DbSet<ProductOrder> ProductOrders { get; set; }
         public virtual DbSet<ProductPricePoint> ProductPricePoints { get; set; }
         public virtual DbSet<ProductReview> ProductReviews { get; set; }
         public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
+
+
+        public virtual DbSet<Vendor> Vendors { get; set; }
+
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -51,15 +80,12 @@ namespace DataAccess.Models
 
 
 
+
             // Customers
             modelBuilder.Entity<Customer>(entity =>
             {
                 entity.ToTable(name: "Customers");
-                entity.Property(e => e.Id)
-                    .HasMaxLength(10)
-                    .IsUnicode(false);
             });
-
 
 
 
@@ -75,6 +101,12 @@ namespace DataAccess.Models
 
 
 
+            // NotificationText
+            modelBuilder.Entity<NotificationText>(entity =>
+            {
+                entity.HasKey(e => new { e.CustomerId, e.NotificationId })
+                    .HasName("PK_NotificationText");
+            });
 
 
 

@@ -25,7 +25,7 @@ namespace DataAccess.Migrations
                 name: "Customers",
                 columns: table => new
                 {
-                    Id = table.Column<string>(unicode: false, maxLength: 10, nullable: false),
+                    Id = table.Column<string>(nullable: false),
                     UserName = table.Column<string>(maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(maxLength: 256, nullable: true),
                     Email = table.Column<string>(maxLength: 256, nullable: true),
@@ -109,7 +109,7 @@ namespace DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Vendor",
+                name: "Vendors",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
@@ -135,7 +135,7 @@ namespace DataAccess.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Vendor", x => x.Id);
+                    table.PrimaryKey("PK_Vendors", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -249,7 +249,7 @@ namespace DataAccess.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(maxLength: 256, nullable: false),
-                    CustomerId = table.Column<string>(maxLength: 10, nullable: false),
+                    CustomerId = table.Column<string>(nullable: false),
                     Expiration = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
@@ -289,7 +289,7 @@ namespace DataAccess.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    CustomerId = table.Column<string>(maxLength: 10, nullable: false),
+                    CustomerId = table.Column<string>(nullable: false),
                     ListId = table.Column<string>(maxLength: 10, nullable: false),
                     IsOwner = table.Column<bool>(nullable: false)
                 },
@@ -351,7 +351,7 @@ namespace DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "LeadPage",
+                name: "LeadPages",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
@@ -362,9 +362,9 @@ namespace DataAccess.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_LeadPage", x => x.Id);
+                    table.PrimaryKey("PK_LeadPages", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_LeadPage_Niches_NicheId",
+                        name: "FK_LeadPages_Niches_NicheId",
                         column: x => x.NicheId,
                         principalTable: "Niches",
                         principalColumn: "Id",
@@ -380,14 +380,15 @@ namespace DataAccess.Migrations
                     VendorId = table.Column<int>(nullable: false),
                     ImageId = table.Column<int>(nullable: true),
                     NicheId = table.Column<int>(nullable: false),
-                    Name = table.Column<string>(maxLength: 256, nullable: false),
                     UrlId = table.Column<string>(maxLength: 10, nullable: false),
                     UrlName = table.Column<string>(maxLength: 256, nullable: false),
+                    Name = table.Column<string>(maxLength: 256, nullable: false),
                     Hoplink = table.Column<string>(maxLength: 256, nullable: true),
+                    Description = table.Column<string>(nullable: true),
+                    MinPrice = table.Column<double>(nullable: false),
+                    MaxPrice = table.Column<double>(nullable: false),
                     TotalReviews = table.Column<int>(nullable: false),
                     Rating = table.Column<double>(nullable: false),
-                    Description = table.Column<string>(nullable: true),
-                    Price = table.Column<string>(maxLength: 20, nullable: true),
                     OneStar = table.Column<int>(nullable: false),
                     TwoStars = table.Column<int>(nullable: false),
                     ThreeStars = table.Column<int>(nullable: false),
@@ -410,15 +411,15 @@ namespace DataAccess.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Products_Vendor_VendorId",
+                        name: "FK_Products_Vendors_VendorId",
                         column: x => x.VendorId,
-                        principalTable: "Vendor",
+                        principalTable: "Vendors",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "LeadPageEmail",
+                name: "LeadPageEmails",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
@@ -429,31 +430,11 @@ namespace DataAccess.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_LeadPageEmail", x => x.Id);
+                    table.PrimaryKey("PK_LeadPageEmails", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_LeadPageEmail_LeadPage_LeadPageId",
+                        name: "FK_LeadPageEmails_LeadPages_LeadPageId",
                         column: x => x.LeadPageId,
-                        principalTable: "LeadPage",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Keyword",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ProductId = table.Column<int>(nullable: false),
-                    Name = table.Column<string>(maxLength: 50, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Keyword", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Keyword_Products_ProductId",
-                        column: x => x.ProductId,
-                        principalTable: "Products",
+                        principalTable: "LeadPages",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -484,24 +465,24 @@ namespace DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Notification",
+                name: "Notifications",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ProductId = table.Column<int>(nullable: false),
+                    ProductId = table.Column<int>(nullable: true),
                     Type = table.Column<int>(nullable: false),
                     State = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Notification", x => x.Id);
+                    table.PrimaryKey("PK_Notifications", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Notification_Products_ProductId",
+                        name: "FK_Notifications_Products_ProductId",
                         column: x => x.ProductId,
                         principalTable: "Products",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -532,7 +513,7 @@ namespace DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ProductEmail",
+                name: "ProductEmails",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
@@ -543,9 +524,9 @@ namespace DataAccess.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProductEmail", x => x.Id);
+                    table.PrimaryKey("PK_ProductEmails", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ProductEmail_Products_ProductId",
+                        name: "FK_ProductEmails_Products_ProductId",
                         column: x => x.ProductId,
                         principalTable: "Products",
                         principalColumn: "Id",
@@ -570,6 +551,26 @@ namespace DataAccess.Migrations
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_ProductFilters_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProductKeywords",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ProductId = table.Column<int>(nullable: false),
+                    Name = table.Column<string>(maxLength: 50, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProductKeywords", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProductKeywords_Products_ProductId",
                         column: x => x.ProductId,
                         principalTable: "Products",
                         principalColumn: "Id",
@@ -605,7 +606,7 @@ namespace DataAccess.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(maxLength: 21, nullable: false),
-                    CustomerId = table.Column<string>(maxLength: 10, nullable: false),
+                    CustomerId = table.Column<string>(nullable: false),
                     ProductId = table.Column<int>(nullable: false),
                     Date = table.Column<DateTime>(nullable: false),
                     PaymentMethod = table.Column<int>(nullable: false),
@@ -662,7 +663,7 @@ namespace DataAccess.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ProductId = table.Column<int>(nullable: false),
-                    CustomerId = table.Column<string>(maxLength: 10, nullable: false),
+                    CustomerId = table.Column<string>(nullable: false),
                     Title = table.Column<string>(maxLength: 256, nullable: false),
                     Rating = table.Column<double>(nullable: false),
                     Date = table.Column<DateTime>(nullable: false),
@@ -692,9 +693,7 @@ namespace DataAccess.Migrations
                 name: "NotificationText",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    CustomerId = table.Column<string>(maxLength: 10, nullable: false),
+                    CustomerId = table.Column<string>(nullable: false),
                     NotificationId = table.Column<int>(nullable: false),
                     TimeStamp = table.Column<DateTime>(nullable: false),
                     Text = table.Column<string>(nullable: true),
@@ -702,7 +701,7 @@ namespace DataAccess.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_NotificationText", x => x.Id);
+                    table.PrimaryKey("PK_NotificationText", x => new { x.CustomerId, x.NotificationId });
                     table.ForeignKey(
                         name: "FK_NotificationText_Customers_CustomerId",
                         column: x => x.CustomerId,
@@ -710,9 +709,9 @@ namespace DataAccess.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_NotificationText_Notification_NotificationId",
+                        name: "FK_NotificationText_Notifications_NotificationId",
                         column: x => x.NotificationId,
-                        principalTable: "Notification",
+                        principalTable: "Notifications",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -810,19 +809,14 @@ namespace DataAccess.Migrations
                 column: "FilterId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Keyword_ProductId",
-                table: "Keyword",
-                column: "ProductId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_LeadPage_NicheId",
-                table: "LeadPage",
-                column: "NicheId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_LeadPageEmail_LeadPageId",
-                table: "LeadPageEmail",
+                name: "IX_LeadPageEmails_LeadPageId",
+                table: "LeadPageEmails",
                 column: "LeadPageId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LeadPages_NicheId",
+                table: "LeadPages",
+                column: "NicheId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ListCollaborators_CustomerId",
@@ -845,14 +839,9 @@ namespace DataAccess.Migrations
                 column: "CategoryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Notification_ProductId",
-                table: "Notification",
+                name: "IX_Notifications_ProductId",
+                table: "Notifications",
                 column: "ProductId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_NotificationText_CustomerId",
-                table: "NotificationText",
-                column: "CustomerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_NotificationText_NotificationId",
@@ -880,14 +869,19 @@ namespace DataAccess.Migrations
                 column: "ProductId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProductEmail_ProductId",
-                table: "ProductEmail",
+                name: "IX_ProductEmails_ProductId",
+                table: "ProductEmails",
                 column: "ProductId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProductFilters_FilterOptionId",
                 table: "ProductFilters",
                 column: "FilterOptionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductKeywords_ProductId",
+                table: "ProductKeywords",
+                column: "ProductId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProductMedia_MediaId",
@@ -958,10 +952,7 @@ namespace DataAccess.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Keyword");
-
-            migrationBuilder.DropTable(
-                name: "LeadPageEmail");
+                name: "LeadPageEmails");
 
             migrationBuilder.DropTable(
                 name: "ListProducts");
@@ -979,10 +970,13 @@ namespace DataAccess.Migrations
                 name: "PriceRanges");
 
             migrationBuilder.DropTable(
-                name: "ProductEmail");
+                name: "ProductEmails");
 
             migrationBuilder.DropTable(
                 name: "ProductFilters");
+
+            migrationBuilder.DropTable(
+                name: "ProductKeywords");
 
             migrationBuilder.DropTable(
                 name: "ProductMedia");
@@ -1000,13 +994,13 @@ namespace DataAccess.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "LeadPage");
+                name: "LeadPages");
 
             migrationBuilder.DropTable(
                 name: "ListCollaborators");
 
             migrationBuilder.DropTable(
-                name: "Notification");
+                name: "Notifications");
 
             migrationBuilder.DropTable(
                 name: "ProductOrders");
@@ -1033,7 +1027,7 @@ namespace DataAccess.Migrations
                 name: "Niches");
 
             migrationBuilder.DropTable(
-                name: "Vendor");
+                name: "Vendors");
 
             migrationBuilder.DropTable(
                 name: "Categories");

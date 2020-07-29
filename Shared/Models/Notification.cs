@@ -7,7 +7,7 @@ namespace DataAccess.Models
     {
         public int Id { get; set; }
         [ForeignKey("Product")]
-        public int ProductId { get; set; }
+        public int? ProductId { get; set; }
         public int Type { get; set; }
         public int State { get; set; }
         public virtual Product Product { get; set; }

@@ -11,7 +11,6 @@ namespace DataAccess.Models
         [Required]
         public int ProductId { get; set; }
         [ForeignKey("Customer")]
-        [MaxLength(10)]
         [Required]
         public string CustomerId { get; set; }
         [Required]

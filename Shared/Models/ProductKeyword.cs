@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataAccess.Models
 {
-    public class Keyword
+    public class ProductKeyword
     {
         public int Id { get; set; }
         [ForeignKey("Product")]

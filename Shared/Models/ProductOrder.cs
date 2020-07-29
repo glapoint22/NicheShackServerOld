@@ -9,7 +9,6 @@ namespace DataAccess.Models
     {
         [MaxLength(21)]
         public string Id { get; set; }
-        [MaxLength(10)]
         [ForeignKey("Customer")]
         [Required]
         public string CustomerId { get; set; }

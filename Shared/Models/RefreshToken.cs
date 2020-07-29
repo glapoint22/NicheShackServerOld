@@ -9,7 +9,6 @@ namespace DataAccess.Models
         [MaxLength(256)]
         public string Id { get; set; }
         [ForeignKey("Customer")]
-        [MaxLength(10)]
         public string CustomerId { get; set; }
         public DateTime Expiration { get; set; }
         public virtual Customer Customer { get; set; }

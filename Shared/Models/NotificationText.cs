@@ -6,8 +6,6 @@ namespace DataAccess.Models
 {
     public class NotificationText
     {
-        public int Id { get; set; }
-        [MaxLength(10)]
         [ForeignKey("Customer")]
         [Required]
         public string CustomerId { get; set; }

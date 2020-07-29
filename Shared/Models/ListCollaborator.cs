@@ -8,7 +8,6 @@ namespace DataAccess.Models
     {
         public int Id { get; set; }
         [ForeignKey("Customer")]
-        [MaxLength(10)]
         [Required]
         public string CustomerId { get; set; }
         [ForeignKey("List")]
