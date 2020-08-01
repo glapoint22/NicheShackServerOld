@@ -1,6 +1,6 @@
-﻿namespace Website.Classes
+﻿namespace Website.ViewModels
 {
-    public class ListDTO
+    public class ListViewModel
     {
         public string Id { get; set; }
         public string Name { get; set; }

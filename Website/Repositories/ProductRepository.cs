@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 using Website.Classes;
 using Website.Interfaces;
 using DataAccess.Models;
+using DataAccess.Repositories;
+using DataAccess.Classes;
+using Website.ViewModels;
 
 namespace Website.Repositories
 {
@@ -22,9 +25,9 @@ namespace Website.Repositories
 
 
         // ..................................................................................Get Queried Products.....................................................................
-        public async Task<IEnumerable<ProductDTO>> GetQueriedProducts(QueryParams queryParams)
+        public async Task<IEnumerable<ProductViewModel>> GetQueriedProducts(QueryParams queryParams)
         {
-            ProductDTO productDTO = new ProductDTO(queryParams, await GetFilteredProducts(queryParams));
+            ProductViewModel productDTO = new ProductViewModel(queryParams, await GetFilteredProducts(queryParams));
 
             // Return products based on the query parameters
             return await context.Products
@@ -32,7 +35,7 @@ namespace Website.Repositories
                 .SortBy(productDTO)
                 .ThenBy(x => x.Name)
                 .Where(productDTO)
-                .Select(productDTO)
+                .Select<Product, ProductViewModel>()
                 .ToListAsync();
         }
 
@@ -69,7 +72,7 @@ namespace Website.Repositories
             // Return just product ids from the queried products
             return await context.Products
                 .AsNoTracking()
-                .Where(new ProductDTO(queryParams, await GetFilteredProducts(queryParams)))
+                .Where(new ProductViewModel(queryParams, await GetFilteredProducts(queryParams)))
                 .Select(x => x.Id)
                 .ToListAsync();
         }
@@ -87,7 +90,7 @@ namespace Website.Repositories
             // Return just product ratings from the queried products
             return await context.Products
                 .AsNoTracking()
-                .Where(new ProductDTO(queryParams, await GetFilteredProducts(queryParams)))
+                .Where(new ProductViewModel(queryParams, await GetFilteredProducts(queryParams)))
                 .Select(x => x.Rating)
                 .ToListAsync();
         }
@@ -98,7 +101,7 @@ namespace Website.Repositories
 
 
         // ..................................................................................Get Product Filters.....................................................................
-        public async Task<IEnumerable<FilterData>> GetProductFilters(QueryParams queryParams, IEnumerable<ProductDTO> products)
+        public async Task<IEnumerable<FilterData>> GetProductFilters(QueryParams queryParams, IEnumerable<ProductViewModel> products)
         {
             List<FilterData> filters = new List<FilterData>();
             List<IQueryFilterOption> options = new List<IQueryFilterOption>();

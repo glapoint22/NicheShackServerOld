@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace Website.ViewModels
+﻿namespace Website.ViewModels
 {
-    public class MediaViewModel
+    public class ProductMediaViewModel
     {
         public string name { get; set; }
         public string url { get; set; }

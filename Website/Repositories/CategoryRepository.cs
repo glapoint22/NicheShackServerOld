@@ -5,6 +5,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Website.Classes;
 using DataAccess.Models;
+using DataAccess.Repositories;
+using Website.ViewModels;
+using DataAccess.ViewModels;
 
 namespace Website.Repositories
 {
@@ -21,7 +24,7 @@ namespace Website.Repositories
 
 
         // ................................................................................Get Queried Categories.....................................................................
-        public async Task<IEnumerable<CategoryDTO>> GetQueriedCategories(QueryParams queryParams, IEnumerable<ProductDTO> products)
+        public async Task<IEnumerable<CategoryViewModel>> GetQueriedCategories(QueryParams queryParams, IEnumerable<ProductViewModel> products)
         {
             List<int> nicheIds = new List<int>();
             List<int> categoryIds = new List<int>();
@@ -61,14 +64,14 @@ namespace Website.Repositories
                 .AsNoTracking()
                 .Where(x => categoryIds
                     .Contains(x.Id))
-                .Select(x => new CategoryDTO
+                .Select(x => new CategoryViewModel
                 {
                     Id = x.Id,
                     Name = x.Name,
                     Niches = x.Niches
                         .Where(y => nicheIds
                             .Contains(y.Id))
-                        .Select(y => new NicheDTO
+                        .Select(y => new ItemViewModel<Niche>
                         {
                             Id = y.Id,
                             Name = y.Name
@@ -83,7 +86,7 @@ namespace Website.Repositories
 
 
         // ................................................................................Get Niche Ids.....................................................................
-        private async Task<List<int>> GetNicheIds(IEnumerable<ProductDTO> products)
+        private async Task<List<int>> GetNicheIds(IEnumerable<ProductViewModel> products)
         {
             // Get niche ids from the products
             return await context.Products

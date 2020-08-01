@@ -1,15 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Website.Classes;
 using DataAccess.Models;
+using DataAccess.Repositories;
+using Website.ViewModels;
 
 namespace Website.Repositories
 {
     public interface IProductRepository : IRepository<Product>
     {
-        Task<IEnumerable<ProductDTO>> GetQueriedProducts(QueryParams queryParams);
-        Task<IEnumerable<FilterData>> GetProductFilters(QueryParams queryParams, IEnumerable<ProductDTO> products);
+        Task<IEnumerable<ProductViewModel>> GetQueriedProducts(QueryParams queryParams);
+        Task<IEnumerable<FilterData>> GetProductFilters(QueryParams queryParams, IEnumerable<ProductViewModel> products);
     }
 }

@@ -861,7 +861,7 @@ namespace Website.Controllers
                     Name = i == 0 ? product.Name : GetProductTitle(),
                     Type = random.Next(0, 3),
                     Quantity = random.Next(1, 3),
-                    //Price = i == 0 ? product.MinPrice : Math.Round(random.NextDouble() * 10, 2),
+                    Price = i == 0 ? product.MinPrice : Math.Round(random.NextDouble() * 10, 2),
                     IsMain = i == 0 ? true : false
                 };
 

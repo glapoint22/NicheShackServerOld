@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Website.Classes;
 using DataAccess.Models;
 using Website.Repositories;
+using Website.ViewModels;
 
 namespace Website.Controllers
 {
@@ -68,7 +69,7 @@ namespace Website.Controllers
         [Route("SortOptions")]
         public ActionResult GetSortOptions()
         {
-            return Ok(new ListProductDTO().GetSortOptions());
+            return Ok(new ListProductViewModel().GetSortOptions());
         }
 
 

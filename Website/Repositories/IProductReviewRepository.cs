@@ -1,14 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Website.Classes;
 using DataAccess.Models;
+using DataAccess.Repositories;
+using Website.ViewModels;
 
 namespace Website.Repositories
 {
     public interface IProductReviewRepository : IRepository<ProductReview>
     {
-        Task<IEnumerable<ProductReviewDTO>> GetReviews(string productId, string sortBy, int page);
-        Task<ProductReviewDTO> GetPositiveReview(string productId);
-        Task<ProductReviewDTO> GetNegativeReview(string productId);
+        Task<IEnumerable<ProductReviewViewModel>> GetReviews(string productId, string sortBy, int page);
+        Task<ProductReviewViewModel> GetPositiveReview(string productId);
+        Task<ProductReviewViewModel> GetNegativeReview(string productId);
     }
 }

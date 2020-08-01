@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using Website.Interfaces;
+using DataAccess.Interfaces;
 using DataAccess.Models;
 
-namespace Website.Classes
+namespace Website.ViewModels
 {
-    public class ProductReviewDTO : ISelect<ProductReview, ProductReviewDTO>, ISort<ProductReview>
+    public class ProductReviewViewModel : ISelect<ProductReview, ProductReviewViewModel>, ISort<ProductReview>
     {
         private readonly string sortBy;
 
@@ -25,9 +23,9 @@ namespace Website.Classes
 
 
         // Constructors
-        public ProductReviewDTO() { }
+        public ProductReviewViewModel() { }
 
-        public ProductReviewDTO(string sortBy)
+        public ProductReviewViewModel(string sortBy)
         {
             this.sortBy = sortBy;
         }
@@ -60,9 +58,9 @@ namespace Website.Classes
 
 
         // ..................................................................................Set Select.....................................................................
-        public IQueryable<ProductReviewDTO> SetSelect(IQueryable<ProductReview> source)
+        public IQueryable<ProductReviewViewModel> Select(IQueryable<ProductReview> source)
         {
-            return source.Select(x => new ProductReviewDTO
+            return source.Select(x => new ProductReviewViewModel
             {
                 Id = x.Id,
                 Title = x.Title,

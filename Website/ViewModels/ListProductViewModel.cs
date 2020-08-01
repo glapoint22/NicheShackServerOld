@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Website.Interfaces;
+using DataAccess.Interfaces;
 using DataAccess.Models;
 
-namespace Website.Classes
+namespace Website.ViewModels
 {
-    public class ListProductDTO : ISort<ListProduct>
+    public class ListProductViewModel : ISort<ListProduct>
     {
         private readonly string sortBy;
 
@@ -22,9 +22,9 @@ namespace Website.Classes
         public string UrlTitle { get; set; }
 
         // Constructors
-        public ListProductDTO() { }
+        public ListProductViewModel() { }
 
-        public ListProductDTO(string sortBy)
+        public ListProductViewModel(string sortBy)
         {
             this.sortBy = sortBy;
         }
@@ -54,10 +54,10 @@ namespace Website.Classes
             switch (sortBy)
             {
                 case "price-asc":
-                    //sortResult = source.OrderBy(x => x.Product.MinPrice);
+                    sortResult = source.OrderBy(x => x.Product.MinPrice);
                     break;
                 case "price-desc":
-                    //sortResult = source.OrderByDescending(x => x.Product.MinPrice);
+                    sortResult = source.OrderByDescending(x => x.Product.MinPrice);
                     break;
                 case "rating":
                     sortResult = source.OrderByDescending(x => x.Product.Rating);

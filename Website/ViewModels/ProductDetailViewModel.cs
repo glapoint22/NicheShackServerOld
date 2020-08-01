@@ -1,10 +1,10 @@
 ﻿using System.Linq;
-using Website.Interfaces;
+using DataAccess.Interfaces;
 using DataAccess.Models;
 
-namespace Website.Classes
+namespace Website.ViewModels
 {
-    public class ProductDetailDTO : ISelect<Product, ProductDetailDTO>
+    public class ProductDetailViewModel : ISelect<Product, ProductDetailViewModel>
     {
         public int Id { get; set; }
         public string Title { get; set; }
@@ -26,17 +26,17 @@ namespace Website.Classes
 
 
         // ..................................................................................Set Select.....................................................................
-        public IQueryable<ProductDetailDTO> SetSelect(IQueryable<Product> source)
+        public IQueryable<ProductDetailViewModel> Select(IQueryable<Product> source)
         {
-            return source.Select(x => new ProductDetailDTO
+            return source.Select(x => new ProductDetailViewModel
             {
                 Id = x.Id,
                 Title = x.Name,
                 UrlTitle = x.UrlName,
                 Rating = x.Rating,
                 TotalReviews = x.TotalReviews,
-                //MinPrice = x.MinPrice,
-                //MaxPrice = x.MaxPrice,
+                MinPrice = x.MinPrice,
+                MaxPrice = x.MaxPrice,
                 //Image = x.Image,
                 Hoplink = x.Hoplink,
                 Description = x.Description,

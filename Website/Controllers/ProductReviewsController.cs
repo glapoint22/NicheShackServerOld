@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Website.Classes;
 using DataAccess.Models;
 using Website.Repositories;
+using Website.ViewModels;
 
 namespace Website.Controllers
 {
@@ -37,7 +38,7 @@ namespace Website.Controllers
         [HttpGet]
         public ActionResult GetReviewOptions()
         {
-            ProductReviewDTO productReviewDTO = new ProductReviewDTO();
+            ProductReviewViewModel productReviewDTO = new ProductReviewViewModel();
 
             return Ok(new
             {

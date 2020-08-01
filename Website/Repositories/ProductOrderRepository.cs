@@ -6,7 +6,10 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Website.Classes;
 using DataAccess.Models;
+using DataAccess.Repositories;
+using DataAccess.Classes;
 using static Website.Classes.Enums;
+using Website.ViewModels;
 
 namespace Website.Repositories
 {
@@ -22,13 +25,13 @@ namespace Website.Repositories
 
 
         // ..................................................................................Get Orders.....................................................................
-        public async Task<IEnumerable<ProductOrderDTO>> GetOrders(string customerId, string filter, string searchWords = "")
+        public async Task<IEnumerable<ProductOrderViewModel>> GetOrders(string customerId, string filter, string searchWords = "")
         {
             // This will return orders based on a time frame from the filter parameter or a single order based on an ordernumber from the searchwords parameter
             return await context.ProductOrders
                 .AsNoTracking()
-                .Where(new ProductOrderDTO(customerId, filter, searchWords))
-                .Select(x => new ProductOrderDTO
+                .Where(new ProductOrderViewModel(customerId, filter, searchWords))
+                .Select(x => new ProductOrderViewModel
                 {
                     OrderNumber = x.Id,
                     Date = x.Date.ToString("MMMM dd, yyyy"),
@@ -45,7 +48,7 @@ namespace Website.Repositories
                     Products = x.OrderProducts
                         .Where(y => y.OrderId == x.Id)
                         .OrderByDescending(y => y.IsMain)
-                        .Select(y => new OrderProductInfoDTO
+                        .Select(y => new OrderProductInfoViewModel
                         {
                             Name = y.Name,
                             Type = ((OrderProductTypes)y.Type).ToString(),
@@ -65,7 +68,7 @@ namespace Website.Repositories
 
 
         // ....................................................................Get Order Products...........................................................................
-        public async Task<IEnumerable<OrderProductQueryResultDTO>> GetOrderProducts(string customerId, string searchWords)
+        public async Task<IEnumerable<OrderProductQueryResultViewModel>> GetOrderProducts(string customerId, string searchWords)
         {
             string[] searchWordsArray = searchWords.Split(' ').Select(x => "%" + x + "%").ToArray();
 
@@ -76,7 +79,7 @@ namespace Website.Repositories
                 .ThenBy(x => x.OrderId)
                 .Where(x => x.ProductOrder.CustomerId == customerId)
                 .WhereAny(searchWordsArray.Select(w => (Expression<Func<OrderProduct, bool>>)(x => EF.Functions.Like(x.Name, w))).ToArray())
-                .Select(x => new OrderProductQueryResultDTO
+                .Select(x => new OrderProductQueryResultViewModel
                 {
                     Date = x.ProductOrder.Date.ToString("MMMM dd, yyyy"),
                     Name = x.Name,

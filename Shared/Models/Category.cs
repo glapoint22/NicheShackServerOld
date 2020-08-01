@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using DataAccess.Interfaces;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataAccess.Models
 {
-    public class Category
+    public class Category: IItem
     {
         public int Id { get; set; }
         [ForeignKey("Media")]

@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Website.Interfaces;
+using DataAccess.Interfaces;
 using DataAccess.Models;
 
-namespace Website.Classes
+namespace Website.ViewModels
 {
-    public class ProductOrderDTO : IWhere<ProductOrder>
+    public class ProductOrderViewModel : IWhere<ProductOrder>
     {
         private readonly string customerId;
         private readonly string filter;
@@ -25,15 +25,15 @@ namespace Website.Classes
         public int ProductId { get; set; }
         public string Hoplink { get; set; }
         public string UrlTitle { get; set; }
-        public IEnumerable<OrderProductInfoDTO> Products { get; set; }
+        public IEnumerable<OrderProductInfoViewModel> Products { get; set; }
 
 
 
         // Constructors
-        public ProductOrderDTO() { }
+        public ProductOrderViewModel() { }
 
 
-        public ProductOrderDTO(string customerId, string filter, string searchWords)
+        public ProductOrderViewModel(string customerId, string filter, string searchWords)
         {
             this.customerId = customerId;
             this.filter = filter;

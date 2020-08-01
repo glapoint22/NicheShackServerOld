@@ -16,6 +16,7 @@ using Microsoft.IdentityModel.Tokens;
 using Website.Classes;
 using DataAccess.Models;
 using Website.Repositories;
+using Website.ViewModels;
 
 namespace Website.Controllers
 {
@@ -324,7 +325,7 @@ namespace Website.Controllers
         [Route("GetCustomer")]
         public async Task<ActionResult> GetCustomer()
         {
-            CustomerDTO customerDTO = null;
+            CustomerViewModel customerDTO = null;
 
             if (Request.Cookies["access"] != null)
             {
@@ -336,7 +337,7 @@ namespace Website.Controllers
 
                     if (customer != null)
                     {
-                        customerDTO = new CustomerDTO
+                        customerDTO = new CustomerViewModel
                         {
                             FirstName = customer.FirstName,
                             LastName = customer.LastName,

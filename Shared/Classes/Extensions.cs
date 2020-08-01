@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
-using Website.Interfaces;
+using DataAccess.Interfaces;
 
-namespace Website.Classes
+namespace DataAccess.Classes
 {
     public static class Extensions
     {
@@ -23,13 +23,15 @@ namespace Website.Classes
 
 
         // ..................................................................................Select.....................................................................
-        public static IQueryable<TOut> Select<T, TOut>(this IQueryable<T> source, ISelect<T, TOut> dto) where T : class where TOut : class
+        public static IQueryable<TOut> Select<T, TOut>(this IQueryable<T> source) where T : class where TOut : class, new()
         {
-            return dto.SetSelect(source);
+            ISelect<T, TOut> viewModel = (ISelect<T, TOut>)new TOut();
+            return viewModel.Select(source);
         }
 
 
 
+        // ...............................................................................Where Any.....................................................................
         public static IQueryable<T> WhereAny<T>(this IQueryable<T> queryable, params Expression<Func<T, bool>>[] predicates)
         {
             var parameter = Expression.Parameter(typeof(T));
@@ -40,24 +42,5 @@ namespace Website.Classes
                     return current != null ? Expression.OrElse(current, visitor.Visit(predicate.Body)) : visitor.Visit(predicate.Body);
                 }), parameter));
         }
-
-        private class ParameterSubstitutionVisitor : ExpressionVisitor
-        {
-            private readonly ParameterExpression _destination;
-            private readonly ParameterExpression _source;
-
-            public ParameterSubstitutionVisitor(ParameterExpression source, ParameterExpression destination)
-            {
-                _source = source;
-                _destination = destination;
-            }
-
-            protected override Expression VisitParameter(ParameterExpression node)
-            {
-                return ReferenceEquals(node, _source) ? _destination : base.VisitParameter(node);
-            }
-        }
-
-
     }
 }

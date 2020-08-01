@@ -30,8 +30,8 @@ namespace Website.Controllers
             {
                 id = x.Id,
                 title = x.Name,
-                //minPrice = x.MinPrice,
-                //maxPrice = x.MaxPrice,
+                minPrice = x.MinPrice,
+                maxPrice = x.MaxPrice,
                 //image = x.Image,
                 rating = x.Rating,
                 totalReviews = x.TotalReviews,
@@ -69,11 +69,11 @@ namespace Website.Controllers
 
 
 
-        public async Task<IEnumerable<MediaViewModel>> GetMedia(int id)
+        public async Task<IEnumerable<ProductMediaViewModel>> GetMedia(int id)
         {
             var mediaIds = await unitOfWork.ProductMedia.GetCollection(x => x.ProductId == id, x => x.MediaId);
 
-            return await unitOfWork.Media.GetCollection(x => mediaIds.Contains(x.Id), x => new MediaViewModel
+            return await unitOfWork.Media.GetCollection(x => mediaIds.Contains(x.Id), x => new ProductMediaViewModel
             {
                 name = x.Name,
                 url = x.Url,
@@ -90,7 +90,7 @@ namespace Website.Controllers
         public async Task<ActionResult> GetProductDetail(string id)
         {
             // Get the product based on the id
-            ProductDetailDTO product = await unitOfWork.Products.Get(x => x.UrlId == id, new ProductDetailDTO());
+            ProductDetailViewModel product = await unitOfWork.Products.Get<ProductDetailViewModel>(x => x.UrlId == id);
 
             //var iconId = await unitOfWork.ProductContent.Get(x => x.ProductId == id, x => x.IconId);
 
@@ -142,9 +142,9 @@ namespace Website.Controllers
             QueryParams queryParams = new QueryParams(query, sort, categoryId, nicheId, filter);
 
             // Query the products
-            IEnumerable<ProductDTO> products = await unitOfWork.Products.GetQueriedProducts(queryParams);
+            IEnumerable<ProductViewModel> products = await unitOfWork.Products.GetQueriedProducts(queryParams);
 
-            ProductDTO productDTO = new ProductDTO();
+            ProductViewModel productDTO = new ProductViewModel();
 
             var response = new
             {

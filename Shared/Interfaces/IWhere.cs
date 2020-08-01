@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 
-namespace Website.Interfaces
+namespace DataAccess.Interfaces
 {
     public interface IWhere<T> where T: class
     {

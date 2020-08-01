@@ -1,15 +1,14 @@
 ﻿using System.Threading.Tasks;
-using DataAccess.Models;
+using Manager.Repositories;
 using DataAccess.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using Website.Repositories;
+using DataAccess.Models;
 
-namespace Website.Controllers
+namespace Manager.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CategoriesController : ControllerBase
-    {
+    public class CategoriesController : ControllerBase {
         private readonly IUnitOfWork unitOfWork;
 
         public CategoriesController(IUnitOfWork unitOfWork)
@@ -17,12 +16,9 @@ namespace Website.Controllers
             this.unitOfWork = unitOfWork;
         }
 
-
-        // ..................................................................................Get Categories.....................................................................
         [HttpGet]
         public async Task<ActionResult> GetCategories()
         {
-            // Get all categories and their niches
             return Ok(await unitOfWork.Categories.GetCollection<ItemViewModel<Category>>());
         }
     }

@@ -20,25 +20,25 @@ namespace Website.Controllers
 
 
         // ..................................................................................Get.....................................................................
-        //public async Task<ActionResult> Get()
-        //{
-        //    List<ProductGroup> productGroups = new List<ProductGroup>();
+        public async Task<ActionResult> Get()
+        {
+            List<ProductGroup> productGroups = new List<ProductGroup>();
 
-        //    // Featured products
-        //    ProductGroup featuredProducts = new ProductGroup
-        //    {
-        //        Caption = "Check out our featured products",
-        //        Products = await unitOfWork.Products.GetCollection(x => x.Featured, new ProductDTO())
-        //    };
+            // Featured products
+            ProductGroup featuredProducts = new ProductGroup
+            {
+                Caption = "Check out our featured products",
+                //Products = await unitOfWork.Products.GetCollection(x => x.Featured, new ProductDTO())
+            };
 
-        //    // Add featured products to the list of product groups
-        //    productGroups.Add(featuredProducts);
+            // Add featured products to the list of product groups
+            //productGroups.Add(featuredProducts);
 
 
-        //    return Ok(new
-        //    {
-        //        productGroups,
-        //    });
-        //}
+            return Ok(new
+            {
+                productGroups,
+            });
+        }
     }
 }

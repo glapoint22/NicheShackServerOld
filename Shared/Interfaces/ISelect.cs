@@ -1,9 +1,9 @@
 ﻿using System.Linq;
 
-namespace Website.Interfaces
+namespace DataAccess.Interfaces
 {
     public interface ISelect<T, TOut> where T : class where TOut : class
     {
-        IQueryable<TOut> SetSelect(IQueryable<T> source);
+        IQueryable<TOut> Select(IQueryable<T> source);
     }
 }

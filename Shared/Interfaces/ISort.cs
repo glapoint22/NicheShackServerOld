@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 
-namespace Website.Interfaces
+namespace DataAccess.Interfaces
 {
     public interface ISort<T> where T : class
     {

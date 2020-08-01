@@ -4,10 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Website.Interfaces;
-using Website.Classes;
+using DataAccess.Interfaces;
+using DataAccess.Classes;
 
-namespace Website.Repositories
+namespace DataAccess.Repositories
 {
     public class Repository<T> : IRepository<T> where T : class
     {
@@ -50,12 +50,12 @@ namespace Website.Repositories
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<TOut> Get<TOut>(Expression<Func<T, bool>> predicate, ISelect<T, TOut> dto) where TOut : class
+        public async Task<TOut> Get<TOut>(Expression<Func<T, bool>> predicate) where TOut : class, new()
         {
             return await context.Set<T>()
                 .AsNoTracking()
                 .Where(predicate)
-                .Select(dto)
+                .Select<T, TOut>()
                 .FirstOrDefaultAsync();
         }
 
@@ -64,28 +64,37 @@ namespace Website.Repositories
 
 
         // GetCollection overloads
-        public async Task<IEnumerable<TOut>> GetCollection<TOut>(ISelect<T, TOut> dto) where TOut : class
-        {
-            return await context.Set<T>()
-                .AsNoTracking()
-                .Select(dto)
-                .ToListAsync();
-        }
+        //public async Task<IEnumerable<TOut>> GetCollection<TOut>(ISelect<T, TOut> dto) where TOut : class
+        //{
+        //    return await context.Set<T>()
+        //        .AsNoTracking()
+        //        .Select(dto)
+        //        .ToListAsync();
+        //}
 
-        public async Task<IEnumerable<TOut>> GetCollection<TOut>(Expression<Func<T, bool>> predicate, ISelect<T, TOut> dto) where TOut : class
-        {
-            return await context.Set<T>()
-                .AsNoTracking()
-                .Where(predicate)
-                .Select(dto)
-                .ToListAsync();
-        }
+        //public async Task<IEnumerable<TOut>> GetCollection<TOut>(Expression<Func<T, bool>> predicate, ISelect<T, TOut> dto) where TOut : class
+        //{
+        //    return await context.Set<T>()
+        //        .AsNoTracking()
+        //        .Where(predicate)
+        //        .Select(dto)
+        //        .ToListAsync();
+        //}
 
         public async Task<IEnumerable<TOut>> GetCollection<TOut>(Expression<Func<T, bool>> predicate, Expression<Func<T, TOut>> select)
         {
             return await context.Set<T>()
                 .AsNoTracking()
                 .Where(predicate)
+                .Select(select)
+                .ToListAsync();
+        }
+
+
+        public async Task<IEnumerable<TOut>> GetCollection<TOut>(Expression<Func<T, TOut>> select)
+        {
+            return await context.Set<T>()
+                .AsNoTracking()
                 .Select(select)
                 .ToListAsync();
         }
@@ -98,6 +107,36 @@ namespace Website.Repositories
             return await context.Set<T>().ToListAsync();
                 
         }
+
+
+
+
+
+
+
+
+        public async Task<IEnumerable<TOut>> GetCollection<TOut>() where TOut : class, new()
+        {
+            return await context.Set<T>()
+                .AsNoTracking()
+                .Select<T, TOut>()
+                .ToListAsync();
+        }
+
+
+
+
+
+        public async Task<IEnumerable<TOut>> GetCollection<TOut>(Expression<Func<T, bool>> predicate) where TOut : class, new()
+        {
+            return await context.Set<T>()
+                .AsNoTracking()
+                .Where(predicate)
+                .Select<T, TOut>()
+                .ToListAsync();
+        }
+
+
 
 
 

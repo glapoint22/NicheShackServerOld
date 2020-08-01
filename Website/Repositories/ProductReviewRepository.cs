@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Website.Classes;
 using DataAccess.Models;
+using DataAccess.Repositories;
+using DataAccess.Classes;
+using Website.ViewModels;
 
 namespace Website.Repositories
 {
@@ -20,16 +22,16 @@ namespace Website.Repositories
 
 
         // ..................................................................................Get Reviews.....................................................................
-        public async Task<IEnumerable<ProductReviewDTO>> GetReviews(string productId, string sortBy, int page)
+        public async Task<IEnumerable<ProductReviewViewModel>> GetReviews(string productId, string sortBy, int page)
         {
-            ProductReviewDTO productReviewDTO = new ProductReviewDTO(sortBy);
+            ProductReviewViewModel productReviewDTO = new ProductReviewViewModel(sortBy);
 
             return await context.ProductReviews
                 .AsNoTracking()
                 .SortBy(productReviewDTO)
                 .ThenByDescending(x => x.Date)
                 .Where(x => x.Product.UrlId == productId)
-                .Select(productReviewDTO)
+                .Select<ProductReview, ProductReviewViewModel>()
                 .Skip((page - 1) * productReviewDTO.GetReviewsPerPage())
                 .Take(productReviewDTO.GetReviewsPerPage())
                 .ToListAsync();
@@ -40,7 +42,7 @@ namespace Website.Repositories
 
 
         // .............................................................................Get Negative Review................................................................
-        public async Task<ProductReviewDTO> GetNegativeReview(string productId)
+        public async Task<ProductReviewViewModel> GetNegativeReview(string productId)
         {
             return await context.ProductReviews
                 .AsNoTracking()
@@ -48,7 +50,7 @@ namespace Website.Repositories
                 .ThenByDescending(x => x.Likes)
                 .ThenByDescending(x => x.Date)
                 .Where(x => x.Product.UrlId == productId && x.Likes > 0)
-                .Select(new ProductReviewDTO())
+                .Select<ProductReview, ProductReviewViewModel>()
                 .FirstOrDefaultAsync();
         }
 
@@ -57,7 +59,7 @@ namespace Website.Repositories
 
 
         // .............................................................................Get Positive Review................................................................
-        public async Task<ProductReviewDTO> GetPositiveReview(string productId)
+        public async Task<ProductReviewViewModel> GetPositiveReview(string productId)
         {
             return await context.ProductReviews
                 .AsNoTracking()
@@ -65,7 +67,7 @@ namespace Website.Repositories
                 .ThenByDescending(x => x.Likes)
                 .ThenByDescending(x => x.Date)
                 .Where(x => x.Product.UrlId == productId && x.Likes > 0)
-                .Select(new ProductReviewDTO())
+                .Select<ProductReview, ProductReviewViewModel>()
                 .FirstOrDefaultAsync();
         }
     }

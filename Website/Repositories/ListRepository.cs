@@ -5,6 +5,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Website.Classes;
 using DataAccess.Models;
+using DataAccess.Repositories;
+using DataAccess.Classes;
+using Website.ViewModels;
 
 namespace Website.Repositories
 {
@@ -22,14 +25,14 @@ namespace Website.Repositories
 
 
         // ................................................................................Get Lists.....................................................................
-        public async Task<IEnumerable<ListDTO>> GetLists(string customerId)
+        public async Task<IEnumerable<ListViewModel>> GetLists(string customerId)
         {
             // Returns all of the customer's lists.
             return await context.ListCollaborators
                 .AsNoTracking()
                 .OrderByDescending(x => x.IsOwner)
                 .Where(x => x.CustomerId == customerId)
-                .Select(x => new ListDTO
+                .Select(x => new ListViewModel
                 {
                     Id = x.ListId,
                     Name = x.List.Name,
@@ -53,23 +56,23 @@ namespace Website.Repositories
 
 
         // ................................................................................Get List Products.....................................................................
-        public async Task<IEnumerable<ListProductDTO>> GetListProducts(IEnumerable<int> collaboratorIds, string customerId, string sort)
+        public async Task<IEnumerable<ListProductViewModel>> GetListProducts(IEnumerable<int> collaboratorIds, string customerId, string sort)
         {
             // Gets products based on collaborators from a list.
             var products = await context.ListProducts
                 .AsNoTracking()
-                .SortBy(new ListProductDTO(sort))
+                .SortBy(new ListProductViewModel(sort))
                 .Where(x => collaboratorIds
                     //.Select(y => y.Id)
                     .Contains(x.CollaboratorId))
-                .Select(x => new ListProductDTO
+                .Select(x => new ListProductViewModel
                 {
                     Id = x.Product.Id,
                     Title = x.Product.Name,
                     Rating = x.Product.Rating,
                     TotalReviews = x.Product.TotalReviews,
-                    //MinPrice = x.Product.MinPrice,
-                    //MaxPrice = x.Product.MaxPrice,
+                    MinPrice = x.Product.MinPrice,
+                    MaxPrice = x.Product.MaxPrice,
                     DateAdded = x.DateAdded.ToString("MMMM dd, yyyy"),
                     Collaborator = x.Collaborator.CustomerId == customerId ? "you" : x.Collaborator.Customer.FirstName,
                     Hoplink = x.Product.Hoplink,

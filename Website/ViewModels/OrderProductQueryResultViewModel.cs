@@ -1,6 +1,6 @@
-﻿namespace Website.Classes
+﻿namespace Website.ViewModels
 {
-    public struct OrderProductQueryResultDTO
+    public struct OrderProductQueryResultViewModel
     {
         public string Date { get; set; }
         public string Name { get; set; }
