@@ -21,5 +21,29 @@ namespace Manager.Controllers
         {
             return Ok(await unitOfWork.Niches.GetCollection<ItemViewModel<Niche>>(x => x.CategoryId == categoryId));
         }
+
+
+        [Route("LeadPageIds")]  
+        [HttpGet]
+        public async Task<ActionResult> GetLeadpageIds(int nicheId)
+        {
+            return Ok(await unitOfWork.LeadPages.GetCollection(x => x.NicheId == nicheId, x => x.Id));
+        }
+
+
+        [Route("LeadPages")]
+        [HttpGet]
+        public async Task<ActionResult> GetLeadpages(int leadPageId)
+        {
+            return Ok(await unitOfWork.LeadPages.GetCollection(x => x.Id == leadPageId, x => x.Content));
+        }
+
+
+        [Route("LeadPageEmails")]
+        [HttpGet]
+        public async Task<ActionResult> GetLeadpageEmails(int leadPageId)
+        {
+            return Ok(await unitOfWork.LeadPageEmails.GetCollection(x => x.Id == leadPageId, x => x.Content));
+        }
     }
 }

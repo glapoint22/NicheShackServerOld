@@ -55,7 +55,7 @@ namespace DataAccess.Repositories
             return await context.Set<T>()
                 .AsNoTracking()
                 .Where(predicate)
-                .Select<T, TOut>()
+                .ExtensionSelect<T, TOut>()
                 .FirstOrDefaultAsync();
         }
 
@@ -119,7 +119,7 @@ namespace DataAccess.Repositories
         {
             return await context.Set<T>()
                 .AsNoTracking()
-                .Select<T, TOut>()
+                .ExtensionSelect<T, TOut>()
                 .ToListAsync();
         }
 
@@ -132,7 +132,7 @@ namespace DataAccess.Repositories
             return await context.Set<T>()
                 .AsNoTracking()
                 .Where(predicate)
-                .Select<T, TOut>()
+                .ExtensionSelect<T, TOut>()
                 .ToListAsync();
         }
 

@@ -9,9 +9,5 @@
     <ProjectReference Include="..\Shared\DataAccess.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="ViewModels\" />
-  </ItemGroup>
-
 
 </Project>

@@ -3,6 +3,9 @@ using Manager.Repositories;
 using DataAccess.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using DataAccess.Models;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 
 namespace Manager.Controllers
 {
@@ -16,9 +19,27 @@ namespace Manager.Controllers
             this.unitOfWork = unitOfWork;
         }
 
+        [HttpGet]
         public async Task<ActionResult> GetProducts(int nicheId)
         {
           return Ok(await unitOfWork.Products.GetCollection<ItemViewModel<Product>>(x => x.NicheId == nicheId));
+        }
+
+
+
+        [HttpGet]
+        [Route("Filters")]
+        public async Task<ActionResult> GetFilters(int productId, int filterId)
+        {
+            return Ok(await unitOfWork.Products.GetProductFilters(productId, filterId));
+        }
+
+
+        [HttpGet]
+        [Route("Product")]
+        public async Task<ActionResult> GetProduct(int productId)
+        {
+            return Ok(await unitOfWork.Products.GetProduct(productId));
         }
     }
 }

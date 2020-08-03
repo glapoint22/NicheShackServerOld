@@ -58,7 +58,7 @@ namespace Website.ViewModels
 
 
         // ..................................................................................Set Select.....................................................................
-        public IQueryable<ProductReviewViewModel> Select(IQueryable<ProductReview> source)
+        public IQueryable<ProductReviewViewModel> ViewModelSelect(IQueryable<ProductReview> source)
         {
             return source.Select(x => new ProductReviewViewModel
             {

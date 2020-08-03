@@ -15,6 +15,8 @@ namespace DataAccess.Models
         public int Decimal { get; set; }
         [MaxLength(50)]
         public string TextAfter { get; set; }
+        [Required]
+        public int Index { get; set; }
         public virtual Product Product { get; set; }
     }
 }

@@ -35,7 +35,7 @@ namespace Website.Repositories
                 .SortBy(productDTO)
                 .ThenBy(x => x.Name)
                 .Where(productDTO)
-                .Select<Product, ProductViewModel>()
+                .ExtensionSelect<Product, ProductViewModel>()
                 .ToListAsync();
         }
 

@@ -26,7 +26,7 @@ namespace Website.ViewModels
 
 
         // ..................................................................................Set Select.....................................................................
-        public IQueryable<ProductDetailViewModel> Select(IQueryable<Product> source)
+        public IQueryable<ProductDetailViewModel> ViewModelSelect(IQueryable<Product> source)
         {
             return source.Select(x => new ProductDetailViewModel
             {

@@ -11,18 +11,34 @@ namespace Manager.Repositories
     {
         private readonly NicheShackContext context;
 
+        // Generic Repositories
         public IRepository<Category> Categories { get; }
         public IRepository<Niche> Niches { get; }
-        public IRepository<Product> Products { get; }
+        public IRepository<Filter> Filters { get; }
+        public IRepository<FilterOption> FilterOptions { get; }
+        public IRepository<LeadPage> LeadPages { get; }
+        public IRepository<LeadPageEmail> LeadPageEmails { get; }
+
+
+        // Custom Repositories
+        public IProductRepository Products { get; }
 
 
         public UnitOfWork(NicheShackContext context)
         {
             this.context = context;
 
+            // Custom Repositories
             Categories = new Repository<Category>(context);
             Niches = new Repository<Niche>(context);
-            Products = new Repository<Product>(context);
+            Filters = new Repository<Filter>(context);
+            FilterOptions = new Repository<FilterOption>(context);
+            LeadPages = new Repository<LeadPage>(context);
+            LeadPageEmails = new Repository<LeadPageEmail>(context);
+
+
+            // Custom Repositories
+            Products = new ProductRepository(context);
         }
 
 
