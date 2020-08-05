@@ -31,19 +31,19 @@ namespace Manager.Controllers
         }
 
 
-        [Route("LeadPages")]
+        [Route("LeadPage")]
         [HttpGet]
         public async Task<ActionResult> GetLeadpages(int leadPageId)
         {
-            return Ok(await unitOfWork.LeadPages.GetCollection(x => x.Id == leadPageId, x => x.Content));
+            return Ok(await unitOfWork.LeadPages.Get(x => x.Id == leadPageId, x => x.Content));
         }
 
 
-        [Route("LeadPageEmails")]
+        [Route("LeadPageEmail")]
         [HttpGet]
         public async Task<ActionResult> GetLeadpageEmails(int leadPageId)
         {
-            return Ok(await unitOfWork.LeadPageEmails.GetCollection(x => x.Id == leadPageId, x => x.Content));
+            return Ok(await unitOfWork.LeadPageEmails.Get(x => x.Id == leadPageId, x => x.Content));
         }
     }
 }

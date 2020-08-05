@@ -18,6 +18,13 @@ namespace Manager.Repositories
         IRepository<FilterOption> FilterOptions { get; }
         IRepository<LeadPage> LeadPages { get; }
         IRepository<LeadPageEmail> LeadPageEmails { get; }
+        IRepository<ProductEmail> ProductEmails { get; }
+        IRepository<Vendor> Vendors { get; }
+        IRepository<Page> Pages { get; }
+        IRepository<Email> Emails { get; }
+        IRepository<Media> Media { get; }
+        IRepository<Notification> Notifications { get; }
+
 
 
 

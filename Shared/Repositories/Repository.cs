@@ -64,22 +64,12 @@ namespace DataAccess.Repositories
 
 
         // GetCollection overloads
-        //public async Task<IEnumerable<TOut>> GetCollection<TOut>(ISelect<T, TOut> dto) where TOut : class
-        //{
-        //    return await context.Set<T>()
-        //        .AsNoTracking()
-        //        .Select(dto)
-        //        .ToListAsync();
-        //}
+        public async Task<IEnumerable<T>> GetCollection()
+        {
+            return await context.Set<T>().ToListAsync();
 
-        //public async Task<IEnumerable<TOut>> GetCollection<TOut>(Expression<Func<T, bool>> predicate, ISelect<T, TOut> dto) where TOut : class
-        //{
-        //    return await context.Set<T>()
-        //        .AsNoTracking()
-        //        .Where(predicate)
-        //        .Select(dto)
-        //        .ToListAsync();
-        //}
+        }
+
 
         public async Task<IEnumerable<TOut>> GetCollection<TOut>(Expression<Func<T, bool>> predicate, Expression<Func<T, TOut>> select)
         {
@@ -98,20 +88,6 @@ namespace DataAccess.Repositories
                 .Select(select)
                 .ToListAsync();
         }
-
-
-
-
-        public async Task<IEnumerable<T>> GetCollection()
-        {
-            return await context.Set<T>().ToListAsync();
-                
-        }
-
-
-
-
-
 
 
 
@@ -135,6 +111,24 @@ namespace DataAccess.Repositories
                 .ExtensionSelect<T, TOut>()
                 .ToListAsync();
         }
+
+
+
+
+
+
+
+
+
+
+        // Count
+        public async Task<int> GetCount(Expression<Func<T, bool>> predicate)
+        {
+            return await context.Set<T>()
+                .AsNoTracking()
+                .CountAsync(predicate);
+        }
+
 
 
 

@@ -18,6 +18,12 @@ namespace Manager.Repositories
         public IRepository<FilterOption> FilterOptions { get; }
         public IRepository<LeadPage> LeadPages { get; }
         public IRepository<LeadPageEmail> LeadPageEmails { get; }
+        public IRepository<ProductEmail> ProductEmails { get; }
+        public IRepository<Vendor> Vendors { get; }
+        public IRepository<Page> Pages { get; }
+        public IRepository<Email> Emails { get; }
+        public IRepository<Media> Media { get; }
+        public IRepository<Notification> Notifications { get; }
 
 
         // Custom Repositories
@@ -28,14 +34,19 @@ namespace Manager.Repositories
         {
             this.context = context;
 
-            // Custom Repositories
+            // Generic Repositories
             Categories = new Repository<Category>(context);
             Niches = new Repository<Niche>(context);
             Filters = new Repository<Filter>(context);
             FilterOptions = new Repository<FilterOption>(context);
             LeadPages = new Repository<LeadPage>(context);
             LeadPageEmails = new Repository<LeadPageEmail>(context);
-
+            ProductEmails = new Repository<ProductEmail>(context);
+            Vendors = new Repository<Vendor>(context);
+            Pages = new Repository<Page> (context);
+            Emails = new Repository<Email>(context);
+            Media = new Repository<Media>(context);
+            Notifications = new Repository<Notification>(context);
 
             // Custom Repositories
             Products = new ProductRepository(context);

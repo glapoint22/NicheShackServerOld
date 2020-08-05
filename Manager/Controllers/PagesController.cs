@@ -12,30 +12,29 @@ namespace Manager.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class FiltersController : ControllerBase
+    public class PagesController : ControllerBase
     {
         private readonly IUnitOfWork unitOfWork;
 
-        public FiltersController(IUnitOfWork unitOfWork)
+        public PagesController(IUnitOfWork unitOfWork)
         {
             this.unitOfWork = unitOfWork;
         }
 
 
-
         [HttpGet]
-        public async Task<ActionResult> GetFilters()
+        public async Task<ActionResult> GetPages()
         {
-            return Ok(await unitOfWork.Filters.GetCollection<ItemViewModel<Filter>>());
+            return Ok(await unitOfWork.Pages.GetCollection<ItemViewModel<Page>>());
         }
 
 
 
-        [Route("Options")]
         [HttpGet]
-        public async Task<ActionResult> GetOptions(int filterId)
+        [Route("Page")]
+        public async Task<ActionResult> GetPage(int pageId)
         {
-            return Ok(await unitOfWork.FilterOptions.GetCollection<ItemViewModel<FilterOption>>(x => x.FilterId == filterId));
+            return Ok(await unitOfWork.Pages.Get(x => x.Id == pageId, x => x.Content));
         }
     }
 }

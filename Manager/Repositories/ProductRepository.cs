@@ -19,6 +19,8 @@ namespace Manager.Repositories
             this.context = context;
         }
 
+
+
         public async Task<IEnumerable<ProductFilterViewModel>> GetProductFilters(int productId, int filterId)
         {
             // Get filter options based on the filter id
@@ -48,6 +50,7 @@ namespace Manager.Repositories
 
             return productFilters;
         }
+
 
 
 

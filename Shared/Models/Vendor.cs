@@ -1,8 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using DataAccess.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
 namespace DataAccess.Models
 {
-    public class Vendor
+    public class Vendor : IItem
     {
         public int Id { get; set; }
         [Required]

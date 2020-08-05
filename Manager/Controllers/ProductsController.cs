@@ -41,5 +41,21 @@ namespace Manager.Controllers
         {
             return Ok(await unitOfWork.Products.GetProduct(productId));
         }
+
+
+        [HttpGet]
+        [Route("EmailIds")]
+        public async Task<ActionResult> GetEmailIds(int productId)
+        {
+            return Ok(await unitOfWork.ProductEmails.GetCollection(x => x.ProductId == productId, x => x.Id));
+        }
+
+
+        [HttpGet]
+        [Route("Email")]
+        public async Task<ActionResult> GetEmails(int emailId)
+        {
+            return Ok(await unitOfWork.ProductEmails.Get(x => x.Id == emailId, x => x.Content));
+        }
     }
 }

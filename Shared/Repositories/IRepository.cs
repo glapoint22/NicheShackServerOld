@@ -18,22 +18,17 @@ namespace DataAccess.Repositories
 
 
         // GetCollection overloads
-        //Task<IEnumerable<TOut>> GetCollection<TOut>(ISelect<T, TOut> dto) where TOut : class;
-        //Task<IEnumerable<TOut>> GetCollection<TOut>(Expression<Func<T, bool>> predicate, ISelect<T, TOut> dto) where TOut : class;
+        Task<IEnumerable<T>> GetCollection();
         Task<IEnumerable<TOut>> GetCollection<TOut>(Expression<Func<T, bool>> predicate, Expression<Func<T, TOut>> select);
         Task<IEnumerable<TOut>> GetCollection<TOut>(Expression<Func<T, TOut>> select);
-
-        Task<IEnumerable<T>> GetCollection();
-
-
-
-
-
-
         Task<IEnumerable<TOut>> GetCollection<TOut>() where TOut : class, new();
         Task<IEnumerable<TOut>> GetCollection<TOut>(Expression<Func<T, bool>> predicate) where TOut : class, new();
 
 
+
+
+        // Count
+        Task<int> GetCount(Expression<Func<T, bool>> predicate);
 
 
 

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DataAccess.Models;
 using DataAccess.ViewModels;
 using Manager.Repositories;
 using Microsoft.AspNetCore.Http;
@@ -12,30 +11,32 @@ namespace Manager.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class FiltersController : ControllerBase
+    public class EmailsController : ControllerBase
     {
         private readonly IUnitOfWork unitOfWork;
 
-        public FiltersController(IUnitOfWork unitOfWork)
+        public EmailsController(IUnitOfWork unitOfWork)
         {
             this.unitOfWork = unitOfWork;
         }
 
 
-
         [HttpGet]
-        public async Task<ActionResult> GetFilters()
+        public async Task<ActionResult> GetEmails()
         {
-            return Ok(await unitOfWork.Filters.GetCollection<ItemViewModel<Filter>>());
+            return Ok(await unitOfWork.Emails.GetCollection(x => new { 
+                x.Id,
+                x.Type
+            }));
         }
 
 
 
-        [Route("Options")]
         [HttpGet]
-        public async Task<ActionResult> GetOptions(int filterId)
+        [Route("Email")]
+        public async Task<ActionResult> GetEmail(int emailId)
         {
-            return Ok(await unitOfWork.FilterOptions.GetCollection<ItemViewModel<FilterOption>>(x => x.FilterId == filterId));
+            return Ok(await unitOfWork.Emails.Get(x => x.Id == emailId, x => x.Content));
         }
     }
 }

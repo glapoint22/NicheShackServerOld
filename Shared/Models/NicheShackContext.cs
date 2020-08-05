@@ -14,6 +14,11 @@ namespace DataAccess.Models
         // Tables
         public virtual DbSet<Category> Categories { get; set; }
         public virtual DbSet<Customer> Customers { get; set; }
+
+
+        public virtual DbSet<Email> Emails { get; set; }
+
+
         public virtual DbSet<Filter> Filters { get; set; }
         public virtual DbSet<FilterOption> FilterOptions { get; set; }
 
@@ -21,6 +26,7 @@ namespace DataAccess.Models
 
 
         public virtual DbSet<LeadPageEmail> LeadPageEmails { get; set; }
+
 
 
 
@@ -38,6 +44,11 @@ namespace DataAccess.Models
         public virtual DbSet<Notification> Notifications { get; set; }
         public virtual DbSet<NotificationText> NotificationText { get; set; }
         public virtual DbSet<OrderProduct> OrderProducts { get; set; }
+
+
+        public virtual DbSet<Page> Pages { get; set; }
+
+
         public virtual DbSet<PriceIndex> PriceIndices { get; set; }
         public virtual DbSet<PriceRange> PriceRanges { get; set; }
         public virtual DbSet<Product> Products { get; set; }

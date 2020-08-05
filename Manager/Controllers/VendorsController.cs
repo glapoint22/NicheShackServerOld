@@ -12,30 +12,31 @@ namespace Manager.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class FiltersController : ControllerBase
+    public class VendorsController : ControllerBase
     {
         private readonly IUnitOfWork unitOfWork;
 
-        public FiltersController(IUnitOfWork unitOfWork)
+        public VendorsController(IUnitOfWork unitOfWork)
         {
             this.unitOfWork = unitOfWork;
         }
 
-
-
         [HttpGet]
-        public async Task<ActionResult> GetFilters()
+        public async Task<ActionResult> GetVendors()
         {
-            return Ok(await unitOfWork.Filters.GetCollection<ItemViewModel<Filter>>());
+            return Ok(await unitOfWork.Vendors.GetCollection<ItemViewModel<Vendor>>());
+        }
+
+
+        [Route("Vendor")]
+        [HttpGet]
+        public async Task<ActionResult> GetVendor(int vendorId)
+        {
+            return Ok(await unitOfWork.Vendors.Get(vendorId));
         }
 
 
 
-        [Route("Options")]
-        [HttpGet]
-        public async Task<ActionResult> GetOptions(int filterId)
-        {
-            return Ok(await unitOfWork.FilterOptions.GetCollection<ItemViewModel<FilterOption>>(x => x.FilterId == filterId));
-        }
+        
     }
 }
