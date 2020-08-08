@@ -1,4 +1,5 @@
 ﻿using DataAccess.Interfaces;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace DataAccess.Models
@@ -41,5 +42,14 @@ namespace DataAccess.Models
         public string SecondaryMobilePhone { get; set; }
         [MaxLength(256)]
         public string SecondaryEmail { get; set; }
+
+
+        public virtual ICollection<Product> Products { get; set; }
+
+
+        public Vendor()
+        {
+            Products = new HashSet<Product>();
+        }
     }
 }

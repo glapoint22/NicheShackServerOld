@@ -1,5 +1,4 @@
 ﻿using DataAccess.ViewModels;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace Manager.ViewModels

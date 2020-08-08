@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using static Manager.Classes.Utility;
 
 namespace Manager.Repositories
 {
@@ -112,7 +113,7 @@ namespace Manager.Repositories
                 }),
                 MinPrice = x.MinPrice,
                 MaxPrice = x.MaxPrice
-            }).FirstOrDefaultAsync();
+            }).SingleOrDefaultAsync();
         }
     }
 }

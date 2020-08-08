@@ -37,6 +37,19 @@ namespace Manager.Controllers
 
 
 
-        
+
+        [Route("Products")]
+        [HttpGet]
+        public async Task<ActionResult> GetProducts(int vendorId)
+        {
+            return Ok(await unitOfWork.Products.GetCollection(x => x.VendorId == vendorId, x => new { 
+                x.Id,
+                x.Name,
+                x.Hoplink
+            }));
+        }
+
+
+
     }
 }

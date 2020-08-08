@@ -10,43 +10,25 @@ namespace Manager.ViewModels
 
         public new IQueryable<ProductImageNotificationViewModel> ViewModelSelect(IQueryable<Notification> source)
         {
+            GeneralNotificationViewModel generalNotificationViewModel = base.ViewModelSelect(source).SingleOrDefault();
+
+
             return source.Select(x => new ProductImageNotificationViewModel
             {
-                ProductId = x.Product.Id,
-                ProductName = x.Product.Name,
-                ProductThumbnail = x.Product.Media.Url,
-                VendorId = x.Product.VendorId,
-                Hoplink = x.Product.Hoplink,
-
-
-                CustomerText = x.NotificationText
-                .Where(z => z.NotificationId == x.Id && z.Type == 0)
-                .Select(z => new NotificationTextViewModel
-                {
-                    TimeStamp = z.TimeStamp,
-                    Thumbnail = z.Customer.image,
-                    Text = z.Text
-                })
-                .SingleOrDefault(),
-
-
+                Name = generalNotificationViewModel.Name,
+                CustomerText = generalNotificationViewModel.CustomerText,
+                Notes = generalNotificationViewModel.Notes,
+                ProductId = generalNotificationViewModel.ProductId,
+                ProductName = generalNotificationViewModel.ProductName,
+                ProductThumbnail = generalNotificationViewModel.ProductThumbnail,
+                VendorId = generalNotificationViewModel.VendorId,
+                Hoplink = generalNotificationViewModel.Hoplink,
                 Image = new ImageViewModel
                 {
                     Id = x.Product.Media.Id,
                     Name = x.Product.Media.Name,
                     Url = x.Product.Media.Url
-                },
-
-
-                Notes = x.NotificationText
-                .Where(z => z.NotificationId == x.Id && z.Type == 1)
-                .Select(z => new NotificationTextViewModel
-                {
-                    TimeStamp = z.TimeStamp,
-                    Thumbnail = z.Customer.image,
-                    Text = z.Text
-                })
-                .SingleOrDefault()
+                }
             });
         }
     }

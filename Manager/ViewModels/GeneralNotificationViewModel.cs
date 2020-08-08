@@ -1,11 +1,10 @@
 ﻿using DataAccess.Interfaces;
 using DataAccess.Models;
-using Manager.Interfaces;
 using System.Linq;
 
 namespace Manager.ViewModels
 {
-    public class GeneralNotificationViewModel: NotificationViewModel, ISelect<Notification, GeneralNotificationViewModel>, INotification
+    public class GeneralNotificationViewModel: NotificationViewModel, ISelect<Notification, GeneralNotificationViewModel>
     {
         public string ProductThumbnail { get; set; }
         public string ProductName { get; set; }
@@ -15,37 +14,19 @@ namespace Manager.ViewModels
 
         public new IQueryable<GeneralNotificationViewModel> ViewModelSelect(IQueryable<Notification> source)
         {
+
+            NotificationViewModel notificationViewModel = base.ViewModelSelect(source).SingleOrDefault();
+
             return source.Select(x => new GeneralNotificationViewModel
             {
+                Name = notificationViewModel.Name,
+                CustomerText = notificationViewModel.CustomerText,
+                Notes = notificationViewModel.Notes,
                 ProductId = x.Product.Id,
                 ProductName = x.Product.Name,
                 ProductThumbnail = x.Product.Media.Url,
                 VendorId = x.Product.VendorId,
-                Hoplink = x.Product.Hoplink,
-
-
-                CustomerText = x.NotificationText
-                .Where(z => z.NotificationId == x.Id && z.Type == 0)
-                .Select(z => new NotificationTextViewModel
-                {
-                    TimeStamp = z.TimeStamp,
-                    Thumbnail = z.Customer.image,
-                    Text = z.Text
-                })
-                .SingleOrDefault(),
-
-
-
-
-                Notes = x.NotificationText
-                .Where(z => z.NotificationId == x.Id && z.Type == 1)
-                .Select(z => new NotificationTextViewModel
-                {
-                    TimeStamp = z.TimeStamp,
-                    Thumbnail = z.Customer.image,
-                    Text = z.Text
-                })
-                .SingleOrDefault()
+                Hoplink = x.Product.Hoplink
             });
         }
     }

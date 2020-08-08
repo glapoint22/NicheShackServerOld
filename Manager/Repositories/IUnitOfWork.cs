@@ -27,9 +27,9 @@ namespace Manager.Repositories
 
 
 
-
         // Custom Repositories
         IProductRepository Products { get; }
+        
 
 
         Task<int> Save();

@@ -22,7 +22,7 @@ namespace Manager.Controllers
 
 
         [HttpGet]
-        public async Task<ActionResult> GetProducts(int type)
+        public async Task<ActionResult> Get(int type)
         {
             return Ok(await unitOfWork.Media.GetCollection(x => x.Type == type, x => new  { 
                 x.Id,

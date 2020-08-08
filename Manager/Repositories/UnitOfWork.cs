@@ -28,6 +28,7 @@ namespace Manager.Repositories
 
         // Custom Repositories
         public IProductRepository Products { get; }
+        
 
 
         public UnitOfWork(NicheShackContext context)
@@ -50,6 +51,7 @@ namespace Manager.Repositories
 
             // Custom Repositories
             Products = new ProductRepository(context);
+            
         }
 
 
