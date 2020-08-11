@@ -12,18 +12,24 @@ namespace Manager.Repositories
         private readonly NicheShackContext context;
 
         // Generic Repositories
-        public IRepository<Category> Categories { get; }
-        public IRepository<Niche> Niches { get; }
-        public IRepository<Filter> Filters { get; }
-        public IRepository<FilterOption> FilterOptions { get; }
+        public ISearchableRepository<Category> Categories { get; }
+        public ISearchableRepository<Niche> Niches { get; }
+        public ISearchableRepository<Filter> Filters { get; }
+        public ISearchableRepository<FilterOption> FilterOptions { get; }
         public IRepository<LeadPage> LeadPages { get; }
         public IRepository<LeadPageEmail> LeadPageEmails { get; }
         public IRepository<ProductEmail> ProductEmails { get; }
-        public IRepository<Vendor> Vendors { get; }
-        public IRepository<Page> Pages { get; }
-        public IRepository<Email> Emails { get; }
-        public IRepository<Media> Media { get; }
+        public ISearchableRepository<Vendor> Vendors { get; }
+        public ISearchableRepository<Page> Pages { get; }
+        public ISearchableRepository<Email> Emails { get; }
+        public ISearchableRepository<Media> Media { get; }
         public IRepository<Notification> Notifications { get; }
+        public IRepository<ProductFilter> ProductFilters { get; }
+        public IRepository<ProductPricePoint> ProductPricePoints { get; }
+        public IRepository<PriceIndex> PriceIndices { get; }
+        public IRepository<ProductContent> ProductContent { get; }
+        public IRepository<ProductMedia> ProductMedia { get; }
+        public IRepository<ProductKeyword> ProductKeywords { get; }
 
 
         // Custom Repositories
@@ -36,18 +42,24 @@ namespace Manager.Repositories
             this.context = context;
 
             // Generic Repositories
-            Categories = new Repository<Category>(context);
-            Niches = new Repository<Niche>(context);
-            Filters = new Repository<Filter>(context);
-            FilterOptions = new Repository<FilterOption>(context);
+            Categories = new SearchableRepository<Category>(context);
+            Niches = new SearchableRepository<Niche>(context);
+            Filters = new SearchableRepository<Filter>(context);
+            FilterOptions = new SearchableRepository<FilterOption>(context);
             LeadPages = new Repository<LeadPage>(context);
             LeadPageEmails = new Repository<LeadPageEmail>(context);
             ProductEmails = new Repository<ProductEmail>(context);
-            Vendors = new Repository<Vendor>(context);
-            Pages = new Repository<Page> (context);
-            Emails = new Repository<Email>(context);
-            Media = new Repository<Media>(context);
+            Vendors = new SearchableRepository<Vendor>(context);
+            Pages = new SearchableRepository<Page> (context);
+            Emails = new SearchableRepository<Email>(context);
+            Media = new SearchableRepository<Media>(context);
             Notifications = new Repository<Notification>(context);
+            ProductFilters = new Repository<ProductFilter>(context);
+            ProductPricePoints = new Repository<ProductPricePoint>(context);
+            PriceIndices = new Repository<PriceIndex>(context);
+            ProductContent = new Repository<ProductContent>(context);
+            ProductMedia = new Repository<ProductMedia>(context);
+            ProductKeywords = new Repository<ProductKeyword>(context);
 
             // Custom Repositories
             Products = new ProductRepository(context);

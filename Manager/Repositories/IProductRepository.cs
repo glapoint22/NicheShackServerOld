@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Manager.Repositories
 {
-    public interface IProductRepository : IRepository<Product>
+    public interface IProductRepository : ISearchableRepository<Product>
     {
         Task<IEnumerable<ProductFilterViewModel>> GetProductFilters(int productId, int filterId);
         Task<ProductViewModel> GetProduct(int productId);

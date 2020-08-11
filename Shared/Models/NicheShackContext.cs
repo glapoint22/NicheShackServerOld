@@ -151,12 +151,7 @@ namespace DataAccess.Models
             });
 
 
-            // ProductMedia
-            modelBuilder.Entity<ProductMedia>(entity =>
-            {
-                entity.HasKey(e => new { e.ProductId, e.MediaId })
-                    .HasName("PK_ProductMedia");
-            });
+           
 
 
 

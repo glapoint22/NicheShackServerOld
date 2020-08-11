@@ -11,7 +11,7 @@ using static Manager.Classes.Utility;
 
 namespace Manager.Repositories
 {
-    public class ProductRepository : Repository<Product>, IProductRepository
+    public class ProductRepository : SearchableRepository<Product>, IProductRepository
     {
         private readonly NicheShackContext context;
 
@@ -86,10 +86,14 @@ namespace Manager.Repositories
                         Name = y.Media.Name,
                         Url = y.Media.Url
                     },
-                    PriceIndices = y.Product.ProductPricePoints.Select(z => y.PriceIndices.Select(w => w.Index).Contains(z.Index))
+                    PriceIndices = y.Product.ProductPricePoints
+                    .OrderBy(z => z.Index)
+                    .Select(z => y.PriceIndices.Select(w => w.Index).Contains(z.Index))
 
                 }),
-                PricePoints = x.ProductPricePoints.Select(y => new ProductPricePointViewModel
+                PricePoints = x.ProductPricePoints
+                .OrderBy(y => y.Index)
+                .Select(y => new ProductPricePointViewModel
                 {
                     Id = y.Id,
                     TextBefore = y.TextBefore,
@@ -109,7 +113,7 @@ namespace Manager.Repositories
                     Name = y.Media.Name,
                     Url = y.Media.Url,
                     Thumbnail = y.Media.Thumbnail,
-                    Type = (MediaType)y.Media.Type
+                    Type = y.Media.Type
                 }),
                 MinPrice = x.MinPrice,
                 MaxPrice = x.MaxPrice

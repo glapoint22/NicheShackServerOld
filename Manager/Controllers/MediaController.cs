@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Manager.Repositories;
 using Manager.ViewModels;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Manager.Controllers
@@ -24,12 +20,16 @@ namespace Manager.Controllers
         [HttpGet]
         public async Task<ActionResult> Get(int type)
         {
-            return Ok(await unitOfWork.Media.GetCollection(x => x.Type == type, x => new  { 
-                x.Id,
-                x.Name,
-                x.Url,
-                x.Thumbnail
-            }));
+            return Ok(await unitOfWork.Media.GetCollection<MediaViewModel>(x => x.Type == type));
+        }
+
+
+
+        [HttpGet]
+        [Route("Search")]
+        public async Task<ActionResult> Search(int type, string searchWords)
+        {
+            return Ok(await unitOfWork.Media.GetCollection<MediaViewModel>(x => x.Type == type, searchWords));
         }
     }
 }

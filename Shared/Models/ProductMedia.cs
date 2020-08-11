@@ -4,6 +4,7 @@ namespace DataAccess.Models
 {
     public class ProductMedia
     {
+        public int Id { get; set; }
         [ForeignKey("Product")]
         public int ProductId { get; set; }
         [ForeignKey("Media")]

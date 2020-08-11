@@ -31,7 +31,7 @@ namespace Manager.ViewModels
                     Name = m.Media.Name,
                     Url = m.Media.Url,
                     Thumbnail = m.Media.Thumbnail,
-                    Type = (MediaType)m.Media.Type
+                    Type = m.Media.Type
                 })
             });
         }

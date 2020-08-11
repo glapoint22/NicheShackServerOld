@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using DataAccess.Interfaces;
 using DataAccess.Classes;
 
 namespace DataAccess.Repositories
@@ -71,6 +70,19 @@ namespace DataAccess.Repositories
         }
 
 
+
+        public async Task<IEnumerable<T>> GetCollection(Expression<Func<T, bool>> predicate)
+        {
+            return await context.Set<T>()
+                .AsNoTracking()
+                .Where(predicate)
+                .ToListAsync();
+        }
+
+
+
+
+
         public async Task<IEnumerable<TOut>> GetCollection<TOut>(Expression<Func<T, bool>> predicate, Expression<Func<T, TOut>> select)
         {
             return await context.Set<T>()
@@ -114,6 +126,8 @@ namespace DataAccess.Repositories
 
 
 
+
+        
 
 
 

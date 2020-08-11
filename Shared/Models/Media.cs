@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using DataAccess.Interfaces;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace DataAccess.Models
 {
-    public class Media
+    public class Media: IItem
     {
         public int Id { get; set; }
         [Required]

@@ -1,17 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using DataAccess.Interfaces;
 using System.ComponentModel.DataAnnotations;
-using System.Text;
 
 namespace DataAccess.Models
 {
-    public class Email
+    public class Email: IItem
     { 
         public int Id { get; set; }
         public int Type { get; set; }
         [Required]
         [MaxLength(256)]
-        public string Subject { get; set; }
+        public string Name { get; set; }
         [Required]
         public string Content { get; set; }
     }

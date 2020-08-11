@@ -4,14 +4,16 @@ using DataAccess.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(NicheShackContext))]
-    partial class NicheShackContextModelSnapshot : ModelSnapshot
+    [Migration("20200809174331_UpdatedVendor")]
+    partial class UpdatedVendor
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -678,22 +680,16 @@ namespace DataAccess.Migrations
 
             modelBuilder.Entity("DataAccess.Models.ProductMedia", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
 
                     b.Property<int?>("MediaId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
+                    b.HasKey("ProductId", "MediaId")
+                        .HasName("PK_ProductMedia");
 
                     b.HasIndex("MediaId");
-
-                    b.HasIndex("ProductId");
 
                     b.ToTable("ProductMedia");
                 });
@@ -1245,7 +1241,8 @@ namespace DataAccess.Migrations
                     b.HasOne("DataAccess.Models.Media", "Media")
                         .WithMany("ProductMedia")
                         .HasForeignKey("MediaId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("DataAccess.Models.Product", "Product")
                         .WithMany("ProductMedia")

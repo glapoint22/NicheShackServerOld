@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using DataAccess.Models;
 using Manager.ViewModels;
 using System.Linq;
+using Manager.Classes;
 
 namespace Manager.Controllers
 {
@@ -27,6 +28,44 @@ namespace Manager.Controllers
         }
 
 
+
+        [HttpPut]
+        public async Task<ActionResult> UpdateCategoryName(ItemViewModel category)
+        {
+            Category updatedCategory = await unitOfWork.Categories.Get(category.Id);
+
+            updatedCategory.Name = category.Name;
+
+            // Update and save
+            unitOfWork.Categories.Update(updatedCategory);
+            await unitOfWork.Save();
+
+            return Ok();
+        }
+
+
+
+
+
+
+        [HttpPut]
+        [Route("Image")]
+        public async Task<ActionResult> UpdateCategoryImage(UpdatedProperty updatedProperty)
+        {
+            Category category = await unitOfWork.Categories.Get(updatedProperty.ItemId);
+
+            category.ImageId = updatedProperty.PropertyId;
+
+            // Update and save
+            unitOfWork.Categories.Update(category);
+            await unitOfWork.Save();
+
+            return Ok();
+        }
+
+
+
+
         [HttpGet]
         [Route("Image")]
         public async Task<ActionResult> GetCategoryImage(int categoryId)
@@ -37,6 +76,15 @@ namespace Manager.Controllers
                 Name = x.Name,
                 Url = x.Url
             }));
+        }
+
+
+
+        [HttpGet]
+        [Route("Search")]
+        public async Task<ActionResult> Search(string searchWords)
+        {
+            return Ok(await unitOfWork.Categories.GetCollection<ItemViewModel<Category>>(searchWords));
         }
     }
 }

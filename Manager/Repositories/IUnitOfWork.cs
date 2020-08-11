@@ -12,18 +12,25 @@ namespace Manager.Repositories
 
 
         // Generic Repositories
-        IRepository<Category> Categories { get; }
-        IRepository<Niche> Niches { get; }
-        IRepository<Filter> Filters { get; }
-        IRepository<FilterOption> FilterOptions { get; }
+        ISearchableRepository<Category> Categories { get; }
+        ISearchableRepository<Niche> Niches { get; }
+        ISearchableRepository<Filter> Filters { get; }
+        ISearchableRepository<FilterOption> FilterOptions { get; }
         IRepository<LeadPage> LeadPages { get; }
         IRepository<LeadPageEmail> LeadPageEmails { get; }
         IRepository<ProductEmail> ProductEmails { get; }
-        IRepository<Vendor> Vendors { get; }
-        IRepository<Page> Pages { get; }
-        IRepository<Email> Emails { get; }
-        IRepository<Media> Media { get; }
+        ISearchableRepository<Vendor> Vendors { get; }
+        ISearchableRepository<Page> Pages { get; }
+        ISearchableRepository<Email> Emails { get; }
+        ISearchableRepository<Media> Media { get; }
         IRepository<Notification> Notifications { get; }
+        IRepository<ProductFilter> ProductFilters { get; }
+        IRepository<ProductPricePoint> ProductPricePoints { get; }
+        IRepository<PriceIndex> PriceIndices { get; }
+        IRepository<ProductContent> ProductContent { get; }
+        IRepository<ProductMedia> ProductMedia { get; }
+        IRepository<ProductKeyword> ProductKeywords { get; }
+
 
 
 

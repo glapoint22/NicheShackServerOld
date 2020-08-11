@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using DataAccess.Models;
 using DataAccess.ViewModels;
 using Manager.Repositories;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Manager.Controllers
@@ -38,6 +34,44 @@ namespace Manager.Controllers
 
 
 
+
+        [Route("Vendor")]
+        [HttpPut]
+        public async Task<ActionResult> UpdateVendor(Vendor updatedVendor)
+        {
+            Vendor vendor = await unitOfWork.Vendors.Get(updatedVendor.Id);
+
+            vendor.Name = updatedVendor.Name;
+            vendor.WebPage = updatedVendor.WebPage;
+            vendor.Street = updatedVendor.Street;
+            vendor.City = updatedVendor.City;
+            vendor.Zip = updatedVendor.Zip;
+            vendor.PoBox = updatedVendor.PoBox;
+            vendor.State = updatedVendor.State;
+            vendor.Country = updatedVendor.Country;
+            vendor.PrimaryFirstName = updatedVendor.PrimaryFirstName;
+            vendor.PrimaryLastName = updatedVendor.PrimaryLastName;
+            vendor.PrimaryOfficePhone = updatedVendor.PrimaryOfficePhone;
+            vendor.PrimaryMobilePhone = updatedVendor.PrimaryMobilePhone;
+            vendor.PrimaryEmail = updatedVendor.PrimaryEmail;
+            vendor.SecondaryFirstName = updatedVendor.SecondaryFirstName;
+            vendor.SecondaryLastName = updatedVendor.SecondaryLastName;
+            vendor.SecondaryOfficePhone = updatedVendor.SecondaryOfficePhone;
+            vendor.SecondaryMobilePhone = updatedVendor.SecondaryMobilePhone;
+            vendor.SecondaryEmail = updatedVendor.SecondaryEmail;
+            vendor.Notes = updatedVendor.Notes;
+
+            // Update and save
+            unitOfWork.Vendors.Update(vendor);
+            await unitOfWork.Save();
+
+
+            return Ok();
+        }
+
+
+
+
         [Route("Products")]
         [HttpGet]
         public async Task<ActionResult> GetProducts(int vendorId)
@@ -49,6 +83,14 @@ namespace Manager.Controllers
             }));
         }
 
+
+
+        [HttpGet]
+        [Route("Search")]
+        public async Task<ActionResult> Search(string searchWords)
+        {
+            return Ok(await unitOfWork.Vendors.GetCollection<ItemViewModel<Vendor>>(searchWords));
+        }
 
 
     }

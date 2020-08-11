@@ -42,6 +42,7 @@ namespace DataAccess.Models
         public string SecondaryMobilePhone { get; set; }
         [MaxLength(256)]
         public string SecondaryEmail { get; set; }
+        public string Notes { get; set; }
 
 
         public virtual ICollection<Product> Products { get; set; }

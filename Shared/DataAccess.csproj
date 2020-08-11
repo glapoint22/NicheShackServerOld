@@ -37,6 +37,8 @@
     <Compile Remove="Migrations\20200728172101_Initial.Designer.cs" />
     <Compile Remove="Migrations\20200728211338_Alita.cs" />
     <Compile Remove="Migrations\20200728211338_Alita.Designer.cs" />
+    <Compile Remove="Migrations\20200809174008_UpdatedVendor.cs" />
+    <Compile Remove="Migrations\20200809174008_UpdatedVendor.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>
