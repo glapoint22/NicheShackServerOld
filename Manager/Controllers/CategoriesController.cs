@@ -6,6 +6,7 @@ using DataAccess.Models;
 using Manager.ViewModels;
 using System.Linq;
 using Manager.Classes;
+using System;
 
 namespace Manager.Controllers
 {
@@ -43,6 +44,40 @@ namespace Manager.Controllers
             return Ok();
         }
 
+
+
+
+
+        [HttpPost]
+        public async Task<ActionResult> AddCategory(ItemViewModel category)
+        {
+            Category newCategory = new Category
+            {
+                Name = category.Name,
+                UrlId = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper(),
+                UrlName = Utility.GetUrlName(category.Name)
+            };
+
+            unitOfWork.Categories.Add(newCategory);
+            await unitOfWork.Save();
+
+            return Ok(newCategory.Id);
+        }
+
+
+
+
+
+        [HttpDelete]
+        public async Task<ActionResult> DeleteCategory(int id)
+        {
+            Category category = await unitOfWork.Categories.Get(id);
+
+            unitOfWork.Categories.Remove(category);
+            await unitOfWork.Save();
+
+            return Ok();
+        }
 
 
 

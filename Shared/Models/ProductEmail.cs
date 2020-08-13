@@ -13,7 +13,7 @@ namespace DataAccess.Models
         public string Content { get; set; }
         [Required]
         [MaxLength(256)]
-        public string Subject { get; set; }
+        public string Name { get; set; }
         public virtual Product Product { get; set; }
     }
 }

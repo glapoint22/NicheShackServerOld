@@ -9,7 +9,7 @@ namespace Manager.ViewModels
         public string ProductThumbnail { get; set; }
         public string ProductName { get; set; }
         public int ProductId { get; set; }
-        public int VendorId { get; set; }
+        public int? VendorId { get; set; }
         public string Hoplink { get; set; }
 
         public new IQueryable<GeneralNotificationViewModel> ViewModelSelect(IQueryable<Notification> source)

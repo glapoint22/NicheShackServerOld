@@ -49,6 +49,78 @@ namespace Manager.Controllers
 
 
 
+        [HttpPost]
+        public async Task<ActionResult> AddFilter(ItemViewModel filter)
+        {
+            Filter newFilter = new Filter
+            {
+                Name = filter.Name
+            };
+
+
+            unitOfWork.Filters.Add(newFilter);
+            await unitOfWork.Save();
+
+            return Ok(newFilter.Id);
+        }
+
+
+
+
+
+        [HttpDelete]
+        public async Task<ActionResult> DeleteFilter(int id)
+        {
+            Filter filter = await unitOfWork.Filters.Get(id);
+
+            unitOfWork.Filters.Remove(filter);
+            await unitOfWork.Save();
+
+            return Ok();
+        }
+
+
+
+
+
+
+        [HttpPost]
+        [Route("Options")]
+        public async Task<ActionResult> AddFilterOption(ItemViewModel filterOption)
+        {
+            FilterOption newFilterOption = new FilterOption
+            {
+                FilterId = filterOption.Id,
+                Name = filterOption.Name
+            };
+
+
+            unitOfWork.FilterOptions.Add(newFilterOption);
+            await unitOfWork.Save();
+
+            return Ok(newFilterOption.Id);
+        }
+
+
+
+
+
+
+        [HttpDelete]
+        [Route("Options")]
+        public async Task<ActionResult> DeleteFilterOption(int id)
+        {
+            FilterOption filterOption = await unitOfWork.FilterOptions.Get(id);
+
+            unitOfWork.FilterOptions.Remove(filterOption);
+            await unitOfWork.Save();
+
+            return Ok();
+        }
+
+
+
+
 
         [HttpPut]
         [Route("Options")]

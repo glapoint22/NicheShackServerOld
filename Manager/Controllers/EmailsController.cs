@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DataAccess.Models;
 using DataAccess.ViewModels;
@@ -55,6 +56,90 @@ namespace Manager.Controllers
 
             return Ok();
         }
+
+
+
+
+
+
+        [Route("Create")]
+        [HttpGet]
+        public async Task<ActionResult> CreateEmail()
+        {
+            string emailName = "None";
+
+
+            // Create the new email
+            Email email = new Email
+            {
+                Name = emailName,
+                Content = ""
+            };
+
+            // Add and save
+            unitOfWork.Emails.Add(email);
+            await unitOfWork.Save();
+
+            // Update the content with the new Id and update
+            email.Content = "{\"id\":" + email.Id + ",\"name\":\"" + emailName + "\",\"background\":{\"color\":\"#ffffff\"}}";
+            unitOfWork.Emails.Update(email);
+
+
+            await unitOfWork.Save();
+
+
+            // Return the new email content
+            return Ok(email.Content);
+        }
+
+
+
+
+
+
+        [Route("Duplicate")]
+        [HttpGet]
+        public async Task<ActionResult> DuplicateEmail(int pageId)
+        {
+            // Get the page
+            Email email = await unitOfWork.Emails.Get(pageId);
+            email.Id = 0;
+
+            // Add the duplicated email and save
+            unitOfWork.Emails.Add(email);
+            await unitOfWork.Save();
+
+
+            // Update the content with the new id and save
+            email.Content = Regex.Replace(email.Content, "^{\"id\":" + pageId, "{\"id\":" + email.Id);
+            unitOfWork.Emails.Update(email);
+            await unitOfWork.Save();
+
+
+            // Return the page content
+            return Ok(email.Content);
+        }
+
+
+
+
+
+
+
+        [HttpDelete]
+        public async Task<ActionResult> DeleteEmail(int pageId)
+        {
+            Email email = await unitOfWork.Emails.Get(pageId);
+
+            unitOfWork.Emails.Remove(email);
+            await unitOfWork.Save();
+
+            return Ok();
+        }
+
+
+
+
 
 
 

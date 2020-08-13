@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Manager.Classes
@@ -153,6 +154,21 @@ namespace Manager.Classes
             }
 
             return name;
+        }
+
+
+
+        public static string GetUrlName(string name)
+        {
+            return Regex.Replace(name, @"[^a-zA-Z0-9\-]", evaluator);
+        }
+
+
+        private static string evaluator(Match match)
+        {
+            Match nextMatch = match.NextMatch();
+            if (nextMatch.Index == match.Index + 1) return "";
+            return "-";
         }
     }
 }

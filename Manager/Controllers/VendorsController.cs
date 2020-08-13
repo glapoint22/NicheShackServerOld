@@ -72,6 +72,40 @@ namespace Manager.Controllers
 
 
 
+
+
+
+
+        [Route("Vendor")]
+        [HttpPost]
+        public async Task<ActionResult> AddVendor(Vendor vendor)
+        {
+            // Add and save
+            unitOfWork.Vendors.Add(vendor);
+            await unitOfWork.Save();
+
+            return Ok(vendor.Id);
+        }
+
+
+
+
+
+        [HttpDelete]
+        public async Task<ActionResult> DeleteVendor(int vendorId)
+        {
+            Vendor vendor = await unitOfWork.Vendors.Get(vendorId);
+
+            unitOfWork.Vendors.Remove(vendor);
+            await unitOfWork.Save();
+            return Ok();
+        }
+
+
+
+
+
+
         [Route("Products")]
         [HttpGet]
         public async Task<ActionResult> GetProducts(int vendorId)

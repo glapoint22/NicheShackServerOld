@@ -138,6 +138,11 @@ namespace DataAccess.Models
                 entity.HasOne(x => x.Media)
                 .WithMany(x => x.Products)
                 .OnDelete(DeleteBehavior.Restrict);
+
+
+                entity.HasOne(x => x.Vendor)
+                .WithMany(x => x.Products)
+                .OnDelete(DeleteBehavior.Cascade);
             });
 
 

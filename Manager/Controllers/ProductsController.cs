@@ -7,6 +7,7 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using Manager.Classes;
+using System;
 
 namespace Manager.Controllers
 {
@@ -51,6 +52,42 @@ namespace Manager.Controllers
 
 
 
+        [HttpPost]
+        public async Task<ActionResult> AddProduct(ItemViewModel product)
+        {
+            Product newProduct = new Product
+            {
+                NicheId = product.Id,
+                Name = product.Name,
+                UrlId = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper(),
+                UrlName = Utility.GetUrlName(product.Name)
+            };
+
+            unitOfWork.Products.Add(newProduct);
+            await unitOfWork.Save();
+
+            return Ok(newProduct.Id);
+        }
+
+
+
+
+
+        [HttpDelete]
+        public async Task<ActionResult> DeleteProduct(int id)
+        {
+            Product product = await unitOfWork.Products.Get(id);
+
+            unitOfWork.Products.Remove(product);
+            await unitOfWork.Save();
+
+            return Ok();
+        }
+
+
+
+
+
         [HttpPut]
         [Route("Image")]
         public async Task<ActionResult> UpdateProductImage(UpdatedProperty updatedProperty)
@@ -76,7 +113,7 @@ namespace Manager.Controllers
         {
             ProductEmail productEmail = await unitOfWork.ProductEmails.Get(updatedPage.PageId);
 
-            productEmail.Subject = updatedPage.Name;
+            productEmail.Name = updatedPage.Name;
             productEmail.Content = updatedPage.Content;
 
             // Update and save
@@ -351,6 +388,49 @@ namespace Manager.Controllers
 
             // Update and save
             unitOfWork.ProductKeywords.Update(keyword);
+            await unitOfWork.Save();
+
+            return Ok();
+        }
+
+
+
+
+
+
+        [Route("Keyword")]
+        [HttpPost]
+        public async Task<ActionResult> AddKeyword(ItemViewModel keyword)
+        {
+            ProductKeyword newKeyword = new ProductKeyword
+            {
+                ProductId = keyword.Id,
+                Name = keyword.Name
+            };
+
+
+            // Add and save
+            unitOfWork.ProductKeywords.Add(newKeyword);
+            await unitOfWork.Save();
+
+            return Ok(newKeyword.Id);
+        }
+
+
+
+
+
+        [HttpDelete]
+        [Route("Keyword")]
+        public async Task<ActionResult> DeleteKeywords([FromQuery] int[] ids)
+        {
+            foreach(int id in ids)
+            {
+                ProductKeyword keyword = await unitOfWork.ProductKeywords.Get(id);
+                unitOfWork.ProductKeywords.Remove(keyword);
+            }
+
+
             await unitOfWork.Save();
 
             return Ok();

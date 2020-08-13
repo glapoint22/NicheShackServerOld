@@ -9,7 +9,7 @@ namespace DataAccess.Models
     {
         public int Id { get; set; }
         [ForeignKey("Vendor")]
-        public int VendorId { get; set; }
+        public int? VendorId { get; set; }
         [ForeignKey("Media")]
         public int? ImageId { get; set; }
         [ForeignKey("Niche")]
