@@ -35,9 +35,9 @@ namespace Manager.ViewModels
                         Name = c.Media.Name,
                         Url = c.Media.Url
                     },
-                    PriceIndices = c.Product.ProductPricePoints.Select(z => c.PriceIndices.Select(w => w.Index).Contains(z.Index))
+                    PriceIndices = c.Product.ProductPricePoints.OrderBy(y => y.Index).Select(z => c.PriceIndices.Select(w => w.Index).Contains(z.Index))
                 }),
-                PricePoints = x.Product.ProductPricePoints.Select(p => new ProductPricePointViewModel
+                PricePoints = x.Product.ProductPricePoints.OrderBy(y => y.Index).Select(p => new ProductPricePointViewModel
                 {
                     Id = p.Id,
                     TextBefore = p.TextBefore,
