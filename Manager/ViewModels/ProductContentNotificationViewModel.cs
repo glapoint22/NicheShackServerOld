@@ -9,6 +9,8 @@ namespace Manager.ViewModels
     {
         public IEnumerable<ProductContentViewModel> Content { get; set; }
         public IEnumerable<ProductPricePointViewModel> PricePoints { get; set; }
+        public double MinPrice { get; set; }
+        public double MaxPrice { get; set; }
 
 
         public new IQueryable<ProductContentNotificationViewModel> ViewModelSelect(IQueryable<Notification> source)
@@ -25,6 +27,8 @@ namespace Manager.ViewModels
                 ProductThumbnail = generalNotificationViewModel.ProductThumbnail,
                 VendorId = generalNotificationViewModel.VendorId,
                 Hoplink = generalNotificationViewModel.Hoplink,
+                MinPrice = x.Product.MinPrice,
+                MaxPrice = x.Product.MaxPrice,
                 Content = x.Product.ProductContent.Select(c => new ProductContentViewModel
                 {
                     Id = c.Id,

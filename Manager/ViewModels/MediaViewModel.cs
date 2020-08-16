@@ -1,7 +1,6 @@
 ﻿using DataAccess.Interfaces;
 using DataAccess.Models;
 using System.Linq;
-using static Manager.Classes.Utility;
 
 namespace Manager.ViewModels
 {
