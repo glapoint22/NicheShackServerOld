@@ -28,7 +28,8 @@ namespace Manager.ViewModels
                     Id = x.Product.Media.Id,
                     Name = x.Product.Media.Name,
                     Url = x.Product.Media.Url
-                }
+                },
+                Type = x.Type
             });
         }
     }

@@ -1,4 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using DataAccess.Models;
+using Manager.Classes;
 using Manager.Repositories;
 using Manager.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -124,9 +127,57 @@ namespace Manager.Controllers
         [Route("Ids")]
         public async Task<ActionResult> GetIds(NotificationListItemViewModel notificationListItem)
         {
-            return Ok(await unitOfWork.Notifications.GetCollection(x => x.ProductId == notificationListItem.ProductId &&
+
+            return Ok(await unitOfWork.Notifications.GetCollection(x => 
+                x.ProductId == notificationListItem.ProductId &&
                 x.Type == notificationListItem.Type &&
                 x.State == notificationListItem.State, x => x.Id));
         }
+
+
+
+
+
+       
+
+        [HttpPut]
+        [Route("State")]
+        public async Task<ActionResult> UpdateState(UpdatedNotification updatedNotification)
+        {
+            IEnumerable<Notification> notifications = null;
+
+            if (updatedNotification.ProductId == 0)
+            {
+                notifications = await unitOfWork.Notifications.GetCollection(x => x.Type == updatedNotification.Type && x.State == updatedNotification.CurrentState);
+            }else
+            {
+                notifications = await unitOfWork.Notifications.GetCollection(x => x.ProductId == updatedNotification.ProductId && x.Type == updatedNotification.Type && x.State == updatedNotification.CurrentState);
+            }
+            
+
+
+            foreach (Notification notification in notifications)
+            {
+
+                notification.State = updatedNotification.DestinationState;
+
+                unitOfWork.Notifications.Update(notification);
+            }
+
+            //Save
+            await unitOfWork.Save();
+
+
+
+
+            return Ok();
+        }
+
+
+
+
+
+
+
     }
 }

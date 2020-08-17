@@ -32,7 +32,8 @@ namespace Manager.ViewModels
                     Url = m.Media.Url,
                     Thumbnail = m.Media.Thumbnail,
                     Type = m.Media.Type
-                })
+                }),
+                Type = x.Type
             });
         }
     }

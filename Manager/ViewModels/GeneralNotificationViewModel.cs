@@ -26,7 +26,8 @@ namespace Manager.ViewModels
                 ProductName = x.Product.Name,
                 ProductThumbnail = x.Product.Media.Url,
                 VendorId = x.Product.VendorId,
-                Hoplink = x.Product.Hoplink
+                Hoplink = x.Product.Hoplink,
+                Type = x.Type
             });
         }
     }

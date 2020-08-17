@@ -25,7 +25,7 @@ namespace Manager.Repositories
         public async Task<IEnumerable<ProductFilterViewModel>> GetProductFilters(int productId, int filterId)
         {
             // Get filter options based on the filter id
-            var filterOptions = await context.FilterOptions.Where(x => x.FilterId == filterId).Select(x => new {
+            var filterOptions = await context.FilterOptions.AsNoTracking().Where(x => x.FilterId == filterId).Select(x => new {
                 x.Id,
                 x.Name
             }).ToArrayAsync();
@@ -36,6 +36,7 @@ namespace Manager.Repositories
 
             // These are the filter option ids that are being used in the current product
             int[] checkedFilterOptionIds = await context.ProductFilters
+                .AsNoTracking()
                 .Where(x => filterOptionIds.Contains(x.FilterOptionId) && x.ProductId == productId)
                 .Select(x => x.FilterOptionId)
                 .ToArrayAsync();
@@ -58,7 +59,9 @@ namespace Manager.Repositories
         public async Task<ProductViewModel> GetProduct(int productId)
         {
 
-            return await context.Products.Where(x => x.Id == productId).Select(x => new ProductViewModel
+            return await context.Products
+                .AsNoTracking()
+                .Where(x => x.Id == productId).Select(x => new ProductViewModel
             {
                 Id = x.Id,
                 Name = x.Name,

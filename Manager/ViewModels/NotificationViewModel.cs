@@ -11,6 +11,7 @@ namespace Manager.ViewModels
         public string Name { get; set; }
         public NotificationTextViewModel CustomerText { get; set; }
         public NotificationTextViewModel Notes { get; set; }
+        public int Type { get; set; }
 
 
         public IQueryable<NotificationViewModel> ViewModelSelect(IQueryable<Notification> source)
@@ -39,7 +40,8 @@ namespace Manager.ViewModels
                     Thumbnail = z.Customer.image,
                     Text = z.Text
                 })
-                .SingleOrDefault()
+                .SingleOrDefault(),
+                Type = x.Type
             });
         }
     }

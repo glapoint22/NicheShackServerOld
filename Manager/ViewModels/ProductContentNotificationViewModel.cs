@@ -48,7 +48,8 @@ namespace Manager.ViewModels
                     WholeNumber = p.WholeNumber,
                     Decimal = p.Decimal,
                     TextAfter = p.TextAfter
-                })
+                }),
+                Type = x.Type
             });
         }
     }

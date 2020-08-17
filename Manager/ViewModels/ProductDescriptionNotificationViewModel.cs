@@ -22,7 +22,8 @@ namespace Manager.ViewModels
                 ProductThumbnail = generalNotificationViewModel.ProductThumbnail,
                 VendorId = generalNotificationViewModel.VendorId,
                 Hoplink = generalNotificationViewModel.Hoplink,
-                ProductDescription = x.Product.Description
+                ProductDescription = x.Product.Description,
+                Type = x.Type
             });
         }
     }
