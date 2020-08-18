@@ -25,7 +25,8 @@ namespace Manager.Repositories
         public async Task<IEnumerable<ProductFilterViewModel>> GetProductFilters(int productId, int filterId)
         {
             // Get filter options based on the filter id
-            var filterOptions = await context.FilterOptions.AsNoTracking().Where(x => x.FilterId == filterId).Select(x => new {
+            var filterOptions = await context.FilterOptions.AsNoTracking().Where(x => x.FilterId == filterId).Select(x => new
+            {
                 x.Id,
                 x.Name
             }).ToArrayAsync();
@@ -62,39 +63,39 @@ namespace Manager.Repositories
             return await context.Products
                 .AsNoTracking()
                 .Where(x => x.Id == productId).Select(x => new ProductViewModel
-            {
-                Id = x.Id,
-                Name = x.Name,
-                Vendor = new ItemViewModel
                 {
-                    Id = x.Vendor.Id,
-                    Name = x.Vendor.Name
-                },
-                Keywords = x.Keywords.Select(y => new ItemViewModel
-                {
-                    Id = y.Id,
-                    Name = y.Name
-                }),
-                Rating = x.Rating,
-                TotalReviews = x.TotalReviews,
-                Hoplink = x.Hoplink,
-                Description = x.Description,
-                Content = x.ProductContent.Select(y => new ProductContentViewModel
-                {
-                    Id = y.Id,
-                    Name = y.Name,
-                    Icon = new ImageViewModel
+                    Id = x.Id,
+                    Name = x.Name,
+                    Vendor = new ItemViewModel
                     {
-                        Id = y.Media.Id,
-                        Name = y.Media.Name,
-                        Url = y.Media.Url
+                        Id = x.Vendor.Id,
+                        Name = x.Vendor.Name
                     },
-                    PriceIndices = y.Product.ProductPricePoints
-                    .OrderBy(z => z.Index)
-                    .Select(z => y.PriceIndices.Select(w => w.Index).Contains(z.Index))
+                    Keywords = x.Keywords.Select(y => new ItemViewModel
+                    {
+                        Id = y.Id,
+                        Name = y.Name
+                    }),
+                    Rating = x.Rating,
+                    TotalReviews = x.TotalReviews,
+                    Hoplink = x.Hoplink,
+                    Description = x.Description,
+                    Content = x.ProductContent.Select(y => new ProductContentViewModel
+                    {
+                        Id = y.Id,
+                        Name = y.Name,
+                        Icon = new ImageViewModel
+                        {
+                            Id = y.Media.Id,
+                            Name = y.Media.Name,
+                            Url = y.Media.Url
+                        },
+                        PriceIndices = y.Product.ProductPricePoints
+                        .OrderBy(z => z.Index)
+                        .Select(z => y.PriceIndices.Select(w => w.Index).Contains(z.Index))
 
-                }),
-                PricePoints = x.ProductPricePoints
+                    }),
+                    PricePoints = x.ProductPricePoints
                 .OrderBy(y => y.Index)
                 .Select(y => new ProductPricePointViewModel
                 {
@@ -104,23 +105,23 @@ namespace Manager.Repositories
                     Decimal = y.Decimal,
                     TextAfter = y.TextAfter
                 }),
-                Image = new ImageViewModel
-                {
-                    Id = x.Media.Id,
-                    Name = x.Media.Name,
-                    Url = x.Media.Url
-                },
-                Media = x.ProductMedia.Select(y => new MediaViewModel
-                {
-                    Id = y.Media.Id,
-                    Name = y.Media.Name,
-                    Url = y.Media.Url,
-                    Thumbnail = y.Media.Thumbnail,
-                    Type = y.Media.Type
-                }),
-                MinPrice = x.MinPrice,
-                MaxPrice = x.MaxPrice
-            }).SingleOrDefaultAsync();
+                    Image = new ImageViewModel
+                    {
+                        Id = x.Media.Id,
+                        Name = x.Media.Name,
+                        Url = x.Media.Url
+                    },
+                    Media = x.ProductMedia.Select(y => new MediaViewModel
+                    {
+                        Id = y.Media.Id,
+                        Name = y.Media.Name,
+                        Url = y.Media.Url,
+                        Thumbnail = y.Media.Thumbnail,
+                        Type = y.Media.Type
+                    }),
+                    MinPrice = x.MinPrice,
+                    MaxPrice = x.MaxPrice
+                }).SingleOrDefaultAsync();
         }
     }
 }

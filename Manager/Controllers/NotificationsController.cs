@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using DataAccess.Models;
 using Manager.Classes;
@@ -97,7 +99,7 @@ namespace Manager.Controllers
 
 
 
-        
+
 
 
 
@@ -128,7 +130,7 @@ namespace Manager.Controllers
         public async Task<ActionResult> GetIds(NotificationListItemViewModel notificationListItem)
         {
 
-            return Ok(await unitOfWork.Notifications.GetCollection(x => 
+            return Ok(await unitOfWork.Notifications.GetCollection(x =>
                 x.ProductId == notificationListItem.ProductId &&
                 x.Type == notificationListItem.Type &&
                 x.State == notificationListItem.State, x => x.Id));
@@ -138,7 +140,7 @@ namespace Manager.Controllers
 
 
 
-       
+
 
         [HttpPut]
         [Route("State")]
@@ -149,11 +151,12 @@ namespace Manager.Controllers
             if (updatedNotification.ProductId == 0)
             {
                 notifications = await unitOfWork.Notifications.GetCollection(x => x.Type == updatedNotification.Type && x.State == updatedNotification.CurrentState);
-            }else
+            }
+            else
             {
                 notifications = await unitOfWork.Notifications.GetCollection(x => x.ProductId == updatedNotification.ProductId && x.Type == updatedNotification.Type && x.State == updatedNotification.CurrentState);
             }
-            
+
 
 
             foreach (Notification notification in notifications)
@@ -172,6 +175,65 @@ namespace Manager.Controllers
 
             return Ok();
         }
+
+
+
+
+
+
+
+
+        [HttpPost]
+        [Route("NewNote")]
+        public async Task<ActionResult> NewNote(UpdatedNotificationNotes updatedNotificationNotes)
+        {
+            NotificationText newNote = new NotificationText
+            {
+                CustomerId = "FF48C7E8FD",
+                NotificationId = updatedNotificationNotes.NotificationId,
+                TimeStamp = DateTime.Now,
+                Text = updatedNotificationNotes.NotificationNote,
+                Type = 1
+            };
+
+            unitOfWork.NotificationText.Add(newNote);
+
+            await unitOfWork.Save();
+
+            return Ok();
+        }
+
+
+
+
+
+
+
+        [HttpPut]
+        [Route("UpdateNote")]
+        public async Task<ActionResult> UpdateNote(UpdatedNotificationNotes updatedNotificationNotes)
+        {
+
+            NotificationText updatedNote = await unitOfWork.NotificationText.Get(x => x.NotificationId == updatedNotificationNotes.NotificationId && x.Type == 1);
+
+            updatedNote.Text = updatedNotificationNotes.NotificationNote;
+
+            unitOfWork.NotificationText.Update(updatedNote);
+
+            await unitOfWork.Save();
+
+            return Ok();
+        }
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -30,6 +30,8 @@ namespace Manager.Repositories
         IRepository<ProductContent> ProductContent { get; }
         IRepository<ProductMedia> ProductMedia { get; }
         IRepository<ProductKeyword> ProductKeywords { get; }
+        IRepository<NotificationText> NotificationText { get; }
+
 
 
 
