@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using static Manager.Classes.Utility;
 
 namespace Manager.Repositories
 {
@@ -110,8 +109,9 @@ namespace Manager.Repositories
                     Name = x.Media.Name,
                     Url = x.Media.Url
                 },
-                Media = x.ProductMedia.Select(y => new MediaViewModel
+                Media = x.ProductMedia.Select(y => new ProductMediaViewModel
                 {
+                    ItemId = y.Id,
                     Id = y.Media.Id,
                     Name = y.Media.Name,
                     Url = y.Media.Url,

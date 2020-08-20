@@ -361,11 +361,11 @@ namespace Manager.Controllers
 
         [HttpPut]
         [Route("Media")]
-        public async Task<ActionResult> UpdateProductMedia(UpdatedProductMedia updatedProductMedia)
+        public async Task<ActionResult> UpdateProductMedia(UpdatedProperty updatedProductMedia)
         {
-            ProductMedia productMedia = await unitOfWork.ProductMedia.Get(x => x.ProductId == updatedProductMedia.ProductId && x.MediaId == updatedProductMedia.OldMediaId);
+            ProductMedia productMedia = await unitOfWork.ProductMedia.Get(updatedProductMedia.ItemId);
 
-            productMedia.MediaId = updatedProductMedia.NewMediaId;
+            productMedia.MediaId = updatedProductMedia.PropertyId;
 
             // Update and save
             unitOfWork.ProductMedia.Update(productMedia);
@@ -392,7 +392,7 @@ namespace Manager.Controllers
 
             await unitOfWork.Save();
 
-            return Ok();
+            return Ok(newProductMedia.Id);
         }
 
 
