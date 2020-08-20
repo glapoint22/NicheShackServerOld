@@ -30,6 +30,7 @@ namespace Manager.Repositories
         public IRepository<ProductContent> ProductContent { get; }
         public IRepository<ProductMedia> ProductMedia { get; }
         public IRepository<ProductKeyword> ProductKeywords { get; }
+        public IRepository<NotificationText> NotificationText { get; }
 
 
         // Custom Repositories
@@ -60,6 +61,8 @@ namespace Manager.Repositories
             ProductContent = new Repository<ProductContent>(context);
             ProductMedia = new Repository<ProductMedia>(context);
             ProductKeywords = new Repository<ProductKeyword>(context);
+            NotificationText = new Repository<NotificationText>(context);
+
 
             // Custom Repositories
             Products = new ProductRepository(context);

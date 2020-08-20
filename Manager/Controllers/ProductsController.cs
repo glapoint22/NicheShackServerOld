@@ -603,13 +603,13 @@ namespace Manager.Controllers
 
 
         [Route("PricePoint")]
-        [HttpGet]
-        public async Task<ActionResult> AddPricePoint(int productId)
+        [HttpPost]
+        public async Task<ActionResult> AddPricePoint(UpdatedProperty updatedProperty)
         {
             ProductPricePoint newPricePoint = new ProductPricePoint
             {
-                ProductId = productId,
-                Index = await unitOfWork.ProductPricePoints.GetCount(x => x.ProductId == productId)
+                ProductId = updatedProperty.ItemId,
+                Index = await unitOfWork.ProductPricePoints.GetCount(x => x.ProductId == updatedProperty.ItemId)
             };
 
             unitOfWork.ProductPricePoints.Add(newPricePoint);
