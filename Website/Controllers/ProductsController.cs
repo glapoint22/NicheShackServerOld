@@ -32,7 +32,10 @@ namespace Website.Controllers
                 title = x.Name,
                 minPrice = x.MinPrice,
                 maxPrice = x.MaxPrice,
-                //image = x.Image,
+                image = new {
+                    name = x.Media.Name,
+                    url = x.Media.Url
+                },
                 rating = x.Rating,
                 totalReviews = x.TotalReviews,
                 oneStar = x.OneStar,
@@ -45,27 +48,6 @@ namespace Website.Controllers
 
         }
 
-
-
-        // ..................................................................................Get Quick Look Product.....................................................................
-        [Route("QuickLookProduct")]
-        [HttpGet]
-        public async Task<ActionResult> GetQuickLookProduct(int id)
-        {
-            // Return the product's description and media
-            var quickLookProduct = new
-            {
-                product = await unitOfWork.Products.Get(x => x.Id == id, x => new
-                {
-                    description = x.Description,
-                    hoplink = x.Hoplink,
-                    //shareImage = x.ShareImage
-                }),
-                media = await GetMedia(id)
-            };
-
-            return Ok(quickLookProduct);
-        }
 
 
 
@@ -95,9 +77,9 @@ namespace Website.Controllers
             //var iconId = await unitOfWork.ProductContent.Get(x => x.ProductId == id, x => x.IconId);
 
 
+            
 
 
-           
 
             // If the product is found in the database, return the product with other product details
             if (product != null)
@@ -111,15 +93,24 @@ namespace Website.Controllers
                     },
                     content = await unitOfWork.ProductContent.GetCollection(x => x.ProductId == product.Id, x => new
                     {
-                        Icon = unitOfWork.Media.Get(y => y.Id == x.IconId, y => new
+                        Icon = new
                         {
-                            y.Name,
-                            y.Url
-                        }),
+                            x.Media.Name,
+                            x.Media.Url
+                        },
                         x.Name,
-                        PriceIndices = x.PriceIndices.Select(y => y.Index).ToList()
+                        PriceIndices = x.PriceIndices
+                        .OrderBy(y => y.Index)
+                        .Select(y => y.Index)
+                        .ToList()
                     }),
-                    //pricePoints = await unitOfWork.PricePoints.GetCollection(x => x.ProductId == product.Id, x => string.Format(x.Description, x.Price)),
+                    pricePoints = await unitOfWork.PricePoints.GetCollection(x => x.Index, x => x.ProductId == product.Id, y => new 
+                    {
+                        y.TextBefore,
+                        y.WholeNumber,
+                        y.Decimal,
+                        y.TextAfter
+                    })
                 };
 
                 return Ok(response);

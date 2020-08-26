@@ -127,10 +127,18 @@ namespace DataAccess.Repositories
 
 
 
-        
 
 
 
+        public async Task<IEnumerable<TOut>> GetCollection<TOut>(Expression<Func<T, int>> keySelector, Expression<Func<T, bool>> predicate, Expression<Func<T, TOut>> select)
+        {
+            return await context.Set<T>()
+                .AsNoTracking()
+                .OrderBy(keySelector)
+                .Where(predicate)
+                .Select(select)
+                .ToListAsync();
+        }
 
 
 

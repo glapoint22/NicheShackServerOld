@@ -42,9 +42,9 @@ namespace Website.Repositories
                     Discount = x.Discount,
                     Tax = x.Tax,
                     Total = x.Total,
-                    ProductId = x.Product.Id,
+                    ProductUrlId = x.Product.UrlId,
                     Hoplink = x.Product.Hoplink,
-                    UrlTitle = x.Product.UrlName,
+                    UrlName = x.Product.UrlName,
                     Products = x.OrderProducts
                         .Where(y => y.OrderId == x.Id)
                         .OrderByDescending(y => y.IsMain)
@@ -54,7 +54,10 @@ namespace Website.Repositories
                             Type = ((OrderProductTypes)y.Type).ToString(),
                             Quantity = y.Type == 0 ? y.Quantity : 0,
                             Price = y.Price,
-                            //Image = y.IsMain ? y.ProductOrder.Product.Image : null
+                            Image = y.IsMain ? new ImageViewModel { 
+                                Name = y.ProductOrder.Product.Media.Name,
+                                Url = y.ProductOrder.Product.Media.Url
+                            } : new ImageViewModel { }
                         })
                 })
                 .ToListAsync();
@@ -83,10 +86,14 @@ namespace Website.Repositories
                 {
                     Date = x.ProductOrder.Date.ToString("MMMM dd, yyyy"),
                     Name = x.Name,
-                    //Image = x.IsMain ? x.ProductOrder.Product.Image : null,
+                    Image = x.IsMain ? new ImageViewModel
+                    {
+                        Name = x.ProductOrder.Product.Media.Name,
+                        Url = x.ProductOrder.Product.Media.Url
+                    } : new ImageViewModel { },
                     Hoplink = x.ProductOrder.Product.Hoplink,
                     OrderNumber = x.OrderId,
-                    ProductId = x.ProductOrder.ProductId,
+                    ProductUrlId = x.ProductOrder.Product.UrlId,
                     UrlName = x.ProductOrder.Product.UrlName
                 })
                 .ToListAsync();

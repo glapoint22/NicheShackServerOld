@@ -63,11 +63,10 @@ namespace Website.Repositories
                 .AsNoTracking()
                 .SortBy(new ListProductViewModel(sort))
                 .Where(x => collaboratorIds
-                    //.Select(y => y.Id)
                     .Contains(x.CollaboratorId))
                 .Select(x => new ListProductViewModel
                 {
-                    Id = x.Product.Id,
+                    UrlId = x.Product.UrlId,
                     Title = x.Product.Name,
                     Rating = x.Product.Rating,
                     TotalReviews = x.Product.TotalReviews,
@@ -76,7 +75,11 @@ namespace Website.Repositories
                     DateAdded = x.DateAdded.ToString("MMMM dd, yyyy"),
                     Collaborator = x.Collaborator.CustomerId == customerId ? "you" : x.Collaborator.Customer.FirstName,
                     Hoplink = x.Product.Hoplink,
-                    //Image = x.Product.Image,
+                    Image = new ImageViewModel
+                    {
+                        Name = x.Product.Media.Name,
+                        Url = x.Product.Media.Url
+                    },
                     UrlTitle = x.Product.UrlName
                 })
                 .ToListAsync();

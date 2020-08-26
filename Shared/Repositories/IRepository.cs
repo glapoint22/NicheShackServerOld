@@ -23,6 +23,7 @@ namespace DataAccess.Repositories
         Task<IEnumerable<TOut>> GetCollection<TOut>(Expression<Func<T, TOut>> select);
         Task<IEnumerable<TOut>> GetCollection<TOut>() where TOut : class, new();
         Task<IEnumerable<TOut>> GetCollection<TOut>(Expression<Func<T, bool>> predicate) where TOut : class, new();
+        Task<IEnumerable<TOut>> GetCollection<TOut>(Expression<Func<T, int>> keySelector, Expression<Func<T, bool>> predicate, Expression<Func<T, TOut>> select);
 
 
 

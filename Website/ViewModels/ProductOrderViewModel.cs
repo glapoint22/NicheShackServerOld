@@ -22,9 +22,9 @@ namespace Website.ViewModels
         public double Discount { get; set; }
         public double Tax { get; set; }
         public double Total { get; set; }
-        public int ProductId { get; set; }
+        public string ProductUrlId { get; set; }
         public string Hoplink { get; set; }
-        public string UrlTitle { get; set; }
+        public string UrlName { get; set; }
         public IEnumerable<OrderProductInfoViewModel> Products { get; set; }
 
 
