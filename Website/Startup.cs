@@ -10,6 +10,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using DataAccess.Models;
 using Website.Repositories;
+using Microsoft.Extensions.FileProviders;
+using System.IO;
 
 namespace Website
 {
@@ -88,6 +90,12 @@ namespace Website
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "images")),
+                RequestPath = "/images"
+            });
 
             app.UseRouting();
 
