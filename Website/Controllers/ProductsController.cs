@@ -29,6 +29,7 @@ namespace Website.Controllers
             return Ok(await unitOfWork.Products.Get(x => x.UrlId == id, x => new
             {
                 id = x.Id,
+                urlId = x.UrlId,
                 title = x.Name,
                 minPrice = x.MinPrice,
                 maxPrice = x.MaxPrice,

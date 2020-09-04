@@ -7,7 +7,9 @@ namespace Website.ViewModels
     public class ProductDetailViewModel : ISelect<Product, ProductDetailViewModel>
     {
         public int Id { get; set; }
+        public string UrlId { get; set; }
         public string Name { get; set; }
+        public string UrlName { get; set; }
         public double Rating { get; set; }
         public int TotalReviews { get; set; }
         public double MinPrice { get; set; }
@@ -28,7 +30,9 @@ namespace Website.ViewModels
             return source.Select(x => new ProductDetailViewModel
             {
                 Id = x.Id,
+                UrlId = x.UrlId,
                 Name = x.Name,
+                UrlName = x.UrlName,
                 Rating = x.Rating,
                 TotalReviews = x.TotalReviews,
                 MinPrice = x.MinPrice,
