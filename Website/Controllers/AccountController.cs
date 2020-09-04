@@ -53,19 +53,20 @@ namespace Website.Controllers
                 // Create the new list and add it to the database
                 List newList = new List
                 {
-                    //Id = Guid.NewGuid().ToString("N").ToUpper(),
-                    Name = "Wish List",
+                    Id = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper(),
+                    Name = "My List",
                     Description = string.Empty,
                     CollaborateId = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper()
                 };
 
+
                 unitOfWork.Lists.Add(newList);
+
 
 
                 // Set the owner as the first collaborator of the list
                 ListCollaborator collaborator = new ListCollaborator
                 {
-                    //Id = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper(),
                     CustomerId = customer.Id,
                     ListId = newList.Id,
                     IsOwner = true
@@ -76,6 +77,7 @@ namespace Website.Controllers
 
                 // Save all updates to the database
                 await unitOfWork.Save();
+
 
 
                 // The new customer was successfully added to the database

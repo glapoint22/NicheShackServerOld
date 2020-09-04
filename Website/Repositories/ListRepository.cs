@@ -73,7 +73,7 @@ namespace Website.Repositories
                     MinPrice = x.Product.MinPrice,
                     MaxPrice = x.Product.MaxPrice,
                     DateAdded = x.DateAdded.ToString("MMMM dd, yyyy"),
-                    Collaborator = x.Collaborator.CustomerId == customerId ? "you" : x.Collaborator.Customer.FirstName,
+                    Collaborator = customerId != null ? (x.Collaborator.CustomerId == customerId ? "you" : x.Collaborator.Customer.FirstName): null,
                     Hoplink = x.Product.Hoplink,
                     Image = new ImageViewModel
                     {

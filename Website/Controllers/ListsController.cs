@@ -56,8 +56,35 @@ namespace Website.Controllers
             // Get the customer Id from the access token
             string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
-            
+
             return Ok(await unitOfWork.Lists.GetLists(customerId));
+        }
+
+
+
+
+
+        // ..................................................................................Get Dropdown Lists......................................................................
+        [HttpGet]
+        [Route("DropdownLists")]
+        [Authorize(Policy = "Account Policy")]
+        public async Task<ActionResult> GetDropdownLists()
+        {
+            // Get the customer Id from the access token
+            string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+            IEnumerable<string> listIds = await unitOfWork.Collaborators.GetCollection(x => x.CustomerId == customerId, x => x.ListId);
+
+
+            // The customer's lists
+            var lists = await unitOfWork.Lists.GetCollection(x => listIds.Contains(x.Id),
+            x => new
+            {
+                x.Id,
+                x.Name
+            });
+
+            return Ok(lists);
         }
 
 
@@ -122,10 +149,13 @@ namespace Website.Controllers
         // ..................................................................................Get List Products......................................................................
         [HttpGet]
         [Route("Products")]
-        public async Task<ActionResult> GetListProducts(string listId, string sort = "")
+        public async Task<ActionResult> GetListProducts(string listId, bool shared, string sort = "")
         {
+            string customerId = null;
+
             // Get the customer Id
-            string customerId = await unitOfWork.Collaborators.Get(x => x.ListId == listId && x.IsOwner, x => x.CustomerId);
+            if(!shared) customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+
 
             // Get all collaborator ids from this list
             IEnumerable<int> collaboratorIds = await unitOfWork.Collaborators
@@ -143,7 +173,7 @@ namespace Website.Controllers
         // ..................................................................................Create List....................................................................
         [HttpPost]
         [Authorize(Policy = "Account Policy")]
-        public async Task<ActionResult> CreateList(List list)
+        public async Task<ActionResult> CreateList(NewList list)
         {
             // Make sure the list name is not empty
             if (list.Name == null) return BadRequest(ModelState);
@@ -160,7 +190,7 @@ namespace Website.Controllers
                 Id = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper(),
                 Name = list.Name,
                 Description = list.Description,
-                CollaborateId = Guid.NewGuid().ToString("N").ToUpper()
+                CollaborateId = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper()
             };
 
             unitOfWork.Lists.Add(newList);
@@ -169,7 +199,6 @@ namespace Website.Controllers
             // Set the owner as the first collaborator of the list
             ListCollaborator collaborator = new ListCollaborator
             {
-                //Id = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper(),
                 CustomerId = customerId,
                 ListId = newList.Id,
                 IsOwner = true
@@ -188,6 +217,51 @@ namespace Website.Controllers
                 listId = newList.Id
             });
         }
+
+
+
+
+
+
+
+
+
+
+        // ..................................................................................Add Product....................................................................
+        [HttpPost]
+        [Route("AddProduct")]
+        [Authorize(Policy = "Account Policy")]
+        public async Task<ActionResult> AddProduct(NewListProduct newListProduct)
+        {
+            IEnumerable<int> collaboratorIds = await unitOfWork.Collaborators.GetCollection(x => x.ListId == newListProduct.ListId, x => x.Id);
+            int count = await unitOfWork.ListProducts.GetCount(x => collaboratorIds.Contains(x.CollaboratorId) && x.ProductId == newListProduct.ProductId);
+
+
+            if (count != 0) return Ok(true);
+
+            // Get the customer id from the access token
+            string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+
+            int collaboratorId = await unitOfWork.Collaborators.Get(x => x.CustomerId == customerId && x.ListId == newListProduct.ListId, x => x.Id);
+
+
+            
+
+
+            unitOfWork.ListProducts.Add(new ListProduct { 
+                ProductId = newListProduct.ProductId,
+                CollaboratorId = collaboratorId,
+                DateAdded = DateTime.Now
+            });
+
+            await unitOfWork.Save();
+
+            return Ok();
+        }
+
+
+
 
 
 

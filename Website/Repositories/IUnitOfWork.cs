@@ -23,6 +23,8 @@ namespace Website.Repositories
         IRepository<Customer> Customers { get; }
         IRepository<ListProduct> ListProducts { get; }
         IRepository<Media> Media { get; }
+        IRepository<Notification> Notifications { get; }
+        IRepository<NotificationText> NotificationText { get; }
 
 
 

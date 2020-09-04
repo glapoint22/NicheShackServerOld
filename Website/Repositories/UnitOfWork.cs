@@ -22,6 +22,8 @@ namespace Website.Repositories
         public IRepository<Customer> Customers { get; }
         public IRepository<ListProduct> ListProducts { get; }
         public IRepository<Media> Media { get; }
+        public IRepository<Notification> Notifications { get; }
+        public IRepository<NotificationText> NotificationText { get; }
 
 
         // Declare the Nicheshack context
@@ -46,6 +48,8 @@ namespace Website.Repositories
             Customers = new Repository<Customer>(context);
             ListProducts = new Repository<ListProduct>(context);
             Media = new Repository<Media>(context);
+            Notifications = new Repository<Notification>(context);
+            NotificationText = new Repository<NotificationText>(context);
         }
 
 
