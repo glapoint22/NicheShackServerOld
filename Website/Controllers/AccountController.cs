@@ -17,6 +17,10 @@ using Website.Classes;
 using DataAccess.Models;
 using Website.Repositories;
 using Website.ViewModels;
+using Microsoft.AspNetCore.Http;
+using System.Drawing;
+using System.IO;
+using System.Drawing.Imaging;
 
 namespace Website.Controllers
 {
@@ -242,6 +246,121 @@ namespace Website.Controllers
 
 
 
+        // ..................................................................................Update Profile Picture.....................................................................
+        [HttpPost, DisableRequestSizeLimit]
+        [Route("UpdateProfilePicture")]
+        public async Task<ActionResult> UpdateImage()
+        {
+
+            // Get the new image
+            IFormFile imageFile = Request.Form.Files["image"];
+
+            Bitmap bmp;
+            StringValues width;
+            StringValues height;
+            StringValues scale;
+
+
+
+            Request.Form.TryGetValue("width", out width);
+            Request.Form.TryGetValue("height", out height);
+            Request.Form.TryGetValue("scale", out scale);
+
+
+
+            decimal originalWidth = Convert.ToDecimal(width);
+            decimal originalHeight = Convert.ToDecimal(height);
+            decimal scaleValue = Convert.ToDecimal(scale);
+
+
+
+
+            using (var memoryStream = new MemoryStream())
+            {
+                await imageFile.CopyToAsync(memoryStream);
+                using (var img = Image.FromStream(memoryStream))
+                {
+
+                    bmp = new Bitmap(img);
+                    
+                }
+
+
+            }
+
+
+           
+
+
+
+            
+            var scaleWidth = (int)(originalWidth * scaleValue);
+            var scaleHeight = (int)(originalHeight * scaleValue);
+            var scaledBitmap = new Bitmap(scaleWidth, scaleHeight);
+
+
+            Graphics graph = Graphics.FromImage(scaledBitmap);
+
+            graph.DrawImage(bmp, 0, 0, scaleWidth, scaleHeight);
+
+
+
+            Bitmap crpImg = new Bitmap(300, 300);
+
+            for (int i = 0; i < 300; i++)
+            {
+                for (int y = 0; y < 300; y++)
+                {
+                    Color pxlclr = scaledBitmap.GetPixel(22 + i, 22 + y);
+                    crpImg.SetPixel(i, y, pxlclr);
+                }
+            }
+
+
+
+            string imagesFolder = Path.Combine(Directory.GetCurrentDirectory(), "images");
+            string filePath = Path.Combine(imagesFolder, "willow.png");
+
+            crpImg.Save(filePath, ImageFormat.Png);
+
+
+            return Ok();
+        }
+
+
+
+
+        private async Task<string> CopyImage(IFormFile imageFile)
+        {
+            // This will get the file extension
+            Regex regex = new Regex(@"\.(jpg|jpeg|gif|png|bmp|tiff|tga|svg|webp)$", RegexOptions.IgnoreCase);
+            Match match = regex.Match(imageFile.FileName);
+            string fileExtension = match.Value;
+
+
+            // Create a new unique name for the image
+            string imageUrl = Guid.NewGuid().ToString("N") + fileExtension;
+
+            // Place the new image into the images folder
+            string imagesFolder = Path.Combine(Directory.GetCurrentDirectory(), "images");
+            string filePath = Path.Combine(imagesFolder, imageUrl);
+
+            // Create the file stream
+            var fileStream = new FileStream(filePath, FileMode.Create);
+
+            // Copy to image to the images folder
+            await imageFile.CopyToAsync(fileStream);
+
+
+            // Close the file stream
+            fileStream.Close();
+
+
+            return imageUrl;
+        }
+
+
+
 
 
         // ..................................................................................Refresh.....................................................................
@@ -341,7 +460,8 @@ namespace Website.Controllers
                         {
                             FirstName = customer.FirstName,
                             LastName = customer.LastName,
-                            Email = customer.Email
+                            Email = customer.Email,
+                            Image = customer.image
                         };
                     }
                 }
