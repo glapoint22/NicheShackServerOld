@@ -183,7 +183,7 @@ namespace Website.Controllers
             // If the customer is found...
             if (customer != null)
             {
-                if(!await userManager.CheckPasswordAsync(customer, updatedEmail.Password))
+                if (!await userManager.CheckPasswordAsync(customer, updatedEmail.Password))
                 {
                     return Conflict("Your password and current email do not match.");
                 }
@@ -201,7 +201,7 @@ namespace Website.Controllers
                 {
                     string error = string.Empty;
 
-                    if(result.Errors.Count(x => x.Code == "DuplicateEmail") == 1)
+                    if (result.Errors.Count(x => x.Code == "DuplicateEmail") == 1)
                     {
                         error = "The email address, \"" + updatedEmail.Email.ToLower() + ",\" already exists with another Niche Shack account. Please use another email address.";
                     }
@@ -247,85 +247,74 @@ namespace Website.Controllers
         }
 
 
-
-        // ..................................................................................Update Profile Picture.....................................................................
+        // ..................................................................................Copy Profile Picture.....................................................................
         [HttpPost, DisableRequestSizeLimit]
-        [Route("UpdateProfilePicture")]
-        public async Task<ActionResult> UpdateImage()
+        [Route("CopyProfilePicture")]
+        [Authorize(Policy = "Account Policy")]
+        public async Task<ActionResult> CopyProfilePicture()
         {
-
             // Get the new image
             IFormFile imageFile = Request.Form.Files["image"];
 
-            Bitmap bmp;
-            StringValues width;
-            StringValues height;
-            StringValues scale;
+            // Copy the image to the images folder
+            string imageUrl = await CopyImage(imageFile);
+
+            return Ok(imageUrl);
+        }
 
 
-
-            Request.Form.TryGetValue("width", out width);
-            Request.Form.TryGetValue("height", out height);
-            Request.Form.TryGetValue("scale", out scale);
-
-
-
-            decimal originalWidth = Convert.ToDecimal(width);
-            decimal originalHeight = Convert.ToDecimal(height);
-            decimal scaleValue = Convert.ToDecimal(scale);
+        // ..................................................................................Update Profile Picture.....................................................................
+        [HttpPost]
+        [Route("UpdateProfilePicture")]
+        [Authorize(Policy = "Account Policy")]
+        public async Task<ActionResult> UpdateImage(ProfilePic profilePic)
+        {
+            string imagesFolder = Path.Combine(Directory.GetCurrentDirectory(), "images");
+            string tempImage = imagesFolder + "\\" + profilePic.Image;
 
 
-
-
-            using (var memoryStream = new MemoryStream())
+            //Scale
+            Bitmap scaledBitmap = new Bitmap(profilePic.Width, profilePic.Height);
+            Graphics graph = Graphics.FromImage(scaledBitmap);
+            using (Bitmap tempBitmap = new Bitmap(tempImage))
             {
-                await imageFile.CopyToAsync(memoryStream);
-                using (var img = Image.FromStream(memoryStream))
-                {
-
-                    bmp = new Bitmap(img);
-                    
-                }
-
-
+                graph.DrawImage(tempBitmap, 0, 0, profilePic.Width, profilePic.Height);
             }
 
-
-           
-
-
-
-            
-            var scaleWidth = (int)(originalWidth * scaleValue);
-            var scaleHeight = (int)(originalHeight * scaleValue);
-            var scaledBitmap = new Bitmap(scaleWidth, scaleHeight);
-
-
-            Graphics graph = Graphics.FromImage(scaledBitmap);
-
-            graph.DrawImage(bmp, 0, 0, scaleWidth, scaleHeight);
+            // Delete the temp image
+            System.IO.File.Delete(tempImage);
 
 
 
-            Bitmap crpImg = new Bitmap(300, 300);
-
+            //Crop
+            Bitmap croppedBitmap = new Bitmap(300, 300);
             for (int i = 0; i < 300; i++)
             {
                 for (int y = 0; y < 300; y++)
                 {
-                    Color pxlclr = scaledBitmap.GetPixel(22 + i, 22 + y);
-                    crpImg.SetPixel(i, y, pxlclr);
+                    Color pxlclr = scaledBitmap.GetPixel(profilePic.CropLeft + i, profilePic.CropTop + y);
+                    croppedBitmap.SetPixel(i, y, pxlclr);
                 }
             }
 
 
+            //Create the new image
+            string imageName = Guid.NewGuid().ToString("N") + ".png";
+            string newImage = Path.Combine(imagesFolder, imageName);
+            croppedBitmap.Save(newImage, ImageFormat.Png);
 
-            string imagesFolder = Path.Combine(Directory.GetCurrentDirectory(), "images");
-            string filePath = Path.Combine(imagesFolder, "willow.png");
 
-            crpImg.Save(filePath, ImageFormat.Png);
+            //Get the customer associated with this profile pic
+            string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            Customer customer = await unitOfWork.Customers.Get(x => x.Id == customerId);
 
 
+            //Update the customer's profile picture
+            customer.image = imageName;
+            unitOfWork.Customers.Update(customer);
+
+            //Save
+            await unitOfWork.Save();
             return Ok();
         }
 
@@ -452,7 +441,7 @@ namespace Website.Controllers
             {
                 Claim claim = User.FindFirst(ClaimTypes.NameIdentifier);
 
-                if(claim != null)
+                if (claim != null)
                 {
                     Customer customer = await userManager.FindByIdAsync(claim.Value);
 
@@ -467,7 +456,7 @@ namespace Website.Controllers
                         };
                     }
                 }
-                
+
             }
 
             return Ok(customerDTO);
