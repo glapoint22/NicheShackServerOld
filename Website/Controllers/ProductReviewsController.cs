@@ -80,7 +80,11 @@ namespace Website.Controllers
             {
                 id = x.Id,
                 title = x.Name,
-                //image = x.Image
+                image = new
+                {
+                    name = x.Media.Name,
+                    url = x.Media.Url
+                }
             });
 
 
