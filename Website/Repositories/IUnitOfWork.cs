@@ -25,6 +25,7 @@ namespace Website.Repositories
         IRepository<Media> Media { get; }
         IRepository<Notification> Notifications { get; }
         IRepository<NotificationText> NotificationText { get; }
+        IRepository<Page> Pages { get; }
 
 
 

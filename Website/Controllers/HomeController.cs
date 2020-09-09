@@ -22,7 +22,7 @@ namespace Website.Controllers
         // ..................................................................................Get.....................................................................
         public async Task<ActionResult> Get()
         {
-            return Ok();
+            return Ok(await unitOfWork.Pages.Get(x => x.Name == "Home", x => x.Content));
         }
     }
 }
