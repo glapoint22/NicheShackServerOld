@@ -247,27 +247,119 @@ namespace Website.Controllers
         }
 
 
-        // ..................................................................................Copy Profile Picture.....................................................................
+        
+
+
+
+
+        // ..................................................................................New Profile Picture.....................................................................
         [HttpPost, DisableRequestSizeLimit]
-        [Route("CopyProfilePicture")]
+        [Route("NewProfilePicture")]
         [Authorize(Policy = "Account Policy")]
-        public async Task<ActionResult> CopyProfilePicture()
+        public async Task<ActionResult> NewImage()
         {
-            // Get the new image
-            IFormFile imageFile = Request.Form.Files["image"];
+            string imagesFolder = Path.Combine(Directory.GetCurrentDirectory(), "images");
 
-            // Copy the image to the images folder
-            string imageUrl = await CopyImage(imageFile);
 
-            return Ok(imageUrl);
+            //Get the form data
+            IFormFile imageFile = Request.Form.Files["newImage"];
+            Request.Form.TryGetValue("width", out StringValues width);
+            Request.Form.TryGetValue("height", out StringValues height);
+            Request.Form.TryGetValue("cropTop", out StringValues cropTop);
+            Request.Form.TryGetValue("cropLeft", out StringValues cropLeft);
+            Request.Form.TryGetValue("currentImage", out StringValues currentImage);
+
+
+            //Convert from image file to bitmap
+            Bitmap tempBitmap;
+            using (var memoryStream = new MemoryStream())
+            {
+                await imageFile.CopyToAsync(memoryStream);
+                using (var tempImage = Image.FromStream(memoryStream))
+                {
+                    tempBitmap = new Bitmap(tempImage);
+                }
+            }
+
+
+            //Convert from string to int
+            int profilePicWidth = Convert.ToInt32(width);
+            int profilePicHeight = Convert.ToInt32(height);
+            int profilePicCropTop = Convert.ToInt32(cropTop);
+            int profilePicCropLeft = Convert.ToInt32(cropLeft);
+
+
+
+            //Scale
+            Bitmap scaledBitmap = new Bitmap(profilePicWidth, profilePicHeight);
+            Graphics graph = Graphics.FromImage(scaledBitmap);
+            graph.DrawImage(tempBitmap, 0, 0, profilePicWidth, profilePicHeight);
+
+
+            //If the customer currently has an image assigned to their profile
+            if(!String.IsNullOrEmpty(currentImage))
+            {
+                // Delete that customer's current image
+                System.IO.File.Delete(imagesFolder + "\\" + currentImage);
+            }
+
+
+            //Crop
+            Bitmap croppedBitmap = new Bitmap(300, 300);
+            for (int i = 0; i < 300; i++)
+            {
+                for (int y = 0; y < 300; y++)
+                {
+                    Color pxlclr = scaledBitmap.GetPixel(profilePicCropLeft + i, profilePicCropTop + y);
+                    croppedBitmap.SetPixel(i, y, pxlclr);
+                }
+            }
+
+
+            //Create the new image
+            string imageName = Guid.NewGuid().ToString("N") + ".png";
+            string newImage = Path.Combine(imagesFolder, imageName);
+            croppedBitmap.Save(newImage, ImageFormat.Png);
+
+
+            //Get the customer associated with this profile pic
+            string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            Customer customer = await unitOfWork.Customers.Get(x => x.Id == customerId);
+
+
+            //Update the customer's profile picture
+            customer.image = imageName;
+            unitOfWork.Customers.Update(customer);
+
+            //Save
+            await unitOfWork.Save();
+            return Ok(imageName);
         }
 
 
-        // ..................................................................................Update Profile Picture.....................................................................
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // ..................................................................................Edit Profile Picture.....................................................................
         [HttpPost]
-        [Route("UpdateProfilePicture")]
+        [Route("EditProfilePicture")]
         [Authorize(Policy = "Account Policy")]
-        public async Task<ActionResult> UpdateImage(ProfilePic profilePic)
+        public async Task<ActionResult> EditImage(ProfilePic profilePic)
         {
             string imagesFolder = Path.Combine(Directory.GetCurrentDirectory(), "images");
             string tempImage = imagesFolder + "\\" + profilePic.Image;
@@ -315,41 +407,13 @@ namespace Website.Controllers
 
             //Save
             await unitOfWork.Save();
-            return Ok();
+            return Ok(imageName);
         }
 
 
 
 
-        private async Task<string> CopyImage(IFormFile imageFile)
-        {
-            // This will get the file extension
-            Regex regex = new Regex(@"\.(jpg|jpeg|gif|png|bmp|tiff|tga|svg|webp)$", RegexOptions.IgnoreCase);
-            Match match = regex.Match(imageFile.FileName);
-            string fileExtension = match.Value;
-
-
-            // Create a new unique name for the image
-            string imageUrl = Guid.NewGuid().ToString("N") + fileExtension;
-
-            // Place the new image into the images folder
-            string imagesFolder = Path.Combine(Directory.GetCurrentDirectory(), "images");
-            string filePath = Path.Combine(imagesFolder, imageUrl);
-
-            // Create the file stream
-            var fileStream = new FileStream(filePath, FileMode.Create);
-
-            // Copy to image to the images folder
-            await imageFile.CopyToAsync(fileStream);
-
-
-            // Close the file stream
-            fileStream.Close();
-
-
-            return imageUrl;
-        }
-
+       
 
 
 
