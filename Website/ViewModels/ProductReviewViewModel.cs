@@ -13,6 +13,7 @@ namespace Website.ViewModels
         public string Title { get; set; }
         public double Rating { get; set; }
         public string Username { get; set; }
+        public string UserImage { get; set; }
         public string Date { get; set; }
         public bool IsVerified { get; set; }
         public string Text { get; set; }
@@ -67,6 +68,7 @@ namespace Website.ViewModels
                 ProductId = x.ProductId,
                 Rating = x.Rating,
                 Username = x.Customer.ReviewName,
+                UserImage = x.Customer.image,
                 Date = x.Date.ToString("MMMM dd, yyyy"),
                 IsVerified = x.Product.ProductOrders.Count(z => z.CustomerId == x.CustomerId && z.ProductId == x.ProductId) > 0,
                 Text = x.Text,
