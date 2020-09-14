@@ -53,5 +53,39 @@ namespace Website.Controllers
 
             return Ok();
         }
+
+
+        [HttpPost]
+        [Route("Message")]
+        public async Task<ActionResult> PostMessage(MessageNotification messageNotification)
+        {
+            Notification notification = new Notification
+            {
+                ProductId = null,
+                Type = 0,
+                State = 0
+            };
+
+            unitOfWork.Notifications.Add(notification);
+
+            await unitOfWork.Save();
+
+            NotificationText notificationText = new NotificationText
+            {
+                CustomerId = User.FindFirst(ClaimTypes.NameIdentifier) != null ? User.FindFirst(ClaimTypes.NameIdentifier).Value : null,
+                NotificationId = notification.Id,
+                TimeStamp = DateTime.Now,
+                Type = 0,
+                Text = messageNotification.Message,
+                Email = messageNotification.Email,
+                Name = messageNotification.Name
+            };
+
+
+            unitOfWork.NotificationText.Add(notificationText);
+            await unitOfWork.Save();
+
+            return Ok();
+        }
     }
 }

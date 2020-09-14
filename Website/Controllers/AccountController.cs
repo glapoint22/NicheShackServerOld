@@ -247,10 +247,8 @@ namespace Website.Controllers
         }
 
 
+
         
-
-
-
 
         // ..................................................................................New Profile Picture.....................................................................
         [HttpPost, DisableRequestSizeLimit]
@@ -297,7 +295,7 @@ namespace Website.Controllers
 
 
             //If the customer currently has an image assigned to their profile
-            if(!String.IsNullOrEmpty(currentImage))
+            if (!String.IsNullOrEmpty(currentImage))
             {
                 // Delete that customer's current image
                 System.IO.File.Delete(imagesFolder + "\\" + currentImage);
@@ -413,7 +411,7 @@ namespace Website.Controllers
 
 
 
-       
+
 
 
 

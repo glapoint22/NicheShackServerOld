@@ -41,6 +41,8 @@
     <Compile Remove="Migrations\20200809174008_UpdatedVendor.Designer.cs" />
     <Compile Remove="Migrations\20200812195550_UpdatedProducts.cs" />
     <Compile Remove="Migrations\20200812195550_UpdatedProducts.Designer.cs" />
+    <Compile Remove="Migrations\20200913172110_AddedIdFieldToNotificationText.cs" />
+    <Compile Remove="Migrations\20200913172110_AddedIdFieldToNotificationText.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

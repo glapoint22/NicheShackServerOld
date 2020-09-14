@@ -115,8 +115,13 @@ namespace DataAccess.Models
             // NotificationText
             modelBuilder.Entity<NotificationText>(entity =>
             {
-                entity.HasKey(e => new { e.CustomerId, e.NotificationId })
-                    .HasName("PK_NotificationText");
+                entity.HasOne(x => x.Customer)
+                .WithMany(x => x.NotificationText)
+                .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(x => x.Notification)
+                .WithMany(x => x.NotificationText)
+                .OnDelete(DeleteBehavior.Cascade);
             });
 
 
