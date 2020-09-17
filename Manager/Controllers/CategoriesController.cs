@@ -30,6 +30,24 @@ namespace Manager.Controllers
 
 
 
+
+        [HttpGet]
+        [Route("Detail")]
+        public async Task<ActionResult> GetCategoriesWithIcon()
+        {
+            return Ok(await unitOfWork.Categories.GetCollection(x => new { 
+                name = x.Name,
+                urlName = x.UrlName,
+                icon = new
+                {
+                    name = x.Media.Name,
+                    url = x.Media.Url
+                }
+            }));
+        }
+
+
+
         [HttpPut]
         public async Task<ActionResult> UpdateCategoryName(ItemViewModel category)
         {
