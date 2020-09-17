@@ -7,9 +7,7 @@ namespace Manager.Classes
 {
     public struct UpdatedNotification
     {
-        public int ProductId { get; set; }
-        public int Type { get; set; }
-        public int CurrentState { get; set; }
+        public int Id { get; set; }
         public int DestinationState { get; set; }
     }
 }

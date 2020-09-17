@@ -35,7 +35,7 @@ namespace Manager.Controllers
             // Message
             if (type == NotificationType.Message)
             {
-                notification = await unitOfWork.Notifications.Get<NotificationViewModel>(x => x.Id == id);
+                notification = await unitOfWork.Notifications.Get<MessageNotificationViewModel>(x => x.Id == id);
             }
 
             // General Notification
@@ -107,7 +107,15 @@ namespace Manager.Controllers
         [Route("Load")]
         public async Task<ActionResult> Load()
         {
-            return Ok(await unitOfWork.Notifications.GetCollection<NotificationListItemViewModel>(x => x.State == 0 || x.State == 1));
+
+            var notifications = await unitOfWork.Notifications.GetCollection<NotificationListItemViewModel>(x => x.State == 0 || x.State == 1);
+
+            foreach(NotificationListItemViewModel notification in notifications)
+            {
+                notification.Count = await unitOfWork.Notifications.GetCount(x => x.State == notification.State && x.ProductId == notification.ProductId && x.Type == notification.Type);
+            }
+
+            return Ok(notifications);
         }
 
 
@@ -146,26 +154,11 @@ namespace Manager.Controllers
         [Route("State")]
         public async Task<ActionResult> UpdateState(UpdatedNotification updatedNotification)
         {
-            IEnumerable<Notification> notifications = null;
+            var notification = await unitOfWork.Notifications.Get(updatedNotification.Id);
 
-            if (updatedNotification.ProductId == 0)
-            {
-                notifications = await unitOfWork.Notifications.GetCollection(x => x.Type == updatedNotification.Type && x.State == updatedNotification.CurrentState);
-            }
-            else
-            {
-                notifications = await unitOfWork.Notifications.GetCollection(x => x.ProductId == updatedNotification.ProductId && x.Type == updatedNotification.Type && x.State == updatedNotification.CurrentState);
-            }
+            notification.State = updatedNotification.DestinationState;
 
-
-
-            foreach (Notification notification in notifications)
-            {
-
-                notification.State = updatedNotification.DestinationState;
-
-                unitOfWork.Notifications.Update(notification);
-            }
+            unitOfWork.Notifications.Update(notification);
 
             //Save
             await unitOfWork.Save();

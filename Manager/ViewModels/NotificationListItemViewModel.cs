@@ -13,6 +13,8 @@ namespace Manager.ViewModels
         public string ListIcon { get; set; }
         public int Type { get; set; }
         public int State { get; set; }
+        public int Count { get; set; }
+
 
 
 
