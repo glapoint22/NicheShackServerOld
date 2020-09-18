@@ -26,7 +26,7 @@ namespace Manager.ViewModels
                 ProductId = x.ProductId,
                 Type = x.Type,
                 Name = Utility.GetNotificationName(x.Type),
-                ListIcon = x.Type > 1 ? x.Product.Media.Url : x.Type == 0 ? "message.png" : "review-complaint.png"
+                ListIcon = x.Type > 0 ? x.Product.Media.Url :"message.png"
             }).Distinct();
         }
     }

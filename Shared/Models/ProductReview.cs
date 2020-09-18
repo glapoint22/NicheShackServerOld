@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -25,5 +26,12 @@ namespace DataAccess.Models
         public int Dislikes { get; set; }
         public virtual Product Product { get; set; }
         public virtual Customer Customer { get; set; }
+        public virtual ICollection<NotificationText> NotificationText { get; set; }
+
+
+        public ProductReview()
+        {
+            NotificationText = new HashSet<NotificationText>();
+        }
     }
 }

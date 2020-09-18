@@ -54,7 +54,7 @@ namespace Manager.Controllers
             // Review Complaint Notification
             if (type == NotificationType.ReviewComplaint)
             {
-                notification = await unitOfWork.Notifications.Get<GeneralNotificationViewModel>(x => x.Id == id);
+                notification = await unitOfWork.Notifications.Get<ReviewComplaintNotificationViewModel>(x => x.Id == id);
             }
 
             // Product Description Notification

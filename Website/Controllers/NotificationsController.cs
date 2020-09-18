@@ -42,6 +42,7 @@ namespace Website.Controllers
             {
                 CustomerId = User.FindFirst(ClaimTypes.NameIdentifier).Value,
                 NotificationId = notification.Id,
+                ReviewId = notificationData.ReviewId,
                 TimeStamp = DateTime.Now,
                 Type = 0,
                 Text = notificationData.Comments
