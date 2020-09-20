@@ -117,7 +117,7 @@ namespace Website.Controllers
                 return Ok(response);
             }
 
-            return NoContent();
+            return NotFound();
         }
 
 

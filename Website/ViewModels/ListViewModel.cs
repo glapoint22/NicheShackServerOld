@@ -7,6 +7,7 @@
         public string Description { get; set; }
         public int TotalItems { get; set; }
         public string Owner { get; set; }
+        public string ProfilePic { get; set; }
         public string CollaborateId { get; set; }
     }
 }

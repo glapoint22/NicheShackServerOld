@@ -8,6 +8,7 @@ using DataAccess.Models;
 using DataAccess.Repositories;
 using DataAccess.Classes;
 using Website.ViewModels;
+using DataAccess.ViewModels;
 
 namespace Website.Repositories
 {
@@ -45,7 +46,11 @@ namespace Website.Repositories
                         .Where(y => y.ListId == x.ListId && y.IsOwner)
                         .Select(y => y.CustomerId == customerId ? "You" : y.Customer.FirstName)
                         .FirstOrDefault(),
-                    CollaborateId = x.List.CollaborateId
+                    CollaborateId = x.List.CollaborateId,
+                    ProfilePic = x.List.Collaborators
+                        .Where(y => y.ListId == x.ListId && y.IsOwner)
+                        .Select(y => y.Customer.image)
+                        .FirstOrDefault()
                 })
                 .ToListAsync();
         }
@@ -66,6 +71,7 @@ namespace Website.Repositories
                     .Contains(x.CollaboratorId))
                 .Select(x => new ListProductViewModel
                 {
+                    Id = x.Product.Id,
                     UrlId = x.Product.UrlId,
                     Title = x.Product.Name,
                     Rating = x.Product.Rating,
@@ -73,7 +79,12 @@ namespace Website.Repositories
                     MinPrice = x.Product.MinPrice,
                     MaxPrice = x.Product.MaxPrice,
                     DateAdded = x.DateAdded.ToString("MMMM dd, yyyy"),
-                    Collaborator = customerId != null ? (x.Collaborator.CustomerId == customerId ? "you" : x.Collaborator.Customer.FirstName): null,
+                    Collaborator = customerId != null ? new CollaboratorViewModel
+                    {
+                        Id = x.CollaboratorId,
+                        Name = x.Collaborator.CustomerId == customerId ? "you" : x.Collaborator.Customer.FirstName,
+                        Image = x.Collaborator.Customer.image
+                    } : null,
                     Hoplink = x.Product.Hoplink,
                     Image = new ImageViewModel
                     {

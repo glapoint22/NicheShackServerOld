@@ -9,6 +9,7 @@ using Website.Classes;
 using DataAccess.Models;
 using Website.Repositories;
 using Website.ViewModels;
+using DataAccess.ViewModels;
 
 namespace Website.Controllers
 {
@@ -43,7 +44,17 @@ namespace Website.Controllers
         [Route("ListOwner")]
         public async Task<ActionResult> GetListOwner(string listId)
         {
-            return Ok(await unitOfWork.Collaborators.Get(x => x.ListId == listId && x.IsOwner, x => x.Customer.FirstName));
+            string ownerName = await unitOfWork.Collaborators.Get(x => x.ListId == listId && x.IsOwner, x => x.Customer.FirstName);
+
+            if(ownerName != null)
+            {
+                return Ok(ownerName);
+            } else
+            {
+                return NotFound();
+            }
+
+            
         }
 
 
@@ -272,7 +283,7 @@ namespace Website.Controllers
         // ..................................................................................Update List....................................................................
         [HttpPut]
         [Authorize(Policy = "Account Policy")]
-        public async Task<ActionResult> UpdateList(List list)
+        public async Task<ActionResult> UpdateList(UpdatedList list)
         {
             // Get the customer id from the access token
             string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
@@ -367,6 +378,136 @@ namespace Website.Controllers
             }
 
             return NotFound();
+        }
+
+
+
+
+
+
+        // .........................................................................Remove Product.....................................................................
+        [Route("Product")]
+        [HttpDelete]
+        [Authorize(Policy = "Account Policy")]
+        public async Task<ActionResult> RemoveProduct(int productId, int collaboratorId)
+        {
+            ListProduct listProduct = await unitOfWork.ListProducts.Get(x => x.ProductId == productId && x.CollaboratorId == collaboratorId);
+
+            unitOfWork.ListProducts.Remove(listProduct);
+
+            await unitOfWork.Save();
+
+            return Ok();
+        }
+
+
+
+
+
+
+
+        // .........................................................................Move Product.....................................................................
+        [Route("Product")]
+        [HttpPut]
+        [Authorize(Policy = "Account Policy")]
+        public async Task<ActionResult> MoveProduct(MovedListProduct movedListProduct)
+        {
+            ListProduct listProduct = await unitOfWork.ListProducts.Get(x => x.ProductId == movedListProduct.ProductId && x.CollaboratorId == movedListProduct.CollaboratorId);
+
+            unitOfWork.ListProducts.Remove(listProduct);
+
+            // Get the customer id from the access token
+            string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+            int collaboratorId = await unitOfWork.Collaborators.Get(x => x.CustomerId == customerId && x.ListId == movedListProduct.ListId, x => x.Id);
+
+            unitOfWork.ListProducts.Add(new ListProduct { 
+                ProductId = movedListProduct.ProductId,
+                CollaboratorId = collaboratorId,
+                DateAdded = DateTime.Now
+            });
+
+
+
+            await unitOfWork.Save();
+
+            return Ok();
+        }
+
+
+
+
+
+
+        // .........................................................................Get List Info.....................................................................
+        [Route("ListInfo")]
+        [HttpGet]
+        [Authorize(Policy = "Account Policy")]
+        public async Task<ActionResult> GetListInfo(string collaborateId)
+        {
+            Customer customer = null;
+
+            List list = await unitOfWork.Lists.Get(x => x.CollaborateId == collaborateId);
+
+            if(list == null)
+            {
+                return NotFound();
+            }
+
+            
+
+
+            bool exists = await unitOfWork.Collaborators.Any(x => x.CustomerId == User.FindFirst(ClaimTypes.NameIdentifier).Value && x.ListId == list.Id);
+
+
+
+            
+
+
+            if (!exists)
+            {
+                string customerId = await unitOfWork.Collaborators.Get(x => x.ListId == list.Id && x.IsOwner, x => x.CustomerId);
+                customer = await unitOfWork.Customers.Get(customerId);
+            }
+
+
+            return Ok(new {
+                listId = list.Id,
+                ownerName = customer != null ? customer.FirstName : null,
+                profilePic = customer != null ? customer.image: null,
+                listName = list.Name,
+                exists
+            });
+        }
+
+
+
+
+
+
+
+
+
+        // .........................................................................Add Collaborator.....................................................................
+        [Route("Collaborator")]
+        [HttpPut]
+        [Authorize(Policy = "Account Policy")]
+        public async Task<ActionResult> AddCollaborator(ItemViewModel itemViewModel)
+        {
+            // Get the customer id from the access token
+            string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+            string listId = await unitOfWork.Lists.Get(x => x.CollaborateId == itemViewModel.Name, x => x.Id);
+
+            unitOfWork.Collaborators.Add(new ListCollaborator { 
+                CustomerId = customerId,
+                ListId = listId
+            });
+
+
+            await unitOfWork.Save();
+
+            return Ok();
         }
     }
 }
