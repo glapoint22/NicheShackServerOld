@@ -21,6 +21,9 @@ using Microsoft.AspNetCore.Http;
 using System.Drawing;
 using System.IO;
 using System.Drawing.Imaging;
+using Services;
+using static Services.EmailService;
+using Services.Classes;
 
 namespace Website.Controllers
 {
@@ -31,12 +34,14 @@ namespace Website.Controllers
         private readonly UserManager<Customer> userManager;
         private readonly IConfiguration configuration;
         private readonly IUnitOfWork unitOfWork;
+        private readonly EmailService emailService;
 
-        public AccountController(UserManager<Customer> userManager, IConfiguration configuration, IUnitOfWork unitOfWork)
+        public AccountController(UserManager<Customer> userManager, IConfiguration configuration, IUnitOfWork unitOfWork, EmailService emailService)
         {
             this.userManager = userManager;
             this.configuration = configuration;
             this.unitOfWork = unitOfWork;
+            this.emailService = emailService;
         }
 
 
@@ -155,6 +160,11 @@ namespace Website.Controllers
 
                 if (result.Succeeded)
                 {
+                    await emailService.SendEmail(new EmailProperties { 
+                        EmailType = EmailType.NameChange,
+                        Host = HttpContext.Request.Scheme + "://" + HttpContext.Request.Host.Value,
+                        CustomerName = customer.FirstName
+                    });
                     return Ok();
                 }
             }
@@ -273,7 +283,7 @@ namespace Website.Controllers
             using (var memoryStream = new MemoryStream())
             {
                 await imageFile.CopyToAsync(memoryStream);
-                using (var tempImage = Image.FromStream(memoryStream))
+                using (var tempImage = System.Drawing.Image.FromStream(memoryStream))
                 {
                     tempBitmap = new Bitmap(tempImage);
                 }

@@ -9,6 +9,7 @@ namespace Website.ViewModels
     {
         private readonly string sortBy;
 
+        public int Id { get; set; }
         public string UrlId { get; set; }
         public string Title { get; set; }
         public double Rating { get; set; }
@@ -16,7 +17,7 @@ namespace Website.ViewModels
         public double MinPrice { get; set; }
         public double MaxPrice { get; set; }
         public string DateAdded { get; set; }
-        public string Collaborator { get; set; }
+        public CollaboratorViewModel Collaborator { get; set; }
         public string Hoplink { get; set; }
         public ImageViewModel Image { get; set; }
         public string UrlTitle { get; set; }

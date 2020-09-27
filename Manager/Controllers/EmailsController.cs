@@ -1,14 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DataAccess.Models;
 using DataAccess.ViewModels;
 using Manager.Classes;
 using Manager.Repositories;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Services.Classes;
 
 namespace Manager.Controllers
 {
@@ -28,6 +26,14 @@ namespace Manager.Controllers
         public async Task<ActionResult> GetEmails()
         {
             return Ok(await unitOfWork.Emails.GetCollection<ItemViewModel<Email>>());
+        }
+
+
+        [HttpGet]
+        [Route("EmailTypes")]
+        public ActionResult GetEmailTypes()
+        {
+            return Ok(Enum.GetNames(typeof(EmailType)));
         }
 
 

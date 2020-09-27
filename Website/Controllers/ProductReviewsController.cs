@@ -89,7 +89,7 @@ namespace Website.Controllers
 
 
             // If product is null, retun a 404 error
-            if (product == null) return NoContent();
+            if (product == null) return NotFound();
 
             // Return the product
             return Ok(product);

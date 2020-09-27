@@ -12,6 +12,7 @@ using DataAccess.Models;
 using Website.Repositories;
 using Microsoft.Extensions.FileProviders;
 using System.IO;
+using Services;
 
 namespace Website
 {
@@ -79,6 +80,7 @@ namespace Website
 
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddTransient<EmailService>();
 
             services.AddControllers();
         }
