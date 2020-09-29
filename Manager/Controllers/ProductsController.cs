@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using Manager.Classes;
 using System;
+using Manager.ViewModels;
+using System.Collections;
 
 namespace Manager.Controllers
 {
@@ -28,6 +30,102 @@ namespace Manager.Controllers
             return Ok(await unitOfWork.Products.GetCollection<ItemViewModel<Product>>(x => x.NicheId == nicheId));
         }
 
+
+
+        [HttpGet]
+        [Route("Alita")]
+        public async Task<ActionResult> Alita()
+        {
+
+            ////---------CATEGORIES ONLY---------\\
+            //int[] categoryIds = new int[] { 1, 2 };
+            //IEnumerable<int> nicheIds = await unitOfWork.Niches.GetCollection(x => categoryIds.Contains(x.CategoryId), x => x.Id);
+            //IEnumerable<QueryBuilderViewModel> products = await unitOfWork.Products.GetCollection(x => nicheIds.Contains(x.NicheId), x => new QueryBuilderViewModel
+            //{
+            //    Name = x.Name,
+            //    Rating = x.Rating,
+            //    TotalReviews = x.TotalReviews,
+            //    MinPrice = x.MinPrice,
+            //    MaxPrice = x.MaxPrice,
+            //    ImageName = x.Media.Name,
+            //    ImageUrl = x.Media.Url
+            //});
+
+
+            ////---------NICHES ONLY---------\\
+            //int[] nicheIds = new int[] { 1, 2 };
+            //IEnumerable<QueryBuilderViewModel> products = await unitOfWork.Products.GetCollection(x => nicheIds.Contains(x.NicheId), x => new QueryBuilderViewModel
+            //{
+            //    Name = x.Name,
+            //    Rating = x.Rating,
+            //    TotalReviews = x.TotalReviews,
+            //    MinPrice = x.MinPrice,
+            //    MaxPrice = x.MaxPrice,
+            //    ImageName = x.Media.Name,
+            //    ImageUrl = x.Media.Url
+            //});
+
+
+            ////---------RATING ONLY---------\\
+            //IEnumerable<QueryBuilderViewModel> products = await unitOfWork.Products.GetCollection(x => x.Rating > 3, x => new QueryBuilderViewModel
+            //{
+            //    Name = x.Name,
+            //    Rating = x.Rating,
+            //    TotalReviews = x.TotalReviews,
+            //    MinPrice = x.MinPrice,
+            //    MaxPrice = x.MaxPrice,
+            //    ImageName = x.Media.Name,
+            //    ImageUrl = x.Media.Url
+            //});
+
+
+
+            ////---------PRICE ONLY---------\\
+            //IEnumerable<QueryBuilderViewModel> products = await unitOfWork.Products.GetCollection(x => (x.MaxPrice == 0 && x.MinPrice > 17) || (x.MaxPrice != 0 && x.MaxPrice > 17), x => new QueryBuilderViewModel
+            //{
+            //    Name = x.Name,
+            //    Rating = x.Rating,
+            //    TotalReviews = x.TotalReviews,
+            //    MinPrice = x.MinPrice,
+            //    MaxPrice = x.MaxPrice,
+            //    ImageName = x.Media.Name,
+            //    ImageUrl = x.Media.Url
+            //});
+
+
+            ////---------KEYWORDS ONLY---------\\
+            //string[] keywords = new string[] { "voice", "jazzy" };
+            //IEnumerable<int> productIds = await unitOfWork.ProductKeywords.GetCollection(x => keywords.Contains(x.Name), x => x.ProductId);
+            //IEnumerable<QueryBuilderViewModel> products = await unitOfWork.Products.GetCollection(x => productIds.Contains(x.Id), x => new QueryBuilderViewModel
+            //{
+            //    Name = x.Name,
+            //    Rating = x.Rating,
+            //    TotalReviews = x.TotalReviews,
+            //    MinPrice = x.MinPrice,
+            //    MaxPrice = x.MaxPrice,
+            //    ImageName = x.Media.Name,
+            //    ImageUrl = x.Media.Url
+            //});
+
+
+
+            ////---------FEATURED ONLY---------\\
+            int[] productIds = new int[] { 1, 2 };
+            IEnumerable<QueryBuilderViewModel> products = await unitOfWork.Products.GetCollection(x => productIds.Contains(x.Id), x => new QueryBuilderViewModel
+            {
+                Name = x.Name,
+                Rating = x.Rating,
+                TotalReviews = x.TotalReviews,
+                MinPrice = x.MinPrice,
+                MaxPrice = x.MaxPrice,
+                ImageName = x.Media.Name,
+                ImageUrl = x.Media.Url
+            });
+
+
+
+            return Ok(products);
+        }
 
 
 
@@ -464,7 +562,7 @@ namespace Manager.Controllers
         [Route("Keyword")]
         public async Task<ActionResult> DeleteKeywords([FromQuery] int[] ids)
         {
-            foreach(int id in ids)
+            foreach (int id in ids)
             {
                 ProductKeyword keyword = await unitOfWork.ProductKeywords.Get(id);
                 unitOfWork.ProductKeywords.Remove(keyword);
@@ -645,22 +743,23 @@ namespace Manager.Controllers
 
             int index = 0;
 
-            foreach(ProductPricePoint pricePoint in pricePointsArray)
+            foreach (ProductPricePoint pricePoint in pricePointsArray)
             {
-                if(ids.Contains(pricePoint.Id))
+                if (ids.Contains(pricePoint.Id))
                 {
                     unitOfWork.ProductPricePoints.Remove(pricePoint);
 
                     PriceIndex[] removedPriceIndices = priceIndices.Where(x => x.Index == pricePoint.Index).ToArray();
 
-                    foreach(PriceIndex priceIndex in removedPriceIndices)
+                    foreach (PriceIndex priceIndex in removedPriceIndices)
                     {
                         unitOfWork.PriceIndices.Remove(priceIndex);
                     }
 
-                } else
+                }
+                else
                 {
-                    if(pricePoint.Index != index)
+                    if (pricePoint.Index != index)
                     {
                         PriceIndex[] updatedPriceIndices = priceIndices.Where(x => x.Index == pricePoint.Index).ToArray();
 

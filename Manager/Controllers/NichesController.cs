@@ -27,6 +27,13 @@ namespace Manager.Controllers
         }
 
 
+        [Route("All")]
+        [HttpGet]
+        public async Task<ActionResult> GetAllNiches()
+        {
+            return Ok(await unitOfWork.Niches.GetCollection<ItemViewModel<Niche>>());
+        }
+
 
 
         [HttpPut]
