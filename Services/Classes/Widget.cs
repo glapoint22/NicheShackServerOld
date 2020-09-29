@@ -1,5 +1,6 @@
 ﻿using HtmlAgilityPack;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Services.Classes
 {
@@ -9,6 +10,9 @@ namespace Services.Classes
         public float Height { get; set; }
         public WidgetType WidgetType { get; set; }
         public string HorizontalAlignment { get; set; }
+        [JsonIgnore]
+        public bool BasePropertiesSet { get; set; }
+
 
 
         public virtual void SetProperty(Utf8JsonReader reader, JsonSerializerOptions options)
@@ -34,16 +38,19 @@ namespace Services.Classes
 
         public virtual HtmlNode Create(HtmlNode column)
         {
-            // Create the widget
-            HtmlNode table = Table.Create(column, Width, Height);
-            Table.CreateRow(table);
-
-            if(HorizontalAlignment != null)
+            // Create the table
+            HtmlNode table = Table.Create(column, new TableOptions
             {
-                string styles = table.GetAttributeValue("style", "");
-                styles += "margin: " + HorizontalAlignment + ";";
-                table.SetAttributeValue("style", styles);
-            }
+                Width = Width,
+                HorizontalAlignment = HorizontalAlignment,
+                CreateRow = true
+            });
+
+
+            HtmlNode td = table.SelectSingleNode("tr/td");
+            td.SetAttributeValue("valign", "top");
+
+            column.AppendChild(new HtmlDocument().CreateComment(Table.MicrosoftIf + "</td></tr></table>" + Table.MicrosoftEndIf));
 
             return table;
         }

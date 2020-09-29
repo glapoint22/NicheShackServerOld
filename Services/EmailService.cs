@@ -1,5 +1,9 @@
 ﻿using DataAccess.Models;
+using MailKit.Net.Smtp;
+using MailKit.Security;
 using Microsoft.EntityFrameworkCore;
+using MimeKit;
+using MimeKit.Text;
 using Services.Classes;
 using System.Linq;
 using System.Text.Json;
@@ -32,9 +36,28 @@ namespace Services
 
 
 
-            string email = emailPage.BuildEmail();
+            string emailBody = emailPage.BuildEmail();
 
-            email = string.Format(email, emailProperties.Host);
+            emailBody = string.Format(emailBody, emailProperties.Host);
+
+
+
+
+            var email = new MimeMessage();
+            email.Sender = MailboxAddress.Parse("no-reply@nicheshack.com");
+            email.To.Add(MailboxAddress.Parse("to_address@example.com"));
+            email.Subject = "Test Email Subject";
+            email.Body = new TextPart(TextFormat.Html) { Text = emailBody };
+
+            // send email
+            SmtpClient smtp = new SmtpClient();
+            await smtp.ConnectAsync("smtp.ethereal.email", 587, SecureSocketOptions.StartTls);
+            await smtp.AuthenticateAsync("chelsea.barton@ethereal.email", "hyf4dv5fcFzbVRjUWR");
+            await smtp.SendAsync(email);
+            await smtp.DisconnectAsync(true);
+
+
+
         }
 
 

@@ -10,7 +10,7 @@ namespace Services.Classes
         public string TextDecoration { get; set; }
         public string Color { get; set; } = "#c8c8c8";
         public string Font { get; set; } = "Arial, Helvetica, sans-serif";
-        public string FontSize { get; set; } = "14px";
+        public string FontSize { get; set; } = "14";
 
 
 
@@ -57,7 +57,7 @@ namespace Services.Classes
 
 
             // Font Size
-            styles += "font-size: " + FontSize + ";";
+            styles += "font-size: " + FontSize + "px;";
 
 
             // Text Break

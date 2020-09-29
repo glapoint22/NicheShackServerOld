@@ -16,29 +16,73 @@ namespace Services.Classes
 
         public string BuildEmail()
         {
+            // Document
             HtmlDocument doc = new HtmlDocument();
             HtmlNode node = HtmlNode.CreateNode("<html><head></head><body></body></html>");
             doc.DocumentNode.AppendChild(node);
+            node.SelectSingleNode("body").SetAttributeValue("style", "margin: 0;");
 
+            // Meta
             HtmlNode meta = HtmlNode.CreateNode("<meta>");
-
             meta.SetAttributeValue("name", "viewport");
             meta.SetAttributeValue("content", "width=device-width, initial-scale=1");
-
             node.FirstChild.AppendChild(meta);
 
-            // Create the main table
-            CreateTable(doc.DocumentNode.FirstChild.LastChild, Width);
+
+            // Style
+            HtmlNode style = HtmlNode.CreateNode("<style>");
+            HtmlTextNode styleText = doc.CreateTextNode(
+                "a {{text-decoration: none}}" +
+                "body {{margin: 0}}" +
+                "ol, ul {{margin-top: 0;margin-bottom: 0;}}"
+                );
+            style.AppendChild(styleText);
+            node.FirstChild.AppendChild(style);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            // Main Table
+            HtmlNode mainTable = Table.Create(doc.DocumentNode.FirstChild.LastChild, new TableOptions
+            {
+                Background = new Background { Color = "#edf0f3" },
+                CreateRow = true
+            });
+
+            // Set alignment to center
+            HtmlNode td = mainTable.SelectSingleNode("tr/td");
+            td.SetAttributeValue("align", "center");
+
+            // Create the body
+            CreateBody(td, Width);
 
             return doc.DocumentNode.InnerHtml;
         }
 
 
 
-        private void CreateTable(HtmlNode parent, float width)
+        private void CreateBody(HtmlNode parent, float width)
         {
-            HtmlNode table = Table.Create(parent, width);
-            Background.SetStyle(table);
+            HtmlNode table = Table.Create(parent, new TableOptions
+            {
+                Width = width,
+                Background = Background
+            });
+
 
             // Rows
             if (Rows != null && Rows.Count > 0)
@@ -50,37 +94,18 @@ namespace Services.Classes
 
                     foreach (Column column in row.Columns)
                     {
-                        float columnWidth = GetColumnWidth(width, row.Columns.Count, column.ColumnSpan);
-
-
-                        tr.AppendChild(new HtmlDocument().CreateComment("<!--[if (gte mso 9)|(IE)]><table width=\"" + columnWidth + "\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\"><tr><td>[endif]-->"));
-
                         // Create the column
-                        HtmlNode td = column.Create(tr, columnWidth);
+                        HtmlNode td = column.Create(tr);
 
 
-
+                        // Create the widget
                         Widget widget = GetWidget(column.WidgetData.WidgetType, column.WidgetData);
-
                         HtmlNode widgetNode = widget.Create(td);
-
-                        tr.AppendChild(new HtmlDocument().CreateComment("<!--[if (gte mso 9)|(IE)]></td></tr></table>[endif]-->"));
                     }
                 }
             }
         }
 
-
-
-
-        private float GetColumnWidth(float tableWidth, int columnCount, float columnSpan)
-        {
-            float totalColumns = columnCount == 5 ? 10 : 12;
-
-            float percentage = columnSpan / totalColumns;
-
-            return percentage * tableWidth;
-        }
 
 
 
@@ -96,16 +121,16 @@ namespace Services.Classes
                     widget = (ButtonWidget)widgetData;
                     break;
                 case WidgetType.Text:
-                    widget = new TextWidget();
+                    widget = (TextWidget)widgetData;
                     break;
                 case WidgetType.Image:
-                    widget = new ImageWidget();
+                    widget = (ImageWidget)widgetData;
                     break;
                 case WidgetType.Container:
-                    widget = new ContainerWidget();
+                    widget = (ContainerWidget)widgetData;
                     break;
                 case WidgetType.Line:
-                    widget = new LineWidget();
+                    widget = (LineWidget)widgetData;
                     break;
             }
 
@@ -113,7 +138,7 @@ namespace Services.Classes
         }
 
 
-        
+
 
     }
 }

@@ -10,19 +10,20 @@ namespace Services.Classes
         public Corners Corners { get; set; }
         public Shadow Shadow { get; set; }
         public Padding Padding { get; set; }
-        public float ColumnSpan { get; set; }
+        public float Width { get; set; }
+
 
         [JsonConverter(typeof(WidgetJsonConverter))]
         public Widget WidgetData { get; set; }
 
 
-        public HtmlNode Create(HtmlNode row, float columnWidth)
+        public HtmlNode Create(HtmlNode row)
         {
             // Create the column
             HtmlNode column = row.AppendChild(HtmlNode.CreateNode("<td>"));
 
 
-            column.SetAttributeValue("style", "display: inline-block;width: 100%;max-width: " + columnWidth + "px;");
+            column.SetAttributeValue("style", "display: inline-block;width: 100%;max-width: " + Width + "px;");
 
 
             // Set the styles
@@ -31,6 +32,11 @@ namespace Services.Classes
             if (Corners != null) Corners.SetStyle(column);
             if (Shadow != null) Shadow.SetStyle(column);
             if (Padding != null) Padding.SetStyle(column);
+
+
+            column.AppendChild(new HtmlDocument().CreateComment(Table.MicrosoftIf + "<table width=\"" +
+                Width + "\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\"><tr><td>" +
+                Table.MicrosoftEndIf));
 
             return column;
         }
