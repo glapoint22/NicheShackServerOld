@@ -16,48 +16,39 @@ namespace Services.Classes
 
 
 
-        public override void SetProperty(Utf8JsonReader reader, JsonSerializerOptions options)
+        public override void SetProperty(string property, ref Utf8JsonReader reader, JsonSerializerOptions options)
         {
-            string property = reader.GetString();
+            base.SetProperty(property, ref reader, options);
 
-            if (property == "background") BasePropertiesSet = true;
-
-            if (!BasePropertiesSet)
+            switch (property)
             {
-                base.SetProperty(reader, options);
-            }
-            else
-            {
-                switch (property)
-                {
-                    case "background":
-                        Background = (Background)JsonSerializer.Deserialize(ref reader, typeof(Background), options);
-                        break;
+                case "background":
+                    Background = (Background)JsonSerializer.Deserialize(ref reader, typeof(Background), options);
+                    break;
 
-                    case "border":
-                        Border = (Border)JsonSerializer.Deserialize(ref reader, typeof(Border), options);
-                        break;
+                case "border":
+                    Border = (Border)JsonSerializer.Deserialize(ref reader, typeof(Border), options);
+                    break;
 
-                    case "caption":
-                        Caption = (Caption)JsonSerializer.Deserialize(ref reader, typeof(Caption), options);
-                        break;
+                case "caption":
+                    Caption = (Caption)JsonSerializer.Deserialize(ref reader, typeof(Caption), options);
+                    break;
 
-                    case "corners":
-                        Corners = (Corners)JsonSerializer.Deserialize(ref reader, typeof(Corners), options);
-                        break;
+                case "corners":
+                    Corners = (Corners)JsonSerializer.Deserialize(ref reader, typeof(Corners), options);
+                    break;
 
-                    case "shadow":
-                        Shadow = (Shadow)JsonSerializer.Deserialize(ref reader, typeof(Shadow), options);
-                        break;
+                case "shadow":
+                    Shadow = (Shadow)JsonSerializer.Deserialize(ref reader, typeof(Shadow), options);
+                    break;
 
-                    case "padding":
-                        Padding = (Padding)JsonSerializer.Deserialize(ref reader, typeof(Padding), options);
-                        break;
+                case "padding":
+                    Padding = (Padding)JsonSerializer.Deserialize(ref reader, typeof(Padding), options);
+                    break;
 
-                    case "link":
-                        Link = (Link)JsonSerializer.Deserialize(ref reader, typeof(Link), options);
-                        break;
-                }
+                case "link":
+                    Link = (Link)JsonSerializer.Deserialize(ref reader, typeof(Link), options);
+                    break;
             }
         }
 
@@ -111,7 +102,7 @@ namespace Services.Classes
             Caption.SetStyle(anchorNode);
 
             // Link
-            Link.SetStyle(anchorNode);
+            if (Link != null) Link.SetStyle(anchorNode);
 
 
             td.AppendChild(new HtmlDocument().CreateComment(Table.MicrosoftIf +

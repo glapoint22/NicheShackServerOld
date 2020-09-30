@@ -1,7 +1,6 @@
 ﻿using HtmlAgilityPack;
-using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 
 namespace Services.Classes
 {
@@ -10,11 +9,11 @@ namespace Services.Classes
         public string Name { get; set; }
         public int Width { get; set; }
         public Background Background { get; set; }
-        public List<Row> Rows { get; set; }
+        public IEnumerable<Row> Rows { get; set; }
 
 
 
-        public string BuildEmail()
+        public string CreateBody()
         {
             // Document
             HtmlDocument doc = new HtmlDocument();
@@ -32,27 +31,12 @@ namespace Services.Classes
             // Style
             HtmlNode style = HtmlNode.CreateNode("<style>");
             HtmlTextNode styleText = doc.CreateTextNode(
-                "a {{text-decoration: none}}" +
-                "body {{margin: 0}}" +
-                "ol, ul {{margin-top: 0;margin-bottom: 0;}}"
+                "a {text-decoration: none}" +
+                "body {margin: 0}" +
+                "ol, ul {margin-top: 0;margin-bottom: 0;}"
                 );
             style.AppendChild(styleText);
             node.FirstChild.AppendChild(style);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -67,43 +51,53 @@ namespace Services.Classes
             HtmlNode td = mainTable.SelectSingleNode("tr/td");
             td.SetAttributeValue("align", "center");
 
-            // Create the body
-            CreateBody(td, Width);
+
+            // Body
+            HtmlNode body = Table.Create(td, new TableOptions
+            {
+                Width = Width,
+                Background = Background
+            });
+
+
+            // Rows
+            if (Rows != null && Rows.Count() > 0)
+            {
+                CreateRows(Rows, body);
+            }
+
 
             return doc.DocumentNode.InnerHtml;
         }
 
 
 
-        private void CreateBody(HtmlNode parent, float width)
+        private void CreateRows(IEnumerable<Row> rows, HtmlNode parent)
         {
-            HtmlNode table = Table.Create(parent, new TableOptions
+            foreach (Row row in rows)
             {
-                Width = width,
-                Background = Background
-            });
+                // Create the row
+                HtmlNode tr = row.Create(parent);
 
-
-            // Rows
-            if (Rows != null && Rows.Count > 0)
-            {
-                foreach (Row row in Rows)
+                foreach (Column column in row.Columns)
                 {
-                    // Create the row
-                    HtmlNode tr = row.Create(table);
+                    // Create the column
+                    HtmlNode td = column.Create(tr);
 
-                    foreach (Column column in row.Columns)
+
+                    // Create the widget
+                    Widget widget = GetWidget(column.WidgetData.WidgetType, column.WidgetData);
+                    HtmlNode widgetNode = widget.Create(td);
+
+                    if (column.WidgetData.WidgetType == WidgetType.Container)
                     {
-                        // Create the column
-                        HtmlNode td = column.Create(tr);
+                        ContainerWidget container = (ContainerWidget)column.WidgetData;
 
-
-                        // Create the widget
-                        Widget widget = GetWidget(column.WidgetData.WidgetType, column.WidgetData);
-                        HtmlNode widgetNode = widget.Create(td);
+                        if (container.Rows != null && container.Rows.Count() > 0) CreateRows(container.Rows, widgetNode);
                     }
                 }
             }
+
         }
 
 
@@ -136,9 +130,5 @@ namespace Services.Classes
 
             return widget;
         }
-
-
-
-
     }
 }

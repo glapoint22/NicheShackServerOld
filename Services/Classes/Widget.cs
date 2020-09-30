@@ -10,15 +10,10 @@ namespace Services.Classes
         public float Height { get; set; }
         public WidgetType WidgetType { get; set; }
         public string HorizontalAlignment { get; set; }
-        [JsonIgnore]
-        public bool BasePropertiesSet { get; set; }
 
 
-
-        public virtual void SetProperty(Utf8JsonReader reader, JsonSerializerOptions options)
+        public virtual void SetProperty(string property, ref Utf8JsonReader reader, JsonSerializerOptions options)
         {
-            string property = reader.GetString();
-
             switch (property)
             {
                 case "width":

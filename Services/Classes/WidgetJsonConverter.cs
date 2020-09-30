@@ -25,10 +25,10 @@ namespace Services.Classes
                 // If we are reading a property name
                 if (reader.TokenType == JsonTokenType.PropertyName)
                 {
-                    string propertyName = reader.GetString();
+                    string property = reader.GetString();
 
                     // If the property name is widget type
-                    if (propertyName == "widgetType")
+                    if (property == "widgetType")
                     {
                         reader.Read();
                         WidgetType widgetType = (WidgetType)reader.GetInt32();
@@ -58,7 +58,7 @@ namespace Services.Classes
                     else
                     {
                         // Set each property for the widget
-                        widget.SetProperty(reader, options);
+                        widget.SetProperty(property, ref reader, options);
                     }
                 }
             }

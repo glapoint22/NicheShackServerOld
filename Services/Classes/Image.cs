@@ -12,7 +12,9 @@ namespace Services.Classes
 
         public void SetStyle(HtmlNode node)
         {
-
+            node.SetAttributeValue("src", "{host}/images/" + Url);
+            node.SetAttributeValue("title", Name);
+            node.SetAttributeValue("alt", Name);
         }
     }
 }

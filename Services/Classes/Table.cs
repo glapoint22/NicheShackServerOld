@@ -8,6 +8,21 @@ namespace Services.Classes
         public static string MicrosoftEndIf = "<![endif]-->";
 
 
+        public static HtmlNode Create(HtmlNode parent)
+        {
+            HtmlNode table = parent.AppendChild(HtmlNode.CreateNode("<table>"));
+            table.SetAttributeValue("width", "100%");
+            table.SetAttributeValue("cellPadding", "0");
+            table.SetAttributeValue("cellSpacing", "0");
+            table.SetAttributeValue("border", "0");
+
+            table.SetAttributeValue("width", "100%");
+            table.SetAttributeValue("style", "width: 100%;");
+
+            return table;
+        }
+
+
         public static HtmlNode Create(HtmlNode parent, TableOptions tableOptions)
         {
             
@@ -55,7 +70,7 @@ namespace Services.Classes
                 string bgColor = tableOptions.Background != null && tableOptions.Background.Color != null ? " bgcolor=\"" + tableOptions.Background.Color + "\"" : string.Empty;
 
                 // Image
-                string image = tableOptions.Background != null && tableOptions.Background.Image != null ? " background=\"{0}/images/" + tableOptions.Background.Image.Url + "\"" : string.Empty;
+                string image = tableOptions.Background != null && tableOptions.Background.Image != null ? " background=\"{host}/images/" + tableOptions.Background.Image.Url + "\"" : string.Empty;
 
                 string align = tableOptions.HorizontalAlignment != null ? "align=\"" + tableOptions.HorizontalAlignment + "\"" : string.Empty;
 
@@ -74,14 +89,6 @@ namespace Services.Classes
                 table.SetAttributeValue("width", "100%");
             }
 
-
-
-            // Height
-            if (tableOptions.Height > 0)
-            {
-                styles += "height: " + tableOptions.Height + "px;";
-                table.SetAttributeValue("height", tableOptions.Height.ToString());
-            }
 
 
             // Set the styles

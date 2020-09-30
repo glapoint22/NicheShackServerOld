@@ -1,11 +1,18 @@
-﻿using static Services.EmailService;
-
-namespace Services.Classes
+﻿namespace Services.Classes
 {
     public struct EmailProperties
     {
-        public EmailType EmailType { get; set; }
         public string Host { get; set; }
-        public string CustomerName { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+
+
+        public string Set(string emailBody)
+        {
+            return emailBody
+                .Replace("{host}", Host)
+                .Replace("{firstName}", FirstName)
+                .Replace("{lastName}", LastName);
+        }
     }
 }

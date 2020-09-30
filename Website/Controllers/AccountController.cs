@@ -160,10 +160,11 @@ namespace Website.Controllers
 
                 if (result.Succeeded)
                 {
-                    await emailService.SendEmail(new EmailProperties { 
-                        EmailType = EmailType.NameChange,
+                    // Send a confirmation email that the customer name has been changed
+                    await emailService.SendEmail(EmailType.NameChange, customer.Email, new EmailProperties { 
                         Host = HttpContext.Request.Scheme + "://" + HttpContext.Request.Host.Value,
-                        CustomerName = customer.FirstName
+                        FirstName = customer.FirstName,
+                        LastName = customer.LastName
                     });
                     return Ok();
                 }

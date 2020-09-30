@@ -22,45 +22,36 @@ namespace Services
         }
 
 
-        public async Task SendEmail(EmailProperties emailProperties)
+        public async Task SendEmail(EmailType emailType, string recipient, EmailProperties emailProperties)
         {
-            string emailName = Regex.Replace(emailProperties.EmailType.ToString(), "[A-Z]", " $0").Trim();
+            string subject = Regex.Replace(emailType.ToString(), "[A-Z]", " $0").Trim();
+            string content = await context.Emails.Where(x => x.Name == subject).Select(x => x.Content).SingleOrDefaultAsync();
 
-            string content = await context.Emails.Where(x => x.Name == emailName).Select(x => x.Content).SingleOrDefaultAsync();
-
-            
-
-            EmailPage emailPage = JsonSerializer.Deserialize<EmailPage>(content, new JsonSerializerOptions {
+            // Deserialize the content into an EmailPage object
+            EmailPage emailPage = JsonSerializer.Deserialize<EmailPage>(content, new JsonSerializerOptions
+            {
                 PropertyNameCaseInsensitive = true
             });
 
 
-
-            string emailBody = emailPage.BuildEmail();
-
-            emailBody = string.Format(emailBody, emailProperties.Host);
-
+            // Create the body
+            string body = emailPage.CreateBody();
+            body = emailProperties.Set(body);
 
 
-
+            // Setup the email
             var email = new MimeMessage();
             email.Sender = MailboxAddress.Parse("no-reply@nicheshack.com");
-            email.To.Add(MailboxAddress.Parse("to_address@example.com"));
-            email.Subject = "Test Email Subject";
-            email.Body = new TextPart(TextFormat.Html) { Text = emailBody };
+            email.To.Add(MailboxAddress.Parse(recipient));
+            email.Subject = subject;
+            email.Body = new TextPart(TextFormat.Html) { Text = body };
 
-            // send email
+            // Send email
             SmtpClient smtp = new SmtpClient();
             await smtp.ConnectAsync("smtp.ethereal.email", 587, SecureSocketOptions.StartTls);
             await smtp.AuthenticateAsync("chelsea.barton@ethereal.email", "hyf4dv5fcFzbVRjUWR");
             await smtp.SendAsync(email);
             await smtp.DisconnectAsync(true);
-
-
-
         }
-
-
-        
     }
 }

@@ -22,8 +22,8 @@ namespace Services.Classes
             // Image
             if (Image != null)
             {
-                node.SetAttributeValue("background", "{0}/images/" + Image.Url);
-                styles += "background-image: url({0}/images/" + Image.Url + ");";
+                node.SetAttributeValue("background", "{host}/images/" + Image.Url);
+                styles += "background-image: url({host}/images/" + Image.Url + ");";
                 Image.SetStyle(ref styles);
             }
 
