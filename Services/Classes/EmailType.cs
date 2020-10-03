@@ -3,13 +3,15 @@
     public enum EmailType
     {
         None,
-        NewCustomer,
+        AccountActivation,
         NewCollaborator,
         DeletedListItem,
         MovedListItem,
         NameChange,
         EmailChange,
         PasswordUpdated,
-        OrderConfirmation
+        OrderConfirmation,
+        Review,
+        ResetPassword
     }
 }

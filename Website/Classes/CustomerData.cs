@@ -1,6 +1,6 @@
-﻿namespace Website.ViewModels
+﻿namespace Website.Classes
 {
-    public class CustomerViewModel
+    public class CustomerData
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }

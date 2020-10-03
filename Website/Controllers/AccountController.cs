@@ -16,14 +16,15 @@ using Microsoft.IdentityModel.Tokens;
 using Website.Classes;
 using DataAccess.Models;
 using Website.Repositories;
-using Website.ViewModels;
 using Microsoft.AspNetCore.Http;
 using System.Drawing;
 using System.IO;
 using System.Drawing.Imaging;
 using Services;
-using static Services.EmailService;
 using Services.Classes;
+using System.Web;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 
 namespace Website.Controllers
 {
@@ -35,14 +36,17 @@ namespace Website.Controllers
         private readonly IConfiguration configuration;
         private readonly IUnitOfWork unitOfWork;
         private readonly EmailService emailService;
+        private readonly IWebHostEnvironment env;
 
-        public AccountController(UserManager<Customer> userManager, IConfiguration configuration, IUnitOfWork unitOfWork, EmailService emailService)
+        public AccountController(UserManager<Customer> userManager, IConfiguration configuration, IUnitOfWork unitOfWork, EmailService emailService, IWebHostEnvironment env)
         {
             this.userManager = userManager;
             this.configuration = configuration;
             this.unitOfWork = unitOfWork;
             this.emailService = emailService;
+            this.env = env;
         }
+
 
 
 
@@ -59,6 +63,10 @@ namespace Website.Controllers
 
             if (result.Succeeded)
             {
+                // Send an email to activate the account
+                await SendAccountActivationEmail(customer);
+
+
                 // Create the new list and add it to the database
                 List newList = new List
                 {
@@ -117,25 +125,145 @@ namespace Website.Controllers
             // Get the customer from the database based on the email address
             Customer customer = await userManager.FindByEmailAsync(signIn.Email);
 
+            if (customer != null && !customer.EmailConfirmed)
+            {
+                return Unauthorized("This account has not been activated. To activate your account, click on the \"Activate Account\" button in the email that was sent to " + customer.Email + ". ");
+            }
 
             // If the customer is in the database and the password is valid, create claims for the access token
             if (customer != null && await userManager.CheckPasswordAsync(customer, signIn.Password))
             {
-                List<Claim> claims = new List<Claim>()
+                List<Claim> claims = GetClaims(customer, signIn.IsPersistent);
+
+
+                return Ok(new
+                {
+                    tokenData = await GenerateTokenData(customer, claims),
+                    customer = new CustomerData
+                    {
+                        FirstName = customer.FirstName,
+                        LastName = customer.LastName,
+                        Email = customer.Email,
+                        Image = customer.image
+                    }
+                });
+            }
+
+            return Conflict("Your password and email do not match. Please try again.");
+        }
+
+
+
+
+
+
+
+
+
+        // ..................................................................................Get Claims.....................................................................
+        private List<Claim> GetClaims(Customer customer, bool isPersistent)
+        {
+            return new List<Claim>()
                 {
                     new Claim("acc", "customer"),
                     new Claim(ClaimTypes.NameIdentifier, customer.Id),
                     new Claim(JwtRegisteredClaimNames.Iss, configuration["TokenValidation:Site"]),
                     new Claim(JwtRegisteredClaimNames.Aud, configuration["TokenValidation:Site"]),
-                    new Claim("isPersistent", signIn.IsPersistent.ToString())
+                    new Claim("isPersistent", isPersistent.ToString())
                 };
+        }
 
-                // Return with the token data
-                return Ok(await GenerateTokenData(customer, claims));
+
+
+
+        // ..................................................................................Activate Account.....................................................................
+        [HttpPost]
+        [Route("ActivateAccount")]
+        public async Task<ActionResult> ActivateAccount(ActivateAccount activateAccount)
+        {
+            if (activateAccount.Email == null || activateAccount.Token == null)
+            {
+                return Ok();
             }
 
-            return Conflict("Your password and email do not match. Please try again.");
+
+            Customer customer = await userManager.FindByEmailAsync(activateAccount.Email);
+
+            if (customer == null)
+            {
+                return Ok();
+            }
+
+
+            if (customer.EmailConfirmed) return Ok();
+
+            var result = await userManager.ConfirmEmailAsync(customer, activateAccount.Token);
+
+            if (result.Succeeded)
+            {
+                List<Claim> claims = GetClaims(customer, true);
+
+                return Ok(new
+                {
+                    tokenData = await GenerateTokenData(customer, claims),
+                    customer = new CustomerData
+                    {
+                        FirstName = customer.FirstName,
+                        LastName = customer.LastName,
+                        Email = customer.Email,
+                        Image = customer.image
+                    }
+                });
+            }
+
+
+            return Ok();
         }
+
+
+
+
+
+
+
+
+
+
+        // ..................................................................................Reset Password.....................................................................
+        [HttpPost]
+        [Route("ResetPassword")]
+        public async Task<ActionResult> ResetPassword(ResetPassword resetPassword)
+        {
+            if (resetPassword.Email != null && resetPassword.Token != null)
+            {
+                Customer customer = await userManager.FindByEmailAsync(resetPassword.Email);
+
+
+                if (customer != null)
+                {
+                    var result = await userManager.ResetPasswordAsync(customer, resetPassword.Token, resetPassword.Password);
+
+
+                    if (result.Succeeded)
+                    {
+                        return Ok();
+                    }
+                }
+
+            }
+
+
+            return BadRequest();
+        }
+
+
+
+
+
+
+
+
+
 
 
 
@@ -160,10 +288,12 @@ namespace Website.Controllers
 
                 if (result.Succeeded)
                 {
-                    await emailService.SendEmail(new EmailProperties { 
-                        EmailType = EmailType.NameChange,
-                        Host = HttpContext.Request.Scheme + "://" + HttpContext.Request.Host.Value,
-                        CustomerName = customer.FirstName
+                    // Send a confirmation email that the customer name has been changed
+                    await emailService.SendEmail(EmailType.NameChange, customer.Email, "Name change confirmation", new EmailProperties
+                    {
+                        Host = GetHost(),
+                        FirstName = customer.FirstName,
+                        LastName = customer.LastName
                     });
                     return Ok();
                 }
@@ -172,7 +302,6 @@ namespace Website.Controllers
 
             return BadRequest();
         }
-
 
 
 
@@ -258,7 +387,7 @@ namespace Website.Controllers
 
 
 
-        
+
 
         // ..................................................................................New Profile Picture.....................................................................
         [HttpPost, DisableRequestSizeLimit]
@@ -507,7 +636,7 @@ namespace Website.Controllers
         [Route("GetCustomer")]
         public async Task<ActionResult> GetCustomer()
         {
-            CustomerViewModel customerDTO = null;
+            CustomerData customerData = null;
 
             if (Request.Cookies["access"] != null)
             {
@@ -519,7 +648,7 @@ namespace Website.Controllers
 
                     if (customer != null)
                     {
-                        customerDTO = new CustomerViewModel
+                        customerData = new CustomerData
                         {
                             FirstName = customer.FirstName,
                             LastName = customer.LastName,
@@ -531,11 +660,90 @@ namespace Website.Controllers
 
             }
 
-            return Ok(customerDTO);
+            if (customerData != null)
+            {
+                return Ok(customerData);
+            }
+
+            return Ok();
         }
 
 
 
+
+
+        // ..................................................................................Resend Account Activation Email.....................................................................
+        [HttpGet]
+        [Route("ResendAccountActivationEmail")]
+        public async Task<ActionResult> ResendAccountActivationEmail(string email)
+        {
+            // Get the customer from the database based on the email address
+            Customer customer = await userManager.FindByEmailAsync(email);
+
+            if (customer != null)
+            {
+                await SendAccountActivationEmail(customer);
+            }
+
+
+            return Ok();
+        }
+
+
+
+
+
+
+
+        // ..................................................................................Forget Password.....................................................................
+        [HttpGet]
+        [Route("ForgetPassword")]
+        public async Task<ActionResult> ForgetPassword(string email)
+        {
+            // Get the customer from the database based on the email address
+            Customer customer = await userManager.FindByEmailAsync(email);
+
+            if (customer != null)
+            {
+                await SendResetPasswordEmail(customer);
+            }
+
+
+            return Ok();
+        }
+
+
+
+
+
+        // ..................................................................................Send Account Activation Email.....................................................................
+        private async Task SendAccountActivationEmail(Customer customer)
+        {
+            string token = await userManager.GenerateEmailConfirmationTokenAsync(customer);
+
+            await emailService.SendEmail(EmailType.AccountActivation, customer.Email, "Activate your new Niche Shack account", new EmailProperties
+            {
+                Host = GetHost(),
+                Link = GetHost() + "/activate-account?email=" + HttpUtility.UrlEncode(customer.Email) + "&token=" + HttpUtility.UrlEncode(token)
+            });
+        }
+
+
+
+
+
+
+        // ..................................................................................Send Reset Password Email.....................................................................
+        private async Task SendResetPasswordEmail(Customer customer)
+        {
+            string token = await userManager.GeneratePasswordResetTokenAsync(customer);
+
+            await emailService.SendEmail(EmailType.ResetPassword, customer.Email, "Reset Password", new EmailProperties
+            {
+                Host = GetHost(),
+                Link = GetHost() + "/reset-password?email=" + HttpUtility.UrlEncode(customer.Email) + "&token=" + HttpUtility.UrlEncode(token)
+            });
+        }
 
 
 
@@ -668,6 +876,21 @@ namespace Website.Controllers
 
             Match result = Regex.Match(value, @"(?:Bearer\s)(.+)");
             return result.Groups[1].Value;
+        }
+
+
+
+
+
+        // ..................................................................................Get Host.....................................................................
+        private string GetHost()
+        {
+            if (env.IsDevelopment())
+            {
+                return "http://localhost:4200";
+            }
+
+            return HttpContext.Request.Scheme + "://" + HttpContext.Request.Host.Value;
         }
     }
 }

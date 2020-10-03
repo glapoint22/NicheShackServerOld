@@ -2,7 +2,7 @@
 
 namespace Services.Classes
 {
-    public struct Link
+    public class Link
     {
         public LinkOption SelectedOption { get; set; }
         public string Url { get; set; }
@@ -10,7 +10,7 @@ namespace Services.Classes
 
         public void SetStyle(HtmlNode node)
         {
-            node.SetAttributeValue("href", SelectedOption == LinkOption.WebAddress ? Url : "{0}/" + Url);
+            node.SetAttributeValue("href", SelectedOption == LinkOption.WebAddress ? Url : "{host}/" + Url);
             node.SetAttributeValue("target", "_blank");
         }
     }

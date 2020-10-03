@@ -1,7 +1,6 @@
 ﻿using HtmlAgilityPack;
-using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 
 namespace Services.Classes
 {
@@ -10,77 +9,97 @@ namespace Services.Classes
         public string Name { get; set; }
         public int Width { get; set; }
         public Background Background { get; set; }
-        public List<Row> Rows { get; set; }
+        public IEnumerable<Row> Rows { get; set; }
 
 
 
-        public string BuildEmail()
+        public string CreateBody()
         {
+            // Document
             HtmlDocument doc = new HtmlDocument();
             HtmlNode node = HtmlNode.CreateNode("<html><head></head><body></body></html>");
             doc.DocumentNode.AppendChild(node);
+            node.SelectSingleNode("body").SetAttributeValue("style", "margin: 0;");
 
+            // Meta
             HtmlNode meta = HtmlNode.CreateNode("<meta>");
-
             meta.SetAttributeValue("name", "viewport");
             meta.SetAttributeValue("content", "width=device-width, initial-scale=1");
-
             node.FirstChild.AppendChild(meta);
 
-            // Create the main table
-            CreateTable(doc.DocumentNode.FirstChild.LastChild, Width);
+
+            // Style
+            HtmlNode style = HtmlNode.CreateNode("<style>");
+            HtmlTextNode styleText = doc.CreateTextNode(
+                "a {text-decoration: none}" +
+                "body {margin: 0}" +
+                "ol, ul {margin-top: 0;margin-bottom: 0;}"
+                );
+            style.AppendChild(styleText);
+            node.FirstChild.AppendChild(style);
+
+
+
+            // Main Table
+            HtmlNode mainTable = Table.Create(doc.DocumentNode.FirstChild.LastChild, new TableOptions
+            {
+                Background = new Background { Color = "#edf0f3" },
+                CreateRow = true
+            });
+
+            // Set alignment to center
+            HtmlNode td = mainTable.SelectSingleNode("tr/td");
+            td.SetAttributeValue("align", "center");
+
+
+            // Body
+            HtmlNode body = Table.Create(td, new TableOptions
+            {
+                Width = Width,
+                Background = Background
+            });
+
+
+            // Rows
+            if (Rows != null && Rows.Count() > 0)
+            {
+                CreateRows(Rows, body);
+            }
+
 
             return doc.DocumentNode.InnerHtml;
         }
 
 
 
-        private void CreateTable(HtmlNode parent, float width)
+        private void CreateRows(IEnumerable<Row> rows, HtmlNode parent)
         {
-            HtmlNode table = Table.Create(parent, width);
-            Background.SetStyle(table);
-
-            // Rows
-            if (Rows != null && Rows.Count > 0)
+            foreach (Row row in rows)
             {
-                foreach (Row row in Rows)
+                // Create the row
+                HtmlNode tr = row.Create(parent);
+
+                foreach (Column column in row.Columns)
                 {
-                    // Create the row
-                    HtmlNode tr = row.Create(table);
+                    // Create the column
+                    HtmlNode td = column.Create(tr);
 
-                    foreach (Column column in row.Columns)
+
+                    // Create the widget
+                    Widget widget = GetWidget(column.WidgetData.WidgetType, column.WidgetData);
+                    HtmlNode widgetNode = widget.Create(td);
+
+                    if (column.WidgetData.WidgetType == WidgetType.Container)
                     {
-                        float columnWidth = GetColumnWidth(width, row.Columns.Count, column.ColumnSpan);
+                        ContainerWidget container = (ContainerWidget)column.WidgetData;
 
-
-                        tr.AppendChild(new HtmlDocument().CreateComment("<!--[if (gte mso 9)|(IE)]><table width=\"" + columnWidth + "\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\"><tr><td>[endif]-->"));
-
-                        // Create the column
-                        HtmlNode td = column.Create(tr, columnWidth);
-
-
-
-                        Widget widget = GetWidget(column.WidgetData.WidgetType, column.WidgetData);
-
-                        HtmlNode widgetNode = widget.Create(td);
-
-                        tr.AppendChild(new HtmlDocument().CreateComment("<!--[if (gte mso 9)|(IE)]></td></tr></table>[endif]-->"));
+                        if (container.Rows != null && container.Rows.Count() > 0) CreateRows(container.Rows, widgetNode);
                     }
                 }
             }
+
         }
 
-
-
-
-        private float GetColumnWidth(float tableWidth, int columnCount, float columnSpan)
-        {
-            float totalColumns = columnCount == 5 ? 10 : 12;
-
-            float percentage = columnSpan / totalColumns;
-
-            return percentage * tableWidth;
-        }
 
 
 
@@ -96,24 +115,20 @@ namespace Services.Classes
                     widget = (ButtonWidget)widgetData;
                     break;
                 case WidgetType.Text:
-                    widget = new TextWidget();
+                    widget = (TextWidget)widgetData;
                     break;
                 case WidgetType.Image:
-                    widget = new ImageWidget();
+                    widget = (ImageWidget)widgetData;
                     break;
                 case WidgetType.Container:
-                    widget = new ContainerWidget();
+                    widget = (ContainerWidget)widgetData;
                     break;
                 case WidgetType.Line:
-                    widget = new LineWidget();
+                    widget = (LineWidget)widgetData;
                     break;
             }
 
             return widget;
         }
-
-
-        
-
     }
 }

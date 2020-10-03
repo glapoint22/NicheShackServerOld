@@ -1,21 +1,58 @@
 ﻿using HtmlAgilityPack;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Text.Json;
 
 namespace Services.Classes
 {
     public class LineWidget : Widget
     {
+        public Border Border { get; set; }
+        public Shadow Shadow { get; set; }
+
+
         public override HtmlNode Create(HtmlNode column)
         {
-            throw new NotImplementedException();
+            // Call the base
+            HtmlNode widget = base.Create(column);
+
+
+            // Td
+            HtmlNode td = widget.SelectSingleNode("tr/td");
+
+
+            td.SetAttributeValue("style", "border-bottom: " + Border.Width + "px " + Border.Style + " " + Border.Color + ";");
+            if (Shadow != null) Shadow.SetStyle(td);
+
+
+            HtmlNode blankRow = widget.InsertBefore(HtmlNode.CreateNode("<tr>"), widget.SelectSingleNode("tr"));
+            HtmlNode blankColumn = blankRow.AppendChild(HtmlNode.CreateNode("<td>"));
+            blankColumn.SetAttributeValue("height", "10");
+
+
+            blankRow = widget.AppendChild(HtmlNode.CreateNode("<tr>"));
+            blankColumn = blankRow.AppendChild(HtmlNode.CreateNode("<td>"));
+            blankColumn.SetAttributeValue("height", "10");
+
+
+            return widget;
         }
 
-        public override void SetProperty(Utf8JsonReader reader, JsonSerializerOptions options)
+
+
+
+        public override void SetProperty(string property, ref Utf8JsonReader reader, JsonSerializerOptions options)
         {
-            throw new NotImplementedException();
+            base.SetProperty(property, ref reader, options);
+
+            switch (property)
+            {
+                case "border":
+                    Border = (Border)JsonSerializer.Deserialize(ref reader, typeof(Border), options);
+                    break;
+
+                case "shadow":
+                    Shadow = (Shadow)JsonSerializer.Deserialize(ref reader, typeof(Shadow), options);
+                    break;
+            }
         }
     }
 }
