@@ -22,10 +22,10 @@ namespace Services
         }
 
 
-        public async Task SendEmail(EmailType emailType, string recipient, EmailProperties emailProperties)
+        public async Task SendEmail(EmailType emailType, string recipient, string subject, EmailProperties emailProperties)
         {
-            string subject = Regex.Replace(emailType.ToString(), "[A-Z]", " $0").Trim();
-            string content = await context.Emails.Where(x => x.Name == subject).Select(x => x.Content).SingleOrDefaultAsync();
+            string emailName = Regex.Replace(emailType.ToString(), "[A-Z]", " $0").Trim();
+            string content = await context.Emails.Where(x => x.Name == emailName).Select(x => x.Content).SingleOrDefaultAsync();
 
             // Deserialize the content into an EmailPage object
             EmailPage emailPage = JsonSerializer.Deserialize<EmailPage>(content, new JsonSerializerOptions

@@ -26,7 +26,7 @@ namespace Website.Classes
                 Email = Email,
                 FirstName = FirstName,
                 LastName = LastName,
-                ReviewName = FirstName
+                ReviewName = FirstName,
             };
         }
     }

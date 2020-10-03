@@ -27,6 +27,7 @@ namespace Services.Classes
             }
 
             // Apply the styles
+            td.SetAttributeValue("style", "font-family: Arial, Helvetica, sans-serif;font-size: 14px;color: #000000;line-height: normal;");
             if (Background != null) Background.SetStyle(td);
             if (Padding != null) Padding.SetStyle(td);
 

@@ -1,7 +1,4 @@
 ﻿using HtmlAgilityPack;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Services.Classes
 {
@@ -26,7 +23,6 @@ namespace Services.Classes
 
                 node.SetAttributeValue("style", styles);
             }
-
         }
     }
 }
