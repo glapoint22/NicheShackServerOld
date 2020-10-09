@@ -1,7 +1,4 @@
 ﻿using HtmlAgilityPack;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Services.Classes
 {
@@ -12,6 +9,12 @@ namespace Services.Classes
 
         public void SetStyle(HtmlNode node)
         {
+            if(Name == "Placeholder")
+            {
+                Name = "{productName}";
+                Url = "{imageUrl}";
+            }
+
             node.SetAttributeValue("src", "{host}/images/" + Url);
             node.SetAttributeValue("title", Name);
             node.SetAttributeValue("alt", Name);

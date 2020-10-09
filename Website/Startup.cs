@@ -80,7 +80,7 @@ namespace Website
 
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
-            services.AddTransient<EmailService>();
+            services.AddSingleton<EmailService>();
 
             services.AddControllers();
         }

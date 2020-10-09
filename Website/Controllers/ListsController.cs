@@ -10,6 +10,11 @@ using DataAccess.Models;
 using Website.Repositories;
 using Website.ViewModels;
 using DataAccess.ViewModels;
+using Services;
+using Services.Classes;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
+using Microsoft.EntityFrameworkCore;
 
 namespace Website.Controllers
 {
@@ -18,10 +23,14 @@ namespace Website.Controllers
     public class ListsController : ControllerBase
     {
         private readonly IUnitOfWork unitOfWork;
+        private readonly EmailService emailService;
+        private readonly IWebHostEnvironment env;
 
-        public ListsController(IUnitOfWork unitOfWork)
+        public ListsController(IUnitOfWork unitOfWork, EmailService emailService, IWebHostEnvironment env)
         {
             this.unitOfWork = unitOfWork;
+            this.emailService = emailService;
+            this.env = env;
         }
 
 
@@ -46,15 +55,16 @@ namespace Website.Controllers
         {
             string ownerName = await unitOfWork.Collaborators.Get(x => x.ListId == listId && x.IsOwner, x => x.Customer.FirstName);
 
-            if(ownerName != null)
+            if (ownerName != null)
             {
                 return Ok(ownerName);
-            } else
+            }
+            else
             {
                 return NotFound();
             }
 
-            
+
         }
 
 
@@ -88,11 +98,10 @@ namespace Website.Controllers
 
 
             // The customer's lists
-            var lists = await unitOfWork.Lists.GetCollection(x => listIds.Contains(x.Id),
-            x => new
+            var lists = await unitOfWork.Collaborators.GetCollection(x => listIds.Contains(x.ListId) && x.IsOwner, x => new
             {
-                x.Id,
-                x.Name
+                id = x.ListId,
+                name = x.List.Name + (x.CustomerId != customerId ? " (" + x.Customer.FirstName + ")" : string.Empty)
             });
 
             return Ok(lists);
@@ -165,7 +174,7 @@ namespace Website.Controllers
             string customerId = null;
 
             // Get the customer Id
-            if(!shared) customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            if (!shared) customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
 
             // Get all collaborator ids from this list
@@ -228,49 +237,6 @@ namespace Website.Controllers
                 listId = newList.Id
             });
         }
-
-
-
-
-
-
-
-
-
-
-        // ..................................................................................Add Product....................................................................
-        [HttpPost]
-        [Route("AddProduct")]
-        [Authorize(Policy = "Account Policy")]
-        public async Task<ActionResult> AddProduct(NewListProduct newListProduct)
-        {
-            IEnumerable<int> collaboratorIds = await unitOfWork.Collaborators.GetCollection(x => x.ListId == newListProduct.ListId, x => x.Id);
-            int count = await unitOfWork.ListProducts.GetCount(x => collaboratorIds.Contains(x.CollaboratorId) && x.ProductId == newListProduct.ProductId);
-
-
-            if (count != 0) return Ok(true);
-
-            // Get the customer id from the access token
-            string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
-
-
-            int collaboratorId = await unitOfWork.Collaborators.Get(x => x.CustomerId == customerId && x.ListId == newListProduct.ListId, x => x.Id);
-
-
-            
-
-
-            unitOfWork.ListProducts.Add(new ListProduct { 
-                ProductId = newListProduct.ProductId,
-                CollaboratorId = collaboratorId,
-                DateAdded = DateTime.Now
-            });
-
-            await unitOfWork.Save();
-
-            return Ok();
-        }
-
 
 
 
@@ -385,21 +351,114 @@ namespace Website.Controllers
 
 
 
-        // .........................................................................Remove Product.....................................................................
-        [Route("Product")]
-        [HttpDelete]
-        [Authorize(Policy = "Account Policy")]
-        public async Task<ActionResult> RemoveProduct(int productId, int collaboratorId)
+
+
+
+        // .........................................................................Is Duplicate.....................................................................
+        private async Task<bool> IsDuplicate(int productId, string listId)
         {
-            ListProduct listProduct = await unitOfWork.ListProducts.Get(x => x.ProductId == productId && x.CollaboratorId == collaboratorId);
+            // Get all collaborator ids for the list
+            IEnumerable<int> collaboratorIds = await unitOfWork.Collaborators.GetCollection(x => x.ListId == listId, x => x.Id);
 
-            unitOfWork.ListProducts.Remove(listProduct);
 
+            // Test to see if this product already exsist on this list
+            int count = await unitOfWork.ListProducts.GetCount(x => collaboratorIds.Contains(x.CollaboratorId) && x.ProductId == productId);
+
+            return count > 0;
+        }
+
+
+
+
+
+
+
+
+
+
+        // .........................................................................Add Product To List.....................................................................
+        private async Task AddProductToList(int productId, string listId)
+        {
+            // Get the customer id from the access token
+            string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+
+            // Get the collaborator id for this list
+            int collaboratorId = await unitOfWork.Collaborators.Get(x => x.CustomerId == customerId && x.ListId == listId, x => x.Id);
+
+
+            // Add the product to the list
+            unitOfWork.ListProducts.Add(new ListProduct
+            {
+                ProductId = productId,
+                CollaboratorId = collaboratorId,
+                DateAdded = DateTime.Now
+            });
+        }
+
+
+
+
+        // ..................................................................................Add Product....................................................................
+        [HttpPost]
+        [Route("AddProduct")]
+        [Authorize(Policy = "Account Policy")]
+        public async Task<ActionResult> AddProduct(NewListProduct newListProduct)
+        {
+            // Test to see if this product is already on this list
+            bool isDuplicate = await IsDuplicate(newListProduct.ProductId, newListProduct.ListId);
+            if (isDuplicate) return Ok(true);
+
+
+            // Add the product to the list and save
+            await AddProductToList(newListProduct.ProductId, newListProduct.ListId);
             await unitOfWork.Save();
+
+
+
+            // Setup the email
+            emailService.SetupEmail(SetupAddedListItemEmail, new EmailSetupParams
+            {
+                ListId1 = newListProduct.ListId,
+                CustomerId = User.FindFirst(ClaimTypes.NameIdentifier).Value,
+                ProductId = newListProduct.ProductId,
+                Host = GetHost()
+            });
+
 
             return Ok();
         }
 
+
+
+
+
+
+        // .........................................................................Remove Product.....................................................................
+        [Route("Product")]
+        [HttpDelete]
+        [Authorize(Policy = "Account Policy")]
+        public async Task<ActionResult> RemoveProduct(int productId, int collaboratorId, string listId)
+        {
+            // Get the product to remove
+            ListProduct listProduct = await unitOfWork.ListProducts.Get(x => x.ProductId == productId && x.CollaboratorId == collaboratorId);
+
+            // Remove the product from the list and save
+            unitOfWork.ListProducts.Remove(listProduct);
+            await unitOfWork.Save();
+
+
+            // Setup the email
+            emailService.SetupEmail(SetupRemovedListItemEmail, new EmailSetupParams
+            {
+                ListId1 = listId,
+                CustomerId = User.FindFirst(ClaimTypes.NameIdentifier).Value,
+                ProductId = productId,
+                Host = GetHost()
+            });
+
+            return Ok();
+        }
 
 
 
@@ -412,27 +471,315 @@ namespace Website.Controllers
         [Authorize(Policy = "Account Policy")]
         public async Task<ActionResult> MoveProduct(MovedListProduct movedListProduct)
         {
-            ListProduct listProduct = await unitOfWork.ListProducts.Get(x => x.ProductId == movedListProduct.ProductId && x.CollaboratorId == movedListProduct.CollaboratorId);
+            // Test to see if this product is already on this list
+            bool isDuplicate = await IsDuplicate(movedListProduct.ProductId, movedListProduct.ToListId);
+            if (isDuplicate) return Ok(true);
 
+
+
+            // Remove the product from the current list
+            ListProduct listProduct = await unitOfWork.ListProducts.Get(x => x.ProductId == movedListProduct.ProductId && x.CollaboratorId == movedListProduct.CollaboratorId);
             unitOfWork.ListProducts.Remove(listProduct);
 
-            // Get the customer id from the access token
-            string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
-            int collaboratorId = await unitOfWork.Collaborators.Get(x => x.CustomerId == customerId && x.ListId == movedListProduct.ListId, x => x.Id);
 
-            unitOfWork.ListProducts.Add(new ListProduct { 
+            // Add the product to the list
+            await AddProductToList(movedListProduct.ProductId, movedListProduct.ToListId);
+
+
+
+            // Save
+            await unitOfWork.Save();
+
+
+
+
+            // Setup the email
+            emailService.SetupEmail(SetupMovedListItemEmail, new EmailSetupParams
+            {
+                ListId1 = movedListProduct.FromListId,
+                ListId2 = movedListProduct.ToListId,
+                CustomerId = User.FindFirst(ClaimTypes.NameIdentifier).Value,
                 ProductId = movedListProduct.ProductId,
-                CollaboratorId = collaboratorId,
-                DateAdded = DateTime.Now
+                Host = GetHost()
             });
 
 
-
-            await unitOfWork.Save();
-
             return Ok();
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // .........................................................................Get Email Params.....................................................................
+        private async Task<EmailParams> GetEmailParams(NicheShackContext context, string customerId, int? productId, string listId, string host)
+        {
+            // Get the recipients
+            List<string> customerIds = await context.ListCollaborators
+                .AsNoTracking()
+                .Where(x => x.ListId == listId && x.CustomerId != customerId)
+                .Select(x => x.CustomerId)
+                .ToListAsync();
+
+            // If we have no customer ids, return
+            if (customerIds.Count == 0) return null;
+
+
+            List<Recipient> recipients = await context.Customers
+                .AsNoTracking()
+                .Where(x => customerIds.Contains(x.Id))
+                .Select(x => new Recipient
+                {
+                    CustomerId = x.Id,
+                    Email = x.Email,
+                    FirstName = x.FirstName,
+                    LastName = x.LastName
+                }).ToListAsync();
+
+
+
+
+
+
+
+
+            // Get the customer that did the action
+            CustomerData collaborator = await context.Customers
+                .AsNoTracking()
+                .Where(x => x.Id == customerId)
+                .Select(x => new CustomerData
+                {
+                    FirstName = x.FirstName,
+                    LastName = x.LastName
+                }).SingleAsync();
+
+
+
+
+
+
+
+
+            // Get the list
+            ListViewModel list = await context.Lists
+                .AsNoTracking()
+                .Where(x => x.Id == listId)
+                .Select(x => new ListViewModel
+                {
+                    Id = x.Id,
+                    Name = x.Name
+                }).SingleAsync();
+
+
+            ListProductData product = null;
+            // Get the product
+            if (productId != null)
+            {
+                product = await context.Products
+                .AsNoTracking()
+                .Where(x => x.Id == productId)
+                .Select(x => new ListProductData
+                {
+                    Name = x.Name,
+                    ImageUrl = x.Media.Url,
+                    UrlName = x.UrlName,
+                    UrlId = x.UrlId
+                }).SingleAsync();
+            }
+
+
+
+
+
+
+
+            return new EmailParams
+            {
+                Collaborator = collaborator,
+                List = list,
+                Product = product,
+                Recipients = recipients,
+                Host = host
+            };
+        }
+
+
+
+
+
+        // .........................................................................Setup Removed List Item Email.....................................................................
+        private async Task SetupRemovedListItemEmail(NicheShackContext context, object state)
+        {
+            EmailSetupParams emailSetupParams = (EmailSetupParams)state;
+
+
+            EmailParams emailParams = await GetEmailParams(context, emailSetupParams.CustomerId, emailSetupParams.ProductId, emailSetupParams.ListId1, emailSetupParams.Host);
+
+            if (emailParams == null) return;
+
+
+            // Add emails to the queue
+            SubmitRemovedListItemEmailsToQueue(emailParams);
+        }
+
+
+
+
+
+
+
+
+
+
+        // .........................................................................Submit Removed List Item Emails To Queue.....................................................................
+        private void SubmitRemovedListItemEmailsToQueue(EmailParams emailParams)
+        {
+            SubmitEmailsToQueue(EmailType.RemovedListItem, emailParams.Collaborator.FirstName +
+                        " " + emailParams.Collaborator.LastName +
+                        " has removed " + emailParams.Product.Name +
+                        " from the list " + emailParams.List.Name, emailParams.Recipients, emailParams.Collaborator, emailParams.Product, emailParams.Host, emailParams.List);
+        }
+
+
+
+
+        // .........................................................................Setup Added List Item Email.....................................................................
+        private async Task SetupAddedListItemEmail(NicheShackContext context, object state)
+        {
+            EmailSetupParams emailSetupParams = (EmailSetupParams)state;
+
+
+            EmailParams emailParams = await GetEmailParams(context, emailSetupParams.CustomerId, emailSetupParams.ProductId, emailSetupParams.ListId1, emailSetupParams.Host);
+
+            if (emailParams == null) return;
+
+
+            // Add emails to the queue
+            SubmitAddedListItemEmailsToQueue(emailParams);
+        }
+
+
+
+
+
+
+
+        // .........................................................................Submit Added List Item Emails To Queue.....................................................................
+        private void SubmitAddedListItemEmailsToQueue(EmailParams emailParams)
+        {
+            SubmitEmailsToQueue(EmailType.AddedListItem, emailParams.Collaborator.FirstName +
+                        " " + emailParams.Collaborator.LastName +
+                        " has added " + emailParams.Product.Name +
+                        " to the list " + emailParams.List.Name, emailParams.Recipients, emailParams.Collaborator, emailParams.Product, emailParams.Host, emailParams.List);
+        }
+
+
+
+
+
+
+
+
+
+
+
+        // .........................................................................Submit Emails To Queue.....................................................................
+        private void SubmitEmailsToQueue(EmailType emailType, string subject, IEnumerable<Recipient> recipients, CustomerData Collaborator, ListProductData product, string host, ListViewModel list1, ListViewModel list2 = null)
+        {
+            foreach (Recipient recipient in recipients)
+            {
+                emailService.emails.Add(new EmailMessage
+                {
+                    EmailType = emailType,
+                    Recipient = recipient.Email,
+                    Subject = subject,
+                    EmailProperties = new EmailProperties
+                    {
+                        Host = host,
+                        FirstName = recipient.FirstName,
+                        LastName = recipient.LastName,
+                        List1 = list1.Name,
+                        List2 = list2 != null ? list2.Name : null,
+                        Link = host + "/account/lists/" + (list2 != null ? list2.Id : list1.Id),
+                        CollaboratorFirstName = Collaborator.FirstName,
+                        CollaboratorLastName = Collaborator.LastName,
+                        ProductName = product != null ? product.Name : null,
+                        ImageUrl = product != null ? product.ImageUrl : null,
+                        ProductLink = product != null ? host + "/" + product.UrlName + "/" + product.UrlId : null
+                    }
+                });
+            }
+        }
+
+
+
+
+        // .........................................................................Send Moved List Item Email.....................................................................
+        private async Task SetupMovedListItemEmail(NicheShackContext context, object state)
+        {
+            EmailSetupParams emailSetupParams = (EmailSetupParams)state;
+
+
+            EmailParams fromListEmailParams = await GetEmailParams(context, emailSetupParams.CustomerId, emailSetupParams.ProductId, emailSetupParams.ListId1, emailSetupParams.Host);
+            EmailParams toListEmailParams = await GetEmailParams(context, emailSetupParams.CustomerId, emailSetupParams.ProductId, emailSetupParams.ListId2, emailSetupParams.Host);
+
+            if (fromListEmailParams == null && toListEmailParams == null) return;
+
+
+            if (fromListEmailParams != null && toListEmailParams == null)
+            {
+                SubmitRemovedListItemEmailsToQueue(fromListEmailParams);
+
+            }
+            else if (fromListEmailParams == null && toListEmailParams != null)
+            {
+                SubmitAddedListItemEmailsToQueue(toListEmailParams);
+            }
+            else
+            {
+                List<Recipient> bothListsRecipients = fromListEmailParams.Recipients.Where(x => toListEmailParams.Recipients.Select(z => z.CustomerId).ToList().Contains(x.CustomerId)).ToList();
+                fromListEmailParams.Recipients = fromListEmailParams.Recipients.Where(x => !bothListsRecipients.Select(z => z.CustomerId).ToList().Contains(x.CustomerId)).ToList();
+                toListEmailParams.Recipients = toListEmailParams.Recipients.Where(x => !bothListsRecipients.Select(z => z.CustomerId).ToList().Contains(x.CustomerId)).ToList();
+
+                if (bothListsRecipients.Count > 0)
+                {
+                    SubmitEmailsToQueue(EmailType.MovedListItem, fromListEmailParams.Collaborator.FirstName +
+                        " " + fromListEmailParams.Collaborator.LastName +
+                        " has moved " + fromListEmailParams.Product.Name +
+                        " from the list " +
+                        fromListEmailParams.List.Name + " to the list " + toListEmailParams.List.Name,
+                            bothListsRecipients,
+                            fromListEmailParams.Collaborator,
+                            fromListEmailParams.Product,
+                            fromListEmailParams.Host,
+                            fromListEmailParams.List,
+                            toListEmailParams.List);
+                }
+
+                SubmitRemovedListItemEmailsToQueue(fromListEmailParams);
+
+                SubmitAddedListItemEmailsToQueue(toListEmailParams);
+            }
+        }
+
+
 
 
 
@@ -449,19 +796,19 @@ namespace Website.Controllers
 
             List list = await unitOfWork.Lists.Get(x => x.CollaborateId == collaborateId);
 
-            if(list == null)
+            if (list == null)
             {
                 return NotFound();
             }
 
-            
+
 
 
             bool exists = await unitOfWork.Collaborators.Any(x => x.CustomerId == User.FindFirst(ClaimTypes.NameIdentifier).Value && x.ListId == list.Id);
 
 
 
-            
+
 
 
             if (!exists)
@@ -471,10 +818,11 @@ namespace Website.Controllers
             }
 
 
-            return Ok(new {
+            return Ok(new
+            {
                 listId = list.Id,
                 ownerName = customer != null ? customer.FirstName : null,
-                profilePic = customer != null ? customer.image: null,
+                profilePic = customer != null ? customer.image : null,
                 listName = list.Name,
                 exists
             });
@@ -494,20 +842,108 @@ namespace Website.Controllers
         [Authorize(Policy = "Account Policy")]
         public async Task<ActionResult> AddCollaborator(ItemViewModel itemViewModel)
         {
-            // Get the customer id from the access token
+            // Get the customer id
             string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
-            string listId = await unitOfWork.Lists.Get(x => x.CollaborateId == itemViewModel.Name, x => x.Id);
-
-            unitOfWork.Collaborators.Add(new ListCollaborator { 
-                CustomerId = customerId,
-                ListId = listId
+            // Get the list
+            var list = await unitOfWork.Lists.Get(x => x.CollaborateId == itemViewModel.Name, x => new
+            {
+                id = x.Id,
+                name = x.Name
             });
 
+            // Add this customer to the list
+            unitOfWork.Collaborators.Add(new ListCollaborator
+            {
+                CustomerId = customerId,
+                ListId = list.id
+            });
 
             await unitOfWork.Save();
 
+
+            // Setup the email
+            emailService.SetupEmail(SetupAddedCollaboratorEmail, new EmailSetupParams
+            {
+                ListId1 = list.id,
+                Host = GetHost(),
+                CustomerId = customerId
+            });
+
+
+
+
             return Ok();
         }
+
+
+
+
+
+
+        private async Task SetupAddedCollaboratorEmail(NicheShackContext context, object state)
+        {
+            EmailSetupParams emailSetupParams = (EmailSetupParams)state;
+
+            EmailParams emailParams = await GetEmailParams(context, emailSetupParams.CustomerId, null, emailSetupParams.ListId1, emailSetupParams.Host);
+
+            if (emailParams == null) return;
+
+
+
+            SubmitEmailsToQueue(EmailType.NewCollaborator, "A new collaborator, " + emailParams.Collaborator.FirstName +
+                " " + emailParams.Collaborator.LastName +
+                ", has joined the list " +
+                emailParams.List.Name, emailParams.Recipients, emailParams.Collaborator, null, emailParams.Host, emailParams.List);
+        }
+
+
+
+
+
+
+
+
+        // ..................................................................................Get Host.....................................................................
+        private string GetHost()
+        {
+            if (env.IsDevelopment())
+            {
+                return "http://localhost:4200";
+            }
+
+            return HttpContext.Request.Scheme + "://" + HttpContext.Request.Host.Value;
+        }
+    }
+
+    struct EmailSetupParams
+    {
+        public string ListId1 { get; set; }
+        public string ListId2 { get; set; }
+        public string CustomerId { get; set; }
+        public int ProductId { get; set; }
+        public string Host { get; set; }
+    }
+
+
+
+    class EmailParams
+    {
+        public CustomerData Collaborator { get; set; }
+        public ListViewModel List { get; set; }
+        public ListProductData Product { get; set; }
+        public IEnumerable<Recipient> Recipients { get; set; }
+        public string Host { get; set; }
+    }
+
+
+
+
+    class ListProductData
+    {
+        public string Name { get; set; }
+        public string ImageUrl { get; set; }
+        public string UrlName { get; set; }
+        public string UrlId { get; set; }
     }
 }
