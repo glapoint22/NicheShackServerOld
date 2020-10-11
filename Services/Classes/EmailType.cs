@@ -5,15 +5,16 @@
         None,
         AccountActivation,
         NewCollaborator,
+        RemovedCollaborator,
         RemovedListItem,
         MovedListItem,
         AddedListItem,
         NameChange,
         EmailChange,
-        PasswordUpdated,
+        VerifyEmail,
+        PasswordChange,
         OrderConfirmation,
         Review,
         ResetPassword,
-        VerifyEmail
     }
 }

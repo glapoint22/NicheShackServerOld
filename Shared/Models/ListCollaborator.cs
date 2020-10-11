@@ -15,6 +15,7 @@ namespace DataAccess.Models
         [Required]
         public string ListId { get; set; }
         public bool IsOwner { get; set; }
+        public bool IsRemoved { get; set; }
         public virtual Customer Customer { get; set; }
         public virtual List List { get; set; }
         public virtual ICollection<ListProduct> ListProducts { get; set; }

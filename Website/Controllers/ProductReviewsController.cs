@@ -7,6 +7,13 @@ using Website.Classes;
 using DataAccess.Models;
 using Website.Repositories;
 using Website.ViewModels;
+using Services;
+using Services.Classes;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
+using Microsoft.EntityFrameworkCore;
+using DataAccess.Classes;
+using System.Linq;
 
 namespace Website.Controllers
 {
@@ -15,10 +22,14 @@ namespace Website.Controllers
     public class ProductReviewsController : ControllerBase
     {
         private readonly IUnitOfWork unitOfWork;
+        private readonly EmailService emailService;
+        private readonly IWebHostEnvironment env;
 
-        public ProductReviewsController(IUnitOfWork unitOfWork)
+        public ProductReviewsController(IUnitOfWork unitOfWork, EmailService emailService, IWebHostEnvironment env)
         {
             this.unitOfWork = unitOfWork;
+            this.emailService = emailService;
+            this.env = env;
         }
 
 
@@ -103,21 +114,22 @@ namespace Website.Controllers
         // .......................................................................................Post Review...................................................................
         [HttpPost]
         [Authorize(Policy = "Account Policy")]
-        public async Task<ActionResult> PostReview(ProductReview review)
+        public async Task<ActionResult> PostReview(ReviewData review)
         {
-            //if (review.ProductId == null)
-            //{
-            //    return BadRequest(ModelState);
-            //}
-
-            // Get the customer Id from the access token
             string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
-            // Assign the customer to the review
-            review.CustomerId = customerId;
 
-            // Add the new review
-            unitOfWork.ProductReviews.Add(review);
+            // Add the review to the database
+            unitOfWork.ProductReviews.Add(new ProductReview
+            {
+                ProductId = review.ProductId,
+                CustomerId = customerId,
+                Title = review.Title,
+                Rating = review.Rating,
+                Date = DateTime.Now,
+                Text = review.Text
+            });
+
 
             // Get the product that is associated with this review
             Product product = await unitOfWork.Products.Get(review.ProductId);
@@ -162,6 +174,22 @@ namespace Website.Controllers
             unitOfWork.Products.Update(product);
             await unitOfWork.Save();
 
+
+
+            // Setup the email
+            emailService.SetupEmail(SetupEmail, new EmailSetupParams
+            {
+                CustomerId = customerId,
+                ProductId = product.Id,
+                Host = GetHost(),
+                ProductRating = review.Rating,
+                Title = review.Title,
+                Text = review.Text
+            });
+
+
+
+
             return Ok();
         }
 
@@ -169,6 +197,86 @@ namespace Website.Controllers
 
 
 
+        // .........................................................................Setup Email.....................................................................
+        private async Task SetupEmail(NicheShackContext context, object state)
+        {
+            EmailSetupParams emailSetupParams = (EmailSetupParams)state;
+
+            Recipient recipient = await context.Customers
+                .AsNoTracking()
+                .Where(x => x.Id == emailSetupParams.CustomerId)
+                .Select(x => new Recipient
+                {
+                    FirstName = x.FirstName,
+                    LastName = x.LastName,
+                    Email = x.Email
+                })
+                .SingleAsync();
+
+
+            ProductData product = await context.Products
+                .AsNoTracking()
+                .Where(x => x.Id == emailSetupParams.ProductId)
+                .Select(x => new ProductData
+                {
+                    Name = x.Name,
+                    Image = x.Media.Url,
+                    Url = emailSetupParams.Host + "/" + x.UrlName + "/" + x.UrlId
+                }).SingleAsync();
+
+
+
+
+
+
+            emailService.AddToQueue(EmailType.Review, "Thank you for reviewing " + product.Name + " on Niche Shack", recipient, new EmailProperties
+            {
+                Host = emailSetupParams.Host,
+                Product = product,
+                Stars = await GetStarsImage(emailSetupParams.ProductRating, context),
+                Var1 = emailSetupParams.Title,
+                Var2 = emailSetupParams.Text
+            });
+
+        }
+
+
+
+        private async Task<string> GetStarsImage(int rating, NicheShackContext context)
+        {
+            string imageName = null;
+
+            switch (rating)
+            {
+                case 1:
+                    imageName = "One Star";
+                    break;
+
+                case 2:
+                    imageName = "Two Stars";
+                    break;
+
+                case 3:
+                    imageName = "Three Stars";
+                    break;
+
+                case 4:
+                    imageName = "Four Stars";
+                    break;
+
+                case 5:
+                    imageName = "Five Stars";
+                    break;
+            }
+
+
+            return await context.Media
+                .AsNoTracking()
+                .Where(x => x.Name == imageName)
+                .Select(x => x.Url)
+                .SingleAsync();
+
+        }
 
 
 
@@ -225,6 +333,20 @@ namespace Website.Controllers
             }
 
             return BadRequest();
+        }
+
+
+
+
+        // ..................................................................................Get Host.....................................................................
+        private string GetHost()
+        {
+            if (env.IsDevelopment())
+            {
+                return "http://localhost:4200";
+            }
+
+            return HttpContext.Request.Scheme + "://" + HttpContext.Request.Host.Value;
         }
     }
 }

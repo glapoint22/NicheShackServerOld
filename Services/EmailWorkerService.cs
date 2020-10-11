@@ -60,7 +60,7 @@ namespace Services
 
                     string emailBody = GetEmailBody(emailContent, emailMessage.EmailProperties);
 
-                    MimeMessage email = GetEmail(emailMessage.Recipient, emailMessage.Subject, emailBody);
+                    MimeMessage email = GetEmail(emailMessage.EmailAddress, emailMessage.Subject, emailBody);
 
                     await SendEmail(email);
 

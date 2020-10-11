@@ -9,10 +9,15 @@ namespace Services.Classes
 
         public void SetStyle(HtmlNode node)
         {
-            if(Name == "Placeholder")
+            if(Name == "Product Placeholder")
             {
                 Name = "{productName}";
-                Url = "{imageUrl}";
+                Url = "{productImage}";
+            }
+            else if(Name == "Stars Placeholder")
+            {
+                Name = "Product Rating";
+                Url = "{stars}";
             }
 
             node.SetAttributeValue("src", "{host}/images/" + Url);
