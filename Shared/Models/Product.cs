@@ -50,6 +50,7 @@ namespace DataAccess.Models
         public virtual ICollection<ProductKeyword> Keywords { get; set; }
         public virtual ICollection<ProductEmail> ProductEmails { get; set; }
         public virtual ICollection<Notification> Notifications { get; set; }
+        public virtual ICollection<SubgroupProduct> SubgroupProducts { get; set; }
 
 
 
@@ -65,6 +66,7 @@ namespace DataAccess.Models
             Keywords = new HashSet<ProductKeyword>();
             ProductEmails = new HashSet<ProductEmail>();
             Notifications = new HashSet<Notification>();
+            SubgroupProducts = new HashSet<SubgroupProduct>();
         }
     }
 }

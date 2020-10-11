@@ -6,6 +6,8 @@ using DataAccess.Models;
 using Manager.Classes;
 using System;
 using System.Text.RegularExpressions;
+using System.Collections;
+using System.Linq;
 
 namespace Manager.Controllers
 {
@@ -32,6 +34,14 @@ namespace Manager.Controllers
         public async Task<ActionResult> GetAllNiches()
         {
             return Ok(await unitOfWork.Niches.GetCollection<ItemViewModel<Niche>>());
+        }
+
+
+        [Route("CategoryIds")]
+        [HttpPost]
+        public async Task<ActionResult> GetMultiNiches(Niches niches)
+        {
+            return Ok(await unitOfWork.Niches.GetCollection(x => niches.CategoryIds.Contains(x.CategoryId)));
         }
 
 

@@ -69,6 +69,9 @@ namespace DataAccess.Models
         public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
 
 
+        public virtual DbSet<Subgroup> Subgroups { get; set; }
+        public virtual DbSet<SubgroupProduct> SubgroupProducts { get; set; }
+
         public virtual DbSet<Vendor> Vendors { get; set; }
 
 
@@ -196,8 +199,13 @@ namespace DataAccess.Models
 
 
 
+            // Subgroup Products
+            modelBuilder.Entity<SubgroupProduct>(entity =>
+            {
+                entity.HasKey(x => new { x.ProductId, x.SubgroupId })
+                .HasName("PK_SubgroupProducts");
+            });
 
-           
         }
     }
 }

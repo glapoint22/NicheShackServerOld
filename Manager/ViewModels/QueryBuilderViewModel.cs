@@ -1,6 +1,8 @@
 ﻿using DataAccess.Interfaces;
 using DataAccess.Models;
 using Manager.Classes;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Manager.ViewModels
@@ -8,11 +10,13 @@ namespace Manager.ViewModels
     public class QueryBuilderViewModel : IWhere<Product>
     {
 
-        private readonly QueryBuilderData queryBuilderData;
+        //private readonly QueryBuilderData queryBuilderData;
 
-        public QueryBuilderViewModel(QueryBuilderData queryBuilderData)
+        private readonly IEnumerable<Query> queries;
+
+        public QueryBuilderViewModel(IEnumerable<Query> queries)
         {
-            this.queryBuilderData = queryBuilderData;
+            this.queries = queries;
         }
 
 
@@ -34,12 +38,42 @@ namespace Manager.ViewModels
         public IQueryable<Product> SetWhere(IQueryable<Product> source)
         {
 
-            ////---------NICHES ONLY---------\\
-            //source = source.Where(x => queryBuilderData.NicheIds.Contains(x.NicheId));
+
+
+
+            for (var i = 0; i < queries.ToArray().Length; i++)
+            {
+
+                
+
+
+                //---------NICHES---------\\
+
+                if (queries.ToArray()[i].QueryType == QueryType.Niche)
+                {
+                    IEnumerable<int> nicheIds = Array.ConvertAll(queries.ToArray()[i].Value.ToArray(), int.Parse);
+                    source = source.Where(x => nicheIds.Contains(x.NicheId));
+                }
+
+
+
+
+
+
+
+            }
+
+
+
+
+
+
+
+            //source = source.Where(x => queries.ToArray()[0].Valu .Contains(x.NicheId));
 
 
             ////---------RATING ONLY---------\\
-            source = source.Where(x => x.Rating > 3);
+            //source = source.Where(x => x.Rating > 3);
 
 
             //////---------PRICE ONLY---------\\

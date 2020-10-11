@@ -47,10 +47,13 @@ namespace Manager.Controllers
 
 
 
-        [HttpGet]
+        [HttpPost]
         [Route("Alita")]
-        public async Task<ActionResult> Alita()
+        public async Task<ActionResult> Alita(IEnumerable<Query> queries)
         {
+
+
+           
 
             ////---------CATEGORIES ONLY---------\\
             //int[] categoryIds = new int[] { 1, 2 };
@@ -191,25 +194,25 @@ namespace Manager.Controllers
 
 
 
-            var queryBuilderData = new QueryBuilderData();
+            //var queryBuilderData = new QueryBuilderData();
 
-            List<int> categoryIds = new List<int>();
-            categoryIds.Add(1);
-            categoryIds.Add(2);
+            //List<int> categoryIds = new List<int>();
+            //categoryIds.Add(1);
+            //categoryIds.Add(2);
 
-            List<string> keywords = new List<string>();
-            keywords.Add("voice");
-            keywords.Add("jazzy");
+            //List<string> keywords = new List<string>();
+            //keywords.Add("voice");
+            //keywords.Add("jazzy");
 
 
 
             
 
-            queryBuilderData.CategoryIds = categoryIds;
-            queryBuilderData.Keywords = keywords;
+            //queryBuilderData.CategoryIds = categoryIds;
+            //queryBuilderData.Keywords = keywords;
 
 
-            return Ok(await unitOfWork.Products.GetAlita(queryBuilderData));
+            return Ok(await unitOfWork.Products.GetAlita(queries));
 
         }
 
