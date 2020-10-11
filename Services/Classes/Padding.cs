@@ -12,17 +12,14 @@ namespace Services.Classes
 
         public void SetStyle(HtmlNode node)
         {
-            if (Top != null && Right != null && Bottom != null && Left != null)
-            {
-                string styles = node.GetAttributeValue("style", "");
+            string styles = node.GetAttributeValue("style", "");
 
-                if (Top != null) styles += "padding-top: " + Top + ";";
-                if (Right != null) styles += "padding-right: " + Right + ";";
-                if (Bottom != null) styles += "padding-bottom: " + Bottom + ";";
-                if (Left != null) styles += "padding-left: " + Left + ";";
+            if (Top != null) styles += "padding-top: " + Top + ";";
+            if (Right != null) styles += "padding-right: " + Right + ";";
+            if (Bottom != null) styles += "padding-bottom: " + Bottom + ";";
+            if (Left != null) styles += "padding-left: " + Left + ";";
 
-                node.SetAttributeValue("style", styles);
-            }
+            node.SetAttributeValue("style", styles);
         }
     }
 }

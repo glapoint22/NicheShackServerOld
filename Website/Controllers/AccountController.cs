@@ -289,12 +289,19 @@ namespace Website.Controllers
                 if (result.Succeeded)
                 {
                     // Send a confirmation email that the customer name has been changed
-                    await emailService.SendEmail(EmailType.NameChange, customer.Email, "Name change confirmation", new EmailProperties
+                    emailService.emails.Add(new EmailMessage
                     {
-                        Host = GetHost(),
-                        FirstName = customer.FirstName,
-                        LastName = customer.LastName
+                        EmailType = EmailType.NameChange,
+                        Recipient = customer.Email,
+                        Subject = "Name change confirmation",
+                        EmailProperties = new EmailProperties
+                        {
+                            Host = GetHost(),
+                            FirstName = customer.FirstName,
+                            LastName = customer.LastName
+                        }
                     });
+
                     return Ok();
                 }
             }
@@ -317,36 +324,49 @@ namespace Website.Controllers
         {
             // Get the customer from the database based on the customer id from the claims via the access token
             Customer customer = await userManager.FindByIdAsync(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-
+            
 
             // If the customer is found...
             if (customer != null)
             {
                 if (!await userManager.CheckPasswordAsync(customer, updatedEmail.Password))
                 {
-                    return Conflict("Your password and current email do not match.");
+                    return Conflict("Your password and email do not match.");
                 }
 
+                string previousEmail = customer.Email;
+
                 // Update the new email in the database
-                IdentityResult result = await userManager.SetEmailAsync(customer, updatedEmail.Email);
+                IdentityResult result = await userManager.ChangeEmailAsync(customer, updatedEmail.Email, updatedEmail.Token);
 
 
                 // If the update was successful, return ok
                 if (result.Succeeded)
                 {
+                    // Send a confirmation email that the customer email has been changed
+                    emailService.emails.Add(new EmailMessage
+                    {
+                        EmailType = EmailType.EmailChange,
+                        Recipient = updatedEmail.Email,
+                        Subject = "Email change confirmation",
+                        EmailProperties = new EmailProperties
+                        {
+                            Host = GetHost(),
+                            FirstName = customer.FirstName,
+                            LastName = customer.LastName,
+                            Email1 = previousEmail,
+                            Email2 = updatedEmail.Email
+                        }
+                    });
+
+
                     return Ok();
-                }
+                } 
                 else
                 {
-                    string error = string.Empty;
-
-                    if (result.Errors.Count(x => x.Code == "DuplicateEmail") == 1)
-                    {
-                        error = "The email address, \"" + updatedEmail.Email.ToLower() + ",\" already exists with another Niche Shack account. Please use another email address.";
-                    }
-
-                    return Conflict(error);
+                    return Conflict("An error occured due to an invalid email address or invalid token.");
                 }
+                
             }
 
             return BadRequest();
@@ -716,15 +736,70 @@ namespace Website.Controllers
 
 
 
+
+
+
+
+        // ..................................................................................New Email.....................................................................
+        [HttpGet]
+        [Route("NewEmail")]
+        [Authorize(Policy = "Account Policy")]
+        public async Task<ActionResult> NewEmail(string email)
+        {
+            string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            Customer customer = await userManager.FindByIdAsync(customerId);
+
+
+            if (customer != null)
+            {
+               var result = await userManager.FindByEmailAsync(email);
+
+                if(result != null) return Conflict();
+
+                string token = await userManager.GenerateChangeEmailTokenAsync(customer, email);
+
+
+
+                emailService.emails.Add(new EmailMessage
+                {
+                    EmailType = EmailType.VerifyEmail,
+                    Recipient = email,
+                    Subject = "Verify Email",
+                    EmailProperties = new EmailProperties
+                    {
+                        Host = GetHost(),
+                        Link = GetHost() + "/account/profile/change-email?email=" + HttpUtility.UrlEncode(email) + "&token=" + HttpUtility.UrlEncode(token)
+                    }
+                });
+
+                return Ok();
+            }
+
+
+            return BadRequest();
+        }
+
+
+
+
+
+
+
+
         // ..................................................................................Send Account Activation Email.....................................................................
         private async Task SendAccountActivationEmail(Customer customer)
         {
             string token = await userManager.GenerateEmailConfirmationTokenAsync(customer);
 
-            await emailService.SendEmail(EmailType.AccountActivation, customer.Email, "Activate your new Niche Shack account", new EmailProperties
-            {
-                Host = GetHost(),
-                Link = GetHost() + "/activate-account?email=" + HttpUtility.UrlEncode(customer.Email) + "&token=" + HttpUtility.UrlEncode(token)
+            emailService.emails.Add(new EmailMessage { 
+                EmailType = EmailType.AccountActivation,
+                Recipient = customer.Email,
+                Subject = "Activate your new Niche Shack account",
+                EmailProperties = new EmailProperties
+                {
+                    Host = GetHost(),
+                    Link = GetHost() + "/activate-account?email=" + HttpUtility.UrlEncode(customer.Email) + "&token=" + HttpUtility.UrlEncode(token)
+                }
             });
         }
 
@@ -738,10 +813,17 @@ namespace Website.Controllers
         {
             string token = await userManager.GeneratePasswordResetTokenAsync(customer);
 
-            await emailService.SendEmail(EmailType.ResetPassword, customer.Email, "Reset Password", new EmailProperties
+
+            emailService.emails.Add(new EmailMessage
             {
-                Host = GetHost(),
-                Link = GetHost() + "/reset-password?email=" + HttpUtility.UrlEncode(customer.Email) + "&token=" + HttpUtility.UrlEncode(token)
+                EmailType = EmailType.ResetPassword,
+                Recipient = customer.Email,
+                Subject = "Reset Password",
+                EmailProperties = new EmailProperties
+                {
+                    Host = GetHost(),
+                    Link = GetHost() + "/reset-password?email=" + HttpUtility.UrlEncode(customer.Email) + "&token=" + HttpUtility.UrlEncode(token)
+                }
             });
         }
 
