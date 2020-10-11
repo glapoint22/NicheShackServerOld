@@ -13,6 +13,6 @@ namespace Manager.Repositories
         Task<ProductViewModel> GetProduct(int productId);
 
 
-        Task<IEnumerable<QueryBuilderViewModel>> GetAlita(QueryBuilderData queryBuilderData);
+        Task<IEnumerable<QueryBuilderViewModel>> GetAlita(IEnumerable<Query> queries);
     }
 }

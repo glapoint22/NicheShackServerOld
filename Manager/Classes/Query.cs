@@ -7,7 +7,7 @@ namespace Manager.Classes
 {
 
 
-    public enum WhereType
+    public enum QueryType
     {
         Category,
         Niche,
@@ -31,11 +31,15 @@ namespace Manager.Classes
         IsBetween
     }
 
+    public class Niches
+    {
+        public IEnumerable<int> CategoryIds { get; set; }
+    }
 
     public class Query
     {
-        public WhereType Where { get; set; }
-        public OperatorType Operator { get; set; }
-        public string Value { get; set; }
+        public QueryType QueryType { get; set; }
+        public IEnumerable<OperatorType> Operator { get; set; }
+        public IEnumerable<string> Value { get; set; }
     }
 }

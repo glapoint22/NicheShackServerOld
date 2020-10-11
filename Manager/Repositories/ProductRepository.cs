@@ -5,6 +5,7 @@ using DataAccess.ViewModels;
 using Manager.Classes;
 using Manager.ViewModels;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -134,36 +135,56 @@ namespace Manager.Repositories
         }
 
 
-        
 
 
 
-        public async Task<IEnumerable<QueryBuilderViewModel>> GetAlita(QueryBuilderData queryBuilderData)
+
+        public async Task<IEnumerable<QueryBuilderViewModel>> GetAlita(IEnumerable<Query> queries)
         {
 
+            int categoryIndex = queries.ToList().FindIndex(x => x.QueryType == QueryType.Category);
 
-            
+            if(categoryIndex != -1)
+            {
+                int nicheIndex = queries.ToList().FindIndex(x => x.QueryType == QueryType.Niche);
+            }
 
-            queryBuilderData.NicheIds = await context.Niches.Where(x => queryBuilderData.CategoryIds.Contains(x.CategoryId)).Select(x => x.Id).ToListAsync();
-            queryBuilderData.ProductIds = await context.ProductKeywords.Where(x => queryBuilderData.Keywords.Contains(x.Name)).Select(x => x.ProductId).ToListAsync();
+
+            //for (var i = 0; i < queries.ToArray().Length; i++)
+            //{
+
+            //    if (queries.ToArray()[i].QueryType == QueryType.Category)
+            //    {
+            //        IEnumerable<int> categoryIds = Array.ConvertAll(queries.ToArray()[i].Value.ToArray(), int.Parse);
+            //        IEnumerable<int> nicheIds = await context.Niches.Where(x => categoryIds.Contains(x.CategoryId)).Select(x => x.Id).ToListAsync();
+
+            //        int myIndex = queries.ToList().FindIndex(x => x.QueryType == QueryType.Niche);
+
+
+            //    }
+
+            //}
+
+            //queryBuilderData.NicheIds = await context.Niches.Where(x => queryBuilderData.CategoryIds.Contains(x.CategoryId)).Select(x => x.Id).ToListAsync();
+            //queryBuilderData.ProductIds = await context.ProductKeywords.Where(x => queryBuilderData.Keywords.Contains(x.Name)).Select(x => x.ProductId).ToListAsync();
 
 
 
             return await context.Products
-                .AsNoTracking()
-                .Where(new QueryBuilderViewModel(queryBuilderData))
-                .AsQueryable()
-                .Select(x => new QueryBuilderViewModel
-                {
-                    Name = x.Name,
-                    Rating = x.Rating,
-                    TotalReviews = x.TotalReviews,
-                    MinPrice = x.MinPrice,
-                    MaxPrice = x.MaxPrice,
-                    ImageName = x.Media.Name,
-                    ImageUrl = x.Media.Url
+            .AsNoTracking()
+            .Where(new QueryBuilderViewModel(queries))
+            .AsQueryable()
+            .Select(x => new QueryBuilderViewModel
+            {
+                Name = x.Name,
+                Rating = x.Rating,
+                TotalReviews = x.TotalReviews,
+                MinPrice = x.MinPrice,
+                MaxPrice = x.MaxPrice,
+                ImageName = x.Media.Name,
+                ImageUrl = x.Media.Url
 
-                }).ToListAsync();
+            }).ToListAsync();
         }
     }
 }
