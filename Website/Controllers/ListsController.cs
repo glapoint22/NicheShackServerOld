@@ -265,12 +265,32 @@ namespace Website.Controllers
             // Update the list with the new data
             if (updatedList != null)
             {
+                string previousName = updatedList.Name;
+
                 updatedList.Name = list.Name;
                 updatedList.Description = list.Description;
 
                 // Update and save
                 unitOfWork.Lists.Update(updatedList);
                 await unitOfWork.Save();
+
+
+
+                // Setup the email
+                if(previousName != list.Name)
+                {
+                    emailService.SetupEmail(SetupChangedListName, new EmailSetupParams
+                    {
+                        Host = GetHost(),
+                        CustomerId = User.FindFirst(ClaimTypes.NameIdentifier).Value,
+                        ListId1 = updatedList.Id,
+                        Var1 = previousName,
+                        Var2 = list.Name
+                    });
+                }
+                
+
+
 
                 return Ok(new
                 {
@@ -281,6 +301,36 @@ namespace Website.Controllers
 
             return BadRequest();
         }
+
+
+
+
+
+
+
+
+
+        // .........................................................................Setup Changed List Name.....................................................................
+        private async Task SetupChangedListName(NicheShackContext context, object state)
+        {
+            EmailSetupParams emailSetupParams = (EmailSetupParams)state;
+
+
+            EmailParams emailParams = await GetEmailParams(context, emailSetupParams.CustomerId, emailSetupParams.ListId1, emailSetupParams.Host);
+
+            if (emailParams == null) return;
+
+
+            // Add email to queue
+            emailService.AddToQueue(EmailType.ListNameChange, "List name changed", emailParams.Recipients , new EmailProperties
+            {
+                Host = emailSetupParams.Host,
+                Var1 = emailSetupParams.Var1,
+                Var2 = emailSetupParams.Var2,
+                Person = emailParams.Collaborator
+            });
+        }
+
 
 
 
@@ -309,6 +359,36 @@ namespace Website.Controllers
             if (list != null)
             {
                 unitOfWork.Lists.Remove(list);
+
+
+                IEnumerable<string> customerIds = await unitOfWork.Collaborators.GetCollection(x => x.ListId == list.Id && !x.IsRemoved, x => x.CustomerId);
+
+                if(customerIds.Count() > 1)
+                {
+                    IEnumerable<Recipient> recipients = await unitOfWork.Customers.GetCollection(x => customerIds.Contains(x.Id), x => new Recipient
+                    {
+                        CustomerId = x.Id,
+                        FirstName = x.FirstName,
+                        LastName = x.LastName,
+                        Email = x.Email
+                    });
+
+
+
+                    // Add email to queue
+                    emailService.AddToQueue(EmailType.DeletedList, "List has been deleted", recipients.Where(x => x.CustomerId != customerId).ToList(), new EmailProperties
+                    {
+                        Host = GetHost(),
+                        Person = recipients.Where(x => x.CustomerId == customerId).Select(x => new Person
+                        {
+                            FirstName = x.FirstName,
+                            LastName = x.LastName
+                        }).Single(),
+                        Var1 = list.Name
+                    });
+                }
+
+
                 await unitOfWork.Save();
                 return Ok();
             }
@@ -594,7 +674,7 @@ namespace Website.Controllers
 
 
         // .........................................................................Get Email Params.....................................................................
-        private async Task<EmailParams> GetEmailParams(NicheShackContext context, string customerId, int? productId, string listId, string host)
+        private async Task<EmailParams> GetEmailParams(NicheShackContext context, string customerId, string listId, string host, int? productId = null)
         {
             // Get the recipients
             List<string> customerIds = await context.ListCollaborators
@@ -700,7 +780,7 @@ namespace Website.Controllers
             EmailSetupParams emailSetupParams = (EmailSetupParams)state;
 
 
-            EmailParams emailParams = await GetEmailParams(context, emailSetupParams.CustomerId, emailSetupParams.ProductId, emailSetupParams.ListId1, emailSetupParams.Host);
+            EmailParams emailParams = await GetEmailParams(context, emailSetupParams.CustomerId, emailSetupParams.ListId1, emailSetupParams.Host, emailSetupParams.ProductId);
 
             if (emailParams == null) return;
 
@@ -734,7 +814,7 @@ namespace Website.Controllers
             EmailSetupParams emailSetupParams = (EmailSetupParams)state;
 
 
-            EmailParams emailParams = await GetEmailParams(context, emailSetupParams.CustomerId, emailSetupParams.ProductId, emailSetupParams.ListId1, emailSetupParams.Host);
+            EmailParams emailParams = await GetEmailParams(context, emailSetupParams.CustomerId, emailSetupParams.ListId1, emailSetupParams.Host, emailSetupParams.ProductId);
 
             if (emailParams == null) return;
 
@@ -780,8 +860,8 @@ namespace Website.Controllers
             EmailSetupParams emailSetupParams = (EmailSetupParams)state;
 
 
-            EmailParams fromListEmailParams = await GetEmailParams(context, emailSetupParams.CustomerId, emailSetupParams.ProductId, emailSetupParams.ListId1, emailSetupParams.Host);
-            EmailParams toListEmailParams = await GetEmailParams(context, emailSetupParams.CustomerId, emailSetupParams.ProductId, emailSetupParams.ListId2, emailSetupParams.Host);
+            EmailParams fromListEmailParams = await GetEmailParams(context, emailSetupParams.CustomerId, emailSetupParams.ListId1, emailSetupParams.Host, emailSetupParams.ProductId);
+            EmailParams toListEmailParams = await GetEmailParams(context, emailSetupParams.CustomerId, emailSetupParams.ListId2, emailSetupParams.Host, emailSetupParams.ProductId);
 
             if (fromListEmailParams == null && toListEmailParams == null) return;
 
@@ -934,11 +1014,18 @@ namespace Website.Controllers
 
 
 
+
+
+
+
+
+
+        // .........................................................................Setup Added Collaborator Email.....................................................................
         private async Task SetupAddedCollaboratorEmail(NicheShackContext context, object state)
         {
             EmailSetupParams emailSetupParams = (EmailSetupParams)state;
 
-            EmailParams emailParams = await GetEmailParams(context, emailSetupParams.CustomerId, null, emailSetupParams.ListId1, emailSetupParams.Host);
+            EmailParams emailParams = await GetEmailParams(context, emailSetupParams.CustomerId, emailSetupParams.ListId1, emailSetupParams.Host);
 
             if (emailParams == null) return;
 

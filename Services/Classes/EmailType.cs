@@ -16,5 +16,7 @@
         OrderConfirmation,
         Review,
         ResetPassword,
+        ListNameChange,
+        DeletedList
     }
 }

@@ -11,5 +11,7 @@
         public string Title { get; set; }
         public string Text { get; set; }
         public int CollaboratorId { get; set; }
+        public string Var1 { get; set; }
+        public string Var2 { get; set; }
     }
 }

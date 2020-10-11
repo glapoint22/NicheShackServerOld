@@ -61,5 +61,20 @@ namespace Website.Controllers
                 displayType = "order"
             });
         }
+
+
+        [HttpPost]
+        [Route("PostOrder")]
+        public void PostOrder(OrderNotification notification)
+        {
+            var a = 0;
+        }
+    }
+
+
+    public struct OrderNotification
+    {
+        public string notification;
+        public string iv;
     }
 }
