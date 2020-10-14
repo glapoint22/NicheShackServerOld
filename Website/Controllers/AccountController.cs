@@ -144,7 +144,7 @@ namespace Website.Controllers
                         FirstName = customer.FirstName,
                         LastName = customer.LastName,
                         Email = customer.Email,
-                        Image = customer.image
+                        Image = customer.Image
                     }
                 });
             }
@@ -211,7 +211,7 @@ namespace Website.Controllers
                         FirstName = customer.FirstName,
                         LastName = customer.LastName,
                         Email = customer.Email,
-                        Image = customer.image
+                        Image = customer.Image
                     }
                 });
             }
@@ -490,7 +490,7 @@ namespace Website.Controllers
 
 
             //Update the customer's profile picture
-            customer.image = imageName;
+            customer.Image = imageName;
             unitOfWork.Customers.Update(customer);
 
             //Save
@@ -564,7 +564,7 @@ namespace Website.Controllers
 
 
             //Update the customer's profile picture
-            customer.image = imageName;
+            customer.Image = imageName;
             unitOfWork.Customers.Update(customer);
 
             //Save
@@ -678,7 +678,7 @@ namespace Website.Controllers
                             FirstName = customer.FirstName,
                             LastName = customer.LastName,
                             Email = customer.Email,
-                            Image = customer.image
+                            Image = customer.Image
                         };
                     }
                 }

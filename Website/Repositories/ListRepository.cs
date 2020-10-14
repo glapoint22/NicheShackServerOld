@@ -49,7 +49,7 @@ namespace Website.Repositories
                     CollaborateId = x.List.CollaborateId,
                     ProfilePic = x.List.Collaborators
                         .Where(y => y.ListId == x.ListId && y.IsOwner)
-                        .Select(y => y.Customer.image)
+                        .Select(y => y.Customer.Image)
                         .FirstOrDefault()
                 })
                 .ToListAsync();
@@ -83,7 +83,7 @@ namespace Website.Repositories
                     {
                         Id = x.CollaboratorId,
                         Name = x.Collaborator.CustomerId == customerId ? "you" : x.Collaborator.Customer.FirstName,
-                        Image = x.Collaborator.Customer.image
+                        Image = x.Collaborator.Customer.Image
                     } : null,
                     Hoplink = x.Product.Hoplink,
                     Image = new ImageViewModel

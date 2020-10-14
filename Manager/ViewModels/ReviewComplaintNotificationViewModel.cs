@@ -29,7 +29,7 @@ namespace Manager.ViewModels
                 Review = x.NotificationText.Select(y => new NotificationTextViewModel
                 {
                     TimeStamp = y.ProductReview.Date.ToString("MMMM dd, yyyy hh:mm tt"),
-                    Thumbnail = y.ProductReview.Customer.image,
+                    Thumbnail = y.ProductReview.Customer.Image,
                     Text = y.ProductReview.Text
                 }).SingleOrDefault()
             });

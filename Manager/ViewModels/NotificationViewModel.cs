@@ -24,7 +24,7 @@ namespace Manager.ViewModels
                 .Select(z => new NotificationTextViewModel
                 {
                     TimeStamp = z.TimeStamp.ToString("MMMM dd, yyyy hh:mm tt"),
-                    Thumbnail = z.Customer.image,
+                    Thumbnail = z.Customer.Image,
                     Text = z.Text
                 })
                 .SingleOrDefault(),
@@ -37,7 +37,7 @@ namespace Manager.ViewModels
                 .Select(z => new NotificationTextViewModel
                 {
                     TimeStamp = z.TimeStamp.ToString("MMMM dd, yyyy hh:mm tt"),
-                    Thumbnail = z.Customer.image,
+                    Thumbnail = z.Customer.Image,
                     Text = z.Text
                 })
                 .SingleOrDefault(),

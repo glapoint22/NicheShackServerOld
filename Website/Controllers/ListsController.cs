@@ -943,7 +943,7 @@ namespace Website.Controllers
             {
                 listId = list.Id,
                 ownerName = customer != null ? customer.FirstName : null,
-                profilePic = customer != null ? customer.image : null,
+                profilePic = customer != null ? customer.Image : null,
                 listName = list.Name,
                 exists
             });

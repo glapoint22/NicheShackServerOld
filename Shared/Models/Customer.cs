@@ -16,7 +16,7 @@ namespace DataAccess.Models
         [MaxLength(100)]
         public string ReviewName { get; set; }
         [MaxLength(50)]
-        public string image { get; set; }
+        public string Image { get; set; }
         public virtual ICollection<ListCollaborator> ListCollaborators { get; set; }
         public virtual ICollection<RefreshToken> RefreshTokens { get; set; }
         public virtual ICollection<ProductOrder> ProductOrders { get; set; }

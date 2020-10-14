@@ -68,7 +68,7 @@ namespace Website.ViewModels
                 ProductId = x.ProductId,
                 Rating = x.Rating,
                 Username = x.Customer.ReviewName,
-                UserImage = x.Customer.image,
+                UserImage = x.Customer.Image,
                 Date = x.Date.ToString("MMMM dd, yyyy"),
                 IsVerified = x.Product.ProductOrders.Count(z => z.CustomerId == x.CustomerId && z.ProductId == x.ProductId) > 0,
                 Text = x.Text,

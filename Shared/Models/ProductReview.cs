@@ -19,7 +19,6 @@ namespace DataAccess.Models
         public string Title { get; set; }
         public double Rating { get; set; }
         public DateTime Date { get; set; }
-        public bool IsVerified { get; set; }
         [Required]
         public string Text { get; set; }
         public int Likes { get; set; }
