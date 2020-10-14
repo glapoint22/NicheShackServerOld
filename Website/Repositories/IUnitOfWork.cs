@@ -26,6 +26,7 @@ namespace Website.Repositories
         IRepository<Notification> Notifications { get; }
         IRepository<NotificationText> NotificationText { get; }
         IRepository<Page> Pages { get; }
+        IRepository<OrderProduct> OrderProducts { get; }
 
 
 

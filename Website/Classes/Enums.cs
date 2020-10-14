@@ -8,11 +8,17 @@
             Image
         }
 
-        public enum OrderProductTypes
+        public enum PaymentMethod
         {
-            Physical,
-            Digital,
-            Recurring
+            PYPL,
+            VISA,
+            MSTR,
+            DISC,
+            AMEX,
+            SOLO,
+            DNRS,
+            MAES,
+            TEST
         }
     }
 }

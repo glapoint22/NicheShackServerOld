@@ -13,7 +13,6 @@
         EmailChange,
         VerifyEmail,
         PasswordChange,
-        OrderConfirmation,
         Review,
         ResetPassword,
         ListNameChange,

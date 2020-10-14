@@ -881,39 +881,6 @@ namespace DataAccess.Migrations
                     b.ToTable("RefreshTokens");
                 });
 
-            modelBuilder.Entity("DataAccess.Models.Subgroup", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(50)")
-                        .HasMaxLength(50);
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Subgroups");
-                });
-
-            modelBuilder.Entity("DataAccess.Models.SubgroupProduct", b =>
-                {
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SubgroupId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ProductId", "SubgroupId")
-                        .HasName("PK_SubgroupProducts");
-
-                    b.HasIndex("SubgroupId");
-
-                    b.ToTable("SubgroupProducts");
-                });
-
             modelBuilder.Entity("DataAccess.Models.Vendor", b =>
                 {
                     b.Property<int>("Id")
@@ -1372,21 +1339,6 @@ namespace DataAccess.Migrations
                     b.HasOne("DataAccess.Models.Customer", "Customer")
                         .WithMany("RefreshTokens")
                         .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("DataAccess.Models.SubgroupProduct", b =>
-                {
-                    b.HasOne("DataAccess.Models.Product", "Product")
-                        .WithMany("SubgroupProducts")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DataAccess.Models.Subgroup", "Subgroup")
-                        .WithMany("SubgroupProducts")
-                        .HasForeignKey("SubgroupId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
