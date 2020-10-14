@@ -5,51 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Migrations\20200726014907_Initial.cs" />
-    <Compile Remove="Migrations\20200726014907_Initial.Designer.cs" />
-    <Compile Remove="Migrations\20200726023303_Initial.cs" />
-    <Compile Remove="Migrations\20200726023303_Initial.Designer.cs" />
-    <Compile Remove="Migrations\20200726025859_Initial.cs" />
-    <Compile Remove="Migrations\20200726025859_Initial.Designer.cs" />
-    <Compile Remove="Migrations\20200726035301_Initial.cs" />
-    <Compile Remove="Migrations\20200726035301_Initial.Designer.cs" />
-    <Compile Remove="Migrations\20200726174839_Initial.cs" />
-    <Compile Remove="Migrations\20200726174839_Initial.Designer.cs" />
-    <Compile Remove="Migrations\20200726184650_Initial.cs" />
-    <Compile Remove="Migrations\20200726184650_Initial.Designer.cs" />
-    <Compile Remove="Migrations\20200726185424_Initial.cs" />
-    <Compile Remove="Migrations\20200726185424_Initial.Designer.cs" />
-    <Compile Remove="Migrations\20200726192107_Initial.cs" />
-    <Compile Remove="Migrations\20200726192107_Initial.Designer.cs" />
-    <Compile Remove="Migrations\20200726204032_test.cs" />
-    <Compile Remove="Migrations\20200726204032_test.Designer.cs" />
-    <Compile Remove="Migrations\20200726205504_AddedNullable.cs" />
-    <Compile Remove="Migrations\20200726205504_AddedNullable.Designer.cs" />
-    <Compile Remove="Migrations\20200727043237_Initial.cs" />
-    <Compile Remove="Migrations\20200727043237_Initial.Designer.cs" />
-    <Compile Remove="Migrations\20200728160643_Initial.cs" />
-    <Compile Remove="Migrations\20200728160643_Initial.Designer.cs" />
-    <Compile Remove="Migrations\20200728162118_Initial.cs" />
-    <Compile Remove="Migrations\20200728162118_Initial.Designer.cs" />
-    <Compile Remove="Migrations\20200728162734_Initial.cs" />
-    <Compile Remove="Migrations\20200728162734_Initial.Designer.cs" />
-    <Compile Remove="Migrations\20200728172101_Initial.cs" />
-    <Compile Remove="Migrations\20200728172101_Initial.Designer.cs" />
-    <Compile Remove="Migrations\20200728211338_Alita.cs" />
-    <Compile Remove="Migrations\20200728211338_Alita.Designer.cs" />
-    <Compile Remove="Migrations\20200809174008_UpdatedVendor.cs" />
-    <Compile Remove="Migrations\20200809174008_UpdatedVendor.Designer.cs" />
-    <Compile Remove="Migrations\20200812195550_UpdatedProducts.cs" />
-    <Compile Remove="Migrations\20200812195550_UpdatedProducts.Designer.cs" />
-    <Compile Remove="Migrations\20200913172110_AddedIdFieldToNotificationText.cs" />
-    <Compile Remove="Migrations\20200913172110_AddedIdFieldToNotificationText.Designer.cs" />
-    <Compile Remove="Migrations\20200917212246_AddReviewIdToNotificationText.cs" />
-    <Compile Remove="Migrations\20200917212246_AddReviewIdToNotificationText.Designer.cs" />
-    <Compile Remove="Migrations\20201014142156_UpdateOrderProducts.cs" />
-    <Compile Remove="Migrations\20201014142156_UpdateOrderProducts.Designer.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.8" />
   </ItemGroup>

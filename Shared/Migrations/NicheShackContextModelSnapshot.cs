@@ -75,6 +75,10 @@ namespace DataAccess.Migrations
                         .HasColumnType("nvarchar(100)")
                         .HasMaxLength(100);
 
+                    b.Property<string>("Image")
+                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(50);
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("nvarchar(100)")
@@ -117,10 +121,6 @@ namespace DataAccess.Migrations
                     b.Property<string>("UserName")
                         .HasColumnType("nvarchar(256)")
                         .HasMaxLength(256);
-
-                    b.Property<string>("image")
-                        .HasColumnType("nvarchar(50)")
-                        .HasMaxLength(50);
 
                     b.HasKey("Id");
 
@@ -451,21 +451,24 @@ namespace DataAccess.Migrations
 
             modelBuilder.Entity("DataAccess.Models.OrderProduct", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(25)")
-                        .HasMaxLength(25);
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("OrderId")
-                        .HasColumnType("nvarchar(21)")
-                        .HasMaxLength(21);
-
-                    b.Property<bool>("IsMain")
-                        .HasColumnType("bit");
+                    b.Property<string>("LineItemType")
+                        .HasColumnType("nvarchar(8)")
+                        .HasMaxLength(8);
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(256)")
                         .HasMaxLength(256);
+
+                    b.Property<string>("OrderId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(21)")
+                        .HasMaxLength(21);
 
                     b.Property<double>("Price")
                         .HasColumnType("float");
@@ -473,11 +476,13 @@ namespace DataAccess.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
+                    b.Property<double>("RebillAmount")
+                        .HasColumnType("float");
 
-                    b.HasKey("Id", "OrderId")
-                        .HasName("PK_OrderProducts");
+                    b.Property<string>("RebillFrequency")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("OrderId");
 
@@ -831,9 +836,6 @@ namespace DataAccess.Migrations
                     b.Property<int>("Dislikes")
                         .HasColumnType("int");
 
-                    b.Property<bool>("IsVerified")
-                        .HasColumnType("bit");
-
                     b.Property<int>("Likes")
                         .HasColumnType("int");
 
@@ -879,6 +881,39 @@ namespace DataAccess.Migrations
                     b.HasIndex("CustomerId");
 
                     b.ToTable("RefreshTokens");
+                });
+
+            modelBuilder.Entity("DataAccess.Models.Subgroup", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(50);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Subgroups");
+                });
+
+            modelBuilder.Entity("DataAccess.Models.SubgroupProduct", b =>
+                {
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SubgroupId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ProductId", "SubgroupId")
+                        .HasName("PK_SubgroupProducts");
+
+                    b.HasIndex("SubgroupId");
+
+                    b.ToTable("SubgroupProducts");
                 });
 
             modelBuilder.Entity("DataAccess.Models.Vendor", b =>
@@ -1339,6 +1374,21 @@ namespace DataAccess.Migrations
                     b.HasOne("DataAccess.Models.Customer", "Customer")
                         .WithMany("RefreshTokens")
                         .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("DataAccess.Models.SubgroupProduct", b =>
+                {
+                    b.HasOne("DataAccess.Models.Product", "Product")
+                        .WithMany("SubgroupProducts")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataAccess.Models.Subgroup", "Subgroup")
+                        .WithMany("SubgroupProducts")
+                        .HasForeignKey("SubgroupId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

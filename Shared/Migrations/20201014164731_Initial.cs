@@ -43,11 +43,25 @@ namespace DataAccess.Migrations
                     FirstName = table.Column<string>(maxLength: 100, nullable: false),
                     LastName = table.Column<string>(maxLength: 100, nullable: false),
                     ReviewName = table.Column<string>(maxLength: 100, nullable: false),
-                    image = table.Column<string>(maxLength: 50, nullable: true)
+                    Image = table.Column<string>(maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Customers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Emails",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(maxLength: 256, nullable: false),
+                    Content = table.Column<string>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Emails", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -94,6 +108,20 @@ namespace DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Pages",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(maxLength: 256, nullable: false),
+                    Content = table.Column<string>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Pages", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "PriceRanges",
                 columns: table => new
                 {
@@ -106,6 +134,19 @@ namespace DataAccess.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PriceRanges", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Subgroups",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(maxLength: 50, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Subgroups", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -131,7 +172,8 @@ namespace DataAccess.Migrations
                     SecondaryLastName = table.Column<string>(maxLength: 256, nullable: true),
                     SecondaryOfficePhone = table.Column<string>(maxLength: 20, nullable: true),
                     SecondaryMobilePhone = table.Column<string>(maxLength: 20, nullable: true),
-                    SecondaryEmail = table.Column<string>(maxLength: 256, nullable: true)
+                    SecondaryEmail = table.Column<string>(maxLength: 256, nullable: true),
+                    Notes = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -291,7 +333,8 @@ namespace DataAccess.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     CustomerId = table.Column<string>(nullable: false),
                     ListId = table.Column<string>(maxLength: 10, nullable: false),
-                    IsOwner = table.Column<bool>(nullable: false)
+                    IsOwner = table.Column<bool>(nullable: false),
+                    IsRemoved = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -316,6 +359,8 @@ namespace DataAccess.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    UrlId = table.Column<string>(maxLength: 10, nullable: false),
+                    UrlName = table.Column<string>(maxLength: 256, nullable: false),
                     ImageId = table.Column<int>(nullable: true),
                     Name = table.Column<string>(maxLength: 100, nullable: false)
                 },
@@ -336,6 +381,8 @@ namespace DataAccess.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    UrlId = table.Column<string>(maxLength: 10, nullable: false),
+                    UrlName = table.Column<string>(maxLength: 256, nullable: false),
                     CategoryId = table.Column<int>(nullable: false),
                     Name = table.Column<string>(maxLength: 100, nullable: false)
                 },
@@ -377,7 +424,7 @@ namespace DataAccess.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    VendorId = table.Column<int>(nullable: false),
+                    VendorId = table.Column<int>(nullable: true),
                     ImageId = table.Column<int>(nullable: true),
                     NicheId = table.Column<int>(nullable: false),
                     UrlId = table.Column<string>(maxLength: 10, nullable: false),
@@ -426,7 +473,7 @@ namespace DataAccess.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     LeadPageId = table.Column<int>(nullable: false),
                     Content = table.Column<string>(nullable: false),
-                    Subject = table.Column<string>(maxLength: 256, nullable: false)
+                    Name = table.Column<string>(maxLength: 256, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -520,7 +567,7 @@ namespace DataAccess.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ProductId = table.Column<int>(nullable: false),
                     Content = table.Column<string>(nullable: false),
-                    Subject = table.Column<string>(maxLength: 256, nullable: false)
+                    Name = table.Column<string>(maxLength: 256, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -581,12 +628,14 @@ namespace DataAccess.Migrations
                 name: "ProductMedia",
                 columns: table => new
                 {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     ProductId = table.Column<int>(nullable: false),
-                    MediaId = table.Column<int>(nullable: false)
+                    MediaId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProductMedia", x => new { x.ProductId, x.MediaId });
+                    table.PrimaryKey("PK_ProductMedia", x => x.Id);
                     table.ForeignKey(
                         name: "FK_ProductMedia_Media_MediaId",
                         column: x => x.MediaId,
@@ -643,7 +692,8 @@ namespace DataAccess.Migrations
                     TextBefore = table.Column<string>(maxLength: 50, nullable: true),
                     WholeNumber = table.Column<int>(nullable: false),
                     Decimal = table.Column<int>(nullable: false),
-                    TextAfter = table.Column<string>(maxLength: 50, nullable: true)
+                    TextAfter = table.Column<string>(maxLength: 50, nullable: true),
+                    Index = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -667,7 +717,6 @@ namespace DataAccess.Migrations
                     Title = table.Column<string>(maxLength: 256, nullable: false),
                     Rating = table.Column<double>(nullable: false),
                     Date = table.Column<DateTime>(nullable: false),
-                    IsVerified = table.Column<bool>(nullable: false),
                     Text = table.Column<string>(nullable: false),
                     Likes = table.Column<int>(nullable: false),
                     Dislikes = table.Column<int>(nullable: false)
@@ -690,28 +739,25 @@ namespace DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "NotificationText",
+                name: "SubgroupProducts",
                 columns: table => new
                 {
-                    CustomerId = table.Column<string>(nullable: false),
-                    NotificationId = table.Column<int>(nullable: false),
-                    TimeStamp = table.Column<DateTime>(nullable: false),
-                    Text = table.Column<string>(nullable: true),
-                    Type = table.Column<int>(nullable: false)
+                    SubgroupId = table.Column<int>(nullable: false),
+                    ProductId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_NotificationText", x => new { x.CustomerId, x.NotificationId });
+                    table.PrimaryKey("PK_SubgroupProducts", x => new { x.ProductId, x.SubgroupId });
                     table.ForeignKey(
-                        name: "FK_NotificationText_Customers_CustomerId",
-                        column: x => x.CustomerId,
-                        principalTable: "Customers",
+                        name: "FK_SubgroupProducts_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_NotificationText_Notifications_NotificationId",
-                        column: x => x.NotificationId,
-                        principalTable: "Notifications",
+                        name: "FK_SubgroupProducts_Subgroups_SubgroupId",
+                        column: x => x.SubgroupId,
+                        principalTable: "Subgroups",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -740,23 +786,63 @@ namespace DataAccess.Migrations
                 name: "OrderProducts",
                 columns: table => new
                 {
-                    Id = table.Column<string>(maxLength: 25, nullable: false),
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     OrderId = table.Column<string>(maxLength: 21, nullable: false),
                     Name = table.Column<string>(maxLength: 256, nullable: false),
-                    Type = table.Column<int>(nullable: false),
                     Quantity = table.Column<int>(nullable: false),
                     Price = table.Column<double>(nullable: false),
-                    IsMain = table.Column<bool>(nullable: false)
+                    LineItemType = table.Column<string>(maxLength: 8, nullable: true),
+                    RebillFrequency = table.Column<string>(nullable: true),
+                    RebillAmount = table.Column<double>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_OrderProducts", x => new { x.Id, x.OrderId });
+                    table.PrimaryKey("PK_OrderProducts", x => x.Id);
                     table.ForeignKey(
                         name: "FK_OrderProducts_ProductOrders_OrderId",
                         column: x => x.OrderId,
                         principalTable: "ProductOrders",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "NotificationText",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CustomerId = table.Column<string>(nullable: true),
+                    NotificationId = table.Column<int>(nullable: false),
+                    ReviewId = table.Column<int>(nullable: true),
+                    TimeStamp = table.Column<DateTime>(nullable: false),
+                    Text = table.Column<string>(nullable: true),
+                    Type = table.Column<int>(nullable: false),
+                    Name = table.Column<string>(maxLength: 256, nullable: true),
+                    Email = table.Column<string>(maxLength: 256, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_NotificationText", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_NotificationText_Customers_CustomerId",
+                        column: x => x.CustomerId,
+                        principalTable: "Customers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_NotificationText_Notifications_NotificationId",
+                        column: x => x.NotificationId,
+                        principalTable: "Notifications",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_NotificationText_ProductReviews_ReviewId",
+                        column: x => x.ReviewId,
+                        principalTable: "ProductReviews",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
@@ -844,9 +930,19 @@ namespace DataAccess.Migrations
                 column: "ProductId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_NotificationText_CustomerId",
+                table: "NotificationText",
+                column: "CustomerId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_NotificationText_NotificationId",
                 table: "NotificationText",
                 column: "NotificationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_NotificationText_ReviewId",
+                table: "NotificationText",
+                column: "ReviewId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_OrderProducts_OrderId",
@@ -887,6 +983,11 @@ namespace DataAccess.Migrations
                 name: "IX_ProductMedia_MediaId",
                 table: "ProductMedia",
                 column: "MediaId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductMedia_ProductId",
+                table: "ProductMedia",
+                column: "ProductId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProductOrders_CustomerId",
@@ -932,6 +1033,11 @@ namespace DataAccess.Migrations
                 name: "IX_RefreshTokens_CustomerId",
                 table: "RefreshTokens",
                 column: "CustomerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SubgroupProducts_SubgroupId",
+                table: "SubgroupProducts",
+                column: "SubgroupId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -952,6 +1058,9 @@ namespace DataAccess.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "Emails");
+
+            migrationBuilder.DropTable(
                 name: "LeadPageEmails");
 
             migrationBuilder.DropTable(
@@ -962,6 +1071,9 @@ namespace DataAccess.Migrations
 
             migrationBuilder.DropTable(
                 name: "OrderProducts");
+
+            migrationBuilder.DropTable(
+                name: "Pages");
 
             migrationBuilder.DropTable(
                 name: "PriceIndices");
@@ -985,10 +1097,10 @@ namespace DataAccess.Migrations
                 name: "ProductPricePoints");
 
             migrationBuilder.DropTable(
-                name: "ProductReviews");
+                name: "RefreshTokens");
 
             migrationBuilder.DropTable(
-                name: "RefreshTokens");
+                name: "SubgroupProducts");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
@@ -1003,6 +1115,9 @@ namespace DataAccess.Migrations
                 name: "Notifications");
 
             migrationBuilder.DropTable(
+                name: "ProductReviews");
+
+            migrationBuilder.DropTable(
                 name: "ProductOrders");
 
             migrationBuilder.DropTable(
@@ -1010,6 +1125,9 @@ namespace DataAccess.Migrations
 
             migrationBuilder.DropTable(
                 name: "FilterOptions");
+
+            migrationBuilder.DropTable(
+                name: "Subgroups");
 
             migrationBuilder.DropTable(
                 name: "Lists");

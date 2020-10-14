@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(NicheShackContext))]
-    [Migration("20200913173704_AddedIdFieldToNotificationText")]
-    partial class AddedIdFieldToNotificationText
+    [Migration("20201014164731_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -77,6 +77,10 @@ namespace DataAccess.Migrations
                         .HasColumnType("nvarchar(100)")
                         .HasMaxLength(100);
 
+                    b.Property<string>("Image")
+                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(50);
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("nvarchar(100)")
@@ -119,10 +123,6 @@ namespace DataAccess.Migrations
                     b.Property<string>("UserName")
                         .HasColumnType("nvarchar(256)")
                         .HasMaxLength(256);
-
-                    b.Property<string>("image")
-                        .HasColumnType("nvarchar(50)")
-                        .HasMaxLength(50);
 
                     b.HasKey("Id");
 
@@ -287,6 +287,9 @@ namespace DataAccess.Migrations
                     b.Property<bool>("IsOwner")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsRemoved")
+                        .HasColumnType("bit");
+
                     b.Property<string>("ListId")
                         .IsRequired()
                         .HasColumnType("nvarchar(10)")
@@ -425,6 +428,9 @@ namespace DataAccess.Migrations
                     b.Property<int>("NotificationId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("ReviewId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Text")
                         .HasColumnType("nvarchar(max)");
 
@@ -440,26 +446,31 @@ namespace DataAccess.Migrations
 
                     b.HasIndex("NotificationId");
 
+                    b.HasIndex("ReviewId");
+
                     b.ToTable("NotificationText");
                 });
 
             modelBuilder.Entity("DataAccess.Models.OrderProduct", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(25)")
-                        .HasMaxLength(25);
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("OrderId")
-                        .HasColumnType("nvarchar(21)")
-                        .HasMaxLength(21);
-
-                    b.Property<bool>("IsMain")
-                        .HasColumnType("bit");
+                    b.Property<string>("LineItemType")
+                        .HasColumnType("nvarchar(8)")
+                        .HasMaxLength(8);
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(256)")
                         .HasMaxLength(256);
+
+                    b.Property<string>("OrderId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(21)")
+                        .HasMaxLength(21);
 
                     b.Property<double>("Price")
                         .HasColumnType("float");
@@ -467,11 +478,13 @@ namespace DataAccess.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
+                    b.Property<double>("RebillAmount")
+                        .HasColumnType("float");
 
-                    b.HasKey("Id", "OrderId")
-                        .HasName("PK_OrderProducts");
+                    b.Property<string>("RebillFrequency")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("OrderId");
 
@@ -825,9 +838,6 @@ namespace DataAccess.Migrations
                     b.Property<int>("Dislikes")
                         .HasColumnType("int");
 
-                    b.Property<bool>("IsVerified")
-                        .HasColumnType("bit");
-
                     b.Property<int>("Likes")
                         .HasColumnType("int");
 
@@ -873,6 +883,39 @@ namespace DataAccess.Migrations
                     b.HasIndex("CustomerId");
 
                     b.ToTable("RefreshTokens");
+                });
+
+            modelBuilder.Entity("DataAccess.Models.Subgroup", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(50);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Subgroups");
+                });
+
+            modelBuilder.Entity("DataAccess.Models.SubgroupProduct", b =>
+                {
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SubgroupId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ProductId", "SubgroupId")
+                        .HasName("PK_SubgroupProducts");
+
+                    b.HasIndex("SubgroupId");
+
+                    b.ToTable("SubgroupProducts");
                 });
 
             modelBuilder.Entity("DataAccess.Models.Vendor", b =>
@@ -1185,6 +1228,10 @@ namespace DataAccess.Migrations
                         .HasForeignKey("NotificationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("DataAccess.Models.ProductReview", "ProductReview")
+                        .WithMany("NotificationText")
+                        .HasForeignKey("ReviewId");
                 });
 
             modelBuilder.Entity("DataAccess.Models.OrderProduct", b =>
@@ -1329,6 +1376,21 @@ namespace DataAccess.Migrations
                     b.HasOne("DataAccess.Models.Customer", "Customer")
                         .WithMany("RefreshTokens")
                         .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("DataAccess.Models.SubgroupProduct", b =>
+                {
+                    b.HasOne("DataAccess.Models.Product", "Product")
+                        .WithMany("SubgroupProducts")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataAccess.Models.Subgroup", "Subgroup")
+                        .WithMany("SubgroupProducts")
+                        .HasForeignKey("SubgroupId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
