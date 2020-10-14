@@ -45,6 +45,8 @@
     <Compile Remove="Migrations\20200913172110_AddedIdFieldToNotificationText.Designer.cs" />
     <Compile Remove="Migrations\20200917212246_AddReviewIdToNotificationText.cs" />
     <Compile Remove="Migrations\20200917212246_AddReviewIdToNotificationText.Designer.cs" />
+    <Compile Remove="Migrations\20201014142156_UpdateOrderProducts.cs" />
+    <Compile Remove="Migrations\20201014142156_UpdateOrderProducts.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

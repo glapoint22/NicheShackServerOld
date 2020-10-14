@@ -32,7 +32,7 @@ namespace Website.Repositories
             return await context.ListCollaborators
                 .AsNoTracking()
                 .OrderByDescending(x => x.IsOwner)
-                .Where(x => x.CustomerId == customerId)
+                .Where(x => x.CustomerId == customerId && !x.IsRemoved)
                 .Select(x => new ListViewModel
                 {
                     Id = x.ListId,

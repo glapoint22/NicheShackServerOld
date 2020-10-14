@@ -1,9 +1,17 @@
-﻿using System.Linq;
+﻿using System;
+using System.IO;
+using System.Linq;
 using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
+using DataAccess.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Website.Classes;
 using Website.Repositories;
+using static Website.Classes.Enums;
 
 namespace Website.Controllers
 {
@@ -53,6 +61,9 @@ namespace Website.Controllers
                 }
             }
 
+
+
+
             // Return orders based on a time frame
             return Ok(new
             {
@@ -60,6 +71,166 @@ namespace Website.Controllers
                 filters = await unitOfWork.ProductOrders.GetOrderFilters(customerId),
                 displayType = "order"
             });
+        }
+
+
+
+
+
+        private string DecryptNotification(EncryptedOrderNotification notification)
+        {
+            string decryptedString = null;
+
+            byte[] inputBytes = Encoding.UTF8.GetBytes("OBLIVIONISATHAND");
+
+            SHA1 sha1 = SHA1.Create();
+            byte[] key = sha1.ComputeHash(inputBytes);
+
+            StringBuilder hex = new StringBuilder(key.Length * 2);
+            foreach (byte b in key)
+                hex.AppendFormat("{0:x2}", b);
+
+            string secondPhaseKey = hex.ToString().Substring(0, 32);
+
+            ASCIIEncoding asciiEncoding = new ASCIIEncoding();
+
+            byte[] keyBytes = asciiEncoding.GetBytes(secondPhaseKey);
+            byte[] iv = Convert.FromBase64String(notification.iv);
+
+
+            using (RijndaelManaged rijndaelManaged = new RijndaelManaged
+            {
+                Key = keyBytes,
+                IV = iv,
+                Mode = CipherMode.CBC,
+                Padding = PaddingMode.PKCS7
+            })
+            using (Stream memoryStream = new MemoryStream(Convert.FromBase64String(notification.notification)))
+            using (CryptoStream cryptoStream = new CryptoStream(memoryStream, rijndaelManaged.CreateDecryptor(keyBytes, iv), CryptoStreamMode.Read))
+            {
+                decryptedString = new StreamReader(cryptoStream).ReadToEnd();
+            }
+
+            return decryptedString;
+        }
+
+
+        [HttpPost]
+        [Route("PostOrder")]
+        public async Task PostOrder(EncryptedOrderNotification encryptedOrderNotification)
+        {
+            OrderNotification orderNotification;
+
+            try
+            {
+                string decryptedNotification = DecryptNotification(encryptedOrderNotification);
+
+                orderNotification = JsonSerializer.Deserialize<OrderNotification>(decryptedNotification, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+            }
+            catch (Exception e)
+            {
+                // Log the exception
+                return;
+            }
+
+
+
+            if (orderNotification.TransactionType == null) return;
+
+
+            if (orderNotification.TransactionType == "SALE" || orderNotification.TransactionType == "TEST_SALE")
+            {
+
+                // Id
+                if (orderNotification.Receipt == null) return;
+                string id = orderNotification.Receipt;
+
+
+                // Do we have tracking codes?
+                if (orderNotification.TrackingCodes == null || orderNotification.TrackingCodes.Count() == 0) return;
+
+                // Split the tracking codes into product id && customer id
+                string[] trackingCodes = orderNotification.TrackingCodes.ToArray()[0].Split('_');
+
+                // Get the product id
+                int productId = await unitOfWork.Products.Get(x => x.UrlId == trackingCodes[0], x => x.Id);
+                if (productId == 0) return;
+
+
+                // Get the customer id
+                if (!await unitOfWork.Customers.Any(x => x.Id == trackingCodes[1])) return;
+                string customerId = trackingCodes[1];
+
+
+                // Payment method
+                if (orderNotification.PaymentMethod == null) return;
+                string paymentMethod = orderNotification.PaymentMethod;
+
+
+
+                if (orderNotification.LineItems == null || orderNotification.LineItems.Count() == 0) return;
+
+                double subtotal = 0;
+                double tax = 0;
+                double discount = 0;
+                double shipping = 0;
+
+                foreach (LineItem lineItem in orderNotification.LineItems)
+                {
+                    subtotal += lineItem.ProductPrice;
+                    tax += lineItem.TaxAmount;
+                    discount += lineItem.ProductDiscount;
+                    shipping += lineItem.ShippingAmount;
+
+                    OrderProduct orderProduct = new OrderProduct
+                    {
+                        OrderId = id,
+                        Name = lineItem.ProductTitle,
+                        Quantity = lineItem.Quantity,
+                        Price = lineItem.ProductPrice,
+                        LineItemType = lineItem.LineItemType,
+                        RebillFrequency = lineItem.Recurring ? lineItem.PaymentPlan.RebillFrequency : null,
+                        RebillAmount = lineItem.Recurring ? lineItem.PaymentPlan.RebillAmount : 0
+                    };
+
+                    unitOfWork.OrderProducts.Add(orderProduct);
+
+                }
+
+                ProductOrder productOrder = new ProductOrder
+                {
+                    Id = id,
+                    ProductId = productId,
+                    CustomerId = customerId,
+                    Date = DateTime.Now,
+                    PaymentMethod = (int)Enum.Parse(typeof(PaymentMethod), paymentMethod),
+                    Subtotal = subtotal,
+                    ShippingHandling = shipping,
+                    Discount = discount,
+                    Tax = tax,
+                    Total = orderNotification.TotalOrderAmount
+                };
+
+
+                unitOfWork.ProductOrders.Add(productOrder);
+
+
+
+
+
+
+
+
+
+                //await unitOfWork.Save();
+
+            }
+
+
+
         }
     }
 }

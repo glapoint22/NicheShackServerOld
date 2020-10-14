@@ -47,17 +47,18 @@ namespace Website.Repositories
                     UrlName = x.Product.UrlName,
                     Products = x.OrderProducts
                         .Where(y => y.OrderId == x.Id)
-                        .OrderByDescending(y => y.IsMain)
+                        //.OrderByDescending(y => y.IsMain)
                         .Select(y => new OrderProductInfoViewModel
                         {
                             Name = y.Name,
-                            Type = ((OrderProductTypes)y.Type).ToString(),
-                            Quantity = y.Type == 0 ? y.Quantity : 0,
+                            Quantity = y.Quantity > 1 ? y.Quantity : 0,
                             Price = y.Price,
-                            Image = y.IsMain ? new ImageViewModel { 
+                            Image = y.LineItemType == "ORIGINAL" ? new ImageViewModel { 
                                 Name = y.ProductOrder.Product.Media.Name,
                                 Url = y.ProductOrder.Product.Media.Url
-                            } : new ImageViewModel { }
+                            } : new ImageViewModel { },
+                            RebillFrequency = y.RebillFrequency,
+                            RebillAmount = y.RebillAmount
                         })
                 })
                 .ToListAsync();
@@ -86,7 +87,7 @@ namespace Website.Repositories
                 {
                     Date = x.ProductOrder.Date.ToString("MMMM dd, yyyy"),
                     Name = x.Name,
-                    Image = x.IsMain ? new ImageViewModel
+                    Image = x.LineItemType == "ORIGINAL" ? new ImageViewModel
                     {
                         Name = x.ProductOrder.Product.Media.Name,
                         Url = x.ProductOrder.Product.Media.Url
@@ -167,6 +168,9 @@ namespace Website.Repositories
                 case 7:
                     img = "maestro.png";
                     break;
+                case 8:
+                    img = "master_card.png";
+                    break;
             }
 
             return img;
@@ -206,6 +210,9 @@ namespace Website.Repositories
                     break;
                 case 7:
                     title = "Maestro";
+                    break;
+                case 8:
+                    title = "Mastercard";
                     break;
             }
 

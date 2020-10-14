@@ -43,7 +43,7 @@ namespace Website.Controllers
         {
             string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
-            return Ok(await unitOfWork.Collaborators.Any(x => x.ListId == listId && x.CustomerId == customerId));
+            return Ok(await unitOfWork.Collaborators.Any(x => x.ListId == listId && x.CustomerId == customerId && !x.IsRemoved));
         }
 
 
@@ -94,7 +94,7 @@ namespace Website.Controllers
             // Get the customer Id from the access token
             string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
-            IEnumerable<string> listIds = await unitOfWork.Collaborators.GetCollection(x => x.CustomerId == customerId, x => x.ListId);
+            IEnumerable<string> listIds = await unitOfWork.Collaborators.GetCollection(x => x.CustomerId == customerId && !x.IsRemoved, x => x.ListId);
 
 
             // The customer's lists
@@ -136,8 +136,9 @@ namespace Website.Controllers
 
             // Get all collaborators from the selected list
             IEnumerable<Collaborator> collaborators = await unitOfWork.Collaborators
-                    .GetCollection(x => x.ListId == listId, x => new Collaborator
+                    .GetCollection(x => x.ListId == listId && !x.IsRemoved, x => new Collaborator
                     {
+                        Id = x.Id,
                         CustomerId = x.CustomerId,
                         ListId = x.ListId,
                         IsOwner = x.IsOwner,
@@ -152,7 +153,7 @@ namespace Website.Controllers
                 // If the customer is the owner of this list, get collaborators (excluding the owner)
                 collaborators = isOwner ? collaborators.Where(x => !x.IsOwner).Select(x => new
                 {
-                    customerId = x.CustomerId,
+                    id = x.Id,
                     name = x.Name
                 }).ToList() : null,
                 isOwner,
@@ -264,12 +265,32 @@ namespace Website.Controllers
             // Update the list with the new data
             if (updatedList != null)
             {
+                string previousName = updatedList.Name;
+
                 updatedList.Name = list.Name;
                 updatedList.Description = list.Description;
 
                 // Update and save
                 unitOfWork.Lists.Update(updatedList);
                 await unitOfWork.Save();
+
+
+
+                // Setup the email
+                if(previousName != list.Name)
+                {
+                    emailService.SetupEmail(SetupChangedListName, new EmailSetupParams
+                    {
+                        Host = GetHost(),
+                        CustomerId = User.FindFirst(ClaimTypes.NameIdentifier).Value,
+                        ListId1 = updatedList.Id,
+                        Var1 = previousName,
+                        Var2 = list.Name
+                    });
+                }
+                
+
+
 
                 return Ok(new
                 {
@@ -280,6 +301,36 @@ namespace Website.Controllers
 
             return BadRequest();
         }
+
+
+
+
+
+
+
+
+
+        // .........................................................................Setup Changed List Name.....................................................................
+        private async Task SetupChangedListName(NicheShackContext context, object state)
+        {
+            EmailSetupParams emailSetupParams = (EmailSetupParams)state;
+
+
+            EmailParams emailParams = await GetEmailParams(context, emailSetupParams.CustomerId, emailSetupParams.ListId1, emailSetupParams.Host);
+
+            if (emailParams == null) return;
+
+
+            // Add email to queue
+            emailService.AddToQueue(EmailType.ListNameChange, "List name changed", emailParams.Recipients , new EmailProperties
+            {
+                Host = emailSetupParams.Host,
+                Var1 = emailSetupParams.Var1,
+                Var2 = emailSetupParams.Var2,
+                Person = emailParams.Collaborator
+            });
+        }
+
 
 
 
@@ -308,6 +359,36 @@ namespace Website.Controllers
             if (list != null)
             {
                 unitOfWork.Lists.Remove(list);
+
+
+                IEnumerable<string> customerIds = await unitOfWork.Collaborators.GetCollection(x => x.ListId == list.Id && !x.IsRemoved, x => x.CustomerId);
+
+                if(customerIds.Count() > 1)
+                {
+                    IEnumerable<Recipient> recipients = await unitOfWork.Customers.GetCollection(x => customerIds.Contains(x.Id), x => new Recipient
+                    {
+                        CustomerId = x.Id,
+                        FirstName = x.FirstName,
+                        LastName = x.LastName,
+                        Email = x.Email
+                    });
+
+
+
+                    // Add email to queue
+                    emailService.AddToQueue(EmailType.DeletedList, "List has been deleted", recipients.Where(x => x.CustomerId != customerId).ToList(), new EmailProperties
+                    {
+                        Host = GetHost(),
+                        Person = recipients.Where(x => x.CustomerId == customerId).Select(x => new Person
+                        {
+                            FirstName = x.FirstName,
+                            LastName = x.LastName
+                        }).Single(),
+                        Var1 = list.Name
+                    });
+                }
+
+
                 await unitOfWork.Save();
                 return Ok();
             }
@@ -321,25 +402,38 @@ namespace Website.Controllers
 
 
         // .........................................................................Remove Collaborator.....................................................................
-        [Route("Collaborator")]
-        [HttpDelete]
+        [Route("RemoveCollaborator")]
+        [HttpPut]
         [Authorize(Policy = "Account Policy")]
-        public async Task<ActionResult> RemoveCollaborator(string customerId, string listId)
+        public async Task<ActionResult> RemoveCollaborator(RemovedCollaborator removedCollaborator)
         {
             // Make sure we are the owner of the list
-            if (!await unitOfWork.Collaborators.Any(x => x.ListId == listId && x.CustomerId == User.FindFirst(ClaimTypes.NameIdentifier).Value && x.IsOwner))
+            if (!await unitOfWork.Collaborators.Any(x => x.ListId == removedCollaborator.ListId && x.CustomerId == User.FindFirst(ClaimTypes.NameIdentifier).Value && x.IsOwner))
             {
                 return Unauthorized();
             }
 
-            // Get the collaborator to delete
-            ListCollaborator collaborator = await unitOfWork.Collaborators.Get(x => x.CustomerId == customerId && x.ListId == listId);
+            // Get the collaborator to remove
+            ListCollaborator collaborator = await unitOfWork.Collaborators.Get(x => x.Id == removedCollaborator.Id && x.ListId == removedCollaborator.ListId);
 
-            // If found, delete the collaborator
+            // If found, mark the collaborator as removed
             if (collaborator != null)
             {
-                unitOfWork.Collaborators.Remove(collaborator);
+                collaborator.IsRemoved = true;
+                unitOfWork.Collaborators.Update(collaborator);
                 await unitOfWork.Save();
+
+
+                // Setup the email
+                emailService.SetupEmail(SetupRemovedCollaborator, new EmailSetupParams
+                {
+                    Host = GetHost(),
+                    CollaboratorId = collaborator.Id,
+                    ListId1 = removedCollaborator.ListId
+                });
+
+
+
                 return Ok();
             }
 
@@ -347,6 +441,57 @@ namespace Website.Controllers
         }
 
 
+
+
+
+
+        // .........................................................................Setup Removed Collaborator.....................................................................
+        private async Task SetupRemovedCollaborator(NicheShackContext context, object state)
+        {
+            EmailSetupParams emailSetupParams = (EmailSetupParams)state;
+
+            // Get the customer id
+            string customerId = await context.ListCollaborators
+                .AsNoTracking()
+                .Where(x => x.Id == emailSetupParams.CollaboratorId)
+                .Select(x => x.CustomerId)
+                .SingleAsync();
+
+
+
+            // Get the recipient
+            var recipient = await context.Customers
+                .AsNoTracking()
+                .Where(x => x.Id == customerId)
+                .Select(x => new
+                {
+                    firstName = x.FirstName,
+                    lastName = x.LastName,
+                    email = x.Email
+                }).SingleAsync();
+
+
+
+            // Get the list
+            string list = await context.Lists
+                .AsNoTracking()
+                .Where(x => x.Id == emailSetupParams.ListId1)
+                .Select(x => x.Name).SingleAsync();
+
+
+
+            // Add email to queue
+            emailService.AddToQueue(EmailType.RemovedCollaborator, "Removed from list", new Recipient
+            {
+                Email = recipient.email,
+                FirstName = recipient.firstName,
+                LastName = recipient.lastName
+            }, new EmailProperties
+            {
+                Host = emailSetupParams.Host,
+                Var1 = list
+            });
+        }
 
 
 
@@ -529,12 +674,12 @@ namespace Website.Controllers
 
 
         // .........................................................................Get Email Params.....................................................................
-        private async Task<EmailParams> GetEmailParams(NicheShackContext context, string customerId, int? productId, string listId, string host)
+        private async Task<EmailParams> GetEmailParams(NicheShackContext context, string customerId, string listId, string host, int? productId = null)
         {
             // Get the recipients
             List<string> customerIds = await context.ListCollaborators
                 .AsNoTracking()
-                .Where(x => x.ListId == listId && x.CustomerId != customerId)
+                .Where(x => x.ListId == listId && x.CustomerId != customerId && !x.IsRemoved)
                 .Select(x => x.CustomerId)
                 .ToListAsync();
 
@@ -588,19 +733,24 @@ namespace Website.Controllers
                 }).SingleAsync();
 
 
-            ListProductData product = null;
+
+
+
+
+
             // Get the product
+            ProductData product = null;
             if (productId != null)
             {
                 product = await context.Products
                 .AsNoTracking()
                 .Where(x => x.Id == productId)
-                .Select(x => new ListProductData
+                .Select(x => new ProductData
                 {
                     Name = x.Name,
-                    ImageUrl = x.Media.Url,
-                    UrlName = x.UrlName,
-                    UrlId = x.UrlId
+                    Image = x.Media.Url,
+                    Url = host + "/" + x.UrlName + "/" + x.UrlId
+
                 }).SingleAsync();
             }
 
@@ -630,7 +780,7 @@ namespace Website.Controllers
             EmailSetupParams emailSetupParams = (EmailSetupParams)state;
 
 
-            EmailParams emailParams = await GetEmailParams(context, emailSetupParams.CustomerId, emailSetupParams.ProductId, emailSetupParams.ListId1, emailSetupParams.Host);
+            EmailParams emailParams = await GetEmailParams(context, emailSetupParams.CustomerId, emailSetupParams.ListId1, emailSetupParams.Host, emailSetupParams.ProductId);
 
             if (emailParams == null) return;
 
@@ -642,19 +792,17 @@ namespace Website.Controllers
 
 
 
-
-
-
-
-
-
         // .........................................................................Submit Removed List Item Emails To Queue.....................................................................
         private void SubmitRemovedListItemEmailsToQueue(EmailParams emailParams)
         {
-            SubmitEmailsToQueue(EmailType.RemovedListItem, emailParams.Collaborator.FirstName +
-                        " " + emailParams.Collaborator.LastName +
-                        " has removed " + emailParams.Product.Name +
-                        " from the list " + emailParams.List.Name, emailParams.Recipients, emailParams.Collaborator, emailParams.Product, emailParams.Host, emailParams.List);
+            emailService.AddToQueue(EmailType.RemovedListItem, "An item has been removed from your list", emailParams.Recipients, new EmailProperties
+            {
+                Host = emailParams.Host,
+                Product = emailParams.Product,
+                Link = emailParams.Host + "/account/lists/" + emailParams.List.Id,
+                Person = emailParams.Collaborator,
+                Var1 = emailParams.List.Name
+            });
         }
 
 
@@ -666,7 +814,7 @@ namespace Website.Controllers
             EmailSetupParams emailSetupParams = (EmailSetupParams)state;
 
 
-            EmailParams emailParams = await GetEmailParams(context, emailSetupParams.CustomerId, emailSetupParams.ProductId, emailSetupParams.ListId1, emailSetupParams.Host);
+            EmailParams emailParams = await GetEmailParams(context, emailSetupParams.CustomerId, emailSetupParams.ListId1, emailSetupParams.Host, emailSetupParams.ProductId);
 
             if (emailParams == null) return;
 
@@ -684,49 +832,24 @@ namespace Website.Controllers
         // .........................................................................Submit Added List Item Emails To Queue.....................................................................
         private void SubmitAddedListItemEmailsToQueue(EmailParams emailParams)
         {
-            SubmitEmailsToQueue(EmailType.AddedListItem, emailParams.Collaborator.FirstName +
-                        " " + emailParams.Collaborator.LastName +
-                        " has added " + emailParams.Product.Name +
-                        " to the list " + emailParams.List.Name, emailParams.Recipients, emailParams.Collaborator, emailParams.Product, emailParams.Host, emailParams.List);
-        }
-
-
-
-
-
-
-
-
-
-
-
-        // .........................................................................Submit Emails To Queue.....................................................................
-        private void SubmitEmailsToQueue(EmailType emailType, string subject, IEnumerable<Recipient> recipients, CustomerData Collaborator, ListProductData product, string host, ListViewModel list1, ListViewModel list2 = null)
-        {
-            foreach (Recipient recipient in recipients)
+            emailService.AddToQueue(EmailType.AddedListItem, "An item has been added to your list", emailParams.Recipients, new EmailProperties
             {
-                emailService.emails.Add(new EmailMessage
-                {
-                    EmailType = emailType,
-                    Recipient = recipient.Email,
-                    Subject = subject,
-                    EmailProperties = new EmailProperties
-                    {
-                        Host = host,
-                        FirstName = recipient.FirstName,
-                        LastName = recipient.LastName,
-                        List1 = list1.Name,
-                        List2 = list2 != null ? list2.Name : null,
-                        Link = host + "/account/lists/" + (list2 != null ? list2.Id : list1.Id),
-                        CollaboratorFirstName = Collaborator.FirstName,
-                        CollaboratorLastName = Collaborator.LastName,
-                        ProductName = product != null ? product.Name : null,
-                        ImageUrl = product != null ? product.ImageUrl : null,
-                        ProductLink = product != null ? host + "/" + product.UrlName + "/" + product.UrlId : null
-                    }
-                });
-            }
+                Host = emailParams.Host,
+                Product = emailParams.Product,
+                Link = emailParams.Host + "/account/lists/" + emailParams.List.Id,
+                Person = emailParams.Collaborator,
+                Var1 = emailParams.List.Name
+            });
         }
+
+
+
+
+
+
+
+
+
 
 
 
@@ -737,8 +860,8 @@ namespace Website.Controllers
             EmailSetupParams emailSetupParams = (EmailSetupParams)state;
 
 
-            EmailParams fromListEmailParams = await GetEmailParams(context, emailSetupParams.CustomerId, emailSetupParams.ProductId, emailSetupParams.ListId1, emailSetupParams.Host);
-            EmailParams toListEmailParams = await GetEmailParams(context, emailSetupParams.CustomerId, emailSetupParams.ProductId, emailSetupParams.ListId2, emailSetupParams.Host);
+            EmailParams fromListEmailParams = await GetEmailParams(context, emailSetupParams.CustomerId, emailSetupParams.ListId1, emailSetupParams.Host, emailSetupParams.ProductId);
+            EmailParams toListEmailParams = await GetEmailParams(context, emailSetupParams.CustomerId, emailSetupParams.ListId2, emailSetupParams.Host, emailSetupParams.ProductId);
 
             if (fromListEmailParams == null && toListEmailParams == null) return;
 
@@ -760,17 +883,15 @@ namespace Website.Controllers
 
                 if (bothListsRecipients.Count > 0)
                 {
-                    SubmitEmailsToQueue(EmailType.MovedListItem, fromListEmailParams.Collaborator.FirstName +
-                        " " + fromListEmailParams.Collaborator.LastName +
-                        " has moved " + fromListEmailParams.Product.Name +
-                        " from the list " +
-                        fromListEmailParams.List.Name + " to the list " + toListEmailParams.List.Name,
-                            bothListsRecipients,
-                            fromListEmailParams.Collaborator,
-                            fromListEmailParams.Product,
-                            fromListEmailParams.Host,
-                            fromListEmailParams.List,
-                            toListEmailParams.List);
+                    emailService.AddToQueue(EmailType.MovedListItem, "An item has been moved to another list", bothListsRecipients, new EmailProperties
+                    {
+                        Host = fromListEmailParams.Host,
+                        Product = fromListEmailParams.Product,
+                        Link = fromListEmailParams.Host + "/account/lists/" + toListEmailParams.List.Id,
+                        Person = fromListEmailParams.Collaborator,
+                        Var1 = fromListEmailParams.List.Name,
+                        Var2 = toListEmailParams.List.Name
+                    });
                 }
 
                 SubmitRemovedListItemEmailsToQueue(fromListEmailParams);
@@ -804,7 +925,7 @@ namespace Website.Controllers
 
 
 
-            bool exists = await unitOfWork.Collaborators.Any(x => x.CustomerId == User.FindFirst(ClaimTypes.NameIdentifier).Value && x.ListId == list.Id);
+            bool exists = await unitOfWork.Collaborators.Any(x => x.CustomerId == User.FindFirst(ClaimTypes.NameIdentifier).Value && x.ListId == list.Id && !x.IsRemoved);
 
 
 
@@ -852,12 +973,24 @@ namespace Website.Controllers
                 name = x.Name
             });
 
-            // Add this customer to the list
-            unitOfWork.Collaborators.Add(new ListCollaborator
+            ListCollaborator collaborator = await unitOfWork.Collaborators.Get(x => x.CustomerId == customerId && x.ListId == list.id);
+
+            if (collaborator == null)
             {
-                CustomerId = customerId,
-                ListId = list.id
-            });
+                // Add this customer to the list
+                unitOfWork.Collaborators.Add(new ListCollaborator
+                {
+                    CustomerId = customerId,
+                    ListId = list.id
+                });
+            }
+            else
+            {
+                collaborator.IsRemoved = false;
+                unitOfWork.Collaborators.Update(collaborator);
+            }
+
+
 
             await unitOfWork.Save();
 
@@ -881,20 +1014,29 @@ namespace Website.Controllers
 
 
 
+
+
+
+
+
+
+        // .........................................................................Setup Added Collaborator Email.....................................................................
         private async Task SetupAddedCollaboratorEmail(NicheShackContext context, object state)
         {
             EmailSetupParams emailSetupParams = (EmailSetupParams)state;
 
-            EmailParams emailParams = await GetEmailParams(context, emailSetupParams.CustomerId, null, emailSetupParams.ListId1, emailSetupParams.Host);
+            EmailParams emailParams = await GetEmailParams(context, emailSetupParams.CustomerId, emailSetupParams.ListId1, emailSetupParams.Host);
 
             if (emailParams == null) return;
 
 
-
-            SubmitEmailsToQueue(EmailType.NewCollaborator, "A new collaborator, " + emailParams.Collaborator.FirstName +
-                " " + emailParams.Collaborator.LastName +
-                ", has joined the list " +
-                emailParams.List.Name, emailParams.Recipients, emailParams.Collaborator, null, emailParams.Host, emailParams.List);
+            emailService.AddToQueue(EmailType.NewCollaborator, "A new Collaborator has joined your list", emailParams.Recipients, new EmailProperties
+            {
+                Host = emailParams.Host,
+                Link = emailParams.Host + "/account/lists/" + emailParams.List.Id,
+                Person = emailParams.Collaborator,
+                Var1 = emailParams.List.Name
+            });
         }
 
 
@@ -916,34 +1058,16 @@ namespace Website.Controllers
         }
     }
 
-    struct EmailSetupParams
-    {
-        public string ListId1 { get; set; }
-        public string ListId2 { get; set; }
-        public string CustomerId { get; set; }
-        public int ProductId { get; set; }
-        public string Host { get; set; }
-    }
+
 
 
 
     class EmailParams
     {
-        public CustomerData Collaborator { get; set; }
+        public Person Collaborator { get; set; }
         public ListViewModel List { get; set; }
-        public ListProductData Product { get; set; }
+        public ProductData Product { get; set; }
         public IEnumerable<Recipient> Recipients { get; set; }
         public string Host { get; set; }
-    }
-
-
-
-
-    class ListProductData
-    {
-        public string Name { get; set; }
-        public string ImageUrl { get; set; }
-        public string UrlName { get; set; }
-        public string UrlId { get; set; }
     }
 }

@@ -131,11 +131,11 @@ namespace DataAccess.Models
 
 
             // OrderProducts
-            modelBuilder.Entity<OrderProduct>(entity =>
-            {
-                entity.HasKey(e => new { e.Id, e.OrderId })
-                    .HasName("PK_OrderProducts");
-            });
+            //modelBuilder.Entity<OrderProduct>(entity =>
+            //{
+            //    entity.HasKey(e => new { e.Id, e.OrderId })
+            //        .HasName("PK_OrderProducts");
+            //});
 
 
 

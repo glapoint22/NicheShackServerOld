@@ -289,18 +289,13 @@ namespace Website.Controllers
                 if (result.Succeeded)
                 {
                     // Send a confirmation email that the customer name has been changed
-                    emailService.emails.Add(new EmailMessage
+                    emailService.AddToQueue(EmailType.NameChange, "Name change confirmation", new Recipient
                     {
-                        EmailType = EmailType.NameChange,
-                        Recipient = customer.Email,
-                        Subject = "Name change confirmation",
-                        EmailProperties = new EmailProperties
-                        {
-                            Host = GetHost(),
-                            FirstName = customer.FirstName,
-                            LastName = customer.LastName
-                        }
-                    });
+                        FirstName = customer.FirstName,
+                        LastName = customer.LastName,
+                        Email = customer.Email
+                    }, new EmailProperties { Host = GetHost() });
+
 
                     return Ok();
                 }
@@ -324,7 +319,7 @@ namespace Website.Controllers
         {
             // Get the customer from the database based on the customer id from the claims via the access token
             Customer customer = await userManager.FindByIdAsync(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-            
+
 
             // If the customer is found...
             if (customer != null)
@@ -344,29 +339,26 @@ namespace Website.Controllers
                 if (result.Succeeded)
                 {
                     // Send a confirmation email that the customer email has been changed
-                    emailService.emails.Add(new EmailMessage
+                    emailService.AddToQueue(EmailType.EmailChange, "Email change confirmation", new Recipient
                     {
-                        EmailType = EmailType.EmailChange,
-                        Recipient = updatedEmail.Email,
-                        Subject = "Email change confirmation",
-                        EmailProperties = new EmailProperties
-                        {
-                            Host = GetHost(),
-                            FirstName = customer.FirstName,
-                            LastName = customer.LastName,
-                            Email1 = previousEmail,
-                            Email2 = updatedEmail.Email
-                        }
+                        FirstName = customer.FirstName,
+                        LastName = customer.LastName,
+                        Email = updatedEmail.Email
+                    }, new EmailProperties
+                    {
+                        Host = GetHost(),
+                        Var1 = previousEmail,
+                        Var2 = updatedEmail.Email
                     });
 
 
                     return Ok();
-                } 
+                }
                 else
                 {
                     return Conflict("An error occured due to an invalid email address or invalid token.");
                 }
-                
+
             }
 
             return BadRequest();
@@ -398,11 +390,24 @@ namespace Website.Controllers
                 // If the password was successfully updated, return ok
                 if (result.Succeeded)
                 {
+                    // Send a confirmation email that the customer's password has been changed
+                    emailService.AddToQueue(EmailType.PasswordChange, "Password change confirmation", new Recipient
+                    {
+                        FirstName = customer.FirstName,
+                        LastName = customer.LastName,
+                        Email = customer.Email
+                    }, new EmailProperties { Host = GetHost() });
+
+
                     return Ok();
+                }
+                else
+                {
+                    return Conflict();
                 }
             }
 
-            return Conflict();
+            return BadRequest();
         }
 
 
@@ -752,24 +757,23 @@ namespace Website.Controllers
 
             if (customer != null)
             {
-               var result = await userManager.FindByEmailAsync(email);
+                var result = await userManager.FindByEmailAsync(email);
 
-                if(result != null) return Conflict();
+                if (result != null) return Conflict();
 
                 string token = await userManager.GenerateChangeEmailTokenAsync(customer, email);
+                string host = GetHost();
 
 
-
-                emailService.emails.Add(new EmailMessage
+                emailService.AddToQueue(EmailType.VerifyEmail, "Verify Email", new Recipient
                 {
-                    EmailType = EmailType.VerifyEmail,
-                    Recipient = email,
-                    Subject = "Verify Email",
-                    EmailProperties = new EmailProperties
-                    {
-                        Host = GetHost(),
-                        Link = GetHost() + "/account/profile/change-email?email=" + HttpUtility.UrlEncode(email) + "&token=" + HttpUtility.UrlEncode(token)
-                    }
+                    FirstName = customer.FirstName,
+                    LastName = customer.LastName,
+                    Email = customer.Email
+                }, new EmailProperties
+                {
+                    Host = host,
+                    Link = host + "/account/profile/change-email?email=" + HttpUtility.UrlEncode(email) + "&token=" + HttpUtility.UrlEncode(token)
                 });
 
                 return Ok();
@@ -790,16 +794,17 @@ namespace Website.Controllers
         private async Task SendAccountActivationEmail(Customer customer)
         {
             string token = await userManager.GenerateEmailConfirmationTokenAsync(customer);
+            string host = GetHost();
 
-            emailService.emails.Add(new EmailMessage { 
-                EmailType = EmailType.AccountActivation,
-                Recipient = customer.Email,
-                Subject = "Activate your new Niche Shack account",
-                EmailProperties = new EmailProperties
-                {
-                    Host = GetHost(),
-                    Link = GetHost() + "/activate-account?email=" + HttpUtility.UrlEncode(customer.Email) + "&token=" + HttpUtility.UrlEncode(token)
-                }
+            emailService.AddToQueue(EmailType.AccountActivation, "Activate your new Niche Shack account", new Recipient
+            {
+                FirstName = customer.FirstName,
+                LastName = customer.LastName,
+                Email = customer.Email
+            }, new EmailProperties
+            {
+                Host = host,
+                Link = host + "/activate-account?email=" + HttpUtility.UrlEncode(customer.Email) + "&token=" + HttpUtility.UrlEncode(token)
             });
         }
 
@@ -812,22 +817,19 @@ namespace Website.Controllers
         private async Task SendResetPasswordEmail(Customer customer)
         {
             string token = await userManager.GeneratePasswordResetTokenAsync(customer);
+            string host = GetHost();
 
-
-            emailService.emails.Add(new EmailMessage
+            emailService.AddToQueue(EmailType.ResetPassword, "Reset Password", new Recipient
             {
-                EmailType = EmailType.ResetPassword,
-                Recipient = customer.Email,
-                Subject = "Reset Password",
-                EmailProperties = new EmailProperties
-                {
-                    Host = GetHost(),
-                    Link = GetHost() + "/reset-password?email=" + HttpUtility.UrlEncode(customer.Email) + "&token=" + HttpUtility.UrlEncode(token)
-                }
+                FirstName = customer.FirstName,
+                LastName = customer.LastName,
+                Email = customer.Email
+            }, new EmailProperties
+            {
+                Host = host,
+                Link = host + "/reset-password?email=" + HttpUtility.UrlEncode(customer.Email) + "&token=" + HttpUtility.UrlEncode(token)
             });
         }
-
-
 
 
 
