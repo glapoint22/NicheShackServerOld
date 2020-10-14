@@ -142,28 +142,7 @@ namespace Manager.Repositories
         public async Task<IEnumerable<QueryBuilderViewModel>> GetAlita(IEnumerable<Query> queries)
         {
 
-            int categoryIndex = queries.ToList().FindIndex(x => x.QueryType == QueryType.Category);
-
-            if(categoryIndex != -1)
-            {
-                int nicheIndex = queries.ToList().FindIndex(x => x.QueryType == QueryType.Niche);
-            }
-
-
-            //for (var i = 0; i < queries.ToArray().Length; i++)
-            //{
-
-            //    if (queries.ToArray()[i].QueryType == QueryType.Category)
-            //    {
-            //        IEnumerable<int> categoryIds = Array.ConvertAll(queries.ToArray()[i].Value.ToArray(), int.Parse);
-            //        IEnumerable<int> nicheIds = await context.Niches.Where(x => categoryIds.Contains(x.CategoryId)).Select(x => x.Id).ToListAsync();
-
-            //        int myIndex = queries.ToList().FindIndex(x => x.QueryType == QueryType.Niche);
-
-
-            //    }
-
-            //}
+            
 
             //queryBuilderData.NicheIds = await context.Niches.Where(x => queryBuilderData.CategoryIds.Contains(x.CategoryId)).Select(x => x.Id).ToListAsync();
             //queryBuilderData.ProductIds = await context.ProductKeywords.Where(x => queryBuilderData.Keywords.Contains(x.Name)).Select(x => x.ProductId).ToListAsync();
