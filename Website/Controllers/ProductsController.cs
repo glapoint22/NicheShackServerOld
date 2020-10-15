@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Website.Classes;
@@ -33,7 +34,8 @@ namespace Website.Controllers
                 title = x.Name,
                 minPrice = x.MinPrice,
                 maxPrice = x.MaxPrice,
-                image = new {
+                image = new
+                {
                     name = x.Media.Name,
                     url = x.Media.Url
                 },
@@ -67,24 +69,27 @@ namespace Website.Controllers
 
 
 
-            // ..................................................................................Get Product Detail.....................................................................
-            [Route("ProductDetail")]
+        // ..................................................................................Get Product Detail.....................................................................
+        [Route("ProductDetail")]
         [HttpGet]
         public async Task<ActionResult> GetProductDetail(string id)
         {
             // Get the product based on the id
             ProductDetailViewModel product = await unitOfWork.Products.Get<ProductDetailViewModel>(x => x.UrlId == id);
 
-            //var iconId = await unitOfWork.ProductContent.Get(x => x.ProductId == id, x => x.IconId);
-
-
-            
-
 
 
             // If the product is found in the database, return the product with other product details
             if (product != null)
             {
+                if (User.Claims.Count() > 0)
+                {
+                    product.Hoplink = product.Hoplink + (product.Hoplink.Contains('?') ? "&" : "?") + "tid=" + product.UrlId + "_" + User.FindFirst(ClaimTypes.NameIdentifier).Value;
+                }
+
+
+
+
                 var response = new
                 {
                     productInfo = new
@@ -105,7 +110,7 @@ namespace Website.Controllers
                         .Select(y => y.Index)
                         .ToList()
                     }),
-                    pricePoints = await unitOfWork.PricePoints.GetCollection(x => x.Index, x => x.ProductId == product.Id, y => new 
+                    pricePoints = await unitOfWork.PricePoints.GetCollection(x => x.Index, x => x.ProductId == product.Id, y => new
                     {
                         y.TextBefore,
                         y.WholeNumber,

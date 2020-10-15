@@ -193,7 +193,8 @@ namespace Website.Controllers
                         Price = lineItem.ProductPrice,
                         LineItemType = lineItem.LineItemType,
                         RebillFrequency = lineItem.Recurring ? lineItem.PaymentPlan.RebillFrequency : null,
-                        RebillAmount = lineItem.Recurring ? lineItem.PaymentPlan.RebillAmount : 0
+                        RebillAmount = lineItem.Recurring ? lineItem.PaymentPlan.RebillAmount : 0,
+                        PaymentsRemaining = lineItem.Recurring ? lineItem.PaymentPlan.PaymentsRemaining : 0
                     };
 
                     unitOfWork.OrderProducts.Add(orderProduct);
@@ -219,18 +220,8 @@ namespace Website.Controllers
 
 
 
-
-
-
-
-
-
-                //await unitOfWork.Save();
-
+                await unitOfWork.Save();
             }
-
-
-
         }
     }
 }
