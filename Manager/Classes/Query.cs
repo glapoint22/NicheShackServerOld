@@ -39,7 +39,7 @@ namespace Manager.Classes
     public class Query
     {
         public QueryType QueryType { get; set; }
-        public IEnumerable<OperatorType> Operator { get; set; }
-        public IEnumerable<string> Value { get; set; }
+        public List<OperatorType> Operator { get; set; }
+        public List<string> Value { get; set; }
     }
 }
