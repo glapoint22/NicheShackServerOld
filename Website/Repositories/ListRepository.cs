@@ -85,7 +85,7 @@ namespace Website.Repositories
                         Name = x.Collaborator.CustomerId == customerId ? "you" : x.Collaborator.Customer.FirstName,
                         Image = x.Collaborator.Customer.Image
                     } : null,
-                    Hoplink = x.Product.Hoplink,
+                    Hoplink = x.Product.Hoplink + (customerId != null ? (x.Product.Hoplink.Contains('?') ? "&" : "?") + "tid=" + x.Product.UrlId + "_" + customerId : ""),
                     Image = new ImageViewModel
                     {
                         Name = x.Product.Media.Name,

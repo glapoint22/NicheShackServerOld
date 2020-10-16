@@ -30,6 +30,7 @@ namespace Website.Repositories
             // This will return orders based on a time frame from the filter parameter or a single order based on an ordernumber from the searchwords parameter
             return await context.ProductOrders
                 .AsNoTracking()
+                .OrderByDescending(x => x.Date)
                 .Where(new ProductOrderViewModel(customerId, filter, searchWords))
                 .Select(x => new ProductOrderViewModel
                 {
@@ -43,11 +44,11 @@ namespace Website.Repositories
                     Tax = x.Tax,
                     Total = x.Total,
                     ProductUrlId = x.Product.UrlId,
-                    Hoplink = x.Product.Hoplink,
+                    Hoplink = x.Product.Hoplink + (x.Product.Hoplink.Contains('?') ? "&" : "?") + "tid=" + x.Product.UrlId + "_" + customerId,
                     UrlName = x.Product.UrlName,
                     Products = x.OrderProducts
                         .Where(y => y.OrderId == x.Id)
-                        //.OrderByDescending(y => y.IsMain)
+                        .OrderByDescending(y => y.LineItemType)
                         .Select(y => new OrderProductInfoViewModel
                         {
                             Name = y.Name,
@@ -56,9 +57,10 @@ namespace Website.Repositories
                             Image = y.LineItemType == "ORIGINAL" ? new ImageViewModel { 
                                 Name = y.ProductOrder.Product.Media.Name,
                                 Url = y.ProductOrder.Product.Media.Url
-                            } : new ImageViewModel { },
+                            } : null,
                             RebillFrequency = y.RebillFrequency,
-                            RebillAmount = y.RebillAmount
+                            RebillAmount = y.RebillAmount,
+                            PaymentsRemaining = y.PaymentsRemaining
                         })
                 })
                 .ToListAsync();
@@ -92,7 +94,7 @@ namespace Website.Repositories
                         Name = x.ProductOrder.Product.Media.Name,
                         Url = x.ProductOrder.Product.Media.Url
                     } : new ImageViewModel { },
-                    Hoplink = x.ProductOrder.Product.Hoplink,
+                    Hoplink = x.ProductOrder.Product.Hoplink + (x.ProductOrder.Product.Hoplink.Contains('?') ? "&" : "?") + "tid=" + x.ProductOrder.Product.UrlId + "_" + customerId,
                     OrderNumber = x.OrderId,
                     ProductUrlId = x.ProductOrder.Product.UrlId,
                     UrlName = x.ProductOrder.Product.UrlName

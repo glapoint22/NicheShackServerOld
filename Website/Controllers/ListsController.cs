@@ -170,12 +170,12 @@ namespace Website.Controllers
         // ..................................................................................Get List Products......................................................................
         [HttpGet]
         [Route("Products")]
-        public async Task<ActionResult> GetListProducts(string listId, bool shared, string sort = "")
+        public async Task<ActionResult> GetListProducts(string listId, string sort = "")
         {
             string customerId = null;
 
             // Get the customer Id
-            if (!shared) customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            if (User.Claims.Count() > 0) customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
 
             // Get all collaborator ids from this list
@@ -277,7 +277,7 @@ namespace Website.Controllers
 
 
                 // Setup the email
-                if(previousName != list.Name)
+                if (previousName != list.Name)
                 {
                     emailService.SetupEmail(SetupChangedListName, new EmailSetupParams
                     {
@@ -288,7 +288,7 @@ namespace Website.Controllers
                         Var2 = list.Name
                     });
                 }
-                
+
 
 
 
@@ -322,7 +322,7 @@ namespace Website.Controllers
 
 
             // Add email to queue
-            emailService.AddToQueue(EmailType.ListNameChange, "List name changed", emailParams.Recipients , new EmailProperties
+            emailService.AddToQueue(EmailType.ListNameChange, "List name changed", emailParams.Recipients, new EmailProperties
             {
                 Host = emailSetupParams.Host,
                 Var1 = emailSetupParams.Var1,
@@ -363,7 +363,7 @@ namespace Website.Controllers
 
                 IEnumerable<string> customerIds = await unitOfWork.Collaborators.GetCollection(x => x.ListId == list.Id && !x.IsRemoved, x => x.CustomerId);
 
-                if(customerIds.Count() > 1)
+                if (customerIds.Count() > 1)
                 {
                     IEnumerable<Recipient> recipients = await unitOfWork.Customers.GetCollection(x => customerIds.Contains(x.Id), x => new Recipient
                     {

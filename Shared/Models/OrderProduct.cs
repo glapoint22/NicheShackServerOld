@@ -19,6 +19,7 @@ namespace DataAccess.Models
         public string LineItemType { get; set; }
         public string RebillFrequency { get; set; }
         public double RebillAmount { get; set; }
+        public int PaymentsRemaining { get; set; }
         public virtual ProductOrder ProductOrder { get; set; }
     }
 }
