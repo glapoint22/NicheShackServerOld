@@ -204,14 +204,16 @@ namespace Website.Controllers
 
             Recipient recipient = await context.Customers
                 .AsNoTracking()
-                .Where(x => x.Id == emailSetupParams.CustomerId)
+                .Where(x => x.Id == emailSetupParams.CustomerId && x.EmailPrefReview)
                 .Select(x => new Recipient
                 {
                     FirstName = x.FirstName,
                     LastName = x.LastName,
                     Email = x.Email
                 })
-                .SingleAsync();
+                .SingleOrDefaultAsync();
+
+            if (recipient == null) return;
 
 
             ProductData product = await context.Products
