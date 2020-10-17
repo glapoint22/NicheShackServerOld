@@ -139,13 +139,38 @@ namespace Manager.Repositories
 
 
 
-        public async Task<IEnumerable<QueryBuilderViewModel>> GetAlita(IEnumerable<Query> queries)
+        public async Task<IEnumerable<QueryBuilderViewModel>> GetAlita(List<Query> queries)
         {
+            int categoryQueryIndex = queries.FindIndex(x => x.QueryType == QueryType.Category);
+            int nicheQueryIndex = queries.FindIndex(x => x.QueryType == QueryType.Niche);
 
-            
 
-            //queryBuilderData.NicheIds = await context.Niches.Where(x => queryBuilderData.CategoryIds.Contains(x.CategoryId)).Select(x => x.Id).ToListAsync();
             //queryBuilderData.ProductIds = await context.ProductKeywords.Where(x => queryBuilderData.Keywords.Contains(x.Name)).Select(x => x.ProductId).ToListAsync();
+
+
+
+            //If a category query exists
+            if (categoryQueryIndex != -1)
+            {
+                List<int> categoryIds = queries[categoryQueryIndex].Value.ConvertAll(int.Parse);
+                List<int> NicheIds = await context.Niches.Where(x => categoryIds.Contains(x.CategoryId)).Select(x => x.Id).ToListAsync();
+
+
+                //If a niche query does NOT exist
+                if (nicheQueryIndex == -1)
+                {
+                    //Create one
+                    queries.Add(new Query { QueryType = QueryType.Niche, Operator = new List<OperatorType> { OperatorType.Equals }, Value = new List<string>() });
+                    nicheQueryIndex = queries.Count - 1;
+                }
+
+                //Loop through each niche id
+                foreach (var nicheId in NicheIds)
+                {
+                    //Add each niche id to the niche query
+                    queries[nicheQueryIndex].Value.Add(nicheId.ToString());
+                }
+            }
 
 
 

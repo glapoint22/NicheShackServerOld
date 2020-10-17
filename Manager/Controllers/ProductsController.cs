@@ -49,7 +49,7 @@ namespace Manager.Controllers
 
         [HttpPost]
         [Route("Alita")]
-        public async Task<ActionResult> Alita(IEnumerable<Query> queries)
+        public async Task<ActionResult> Alita(List<Query> queries)
         {
 
 
