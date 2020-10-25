@@ -4,18 +4,19 @@
     {
         None,
         AccountActivation,
+        ResetPassword,
+        NameChange,
+        EmailChange,
+        PasswordChange,
+        ProfilePicChange,
+        VerifyEmail,
         NewCollaborator,
         RemovedCollaborator,
         RemovedListItem,
         MovedListItem,
         AddedListItem,
-        NameChange,
-        EmailChange,
-        VerifyEmail,
-        PasswordChange,
-        Review,
-        ResetPassword,
         ListNameChange,
-        DeletedList
+        DeletedList,
+        Review
     }
 }

@@ -99,6 +99,18 @@ namespace DataAccess.Models
             modelBuilder.Entity<Customer>(entity =>
             {
                 entity.ToTable(name: "Customers");
+                entity.Property(x => x.EmailPrefNameChange).HasDefaultValue(true);
+                entity.Property(x => x.EmailPrefEmailChange).HasDefaultValue(true);
+                entity.Property(x => x.EmailPrefPasswordChange).HasDefaultValue(true);
+                entity.Property(x => x.EmailPrefProfilePicChange).HasDefaultValue(true);
+                entity.Property(x => x.EmailPrefNewCollaborator).HasDefaultValue(true);
+                entity.Property(x => x.EmailPrefRemovedCollaborator).HasDefaultValue(true);
+                entity.Property(x => x.EmailPrefRemovedListItem).HasDefaultValue(true);
+                entity.Property(x => x.EmailPrefMovedListItem).HasDefaultValue(true);
+                entity.Property(x => x.EmailPrefAddedListItem).HasDefaultValue(true);
+                entity.Property(x => x.EmailPrefListNameChange).HasDefaultValue(true);
+                entity.Property(x => x.EmailPrefDeletedList).HasDefaultValue(true);
+                entity.Property(x => x.EmailPrefReview).HasDefaultValue(true);
             });
 
 
@@ -164,7 +176,7 @@ namespace DataAccess.Models
             });
 
 
-           
+
 
 
 

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using DataAccess.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Website.Classes;
 using Website.Repositories;
 using static Website.Classes.Enums;
@@ -20,10 +21,12 @@ namespace Website.Controllers
     public class ProductOrdersController : ControllerBase
     {
         private readonly IUnitOfWork unitOfWork;
+        private readonly IConfiguration configuration;
 
-        public ProductOrdersController(IUnitOfWork unitOfWork)
+        public ProductOrdersController(IUnitOfWork unitOfWork, IConfiguration configuration)
         {
             this.unitOfWork = unitOfWork;
+            this.configuration = configuration;
         }
 
 
@@ -81,7 +84,7 @@ namespace Website.Controllers
         {
             string decryptedString = null;
 
-            byte[] inputBytes = Encoding.UTF8.GetBytes("OBLIVIONISATHAND");
+            byte[] inputBytes = Encoding.UTF8.GetBytes(configuration["OrderNotification:Key"]);
 
             SHA1 sha1 = SHA1.Create();
             byte[] key = sha1.ComputeHash(inputBytes);

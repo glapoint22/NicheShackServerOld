@@ -5,6 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Migrations\20201016145651_EmailPrefs.cs" />
+    <Compile Remove="Migrations\20201016145651_EmailPrefs.Designer.cs" />
+    <Compile Remove="Migrations\20201016145941_EmailPrefs.cs" />
+    <Compile Remove="Migrations\20201016145941_EmailPrefs.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.8" />
   </ItemGroup>

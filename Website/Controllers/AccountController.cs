@@ -289,12 +289,16 @@ namespace Website.Controllers
                 if (result.Succeeded)
                 {
                     // Send a confirmation email that the customer name has been changed
-                    emailService.AddToQueue(EmailType.NameChange, "Name change confirmation", new Recipient
+                    if(customer.EmailPrefNameChange)
                     {
-                        FirstName = customer.FirstName,
-                        LastName = customer.LastName,
-                        Email = customer.Email
-                    }, new EmailProperties { Host = GetHost() });
+                        emailService.AddToQueue(EmailType.NameChange, "Name change confirmation", new Recipient
+                        {
+                            FirstName = customer.FirstName,
+                            LastName = customer.LastName,
+                            Email = customer.Email
+                        }, new EmailProperties { Host = GetHost() });
+                    }
+                    
 
 
                     return Ok();
@@ -339,17 +343,21 @@ namespace Website.Controllers
                 if (result.Succeeded)
                 {
                     // Send a confirmation email that the customer email has been changed
-                    emailService.AddToQueue(EmailType.EmailChange, "Email change confirmation", new Recipient
+                    if(customer.EmailPrefEmailChange)
                     {
-                        FirstName = customer.FirstName,
-                        LastName = customer.LastName,
-                        Email = updatedEmail.Email
-                    }, new EmailProperties
-                    {
-                        Host = GetHost(),
-                        Var1 = previousEmail,
-                        Var2 = updatedEmail.Email
-                    });
+                        emailService.AddToQueue(EmailType.EmailChange, "Email change confirmation", new Recipient
+                        {
+                            FirstName = customer.FirstName,
+                            LastName = customer.LastName,
+                            Email = updatedEmail.Email
+                        }, new EmailProperties
+                        {
+                            Host = GetHost(),
+                            Var1 = previousEmail,
+                            Var2 = updatedEmail.Email
+                        });
+                    }
+                    
 
 
                     return Ok();
@@ -390,13 +398,19 @@ namespace Website.Controllers
                 // If the password was successfully updated, return ok
                 if (result.Succeeded)
                 {
+
                     // Send a confirmation email that the customer's password has been changed
-                    emailService.AddToQueue(EmailType.PasswordChange, "Password change confirmation", new Recipient
+                    if (customer.EmailPrefPasswordChange)
                     {
-                        FirstName = customer.FirstName,
-                        LastName = customer.LastName,
-                        Email = customer.Email
-                    }, new EmailProperties { Host = GetHost() });
+                        emailService.AddToQueue(EmailType.PasswordChange, "Password change confirmation", new Recipient
+                        {
+                            FirstName = customer.FirstName,
+                            LastName = customer.LastName,
+                            Email = customer.Email
+                        }, new EmailProperties { Host = GetHost() });
+                    }
+                    
+                    
 
 
                     return Ok();
@@ -495,6 +509,20 @@ namespace Website.Controllers
 
             //Save
             await unitOfWork.Save();
+
+
+            // Send an email
+            if (customer.EmailPrefProfilePicChange)
+            {
+                emailService.AddToQueue(EmailType.ProfilePicChange, "Updated profile picture", new Recipient
+                {
+                    FirstName = customer.FirstName,
+                    LastName = customer.LastName,
+                    Email = customer.Email
+                }, new EmailProperties { Host = GetHost() });
+            }
+
+
             return Ok(imageName);
         }
 
@@ -569,6 +597,21 @@ namespace Website.Controllers
 
             //Save
             await unitOfWork.Save();
+
+
+            // Send an email
+            if (customer.EmailPrefProfilePicChange)
+            {
+                emailService.AddToQueue(EmailType.ProfilePicChange, "Updated profile picture", new Recipient
+                {
+                    FirstName = customer.FirstName,
+                    LastName = customer.LastName,
+                    Email = customer.Email
+                }, new EmailProperties { Host = GetHost() });
+            }
+
+
+
             return Ok(imageName);
         }
 
