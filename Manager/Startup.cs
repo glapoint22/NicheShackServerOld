@@ -35,7 +35,7 @@ namespace Manager
             services.AddDbContextPool<NicheShackContext>(options =>
             {
                 // Set the connection string to the niche shack database
-                options.UseSqlServer(Configuration.GetConnectionString("NicheShackDBConnection"));
+                options.UseSqlServer(Configuration.GetConnectionString("NicheShackDBConnection")).EnableSensitiveDataLogging();
             });
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
