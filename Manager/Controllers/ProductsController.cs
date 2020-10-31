@@ -609,12 +609,12 @@ namespace Manager.Controllers
         [HttpPut]
         public async Task<ActionResult> UpdateKeyword(ItemViewModel updatedProperty)
         {
-            ProductKeyword keyword = await unitOfWork.ProductKeywords.Get(updatedProperty.Id);
+            Keyword keyword = await unitOfWork.Keywords.Get(updatedProperty.Id);
 
             keyword.Name = updatedProperty.Name;
 
             // Update and save
-            unitOfWork.ProductKeywords.Update(keyword);
+            unitOfWork.Keywords.Update(keyword);
             await unitOfWork.Save();
 
             return Ok();
@@ -629,15 +629,14 @@ namespace Manager.Controllers
         [HttpPost]
         public async Task<ActionResult> AddKeyword(ItemViewModel keyword)
         {
-            ProductKeyword newKeyword = new ProductKeyword
+            Keyword newKeyword = new Keyword
             {
-                ProductId = keyword.Id,
                 Name = keyword.Name
             };
 
 
             // Add and save
-            unitOfWork.ProductKeywords.Add(newKeyword);
+            unitOfWork.Keywords.Add(newKeyword);
             await unitOfWork.Save();
 
             return Ok(newKeyword.Id);

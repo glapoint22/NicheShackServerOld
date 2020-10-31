@@ -9,6 +9,6 @@ namespace Website.Repositories
 {
     public interface ICategoryRepository : IRepository<Category>
     {
-        Task<IEnumerable<CategoryViewModel>> GetQueriedCategories(QueryParams queryParams, IEnumerable<ProductViewModel> products);
+        //Task<IEnumerable<CategoryViewModel>> GetQueriedCategories(QueryParams queryParams, IEnumerable<ProductViewModel> products);
     }
 }

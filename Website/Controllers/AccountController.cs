@@ -289,7 +289,7 @@ namespace Website.Controllers
                 if (result.Succeeded)
                 {
                     // Send a confirmation email that the customer name has been changed
-                    if(customer.EmailPrefNameChange)
+                    if(customer.EmailPrefNameChange == true)
                     {
                         emailService.AddToQueue(EmailType.NameChange, "Name change confirmation", new Recipient
                         {
@@ -343,7 +343,7 @@ namespace Website.Controllers
                 if (result.Succeeded)
                 {
                     // Send a confirmation email that the customer email has been changed
-                    if(customer.EmailPrefEmailChange)
+                    if(customer.EmailPrefEmailChange == true)
                     {
                         emailService.AddToQueue(EmailType.EmailChange, "Email change confirmation", new Recipient
                         {
@@ -400,7 +400,7 @@ namespace Website.Controllers
                 {
 
                     // Send a confirmation email that the customer's password has been changed
-                    if (customer.EmailPrefPasswordChange)
+                    if (customer.EmailPrefPasswordChange == true)
                     {
                         emailService.AddToQueue(EmailType.PasswordChange, "Password change confirmation", new Recipient
                         {
@@ -512,7 +512,7 @@ namespace Website.Controllers
 
 
             // Send an email
-            if (customer.EmailPrefProfilePicChange)
+            if (customer.EmailPrefProfilePicChange == true)
             {
                 emailService.AddToQueue(EmailType.ProfilePicChange, "Updated profile picture", new Recipient
                 {
@@ -600,7 +600,7 @@ namespace Website.Controllers
 
 
             // Send an email
-            if (customer.EmailPrefProfilePicChange)
+            if (customer.EmailPrefProfilePicChange == true)
             {
                 emailService.AddToQueue(EmailType.ProfilePicChange, "Updated profile picture", new Recipient
                 {

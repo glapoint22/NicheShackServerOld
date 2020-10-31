@@ -25,6 +25,7 @@ namespace DataAccess.Repositories
 
             return await context.Set<T>()
                 .AsNoTracking()
+                .OrderBy(x => x.Name.StartsWith(searchWords) ? (x.Name == searchWords ? 0 : 1) : 2)
                 .WhereAny(searchWordsArray.Select(w => (Expression<Func<T, bool>>)(x => EF.Functions.Like(x.Name, w))).ToArray())
                 .ExtensionSelect<T, TOut>()
                 .ToListAsync();
@@ -41,6 +42,7 @@ namespace DataAccess.Repositories
 
             return await context.Set<T>()
                 .AsNoTracking()
+                .OrderBy(x => x.Name.StartsWith(searchWords) ? (x.Name == searchWords ? 0 : 1) : 2)
                 .Where(predicate)
                 .WhereAny(searchWordsArray.Select(w => (Expression<Func<T, bool>>)(x => EF.Functions.Like(x.Name, w))).ToArray())
                 .ExtensionSelect<T, TOut>()

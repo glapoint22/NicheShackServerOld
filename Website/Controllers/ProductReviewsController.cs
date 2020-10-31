@@ -204,7 +204,7 @@ namespace Website.Controllers
 
             Recipient recipient = await context.Customers
                 .AsNoTracking()
-                .Where(x => x.Id == emailSetupParams.CustomerId && x.EmailPrefReview)
+                .Where(x => x.Id == emailSetupParams.CustomerId && x.EmailPrefReview == true)
                 .Select(x => new Recipient
                 {
                     FirstName = x.FirstName,

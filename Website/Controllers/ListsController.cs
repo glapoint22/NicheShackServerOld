@@ -362,7 +362,7 @@ namespace Website.Controllers
                 unitOfWork.Lists.Remove(list);
 
 
-                IEnumerable<string> customerIds = await unitOfWork.Collaborators.GetCollection(x => x.ListId == list.Id && !x.IsRemoved && x.Customer.EmailPrefDeletedList, x => x.CustomerId);
+                IEnumerable<string> customerIds = await unitOfWork.Collaborators.GetCollection(x => x.ListId == list.Id && !x.IsRemoved && x.Customer.EmailPrefDeletedList == true, x => x.CustomerId);
 
                 if (customerIds.Count() > 1)
                 {
@@ -454,7 +454,7 @@ namespace Website.Controllers
             // Get the customer id
             string customerId = await context.ListCollaborators
                 .AsNoTracking()
-                .Where(x => x.Id == emailSetupParams.CollaboratorId && x.Customer.EmailPrefRemovedCollaborator)
+                .Where(x => x.Id == emailSetupParams.CollaboratorId && x.Customer.EmailPrefRemovedCollaborator == true)
                 .Select(x => x.CustomerId)
                 .SingleOrDefaultAsync();
 
@@ -781,16 +781,16 @@ namespace Website.Controllers
             switch (emailType)
             {
                 case EmailType.NewCollaborator:
-                    predicate = x => x.Customer.EmailPrefNewCollaborator;
+                    predicate = x => x.Customer.EmailPrefNewCollaborator == true;
                     break;
                 case EmailType.RemovedListItem:
-                    predicate = x => x.Customer.EmailPrefRemovedListItem;
+                    predicate = x => x.Customer.EmailPrefRemovedListItem == true;
                     break;
                 case EmailType.AddedListItem:
-                    predicate = x => x.Customer.EmailPrefAddedListItem;
+                    predicate = x => x.Customer.EmailPrefAddedListItem == true;
                     break;
                 case EmailType.ListNameChange:
-                    predicate = x => x.Customer.EmailPrefListNameChange;
+                    predicate = x => x.Customer.EmailPrefListNameChange == true;
                     break;
             }
 
@@ -903,13 +903,13 @@ namespace Website.Controllers
 
             List<string> fromListCustomerIds = await context.ListCollaborators
                 .AsNoTracking()
-                .Where(x => x.ListId == emailSetupParams.ListId1 && !x.IsRemoved && x.CustomerId != emailSetupParams.CustomerId && x.Customer.EmailPrefMovedListItem)
+                .Where(x => x.ListId == emailSetupParams.ListId1 && !x.IsRemoved && x.CustomerId != emailSetupParams.CustomerId && x.Customer.EmailPrefMovedListItem == true)
                 .Select(x => x.CustomerId)
                 .ToListAsync();
 
             List<string> bothListRecipientIds = await context.ListCollaborators
                 .AsNoTracking()
-                .Where(x => x.ListId == emailSetupParams.ListId2 && !x.IsRemoved && x.CustomerId != emailSetupParams.CustomerId && fromListCustomerIds.Contains(x.CustomerId) && x.Customer.EmailPrefMovedListItem)
+                .Where(x => x.ListId == emailSetupParams.ListId2 && !x.IsRemoved && x.CustomerId != emailSetupParams.CustomerId && fromListCustomerIds.Contains(x.CustomerId) && x.Customer.EmailPrefMovedListItem == true)
                 .Select(x => x.CustomerId)
                 .ToListAsync();
 

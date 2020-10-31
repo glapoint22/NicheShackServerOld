@@ -73,10 +73,10 @@ namespace Manager.Repositories
                         Id = x.Vendor.Id,
                         Name = x.Vendor.Name
                     },
-                    Keywords = x.Keywords.Select(y => new ItemViewModel
+                    Keywords = x.ProductKeywords.Select(y => new ItemViewModel
                     {
                         Id = y.Id,
-                        Name = y.Name
+                        Name = y.Keyword.Name
                     }),
                     Rating = x.Rating,
                     TotalReviews = x.TotalReviews,

@@ -47,7 +47,7 @@ namespace DataAccess.Models
         public virtual ICollection<ProductReview> ProductReviews { get; set; }
         public virtual ICollection<ListProduct> ListProducts { get; set; }
         public virtual ICollection<ProductOrder> ProductOrders { get; set; }
-        public virtual ICollection<ProductKeyword> Keywords { get; set; }
+        public virtual ICollection<ProductKeyword> ProductKeywords { get; set; }
         public virtual ICollection<ProductEmail> ProductEmails { get; set; }
         public virtual ICollection<Notification> Notifications { get; set; }
         public virtual ICollection<SubgroupProduct> SubgroupProducts { get; set; }
@@ -63,7 +63,7 @@ namespace DataAccess.Models
             ProductReviews = new HashSet<ProductReview>();
             ListProducts = new HashSet<ListProduct>();
             ProductOrders = new HashSet<ProductOrder>();
-            Keywords = new HashSet<ProductKeyword>();
+            ProductKeywords = new HashSet<ProductKeyword>();
             ProductEmails = new HashSet<ProductEmail>();
             Notifications = new HashSet<Notification>();
             SubgroupProducts = new HashSet<SubgroupProduct>();

@@ -17,18 +17,18 @@ namespace DataAccess.Models
         public string ReviewName { get; set; }
         [MaxLength(50)]
         public string Image { get; set; }
-        public bool EmailPrefNameChange { get; set; }
-        public bool EmailPrefEmailChange { get; set; }
-        public bool EmailPrefPasswordChange { get; set; }
-        public bool EmailPrefProfilePicChange { get; set; }
-        public bool EmailPrefNewCollaborator { get; set; }
-        public bool EmailPrefRemovedCollaborator { get; set; }
-        public bool EmailPrefRemovedListItem { get; set; }
-        public bool EmailPrefMovedListItem { get; set; }
-        public bool EmailPrefAddedListItem { get; set; }
-        public bool EmailPrefListNameChange { get; set; }
-        public bool EmailPrefDeletedList { get; set; }
-        public bool EmailPrefReview { get; set; }
+        public bool? EmailPrefNameChange { get; set; }
+        public bool? EmailPrefEmailChange { get; set; }
+        public bool? EmailPrefPasswordChange { get; set; }
+        public bool? EmailPrefProfilePicChange { get; set; }
+        public bool? EmailPrefNewCollaborator { get; set; }
+        public bool? EmailPrefRemovedCollaborator { get; set; }
+        public bool? EmailPrefRemovedListItem { get; set; }
+        public bool? EmailPrefMovedListItem { get; set; }
+        public bool? EmailPrefAddedListItem { get; set; }
+        public bool? EmailPrefListNameChange { get; set; }
+        public bool? EmailPrefDeletedList { get; set; }
+        public bool? EmailPrefReview { get; set; }
         public virtual ICollection<ListCollaborator> ListCollaborators { get; set; }
         public virtual ICollection<RefreshToken> RefreshTokens { get; set; }
         public virtual ICollection<ProductOrder> ProductOrders { get; set; }

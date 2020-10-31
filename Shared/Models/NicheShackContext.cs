@@ -22,6 +22,11 @@ namespace DataAccess.Models
         public virtual DbSet<Filter> Filters { get; set; }
         public virtual DbSet<FilterOption> FilterOptions { get; set; }
 
+
+        public virtual DbSet<Keyword> Keywords { get; set; }
+
+        public virtual DbSet<KeywordSearchVolume> KeywordSearchVolumes { get; set; }
+
         public virtual DbSet<LeadPage> LeadPages { get; set; }
 
 
@@ -116,6 +121,21 @@ namespace DataAccess.Models
 
 
 
+            // Keywords
+            modelBuilder.Entity<Keyword>(entity =>
+            {
+                entity.HasIndex(e => e.Name).IsUnique();
+            });
+
+
+            // KeywordSearchVolumes
+            modelBuilder.Entity<KeywordSearchVolume>(entity =>
+            {
+                entity.HasKey(e => new { e.KeywordId, e.Date })
+                    .HasName("PK_KeywordSearchVolumes");
+            });
+
+
 
 
             // ListProducts
@@ -142,12 +162,7 @@ namespace DataAccess.Models
 
 
 
-            // OrderProducts
-            //modelBuilder.Entity<OrderProduct>(entity =>
-            //{
-            //    entity.HasKey(e => new { e.Id, e.OrderId })
-            //        .HasName("PK_OrderProducts");
-            //});
+            
 
 
 

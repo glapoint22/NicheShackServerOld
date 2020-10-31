@@ -9,11 +9,13 @@
     <Compile Remove="Migrations\20201016145651_EmailPrefs.Designer.cs" />
     <Compile Remove="Migrations\20201016145941_EmailPrefs.cs" />
     <Compile Remove="Migrations\20201016145941_EmailPrefs.Designer.cs" />
+    <Compile Remove="Migrations\20201029183757_UpdateKeywords.cs" />
+    <Compile Remove="Migrations\20201029183757_UpdateKeywords.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.8" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.8" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.9" />
   </ItemGroup>
 
 </Project>

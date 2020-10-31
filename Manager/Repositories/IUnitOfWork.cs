@@ -23,6 +23,7 @@ namespace Manager.Repositories
         ISearchableRepository<Page> Pages { get; }
         ISearchableRepository<Email> Emails { get; }
         ISearchableRepository<Media> Media { get; }
+        ISearchableRepository<Keyword> Keywords { get; }
         IRepository<Notification> Notifications { get; }
         IRepository<ProductFilter> ProductFilters { get; }
         IRepository<ProductPricePoint> ProductPricePoints { get; }

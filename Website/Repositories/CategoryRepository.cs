@@ -23,63 +23,63 @@ namespace Website.Repositories
 
 
 
-        // ................................................................................Get Queried Categories.....................................................................
-        public async Task<IEnumerable<CategoryViewModel>> GetQueriedCategories(QueryParams queryParams, IEnumerable<ProductViewModel> products)
-        {
-            List<int> nicheIds = new List<int>();
-            List<int> categoryIds = new List<int>();
+        //// ................................................................................Get Queried Categories.....................................................................
+        //public async Task<IEnumerable<CategoryViewModel>> GetQueriedCategories(QueryParams queryParams, IEnumerable<ProductViewModel> products)
+        //{
+        //    List<int> nicheIds = new List<int>();
+        //    List<int> categoryIds = new List<int>();
 
-            // If query params contains category id, add it to the categoryIds list
-            if (queryParams.CategoryId != -1)
-            {
-                categoryIds.Add(queryParams.CategoryId);
-            }
-            else
-            {
-                // No category Id is present in the query params, so get a list of nicheIds based on the products and there respective categoryIds
-                nicheIds = await GetNicheIds(products);
-                categoryIds = await context.Niches
-                    .AsNoTracking()
-                    .Where(x => nicheIds
-                        .Contains(x.Id))
-                    .Select(x => x.CategoryId)
-                    .Distinct()
-                    .ToListAsync();
-            }
+        //    // If query params contains category id, add it to the categoryIds list
+        //    if (queryParams.CategoryId != -1)
+        //    {
+        //        categoryIds.Add(queryParams.CategoryId);
+        //    }
+        //    else
+        //    {
+        //        // No category Id is present in the query params, so get a list of nicheIds based on the products and there respective categoryIds
+        //        nicheIds = await GetNicheIds(products);
+        //        categoryIds = await context.Niches
+        //            .AsNoTracking()
+        //            .Where(x => nicheIds
+        //                .Contains(x.Id))
+        //            .Select(x => x.CategoryId)
+        //            .Distinct()
+        //            .ToListAsync();
+        //    }
 
-            // If query params contains niche id, add it to the nicheIds list
-            if (queryParams.NicheId != -1)
-            {
-                nicheIds.Add(queryParams.NicheId);
-            }
-            else if (nicheIds.Count == 0)
-            {
-                // No Niche id in the query params so get a list of niche ids based on the products
-                nicheIds = await GetNicheIds(products);
-            }
+        //    // If query params contains niche id, add it to the nicheIds list
+        //    if (queryParams.NicheId != -1)
+        //    {
+        //        nicheIds.Add(queryParams.NicheId);
+        //    }
+        //    else if (nicheIds.Count == 0)
+        //    {
+        //        // No Niche id in the query params so get a list of niche ids based on the products
+        //        nicheIds = await GetNicheIds(products);
+        //    }
 
 
-            // Return categories & niches based on the category ids and niche ids
-            return await context.Categories
-                .AsNoTracking()
-                .Where(x => categoryIds
-                    .Contains(x.Id))
-                .Select(x => new CategoryViewModel
-                {
-                    Id = x.Id,
-                    Name = x.Name,
-                    Niches = x.Niches
-                        .Where(y => nicheIds
-                            .Contains(y.Id))
-                        .Select(y => new ItemViewModel<Niche>
-                        {
-                            Id = y.Id,
-                            Name = y.Name
-                        })
-                        .ToList()
-                })
-                .ToListAsync();
-        }
+        //    // Return categories & niches based on the category ids and niche ids
+        //    return await context.Categories
+        //        .AsNoTracking()
+        //        .Where(x => categoryIds
+        //            .Contains(x.Id))
+        //        .Select(x => new CategoryViewModel
+        //        {
+        //            Id = x.Id,
+        //            Name = x.Name,
+        //            Niches = x.Niches
+        //                .Where(y => nicheIds
+        //                    .Contains(y.Id))
+        //                .Select(y => new ItemViewModel<Niche>
+        //                {
+        //                    Id = y.Id,
+        //                    Name = y.Name
+        //                })
+        //                .ToList()
+        //        })
+        //        .ToListAsync();
+        //}
 
 
 

@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataAccess.Models
 {
-    public class Category: IItem
+    public class Category: IItem, IUrlItem
     {
         public int Id { get; set; }
         [Required]

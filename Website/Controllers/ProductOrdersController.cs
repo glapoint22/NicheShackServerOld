@@ -133,7 +133,7 @@ namespace Website.Controllers
                     PropertyNameCaseInsensitive = true
                 });
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 // Log the exception
                 return;

@@ -23,6 +23,7 @@ namespace Manager.Repositories
         public ISearchableRepository<Page> Pages { get; }
         public ISearchableRepository<Email> Emails { get; }
         public ISearchableRepository<Media> Media { get; }
+        public ISearchableRepository<Keyword> Keywords { get; }
         public IRepository<Notification> Notifications { get; }
         public IRepository<ProductFilter> ProductFilters { get; }
         public IRepository<ProductPricePoint> ProductPricePoints { get; }
@@ -56,6 +57,7 @@ namespace Manager.Repositories
             Pages = new SearchableRepository<Page> (context);
             Emails = new SearchableRepository<Email>(context);
             Media = new SearchableRepository<Media>(context);
+            Keywords = new SearchableRepository<Keyword>(context);
             Notifications = new Repository<Notification>(context);
             ProductFilters = new Repository<ProductFilter>(context);
             ProductPricePoints = new Repository<ProductPricePoint>(context);

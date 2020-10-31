@@ -4,14 +4,16 @@ using DataAccess.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(NicheShackContext))]
-    partial class NicheShackContextModelSnapshot : ModelSnapshot
+    [Migration("20201020162652_UpdatedCustomer")]
+    partial class UpdatedCustomer
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -253,40 +255,6 @@ namespace DataAccess.Migrations
                     b.HasIndex("FilterId");
 
                     b.ToTable("FilterOptions");
-                });
-
-            modelBuilder.Entity("DataAccess.Models.Keyword", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(256)")
-                        .HasMaxLength(256);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.ToTable("Keywords");
-                });
-
-            modelBuilder.Entity("DataAccess.Models.KeywordSearchVolume", b =>
-                {
-                    b.Property<int>("KeywordId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("KeywordId", "Date")
-                        .HasName("PK_KeywordSearchVolumes");
-
-                    b.ToTable("KeywordSearchVolumes");
                 });
 
             modelBuilder.Entity("DataAccess.Models.LeadPage", b =>
@@ -802,15 +770,15 @@ namespace DataAccess.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("KeywordId")
-                        .HasColumnType("int");
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(50);
 
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("KeywordId");
 
                     b.HasIndex("ProductId");
 
@@ -1247,15 +1215,6 @@ namespace DataAccess.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("DataAccess.Models.KeywordSearchVolume", b =>
-                {
-                    b.HasOne("DataAccess.Models.Keyword", "Keyword")
-                        .WithMany("KeywordSearchVolumes")
-                        .HasForeignKey("KeywordId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("DataAccess.Models.LeadPage", b =>
                 {
                     b.HasOne("DataAccess.Models.Niche", "Niche")
@@ -1415,14 +1374,8 @@ namespace DataAccess.Migrations
 
             modelBuilder.Entity("DataAccess.Models.ProductKeyword", b =>
                 {
-                    b.HasOne("DataAccess.Models.Keyword", "Keyword")
-                        .WithMany("ProductKeywords")
-                        .HasForeignKey("KeywordId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("DataAccess.Models.Product", "Product")
-                        .WithMany("ProductKeywords")
+                        .WithMany("Keywords")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
