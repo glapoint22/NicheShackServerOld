@@ -17,7 +17,8 @@ namespace Manager.Classes
         ProductPrice,
         ProductRating,
         ProductKeywords,
-        ProductCreationDate
+        ProductCreationDate,
+        ProductIds
     }
 
 

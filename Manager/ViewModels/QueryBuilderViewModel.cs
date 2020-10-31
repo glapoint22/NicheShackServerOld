@@ -39,20 +39,31 @@ namespace Manager.ViewModels
         {
 
 
-
-
-            for (var i = 0; i < queries.ToArray().Length; i++)
+            foreach (Query query in queries)
             {
 
-                
 
-
-                //---------NICHES---------\\
-
-                if (queries.ToArray()[i].QueryType == QueryType.Niche)
+                if (query.QueryType == QueryType.Category)
                 {
-                    IEnumerable<int> nicheIds = Array.ConvertAll(queries.ToArray()[i].Value.ToArray(), int.Parse);
+
+                    IEnumerable<int> categoryIds = Array.ConvertAll(query.Value.ToArray(), int.Parse);
+                    source = source.Where(x => categoryIds.Contains(x.Niche.Category.Id));
+                }
+
+
+
+                if (query.QueryType == QueryType.Niche)
+                {
+                    IEnumerable<int> nicheIds = Array.ConvertAll(query.Value.ToArray(), int.Parse);
                     source = source.Where(x => nicheIds.Contains(x.NicheId));
+                }
+
+
+
+                if (query.QueryType == QueryType.ProductIds)
+                {
+                    IEnumerable<int> productIds = Array.ConvertAll(query.Value.ToArray(), int.Parse);
+                    source = source.Where(x => productIds.Contains(x.Id));
                 }
 
 
@@ -61,7 +72,11 @@ namespace Manager.ViewModels
 
 
 
-            }
+
+                }
+
+
+
 
 
 

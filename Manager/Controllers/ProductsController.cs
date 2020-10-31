@@ -53,7 +53,7 @@ namespace Manager.Controllers
         {
 
 
-           
+
 
             ////---------CATEGORIES ONLY---------\\
             //int[] categoryIds = new int[] { 1, 2 };
@@ -206,13 +206,16 @@ namespace Manager.Controllers
 
 
 
-            
+
 
             //queryBuilderData.CategoryIds = categoryIds;
             //queryBuilderData.Keywords = keywords;
 
 
-            return Ok(await unitOfWork.Products.GetAlita(queries));
+            var battle = await unitOfWork.Products.GetAlita(queries);
+
+
+            return Ok(battle);
 
         }
 
