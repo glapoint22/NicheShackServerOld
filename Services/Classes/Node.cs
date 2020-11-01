@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 
-namespace Website.Classes
+namespace Services.Classes
 {
     public class Node
     {
         public char Char { get; }
         public bool IsWord { get; set; }
         public Dictionary<char, Node> Children = new Dictionary<char, Node>();
-        public Dictionary<string, TrieCategory> Categories = new Dictionary<string, TrieCategory>();
+        public Dictionary<string, SearchWordCategory> Categories = new Dictionary<string, SearchWordCategory>();
         public float SearchVolume { get; set; }
 
 

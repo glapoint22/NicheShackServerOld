@@ -2,10 +2,8 @@
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using DataAccess.Models;
-using DataAccess.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using Website.Classes;
+using Services;
 using Website.Repositories;
 using Website.ViewModels;
 
@@ -16,10 +14,12 @@ namespace Website.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly IUnitOfWork unitOfWork;
+        private readonly SearchSuggestionsService searchSuggestionsService;
 
-        public ProductsController(IUnitOfWork unitOfWork)
+        public ProductsController(IUnitOfWork unitOfWork, SearchSuggestionsService searchSuggestionsService)
         {
             this.unitOfWork = unitOfWork;
+            this.searchSuggestionsService = searchSuggestionsService;
         }
 
 
@@ -133,9 +133,9 @@ namespace Website.Controllers
 
         [HttpGet]
         [Route("GetSuggestions")]
-        public ActionResult SearchProducts(string searchWords, string categoryId)
+        public ActionResult GetSuggestions(string searchWords, string categoryId)
         {
-            return Ok(unitOfWork.Products.GetSuggestions(searchWords, categoryId));
+            return Ok(searchSuggestionsService.GetSuggestions(searchWords, categoryId));
         }
 
 

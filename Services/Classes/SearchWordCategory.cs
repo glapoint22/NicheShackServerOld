@@ -1,6 +1,6 @@
-﻿namespace Website.Classes
+﻿namespace Services.Classes
 {
-    public class TrieCategory
+    public class SearchWordCategory
     {
         public string UrlId { get; set; }
         public string Name { get; set; }

@@ -11,6 +11,5 @@ namespace Website.Repositories
     {
         Task<IEnumerable<ProductViewModel>> GetQueriedProducts(QueryParams queryParams);
         Task<IEnumerable<FilterData>> GetProductFilters(QueryParams queryParams, IEnumerable<ProductViewModel> products);
-        List<Suggestion> GetSuggestions(string searchWords, string categoryId);
     }
 }

@@ -25,6 +25,9 @@ namespace Website
                     webBuilder.UseStartup<Startup>();
                 })
             .ConfigureServices(services =>
-                    services.AddHostedService<EmailWorkerService>());
+            {
+                services.AddHostedService<EmailWorkerService>();
+                services.AddHostedService<SearchSuggestionsWorkerService>();
+            });
     }
 }

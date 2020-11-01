@@ -9,7 +9,6 @@ using DataAccess.Models;
 using DataAccess.Repositories;
 using DataAccess.Classes;
 using Website.ViewModels;
-using System.Linq.Expressions;
 
 namespace Website.Repositories
 {
@@ -20,106 +19,6 @@ namespace Website.Repositories
         public ProductRepository(NicheShackContext context) : base(context)
         {
             this.context = context;
-        }
-
-
-
-
-
-
-
-        // ..................................................................................Get Suggestions.....................................................................
-        public List<Suggestion> GetSuggestions(string searchWords, string categoryId)
-        {
-            if (searchWords == null) return null;
-
-
-            Trie trie = new Trie();
-
-
-            
-            
-
-
-
-
-            var productOrders = context.ProductOrders
-                .AsNoTracking()
-                .Where(x => x.Date >= DateTime.Now.Date.AddMonths(-1))
-                .Select(x => x.ProductId).ToList();
-
-
-
-            var keywords = context.ProductKeywords
-                .AsNoTracking()
-                .Select(x => new
-                {
-                    SearchVolume = x.Keyword.KeywordSearchVolumes.Where(z => z.Date >= DateTime.Now.Date.AddMonths(-1) && z.KeywordId == x.KeywordId).Count(),
-                    ProductIds = context.ProductKeywords
-                            .Where(z => z.KeywordId == x.KeywordId && z.Product.Niche.CategoryId == x.Product.Niche.Category.Id)
-                            .Select(x => x.ProductId)
-                            .ToList(),
-                    x.Keyword.Name,
-                    category = new
-                    {
-                        x.Product.Niche.Category.UrlId,
-                        x.Product.Niche.Category.Name,
-                        x.Product.Niche.Category.UrlName,
-                    }
-                })
-                .ToList();
-
-
-
-            var foo = keywords
-            .Select(x => new
-            {
-                x.Name,
-                x.SearchVolume,
-                category = new
-                {
-                    x.category.Name,
-                    x.category.UrlId,
-                    x.category.UrlName,
-                    SalesCount = productOrders
-                            .Where(z => x.ProductIds.ToList().Contains(z))
-                            .GroupBy(z => z)
-                            .Select(z => z.Count())
-                            .Sum()
-                }
-
-            })
-            .Distinct()
-            .ToList();
-
-
-
-
-
-            foreach (var keyword in foo)
-            {
-
-
-                trie.Insert(keyword.Name, new TrieCategory { 
-                    Name = keyword.category.Name,
-                    UrlId = keyword.category.UrlId,
-                    UrlName = keyword.category.UrlName,
-                    SalesCount = keyword.category.SalesCount
-                }, keyword.SearchVolume);
-            }
-
-
-
-
-
-
-            var suggestions = trie.GetSuggestions(searchWords, categoryId);
-
-
-            return suggestions;
-
-
-
         }
 
 
