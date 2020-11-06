@@ -1,4 +1,5 @@
 ﻿using DataAccess.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -37,6 +38,7 @@ namespace DataAccess.Models
         public int ThreeStars { get; set; }
         public int FourStars { get; set; }
         public int FiveStars { get; set; }
+        public DateTime Date { get; set; }
         public virtual Niche Niche { get; set; }
         public virtual Media Media { get; set; }
         public virtual  Vendor Vendor { get; set; }

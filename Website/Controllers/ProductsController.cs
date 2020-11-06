@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Services;
+using Website.Classes;
 using Website.Repositories;
 using Website.ViewModels;
 
@@ -141,6 +142,17 @@ namespace Website.Controllers
 
 
 
+        [HttpGet]
+        public async Task<ActionResult> GetProducts(string query)
+        {
+            var products = await unitOfWork.Products.GetProducts(query);
+
+            QueryParams queryParams = new QueryParams(query, "", 0, 0, "");
+
+            var filters = await unitOfWork.Products.GetProductFilters(queryParams, products);
+
+            return Ok();
+        }
 
         // ..................................................................................Get Queried Products.....................................................................
         //[HttpGet]

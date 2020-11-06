@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataAccess.Models
 {
-    public class Niche: IItem
+    public class Niche: IItem, IUrlItem
     {
         public int Id { get; set; }
         [Required]

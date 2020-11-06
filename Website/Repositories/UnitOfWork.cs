@@ -27,6 +27,7 @@ namespace Website.Repositories
         public IRepository<Page> Pages { get; }
         public IRepository<OrderProduct> OrderProducts { get; }
         public IRepository<ProductKeyword> ProductKeywords { get; }
+        public IRepository<Niche> Niches { get; }
 
 
         // Declare the Nicheshack context
@@ -56,6 +57,7 @@ namespace Website.Repositories
             Pages = new Repository<Page>(context);
             OrderProducts = new Repository<OrderProduct>(context);
             ProductKeywords = new Repository<ProductKeyword>(context);
+            Niches = new Repository<Niche>(context);
         }
 
 

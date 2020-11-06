@@ -9,6 +9,7 @@ using DataAccess.Models;
 using DataAccess.Repositories;
 using DataAccess.Classes;
 using Website.ViewModels;
+using System.Linq.Expressions;
 
 namespace Website.Repositories
 {
@@ -26,20 +27,176 @@ namespace Website.Repositories
 
 
         // ..................................................................................Get Queried Products.....................................................................
-        public async Task<IEnumerable<ProductViewModel>> GetQueriedProducts(QueryParams queryParams)
+        //public async Task<IEnumerable<ProductViewModel>> GetQueriedProducts(QueryParams queryParams)
+        //{
+        //    ProductViewModel productDTO = new ProductViewModel(queryParams, await GetFilteredProducts(queryParams));
+
+        //    // Return products based on the query parameters
+        //    return await context.Products
+        //        .AsNoTracking()
+        //        .SortBy(productDTO)
+        //        .ThenBy(x => x.Name)
+        //        .Where(productDTO)
+        //        .ExtensionSelect<Product, ProductViewModel>()
+        //        .ToListAsync();
+        //}
+
+
+
+        public async Task<IEnumerable<ProductViewModel>> GetProducts(string query)
         {
-            ProductViewModel productDTO = new ProductViewModel(queryParams, await GetFilteredProducts(queryParams));
+            List<int> keywordProductIds = new List<int>();
+            List<int> searchWordsProductIds = new List<int>();
+            List<int> productIds = new List<int>();
 
-            // Return products based on the query parameters
-            return await context.Products
+            int keywordId = await context.Keywords
                 .AsNoTracking()
-                .SortBy(productDTO)
-                .ThenBy(x => x.Name)
-                .Where(productDTO)
-                .ExtensionSelect<Product, ProductViewModel>()
-                .ToListAsync();
-        }
+                .Where(x => x.Name == query)
+                .Select(x => x.Id)
+                .SingleOrDefaultAsync();
 
+
+
+            if (keywordId > 0)
+            {
+                keywordProductIds = await context.ProductKeywords
+                .AsNoTracking()
+                .Where(x => x.KeywordId == keywordId)
+                .Select(x => x.ProductId)
+                .ToListAsync();
+            }
+
+
+
+            string[] searchWordsArray = query.Split(' ')
+                //.Select(x => "%" + x + "%")
+                .ToArray();
+
+
+
+
+            searchWordsProductIds = await context.Products
+                .AsNoTracking()
+                .WhereAny(searchWordsArray.Select(w => (Expression<Func<Product, bool>>)(x =>
+
+                EF.Functions.Like(x.Name, w + "[^a-z]%") ||
+                EF.Functions.Like(x.Name, "%[^a-z]" + w + "[^a-z]%") ||
+                EF.Functions.Like(x.Name, "%[^a-z]" + w)
+
+                ||
+
+
+                EF.Functions.Like(x.Description, w + "[^a-z]%") ||
+                EF.Functions.Like(x.Description, "%[^a-z]" + w + "[^a-z]%") ||
+                EF.Functions.Like(x.Description, "%[^a-z]" + w)
+
+
+
+
+                )).ToArray())
+                .Select(x => x.Id)
+                .ToListAsync();
+
+
+
+            productIds = searchWordsProductIds
+                .Concat(keywordProductIds)
+                .Distinct()
+                .ToList();
+
+            var productOrders = await context.ProductOrders
+                .AsNoTracking()
+                .Where(x => productIds.Contains(x.ProductId))
+                .Where(x => x.Date >= DateTime.Now.Date.AddMonths(-1))
+                .GroupBy(x => x.ProductId)
+                .Select(x => new
+                {
+                    productId = x.Key,
+                    count = x.Count()
+                })
+
+                .ToListAsync();
+
+
+
+
+            var qry = productIds.GroupJoin(
+          productOrders,
+          prodIds => prodIds,
+          prodOrders => prodOrders.productId,
+          (x, y) => new { Foo = x, Bars = y })
+       .SelectMany(
+           x => x.Bars.DefaultIfEmpty(),
+           (x, y) => new { productId = x.Foo, count = y != null ? y.count : 0 })
+       .ToList();
+
+
+            var foo = await context.Products
+                .Where(x => productIds.Contains(x.Id))
+                .Select(x => new
+                {
+                    productId = x.Id,
+                    name = x.Name,
+                    urlId = x.UrlId,
+                    urlName = x.UrlName,
+                    rating = x.Rating,
+                    totalReviews = x.TotalReviews,
+                    minPrice = x.MinPrice,
+                    maxPrice = x.MaxPrice,
+                    image = new ImageViewModel
+                    {
+                        Name = x.Media.Name,
+                        Url = x.Media.Url
+                    },
+                    mediaCount = x.ProductMedia.Count()
+                })
+                .ToListAsync();
+
+            var bar = foo.Join(qry, x => x.productId, z => z.productId, (a, b) => new
+            {
+                Id = a.productId,
+                Name = a.name,
+                UrlId = a.urlId,
+                UrlName = a.urlName,
+                TotalReviews = a.totalReviews,
+                MinPrice = a.minPrice,
+                MaxPrice = a.maxPrice,
+                Image = a.image,
+                salesCount = b.count,
+                Rating = a.rating,
+                a.mediaCount
+
+            })
+                .OrderBy(x => x.Name.ToLower().StartsWith(query.ToLower()) ? (x.Name.ToLower() == query.ToLower() ? 0 : 1) :
+
+                //EF.Functions.Like(x.name, "%" + query + "%") 
+
+                EF.Functions.Like(x.Name, query + " %") ||
+                EF.Functions.Like(x.Name, "% " + query + " %") ||
+                EF.Functions.Like(x.Name, "% " + query)
+
+                    ? 2 : 3)
+                .ThenByDescending(x => x.salesCount)
+                .ThenByDescending(x => x.Rating)
+                
+                .ThenBy(x => x.MinPrice)
+                .ThenByDescending(x => x.mediaCount)
+                .Select(x => new ProductViewModel {
+                    Id = x.Id,
+                    Name = x.Name,
+                    UrlId = x.UrlId,
+                    UrlName = x.UrlName,
+                    TotalReviews = x.TotalReviews,
+                    MinPrice = x.MinPrice,
+                    MaxPrice = x.MaxPrice,
+                    Image = x.Image,
+                    Rating = x.Rating,
+                    
+                })
+                .ToList();
+
+            return bar;
+        }
 
 
 

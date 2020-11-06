@@ -9,7 +9,8 @@ namespace Website.Repositories
 {
     public interface IProductRepository : IRepository<Product>
     {
-        Task<IEnumerable<ProductViewModel>> GetQueriedProducts(QueryParams queryParams);
+        //Task<IEnumerable<ProductViewModel>> GetQueriedProducts(QueryParams queryParams);
         Task<IEnumerable<FilterData>> GetProductFilters(QueryParams queryParams, IEnumerable<ProductViewModel> products);
+        Task<IEnumerable<ProductViewModel>> GetProducts(string query);
     }
 }
