@@ -177,7 +177,7 @@ namespace Website.ViewModels
                 //Price Filter
                 if (queryParams.Filters.Any(x => x.Key == "Price"))
                 {
-                    PriceFilterOption priceRange = queryParams.GetPriceRange();
+                    PriceFilter priceRange = queryParams.GetPriceRange();
 
                     if (priceRange.Min == priceRange.Max)
                     {

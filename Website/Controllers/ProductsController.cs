@@ -143,15 +143,15 @@ namespace Website.Controllers
 
 
         [HttpGet]
-        public async Task<ActionResult> GetProducts(string query)
+        public async Task<ActionResult> GetProducts(string query, string filters = "")
         {
             var products = await unitOfWork.Products.GetProducts(query);
 
             QueryParams queryParams = new QueryParams(query, "", 0, 0, "");
 
-            var filters = await unitOfWork.Products.GetProductFilters(queryParams, products);
+            var filterz = await unitOfWork.Products.GetProductFilters(queryParams, products);
 
-            return Ok();
+            return Ok(filterz);
         }
 
         // ..................................................................................Get Queried Products.....................................................................

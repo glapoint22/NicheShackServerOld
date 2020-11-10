@@ -53,12 +53,12 @@ namespace Website.Classes
 
 
         // ..................................................................................Get Price Range................................................................
-        public PriceFilterOption GetPriceRange()
+        public PriceFilter GetPriceRange()
         {
             string priceFilter = Filters.Find(x => x.Key == "Price").Value;
 
             Match result = Regex.Match(priceFilter, @"(\d+\.?(?:\d+)?)-(\d+\.?(?:\d+)?)");
-            return new PriceFilterOption
+            return new PriceFilter
             {
                 Min = float.Parse(result.Groups[1].Value),
                 Max = float.Parse(result.Groups[2].Value)

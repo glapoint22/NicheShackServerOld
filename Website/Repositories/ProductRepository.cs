@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Website.Classes;
-using Website.Interfaces;
 using DataAccess.Models;
 using DataAccess.Repositories;
 using DataAccess.Classes;
@@ -68,9 +67,7 @@ namespace Website.Repositories
 
 
 
-            string[] searchWordsArray = query.Split(' ')
-                //.Select(x => "%" + x + "%")
-                .ToArray();
+            string[] searchWordsArray = query.Split(' ').ToArray();
 
 
 
@@ -178,10 +175,11 @@ namespace Website.Repositories
                     ? 2 : 3)
                 .ThenByDescending(x => x.salesCount)
                 .ThenByDescending(x => x.Rating)
-                
+
                 .ThenBy(x => x.MinPrice)
                 .ThenByDescending(x => x.mediaCount)
-                .Select(x => new ProductViewModel {
+                .Select(x => new ProductViewModel
+                {
                     Id = x.Id,
                     Name = x.Name,
                     UrlId = x.UrlId,
@@ -191,7 +189,7 @@ namespace Website.Repositories
                     MaxPrice = x.MaxPrice,
                     Image = x.Image,
                     Rating = x.Rating,
-                    
+
                 })
                 .ToList();
 
@@ -259,48 +257,105 @@ namespace Website.Repositories
 
 
         // ..................................................................................Get Product Filters.....................................................................
-        public async Task<IEnumerable<FilterData>> GetProductFilters(QueryParams queryParams, IEnumerable<ProductViewModel> products)
+        public async Task<Filters> GetProductFilters(QueryParams queryParams, IEnumerable<ProductViewModel> products)
         {
-            List<FilterData> filters = new List<FilterData>();
-            List<IQueryFilterOption> options = new List<IQueryFilterOption>();
+            Filters filters = new Filters();
+
+            var nicheIds = await context.Products
+                .AsNoTracking()
+                .Where(y => products
+                    .Select(x => x.Id)
+                    .Contains(y.Id))
+                .Select(y => y.NicheId)
+                .Distinct()
+                .ToListAsync();
+
+
+            var categoryIds = await context.Niches
+                    .AsNoTracking()
+                    .Where(x => nicheIds
+                        .Contains(x.Id))
+                    .Select(x => x.CategoryId)
+                    .Distinct()
+                    .ToListAsync();
+
+
+
+            filters.CategoryFilters = await context.Categories
+                 .AsNoTracking()
+                 .Where(x => categoryIds
+                     .Contains(x.Id))
+                 .Select(x => new CategoryFilter
+                 {
+                     UrlId = x.UrlId,
+                     UrlName = x.UrlName,
+                     Name = x.Name,
+                     Niches = x.Niches
+                         .Where(y => nicheIds
+                             .Contains(y.Id))
+                         .Select(y => new NicheFilter
+                         {
+                             UrlId = y.UrlId,
+                             UrlName = y.UrlName,
+                             Name = y.Name
+                         })
+                         .ToList()
+                 })
+                 .ToListAsync();
+
+
+
+
+
+
+
+            //List<FilterData> filters = new List<FilterData>();
+            //List<IQueryFilterOption> options = new List<IQueryFilterOption>();
+
 
             // ******Price Filter********
-            if (!queryParams.Filters.Any(x => x.Key == "Price"))
+            //if (!queryParams.Filters.Any(x => x.Key == "Price"))
+            //{
+            // Cross join between products and the priceRanges table to get the price range options
+            var crossJoin =
+                from pr in await context.PriceRanges.ToListAsync()
+                from p in products
+                orderby pr.Id
+                where (p.MinPrice >= pr.Min && p.MinPrice < pr.Max) || (p.MaxPrice > 0 && pr.Min >= p.MinPrice && pr.Min < p.MaxPrice)
+                select new QueryFilterOption
+                {
+                    Id = pr.Id,
+                    Label = pr.Label
+                };
+
+            List<QueryFilterOption> options = crossJoin.Distinct().ToList();
+
+            filters.PriceFilter = new QueryFilter
             {
-                // Cross join between products and the priceRanges table to get the price range options
-                var crossJoin =
-                    from pr in await context.PriceRanges.ToListAsync()
-                    from p in products
-                    orderby pr.Id
-                    where (p.MinPrice >= pr.Min && p.MinPrice < pr.Max) || (p.MaxPrice > 0 && pr.Min >= p.MinPrice && pr.Min < p.MaxPrice)
-                    select (IQueryFilterOption)new PriceFilterOption
-                    {
-                        Min = pr.Min,
-                        Max = pr.Max,
-                        Label = "$" + pr.Min + " - $" + pr.Max
-                    };
-
-                options = crossJoin.Distinct().ToList();
-            }
-
-
-            // Create the filter data object and add it to the filters
-            FilterData filterData = new FilterData
-            {
-                Type = "Price",
                 Caption = "Price",
                 Options = options
             };
+            //}
 
-            filters.Add(filterData);
+
+            // Create the filter data object and add it to the filters
+            //FilterData filterData = new FilterData
+            //{
+            //    Type = FilterType.Price,
+            //    Caption = "Price",
+            //    Options = options
+            //};
+
+            //filters.Add(filterData);
 
 
 
 
             // ******Rating Filter********
-            List<IQueryFilterOption> ratingOptions = new List<IQueryFilterOption>();
+            //List<int> ratingOptions = new List<int>();
             IEnumerable<double> productRatings = products.Select(x => x.Rating).ToList();
-
+            //filters.RatingFilter = new List<int>();
+            List<QueryFilterOption> ratingOptions = new List<QueryFilterOption>();
 
             // Check to see if we have a customer rating filter selected
             if (queryParams.Filters.Any(x => x.Key == "Customer Rating"))
@@ -315,9 +370,9 @@ namespace Website.Repositories
             // Rating 4 and up
             if (productRatings.Count(x => x >= 4) > 0)
             {
-                ratingOptions.Add(new RatingOption
+                ratingOptions.Add(new QueryFilterOption
                 {
-                    Id = "4"
+                    Id = 4
                 });
             }
 
@@ -326,9 +381,9 @@ namespace Website.Repositories
             // Rating 3 and up
             if (productRatings.Count(x => x >= 3 && x < 4) > 0)
             {
-                ratingOptions.Add(new RatingOption
+                ratingOptions.Add(new QueryFilterOption
                 {
-                    Id = "3"
+                    Id = 3
                 });
             }
 
@@ -337,9 +392,9 @@ namespace Website.Repositories
             // Rating 2 and up
             if (productRatings.Count(x => x >= 2 && x < 3) > 0)
             {
-                ratingOptions.Add(new RatingOption
+                ratingOptions.Add(new QueryFilterOption
                 {
-                    Id = "2"
+                    Id = 2
                 });
             }
 
@@ -349,25 +404,20 @@ namespace Website.Repositories
             // Rating 1 and up
             if (productRatings.Count(x => x >= 1 && x < 2) > 0)
             {
-                ratingOptions.Add(new RatingOption
+                ratingOptions.Add(new QueryFilterOption
                 {
-                    Id = "1"
+                    Id = 1
                 });
             }
 
 
-
-            if (ratingOptions.Count > 0)
+            filters.RatingFilter = new QueryFilter
             {
-                filterData = new FilterData
-                {
-                    Type = "Rating",
-                    Caption = "Customer Rating",
-                    Options = ratingOptions
-                };
+                Caption = "Customer Rating",
+                Options = ratingOptions
+            };
 
-                filters.Add(filterData);
-            }
+
 
 
 
@@ -426,15 +476,14 @@ namespace Website.Repositories
 
 
             // Format the raw data into a list of filter data
-            List<FilterData> filterDataList = rawFilterData
+            filters.CustomFilters = rawFilterData
                 .GroupBy(x => x.filterName)
-                .Select(x => new FilterData
+                .Select(x => new QueryFilter
                 {
-                    Type = "Custom",
                     Caption = x.Select(y => y.filterName).FirstOrDefault(),
-                    Options = x.Select(y => (IQueryFilterOption)new QueryFilterOption
+                    Options = x.Select(y => new QueryFilterOption
                     {
-                        Id = y.optionId.ToString(),
+                        Id = y.optionId,
                         Label = y.optionName
                     })
                     .ToList()
@@ -442,7 +491,7 @@ namespace Website.Repositories
                 .ToList();
 
             // Add the filters
-            filters.AddRange(filterDataList);
+            //filters.AddRange(filterDataList);
 
 
             return filters;
