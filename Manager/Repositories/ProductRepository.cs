@@ -144,47 +144,21 @@ namespace Manager.Repositories
             int categoryQueryIndex = queries.FindIndex(x => x.QueryType == QueryType.Category);
             int nicheQueryIndex = queries.FindIndex(x => x.QueryType == QueryType.Niche);
             int subgroupQueryIndex = queries.FindIndex(x => x.QueryType == QueryType.ProductSubgroup);
+            int keywordQueryIndex = queries.FindIndex(x => x.QueryType == QueryType.ProductKeywords);
             int productIdsQueryIndex = -1;
 
-
-            //queryBuilderData.ProductIds = await context.ProductKeywords.Where(x => queryBuilderData.Keywords.Contains(x.Name)).Select(x => x.ProductId).ToListAsync();
-
-
-
-            ////If a category query exists
-            //if (categoryQueryIndex != -1)
-            //{
-            //    List<int> categoryIds = queries[categoryQueryIndex].Value.ConvertAll(int.Parse);
-            //    List<int> NicheIds = await context.Niches.Where(x => categoryIds.Contains(x.CategoryId)).Select(x => x.Id).ToListAsync();
-
-
-            //    //If a niche query does NOT exist
-            //    if (nicheQueryIndex == -1)
-            //    {
-            //        //Create one
-            //        queries.Add(new Query { QueryType = QueryType.Niche, Operator = new List<OperatorType> { OperatorType.Equals }, Value = new List<string>() });
-            //        nicheQueryIndex = queries.Count - 1;
-            //    }
-
-            //    //Loop through each niche id
-            //    foreach (var nicheId in NicheIds)
-            //    {
-            //        //Add each niche id to the niche query
-            //        queries[nicheQueryIndex].Value.Add(nicheId.ToString());
-            //    }
-            //}
 
             //If a subgroup query exists
             if (subgroupQueryIndex != -1)
             {
                 productIdsQueryIndex = queries.FindIndex(x => x.QueryType == QueryType.ProductIds);
-                List<int> productIds = await context.SubgroupProducts.Where(x => queries[subgroupQueryIndex].Value.ConvertAll(int.Parse).Contains(x.SubgroupId)).Select(x => x.ProductId).ToListAsync();
+                List<int> productIds = await context.SubgroupProducts.Where(x => queries[subgroupQueryIndex].IntValue.Contains(x.SubgroupId)).Select(x => x.ProductId).ToListAsync();
 
                 //If a products id query does NOT exist
                 if (productIdsQueryIndex == -1)
                 {
                     //Create one
-                    queries.Add(new Query { QueryType = QueryType.ProductIds, Operator = new List<OperatorType> { OperatorType.Equals }, Value = new List<string>() });
+                    queries.Add(new Query { QueryType = QueryType.ProductIds, Operator = new List<OperatorType> { OperatorType.Equals }, IntValue = new List<int>() });
                     productIdsQueryIndex = queries.Count - 1;
                 }
 
@@ -193,27 +167,49 @@ namespace Manager.Repositories
                 foreach (var productId in productIds)
                 {
                     //Add each product id to the productid query
-                    queries[productIdsQueryIndex].Value.Add(productId.ToString());
+                    queries[productIdsQueryIndex].IntValue.Add(productId);
                 }
             }
 
 
+            //If a keyword query exists
+            if (keywordQueryIndex != -1)
+            {
+                productIdsQueryIndex = queries.FindIndex(x => x.QueryType == QueryType.ProductIds);
+                List<int> keywordIds = await context.ProductKeywords.Where(x => queries[keywordQueryIndex].StringValue.Contains(x.Keyword.Name)).Select(x => x.Keyword.Id).Distinct().ToListAsync();
+                List<int> productIds = await context.ProductKeywords.Where(x => keywordIds.Contains(x.KeywordId)).Select(x => x.ProductId).ToListAsync();
+
+                //If a products id query does NOT exist
+                if (productIdsQueryIndex == -1)
+                {
+                    //Create one
+                    queries.Add(new Query { QueryType = QueryType.ProductIds, Operator = new List<OperatorType> { OperatorType.Equals }, IntValue = new List<int>() });
+                    productIdsQueryIndex = queries.Count - 1;
+                }
+
+                //Loop through each product id
+                foreach (var productId in productIds)
+                {
+                    //Add each product id to the productid query
+                    queries[productIdsQueryIndex].IntValue.Add(productId);
+                }
+            }
+
 
             return await context.Products
-            .AsNoTracking()
-            .Where(new QueryBuilderViewModel(queries))
-            //.AsQueryable()
-            .Select(x => new QueryBuilderViewModel
-            {
-                Name = x.Name,
-                Rating = x.Rating,
-                TotalReviews = x.TotalReviews,
-                MinPrice = x.MinPrice,
-                MaxPrice = x.MaxPrice,
-                ImageName = x.Media.Name,
-                ImageUrl = x.Media.Url
+        .AsNoTracking()
+        .Where(new QueryBuilderViewModel(queries))
+        .Select(x => new QueryBuilderViewModel
+        {
+            Name = x.Name,
+            Rating = x.Rating,
+            TotalReviews = x.TotalReviews,
+            MinPrice = x.MinPrice,
+            MaxPrice = x.MaxPrice,
+            ImageName = x.Media.Name,
+            ImageUrl = x.Media.Url
 
-            }).ToListAsync();
+        }).ToListAsync();
         }
     }
 }

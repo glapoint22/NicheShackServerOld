@@ -29,7 +29,6 @@ namespace Manager.Classes
         GreaterThanOrEqualTo,
         LessThan,
         LessThanOrEqualTo,
-        IsBetween
     }
 
     public class Niches
@@ -41,6 +40,9 @@ namespace Manager.Classes
     {
         public QueryType QueryType { get; set; }
         public List<OperatorType> Operator { get; set; }
-        public List<string> Value { get; set; }
+        public List<int> IntValue { get; set; }
+        public List<string> StringValue { get; set; }
+        public List<double> DoubleValue { get; set; }
+        public List<DateTime> DateValue { get; set; }
     }
 }
