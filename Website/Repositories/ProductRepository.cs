@@ -24,83 +24,59 @@ namespace Website.Repositories
 
 
 
-
-        // ..................................................................................Get Queried Products.....................................................................
-        //public async Task<IEnumerable<ProductViewModel>> GetQueriedProducts(QueryParams queryParams)
-        //{
-        //    ProductViewModel productDTO = new ProductViewModel(queryParams, await GetFilteredProducts(queryParams));
-
-        //    // Return products based on the query parameters
-        //    return await context.Products
-        //        .AsNoTracking()
-        //        .SortBy(productDTO)
-        //        .ThenBy(x => x.Name)
-        //        .Where(productDTO)
-        //        .ExtensionSelect<Product, ProductViewModel>()
-        //        .ToListAsync();
-        //}
-
-
-
-        public async Task<IEnumerable<ProductViewModel>> GetProducts(string query)
+        // ..................................................................................Query Products.....................................................................
+        private async Task<List<T>> QueryProducts<T>(QueryParams queryParams, Expression<Func<Product, T>> select)
         {
-            List<int> keywordProductIds = new List<int>();
-            List<int> searchWordsProductIds = new List<int>();
-            List<int> productIds = new List<int>();
+            ProductViewModel productViewModel = new ProductViewModel(queryParams);
 
-            int keywordId = await context.Keywords
+            return await context.Products
                 .AsNoTracking()
-                .Where(x => x.Name == query)
-                .Select(x => x.Id)
-                .SingleOrDefaultAsync();
+                .Where(productViewModel)
+                .Select(select)
+                .ToListAsync();
+        }
 
 
 
-            if (keywordId > 0)
+
+
+
+
+
+
+
+        // ..................................................................................Get Products.....................................................................
+        public async Task<IEnumerable<ProductViewModel>> GetProducts(QueryParams queryParams)
+        {
+            // Query the products
+            var products = await QueryProducts(queryParams, x => new
             {
-                keywordProductIds = await context.ProductKeywords
-                .AsNoTracking()
-                .Where(x => x.KeywordId == keywordId)
-                .Select(x => x.ProductId)
-                .ToListAsync();
-            }
+                id = x.Id,
+                name = x.Name,
+                urlId = x.UrlId,
+                urlName = x.UrlName,
+                rating = x.Rating,
+                totalReviews = x.TotalReviews,
+                minPrice = x.MinPrice,
+                maxPrice = x.MaxPrice,
+                image = new ImageViewModel
+                {
+                    Name = x.Media.Name,
+                    Url = x.Media.Url
+                },
+                mediaCount = x.ProductMedia.Count()
+            });
 
 
 
-            string[] searchWordsArray = query.Split(' ').ToArray();
-
-
-
-
-            searchWordsProductIds = await context.Products
-                .AsNoTracking()
-                .WhereAny(searchWordsArray.Select(w => (Expression<Func<Product, bool>>)(x =>
-
-                EF.Functions.Like(x.Name, w + "[^a-z]%") ||
-                EF.Functions.Like(x.Name, "%[^a-z]" + w + "[^a-z]%") ||
-                EF.Functions.Like(x.Name, "%[^a-z]" + w)
-
-                ||
-
-
-                EF.Functions.Like(x.Description, w + "[^a-z]%") ||
-                EF.Functions.Like(x.Description, "%[^a-z]" + w + "[^a-z]%") ||
-                EF.Functions.Like(x.Description, "%[^a-z]" + w)
+            // Extract the product ids
+            var productIds = products.Select(x => x.id).ToList();
 
 
 
 
-                )).ToArray())
-                .Select(x => x.Id)
-                .ToListAsync();
 
-
-
-            productIds = searchWordsProductIds
-                .Concat(keywordProductIds)
-                .Distinct()
-                .ToList();
-
+            // Get the sales count for each product from product orders
             var productOrders = await context.ProductOrders
                 .AsNoTracking()
                 .Where(x => productIds.Contains(x.ProductId))
@@ -111,71 +87,46 @@ namespace Website.Repositories
                     productId = x.Key,
                     count = x.Count()
                 })
-
                 .ToListAsync();
 
 
 
 
-            var qry = productIds.GroupJoin(
-          productOrders,
-          prodIds => prodIds,
-          prodOrders => prodOrders.productId,
-          (x, y) => new { Foo = x, Bars = y })
-       .SelectMany(
-           x => x.Bars.DefaultIfEmpty(),
-           (x, y) => new { productId = x.Foo, count = y != null ? y.count : 0 })
-       .ToList();
+            // Join the productIds and the product orders together to form product sales counts
+            var productSalesCounts = productIds
+               .GroupJoin(productOrders, prodIds => prodIds, prodOrders => prodOrders.productId, (x, y) => new { productId = x, productOrders = y })
+               .SelectMany(x => x.productOrders.DefaultIfEmpty(), (x, y) => new
+               {
+                   x.productId,
+                   count = y != null ? y.count : 0
+               })
+               .ToList();
 
 
-            var foo = await context.Products
-                .Where(x => productIds.Contains(x.Id))
-                .Select(x => new
-                {
-                    productId = x.Id,
-                    name = x.Name,
-                    urlId = x.UrlId,
-                    urlName = x.UrlName,
-                    rating = x.Rating,
-                    totalReviews = x.TotalReviews,
-                    minPrice = x.MinPrice,
-                    maxPrice = x.MaxPrice,
-                    image = new ImageViewModel
-                    {
-                        Name = x.Media.Name,
-                        Url = x.Media.Url
-                    },
-                    mediaCount = x.ProductMedia.Count()
-                })
-                .ToListAsync();
 
-            var bar = foo.Join(qry, x => x.productId, z => z.productId, (a, b) => new
+
+            // Join the products and product sales counts to get the final result
+            return products.Join(productSalesCounts, x => x.id, y => y.productId, (product, productSalesCount) => new
             {
-                Id = a.productId,
-                Name = a.name,
-                UrlId = a.urlId,
-                UrlName = a.urlName,
-                TotalReviews = a.totalReviews,
-                MinPrice = a.minPrice,
-                MaxPrice = a.maxPrice,
-                Image = a.image,
-                salesCount = b.count,
-                Rating = a.rating,
-                a.mediaCount
-
+                Id = product.id,
+                Name = product.name,
+                UrlId = product.urlId,
+                UrlName = product.urlName,
+                TotalReviews = product.totalReviews,
+                MinPrice = product.minPrice,
+                MaxPrice = product.maxPrice,
+                Image = product.image,
+                salesCount = productSalesCount.count,
+                Rating = product.rating,
+                product.mediaCount
             })
-                .OrderBy(x => x.Name.ToLower().StartsWith(query.ToLower()) ? (x.Name.ToLower() == query.ToLower() ? 0 : 1) :
-
-                //EF.Functions.Like(x.name, "%" + query + "%") 
-
-                EF.Functions.Like(x.Name, query + " %") ||
-                EF.Functions.Like(x.Name, "% " + query + " %") ||
-                EF.Functions.Like(x.Name, "% " + query)
-
-                    ? 2 : 3)
+            .OrderBy(x => x.Name.ToLower().StartsWith(queryParams.Query.ToLower()) ? (x.Name.ToLower() == queryParams.Query.ToLower() ? 0 : 1) :
+                EF.Functions.Like(x.Name, queryParams.Query + " %") ||
+                EF.Functions.Like(x.Name, "% " + queryParams.Query + " %") ||
+                EF.Functions.Like(x.Name, "% " + queryParams.Query)
+                ? 2 : 3)
                 .ThenByDescending(x => x.salesCount)
                 .ThenByDescending(x => x.Rating)
-
                 .ThenBy(x => x.MinPrice)
                 .ThenByDescending(x => x.mediaCount)
                 .Select(x => new ProductViewModel
@@ -189,67 +140,14 @@ namespace Website.Repositories
                     MaxPrice = x.MaxPrice,
                     Image = x.Image,
                     Rating = x.Rating,
-
                 })
                 .ToList();
-
-            return bar;
         }
 
 
 
 
-        // ..................................................................................Get Filtered Products.....................................................................
-        private async Task<IEnumerable<FilteredProduct>> GetFilteredProducts(QueryParams queryParams)
-        {
-            // Get all the filtered products based on the passed in filter options from the query params
-            if (queryParams.CustomFilterOptions.Count == 0) return new List<FilteredProduct>();
-
-            return await context.ProductFilters
-                .AsNoTracking()
-                .Where(x => queryParams.CustomFilterOptions
-                    .Contains(x.FilterOptionId))
-                .Select(x => new FilteredProduct
-                {
-                    ProductId = x.ProductId,
-                    FilterId = x.FilterOption.FilterId
-                })
-                .ToListAsync();
-        }
-
-
-
-
-
-
-        // ..................................................................................Get Product Ids.....................................................................
-        private async Task<IEnumerable<int>> GetProductIds(QueryParams queryParams)
-        {
-            // Return just product ids from the queried products
-            return await context.Products
-                .AsNoTracking()
-                .Where(new ProductViewModel(queryParams, await GetFilteredProducts(queryParams)))
-                .Select(x => x.Id)
-                .ToListAsync();
-        }
-
-
-
-
-
-
-
-
-        // ..................................................................................Get Product Ratings.....................................................................
-        private async Task<IEnumerable<double>> GetProductRatings(QueryParams queryParams)
-        {
-            // Return just product ratings from the queried products
-            return await context.Products
-                .AsNoTracking()
-                .Where(new ProductViewModel(queryParams, await GetFilteredProducts(queryParams)))
-                .Select(x => x.Rating)
-                .ToListAsync();
-        }
+        
 
 
 
@@ -257,14 +155,18 @@ namespace Website.Repositories
 
 
         // ..................................................................................Get Product Filters.....................................................................
-        public async Task<Filters> GetProductFilters(QueryParams queryParams, IEnumerable<ProductViewModel> products)
+        public async Task<Filters> GetProductFilters(IEnumerable<ProductViewModel> products, QueryParams queryParams)
         {
             Filters filters = new Filters();
 
+            List<int> productIds = products.Select(x => x.Id).ToList();
+
+
+
+            // ******Categories********
             var nicheIds = await context.Products
                 .AsNoTracking()
-                .Where(y => products
-                    .Select(x => x.Id)
+                .Where(y => productIds
                     .Contains(y.Id))
                 .Select(y => y.NicheId)
                 .Distinct()
@@ -309,61 +211,109 @@ namespace Website.Repositories
 
 
 
-            //List<FilterData> filters = new List<FilterData>();
-            //List<IQueryFilterOption> options = new List<IQueryFilterOption>();
-
-
             // ******Price Filter********
-            //if (!queryParams.Filters.Any(x => x.Key == "Price"))
-            //{
-            // Cross join between products and the priceRanges table to get the price range options
-            var crossJoin =
-                from pr in await context.PriceRanges.ToListAsync()
-                from p in products
-                orderby pr.Id
-                where (p.MinPrice >= pr.Min && p.MinPrice < pr.Max) || (p.MaxPrice > 0 && pr.Min >= p.MinPrice && pr.Min < p.MaxPrice)
-                select new QueryFilterOption
+            List<PriceFilterOption> priceFilterOptions = new List<PriceFilterOption>();
+            var priceRanges = await context.PriceRanges.AsNoTracking().ToListAsync();
+
+            if (queryParams.PriceFilter != null)
+            {
+                // Clear the price filter
+                var priceFilter = queryParams.PriceFilter;
+                queryParams.PriceFilter = null;
+
+                // Query products without the price filter
+                var prods = await QueryProducts(queryParams, x => new
                 {
-                    Id = pr.Id,
-                    Label = pr.Label
-                };
+                    x.MinPrice,
+                    x.MaxPrice
+                });
 
-            List<QueryFilterOption> options = crossJoin.Distinct().ToList();
+                // Get the selected price filter options
+                var selectedPriceFilterOptions = priceFilter.Options
+                    .Select(x => x.Label.Split('-')
+                        .Select(z => int.Parse(z))
+                        .ToArray())
+                        .Select(z => new
+                        {
+                            min = z[0],
+                            max = z[1]
+                        })
+                    .ToList();
 
-            filters.PriceFilter = new QueryFilter
+
+                // Get the price filter options based on the queried products
+                priceFilterOptions =
+                (from pr in priceRanges
+                 from p in prods
+                 orderby pr.Id
+                 where ((p.MinPrice >= pr.Min && p.MinPrice < pr.Max) || selectedPriceFilterOptions.Contains(new
+                 {
+                     min = pr.Min,
+                     max = pr.Max
+                 }))
+                 select new PriceFilterOption
+                 {
+                     Label = pr.Label,
+                     Min = pr.Min,
+                     Max = pr.Max
+                 }).ToList();
+
+
+                queryParams.PriceFilter = priceFilter;
+            }
+            else
+            {
+                priceFilterOptions =
+                (from pr in priceRanges
+                 from p in products
+                 orderby pr.Id
+                 where (p.MinPrice >= pr.Min && p.MinPrice < pr.Max)
+                 select new PriceFilterOption
+                 {
+                     Label = pr.Label,
+                     Min = pr.Min,
+                     Max = pr.Max
+                 }).ToList();
+            }
+
+
+
+            List<PriceFilterOption> options = priceFilterOptions.Distinct().ToList();
+
+            filters.PriceFilter = new PriceFilter
             {
                 Caption = "Price",
                 Options = options
             };
-            //}
+            
 
 
-            // Create the filter data object and add it to the filters
-            //FilterData filterData = new FilterData
-            //{
-            //    Type = FilterType.Price,
-            //    Caption = "Price",
-            //    Options = options
-            //};
 
-            //filters.Add(filterData);
+
 
 
 
 
             // ******Rating Filter********
-            //List<int> ratingOptions = new List<int>();
-            IEnumerable<double> productRatings = products.Select(x => x.Rating).ToList();
-            //filters.RatingFilter = new List<int>();
+            IEnumerable<double> productRatings;
             List<QueryFilterOption> ratingOptions = new List<QueryFilterOption>();
 
             // Check to see if we have a customer rating filter selected
-            if (queryParams.Filters.Any(x => x.Key == "Customer Rating"))
+            if (queryParams.RatingFilter != null)
             {
                 // Remove the customer rating filter and query without it
                 // This is so we can get other rating filters that belong in the results
-                queryParams.Filters.RemoveAll(x => x.Key == "Customer Rating");
-                productRatings = await GetProductRatings(queryParams);
+                var ratingFilter = queryParams.RatingFilter;
+                queryParams.RatingFilter = null;
+                productRatings = await QueryProducts(queryParams, x => x.Rating);
+                queryParams.RatingFilter = ratingFilter;
+
+                List<double> selectedRatingOptions = ratingFilter.Options.Select(x => Convert.ToDouble(x.Id)).ToList();
+                productRatings = productRatings.Concat(selectedRatingOptions).ToList();
+            }
+            else
+            {
+                productRatings = products.Select(x => x.Rating).ToList();
             }
 
 
@@ -423,40 +373,44 @@ namespace Website.Repositories
 
 
             // ******Custom Filters********
-
             // Get all the filter option Ids that are related to the product Ids
             List<int> filterOptionIds = await context.ProductFilters
                 .AsNoTracking()
-                .Where(x => products.Select(y => y.Id)
+                .Where(x => productIds
                     .Contains(x.ProductId))
                 .Select(x => x.FilterOptionId)
                 .Distinct()
                 .ToListAsync();
 
 
+            var customFilters = queryParams.CustomFilters;
 
-            // Display the other options for a selected filter
-            foreach (KeyValuePair<string, string> customFilter in queryParams.CustomFilters)
+
+
+            foreach (var customFilter in customFilters)
             {
+                queryParams.CustomFilters = customFilters.Where(x => x.Caption != customFilter.Caption).ToList();
+
+                await queryParams.SetFilteredProducts();
+                var pIds = await QueryProducts(queryParams, x => x.Id);
+
                 List<int> optionsIds;
 
-                // Exclude the current option from the list of options and query products
-                queryParams.SetCustomFilterOptions(customFilter.Key);
-                var pIds = await GetProductIds(queryParams);
-
-                // Get a list of option ids that we can display from the current custom filter
                 optionsIds = await context.ProductFilters
                     .AsNoTracking()
                     .Where(x => pIds
-                        .Contains(x.ProductId) && x.FilterOption.Filter.Name == customFilter.Key)
+                        .Contains(x.ProductId) && x.FilterOption.Filter.Name == customFilter.Caption)
                     .Select(x => x.FilterOptionId).Distinct()
                     .ToListAsync();
 
                 // Add the new option ids to the list
                 filterOptionIds = filterOptionIds
                     .Concat(optionsIds)
+                    .Concat(customFilter.Options.Select(x => x.Id).ToList())
                     .ToList();
+
             }
+
 
 
             // Get the raw filter data consisting of filter name and filter option name
@@ -489,10 +443,6 @@ namespace Website.Repositories
                     .ToList()
                 })
                 .ToList();
-
-            // Add the filters
-            //filters.AddRange(filterDataList);
-
 
             return filters;
         }

@@ -56,7 +56,7 @@ namespace Website.Controllers
 
 
 
-
+        // ..................................................................................Get Media.....................................................................
         public async Task<IEnumerable<ProductMediaViewModel>> GetMedia(int id)
         {
             var mediaIds = await unitOfWork.ProductMedia.GetCollection(x => x.ProductId == id, x => x.MediaId);
@@ -69,6 +69,10 @@ namespace Website.Controllers
                 type = x.Type
             });
         }
+
+
+
+
 
 
 
@@ -132,6 +136,10 @@ namespace Website.Controllers
 
 
 
+
+
+
+        // ..................................................................................Get Suggestions.....................................................................
         [HttpGet]
         [Route("GetSuggestions")]
         public ActionResult GetSuggestions(string searchWords, string categoryId)
@@ -142,14 +150,28 @@ namespace Website.Controllers
 
 
 
+
+
+
+
+
+
+
+
+        // ..................................................................................Get Products.....................................................................
         [HttpGet]
-        public async Task<ActionResult> GetProducts(string query, string filters = "")
+        public async Task<ActionResult> GetProducts(string query, string filters = "", string categoryId = "", string nicheId = "", string sort = "")
         {
-            var products = await unitOfWork.Products.GetProducts(query);
+            QueryParams queryParams = new QueryParams(query, filters, categoryId, nicheId, sort);
+            await queryParams.Init(unitOfWork);
 
-            QueryParams queryParams = new QueryParams(query, "", 0, 0, "");
+            IEnumerable<ProductViewModel> products = await unitOfWork.Products.GetProducts(queryParams);
+            
 
-            var filterz = await unitOfWork.Products.GetProductFilters(queryParams, products);
+
+
+
+            var filterz = await unitOfWork.Products.GetProductFilters(products, queryParams);
 
             return Ok(filterz);
         }

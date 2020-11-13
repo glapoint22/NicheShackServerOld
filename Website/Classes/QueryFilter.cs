@@ -2,7 +2,7 @@
 
 namespace Website.Classes
 {
-    public struct QueryFilter
+    public class QueryFilter
     {
         public string Caption { get; set; }
         public IEnumerable<QueryFilterOption> Options { get; set; }

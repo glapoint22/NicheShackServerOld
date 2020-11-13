@@ -1,24 +1,31 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using System.Web;
+using Website.Repositories;
 
 namespace Website.Classes
 {
     public class QueryParams
     {
-        public string SearchWords { get; private set; }
+        public string Query { get; private set; }
         public string Sort { get; private set; }
-        public int CategoryId { get; private set; }
-        public int NicheId { get; private set; }
-        public List<int> CustomFilterOptions;
-        public List<KeyValuePair<string, string>> Filters = new List<KeyValuePair<string, string>>();
-        public List<KeyValuePair<string, string>> CustomFilters = new List<KeyValuePair<string, string>>();
+        public string CategoryId { get; private set; }
+        public string NicheId { get; private set; }
+        public List<QueryFilter> CustomFilters = new List<QueryFilter>();
+        public QueryFilter PriceFilter { get; set; }
+        public QueryFilter PriceRangeFilter { get; set; }
+        public QueryFilter RatingFilter { get; set; }
 
+        public List<FilteredProduct> FilteredProducts { get; set; }
 
+        public List<int> KeywordProductIds = new List<int>();
 
-        public QueryParams(string searchWords, string sort, int categoryId, int nicheId, string filters)
+        private IUnitOfWork UnitOfWork;
+
+        public QueryParams(string query, string filters, string categoryId, string nicheId, string sort)
         {
-            SearchWords = searchWords;
+            Query = query;
             Sort = sort;
             CategoryId = categoryId;
             NicheId = nicheId;
@@ -30,62 +37,54 @@ namespace Website.Classes
         // ..................................................................................Set Filters....................................................................
         private void SetFilters(string filterString)
         {
-            // Get the filters from the filter string
-            var matches = Regex.Matches(filterString, @"([a-zA-Z\s]+)\|([0-9\^\-]+)\|");
+            if (filterString == string.Empty) return;
 
-            // Create a key value pair for each filter (filter name, filer value)
-            foreach (Match match in matches)
+            filterString = HttpUtility.UrlDecode(filterString);
+
+            string[] filterStringArray = filterString.Split('|');
+
+            List<QueryFilter> filters = new List<QueryFilter>();
+
+            for (int i = 0; i < filterStringArray.Length - 1; i++)
             {
-                Filters.Add(new KeyValuePair<string, string>(match.Groups[1].Value, match.Groups[2].Value));
+                var optionsArray = filterStringArray[i + 1].Split(',');
+
+                QueryFilter queryFilter = new QueryFilter
+                {
+                    Caption = filterStringArray[i],
+                    Options = optionsArray.Select(x => new QueryFilterOption
+                    {
+                        Id = filterStringArray[i] != "Price" && filterStringArray[i] != "Price Range" ? int.Parse(x) : 0,
+                        Label = filterStringArray[i] == "Price" || filterStringArray[i] == "Price Range" ? x : null
+                    }).ToList()
+                };
+
+                filters.Add(queryFilter);
+
+                i++;
             }
 
-            // Get the custom filters from filters
-            CustomFilters = Filters.Where(x => x.Key != "Price" && x.Key != "Customer Rating").ToList();
-
-
-            // Get the filter options from the custom filters and assign it to CustomFilterOptions property
-            SetCustomFilterOptions();
-        }
-
-
-
-
-
-
-        // ..................................................................................Get Price Range................................................................
-        public PriceFilter GetPriceRange()
-        {
-            string priceFilter = Filters.Find(x => x.Key == "Price").Value;
-
-            Match result = Regex.Match(priceFilter, @"(\d+\.?(?:\d+)?)-(\d+\.?(?:\d+)?)");
-            return new PriceFilter
-            {
-                Min = float.Parse(result.Groups[1].Value),
-                Max = float.Parse(result.Groups[2].Value)
-            };
-        }
-
-
-
-
-
-        // ........................................................................Set Custom Filter Options................................................................
-        public void SetCustomFilterOptions(string exclude = "")
-        {
-            List<string> options = CustomFilters
-                .Where(x => x.Key != exclude)
-                .Select(x => x.Value)
+            // Custom Filters
+            CustomFilters = filters
+                .Where(x => x.Caption != "Price" && x.Caption != "Customer Rating" && x.Caption != "Price Range")
                 .ToList();
 
-            CustomFilterOptions = new List<int>();
+            // Price Filter
+            PriceFilter = filters
+                .Where(x => x.Caption == "Price")
+                .SingleOrDefault();
 
-            foreach (string option in options)
-            {
-                CustomFilterOptions
-                    .AddRange(Regex.Matches(option, @"(\d+)")
-                        .Select(x => int.Parse(x.Groups[1].Value))
-                        .ToList());
-            };
+
+            // Price Range Filter
+            PriceRangeFilter = filters
+                .Where(x => x.Caption == "Price Range")
+                .SingleOrDefault();
+
+
+            // Rating Filter
+            RatingFilter = filters
+                .Where(x => x.Caption == "Customer Rating")
+                .SingleOrDefault();
         }
 
 
@@ -93,20 +92,52 @@ namespace Website.Classes
 
 
 
-        // .................................................................................Get Min Rating................................................................
-        public int GetMinRating()
-        {
-            // Get the customer rating filter
-            string ratingString = Filters
-                .Where(x => x.Key == "Customer Rating")
-                .Select(x => x.Value)
-                .Single();
 
-            // Return the lowest rating
-            return Regex.Matches(ratingString, @"(\d+)")
-                .Select(x => int.Parse(x.Groups[1].Value))
-                .ToList()
-                .Min();
+        // ..................................................................................Init....................................................................
+        public async Task Init(IUnitOfWork unitOfWork)
+        {
+            UnitOfWork = unitOfWork;
+            await SetFilteredProducts();
+
+
+            int keywordId = await unitOfWork.Keywords.Get(x => x.Name == Query, x => x.Id);
+
+            if (keywordId > 0)
+            {
+                KeywordProductIds = (List<int>)await unitOfWork.ProductKeywords.GetCollection(x => x.KeywordId == keywordId, x => x.ProductId);
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+        // ..................................................................................Set Filtered Products....................................................................
+        public async Task SetFilteredProducts()
+        {
+            FilteredProducts = new List<FilteredProduct>();
+
+            if (CustomFilters.Count > 0)
+            {
+                List<int> filterOptionIds = CustomFilters
+                .SelectMany(x => x.Options.Select(z => z.Id).ToList())
+                .ToList();
+
+                if (filterOptionIds.Count > 0)
+                {
+                    FilteredProducts = (List<FilteredProduct>)await UnitOfWork.ProductFilters.GetCollection(x => filterOptionIds.Contains(x.FilterOptionId), x => new FilteredProduct
+                    {
+                        ProductId = x.ProductId,
+                        FilterId = x.FilterOption.FilterId
+                    });
+                }
+            }
         }
     }
 }

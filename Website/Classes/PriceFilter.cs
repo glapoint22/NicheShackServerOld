@@ -1,9 +1,10 @@
-﻿namespace Website.Classes
+﻿using System.Collections.Generic;
+
+namespace Website.Classes
 {
-    public struct PriceFilter
+    public class PriceFilter
     {
-        public string Label { get; set; }
-        public double Min { get; set; }
-        public double Max { get; set; }
+        public string Caption { get; set; }
+        public IEnumerable<PriceFilterOption> Options { get; set; }
     }
 }
