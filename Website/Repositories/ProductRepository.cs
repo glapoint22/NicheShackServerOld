@@ -46,7 +46,7 @@ namespace Website.Repositories
 
 
         // ..................................................................................Get Products.....................................................................
-        public async Task<IEnumerable<ProductViewModel>> GetProducts(QueryParams queryParams)
+        public async Task<IEnumerable<QueriedProduct>> GetProducts(QueryParams queryParams)
         {
             // Query the products
             var products = await QueryProducts(queryParams, x => new
@@ -59,6 +59,7 @@ namespace Website.Repositories
                 totalReviews = x.TotalReviews,
                 minPrice = x.MinPrice,
                 maxPrice = x.MaxPrice,
+                nicheId = x.NicheId,
                 image = new ImageViewModel
                 {
                     Name = x.Media.Name,
@@ -106,48 +107,26 @@ namespace Website.Repositories
 
 
             // Join the products and product sales counts to get the final result
-            return products.Join(productSalesCounts, x => x.id, y => y.productId, (product, productSalesCount) => new
+            return products.Join(productSalesCounts, x => x.id, y => y.productId, (product, productSalesCount) => new QueriedProduct
             {
                 Id = product.id,
                 Name = product.name,
                 UrlId = product.urlId,
                 UrlName = product.urlName,
+                NicheId = product.nicheId,
                 TotalReviews = product.totalReviews,
                 MinPrice = product.minPrice,
                 MaxPrice = product.maxPrice,
                 Image = product.image,
-                salesCount = productSalesCount.count,
                 Rating = product.rating,
-                product.mediaCount
-            })
-            .OrderBy(x => x.Name.ToLower().StartsWith(queryParams.Query.ToLower()) ? (x.Name.ToLower() == queryParams.Query.ToLower() ? 0 : 1) :
-                EF.Functions.Like(x.Name, queryParams.Query + " %") ||
-                EF.Functions.Like(x.Name, "% " + queryParams.Query + " %") ||
-                EF.Functions.Like(x.Name, "% " + queryParams.Query)
-                ? 2 : 3)
-                .ThenByDescending(x => x.salesCount)
-                .ThenByDescending(x => x.Rating)
-                .ThenBy(x => x.MinPrice)
-                .ThenByDescending(x => x.mediaCount)
-                .Select(x => new ProductViewModel
-                {
-                    Id = x.Id,
-                    Name = x.Name,
-                    UrlId = x.UrlId,
-                    UrlName = x.UrlName,
-                    TotalReviews = x.TotalReviews,
-                    MinPrice = x.MinPrice,
-                    MaxPrice = x.MaxPrice,
-                    Image = x.Image,
-                    Rating = x.Rating,
-                })
-                .ToList();
+                Weight = (product.rating * 0.8) + (productSalesCount.count * 0.15) + (product.mediaCount * .05)
+            }).ToList();
         }
 
 
 
 
-        
+
 
 
 
@@ -155,58 +134,197 @@ namespace Website.Repositories
 
 
         // ..................................................................................Get Product Filters.....................................................................
-        public async Task<Filters> GetProductFilters(IEnumerable<ProductViewModel> products, QueryParams queryParams)
+        public async Task<Filters> GetProductFilters(IEnumerable<QueriedProduct> products, QueryParams queryParams)
         {
             Filters filters = new Filters();
-
             List<int> productIds = products.Select(x => x.Id).ToList();
+            var avgWeight = products.Select(x => x.Weight).Sum() / products.Count();
+
+
+            // Grab niche info from the products
+            var niches = products
+                .GroupBy(x => x.NicheId, (key, x) => new
+                {
+                    nicheId = key,
+                    weight = x.Sum(z => z.Weight) / x.Count(),
+                    productCount = x.Count()
+                }).ToList();
 
 
 
-            // ******Categories********
-            var nicheIds = await context.Products
-                .AsNoTracking()
-                .Where(y => productIds
-                    .Contains(y.Id))
-                .Select(y => y.NicheId)
-                .Distinct()
-                .ToListAsync();
-
-
-            var categoryIds = await context.Niches
+            // Get categories based on niche ids
+            var categories = await context.Niches
                     .AsNoTracking()
-                    .Where(x => nicheIds
+                    .Where(x => niches.Select(x => x.nicheId).ToList()
                         .Contains(x.Id))
-                    .Select(x => x.CategoryId)
-                    .Distinct()
+                    .Select(x => new
+                    {
+                        nicheId = x.Id,
+                        nicheName = x.Name,
+                        nicheUrlid = x.UrlId,
+                        nicheUrlName = x.UrlName,
+                        categoryId = x.CategoryId,
+                        categoryName = x.Category.Name,
+                        categoryUrlId = x.Category.UrlId,
+                        categoryUrlName = x.Category.UrlName
+                    })
                     .ToListAsync();
 
 
 
-            filters.CategoryFilters = await context.Categories
-                 .AsNoTracking()
-                 .Where(x => categoryIds
-                     .Contains(x.Id))
-                 .Select(x => new CategoryFilter
-                 {
-                     UrlId = x.UrlId,
-                     UrlName = x.UrlName,
-                     Name = x.Name,
-                     Niches = x.Niches
-                         .Where(y => nicheIds
-                             .Contains(y.Id))
-                         .Select(y => new NicheFilter
-                         {
-                             UrlId = y.UrlId,
-                             UrlName = y.UrlName,
-                             Name = y.Name
-                         })
-                         .ToList()
-                 })
-                 .ToListAsync();
 
 
 
+
+
+            // Join the categories and niches together
+            var categoryData = categories.Join(niches, x => x.nicheId, x => x.nicheId, (categories, niches) => new
+            {
+                categories.nicheId,
+                categories.nicheName,
+                categories.nicheUrlid,
+                categories.nicheUrlName,
+                categories.categoryId,
+                categories.categoryName,
+                categories.categoryUrlId,
+                categories.categoryUrlName,
+                niches.weight,
+                niches.productCount
+            })
+
+            // Group the categories together by category id
+            .GroupBy(x => x.categoryId, (key, x) => new
+            {
+                categoryId = key,
+                categoryName = x.Select(z => z.categoryName).FirstOrDefault(),
+                categoryUrlId = x.Select(z => z.categoryUrlId).FirstOrDefault(),
+                categoryUrlName = x.Select(z => z.categoryUrlName).FirstOrDefault(),
+
+
+                niches = x.Select(z => new
+                {
+                    z.nicheId,
+                    z.nicheName,
+                    z.nicheUrlid,
+                    z.nicheUrlName,
+                    z.weight,
+                    z.productCount
+                }).ToList()
+            })
+
+            // This will add a weight to each category and order the niches by weight
+            .Select(x => new
+            {
+                weight = x.niches.Select(z => z.productCount * z.weight).Sum() / x.niches.Select(z => z.productCount).Sum(),
+                x.categoryUrlId,
+                x.categoryUrlName,
+                x.categoryName,
+                niches = x.niches
+                    .OrderByDescending(z => z.weight)
+
+                    // group the niches by weight greater or equal to the average weight
+                    .GroupBy(z => z.weight >= avgWeight, (key, niches) => new
+                    {
+                        key,
+                        niches = niches.Select(n => new
+                        {
+                            UrlId = n.nicheUrlid,
+                            UrlName = n.nicheUrlName,
+                            Name = n.nicheName,
+                        }).ToList()
+                    }).ToList()
+            })
+
+            // Order the categories by weight and group by weight greater or equal to the average weight
+            .OrderByDescending(x => x.weight)
+            .GroupBy(x => x.weight >= avgWeight, (key, categories) => new
+            {
+                key,
+                categories = categories.Select(z => new
+                {
+                    UrlId = z.categoryUrlId,
+                    UrlName = z.categoryUrlName,
+                    Name = z.categoryName,
+                    Niches = z.niches,
+                }).ToList()
+            })
+            .ToList();
+
+
+
+            // Assign the category filters
+            if (categoryData.Count == 2)
+            {
+                filters.CategoriesFilter = new CategoriesFilter
+                {
+                    Visible = categoryData.Where(x => x.key).Select(x => x.categories
+                        .Select(z => new CategoryFilter
+                        {
+                            UrlId = z.UrlId,
+                            UrlName = z.UrlName,
+                            Name = z.Name,
+                            Niches = new NichesFilter
+                            {
+                                ShowHidden = false,
+                                Visible = z.Niches.Where(w => w.key).Select(n => n.niches.Select(a => new NicheFilter { 
+                                    UrlId = a.UrlId,
+                                    UrlName = a.UrlName,
+                                    Name = a.Name
+                                }).ToList()).SingleOrDefault(),
+                                Hidden = z.Niches.Where(w => !w.key).Select(n => n.niches.Select(a => new NicheFilter
+                                {
+                                    UrlId = a.UrlId,
+                                    UrlName = a.UrlName,
+                                    Name = a.Name
+                                }).ToList()).SingleOrDefault()
+                            }
+                        })
+                        .ToList())
+                    .SingleOrDefault(),
+                    Hidden = categoryData.Where(x => !x.key).Select(x => x.categories
+                        .Select(z => new CategoryFilter
+                        {
+                            UrlId = z.UrlId,
+                            UrlName = z.UrlName,
+                            Name = z.Name
+                        })
+                        .ToList()).SingleOrDefault()
+                };
+            }
+            else
+            {
+                filters.CategoriesFilter = new CategoriesFilter
+                {
+                    Visible = categoryData.Select(x => x.categories
+                        .Select(z => new CategoryFilter
+                        {
+                            UrlId = z.UrlId,
+                            UrlName = z.UrlName,
+                            Name = z.Name,
+                            Niches = new NichesFilter
+                            {
+                                ShowHidden = false,
+                                Visible = z.Niches.Where(w => w.key).Select(n => n.niches.Select(a => new NicheFilter
+                                {
+                                    UrlId = a.UrlId,
+                                    UrlName = a.UrlName,
+                                    Name = a.Name
+                                }).ToList()).SingleOrDefault(),
+                                Hidden = z.Niches.Where(w => !w.key).Select(n => n.niches.Select(a => new NicheFilter
+                                {
+                                    UrlId = a.UrlId,
+                                    UrlName = a.UrlName,
+                                    Name = a.Name
+                                }).ToList()).SingleOrDefault()
+                            }
+                        })
+                        .ToList())
+                    .SingleOrDefault(),
+                };
+            }
+
+
+            
 
 
 
@@ -285,7 +403,7 @@ namespace Website.Repositories
                 Caption = "Price",
                 Options = options
             };
-            
+
 
 
 
@@ -447,4 +565,7 @@ namespace Website.Repositories
             return filters;
         }
     }
+
+
+
 }

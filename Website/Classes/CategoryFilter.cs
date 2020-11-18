@@ -7,6 +7,6 @@ namespace Website.Classes
         public string UrlId { get; set; }
         public string Name { get; set; }
         public string UrlName { get; set; }
-        public IEnumerable<NicheFilter> Niches { get; set; }
+        public NichesFilter Niches { get; set; }
     }
 }

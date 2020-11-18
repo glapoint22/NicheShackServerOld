@@ -10,7 +10,8 @@ using Website.Classes;
 
 namespace Website.ViewModels
 {
-    public class ProductViewModel : ISelect<Product, ProductViewModel>, ISort<Product>, IWhere<Product>
+    // ISort<Product>, ISelect<Product, ProductViewModel>, 
+    public class ProductViewModel : IWhere<Product>
     {
         private readonly QueryParams queryParams;
 
@@ -88,18 +89,19 @@ namespace Website.ViewModels
 
 
         // ..................................................................................Set Select.....................................................................
-        public IQueryable<ProductViewModel> ViewModelSelect(IQueryable<Product> source)
+        public IEnumerable<ProductViewModel> Select(IEnumerable<QueriedProduct> source)
         {
             return source.Select(x => new ProductViewModel
             {
                 Id = x.Id,
+                UrlId = x.UrlId,
                 Name = x.Name,
                 UrlName = x.UrlName,
                 Rating = x.Rating,
                 TotalReviews = x.TotalReviews,
                 MinPrice = x.MinPrice,
                 MaxPrice = x.MaxPrice,
-                //Image = x.Image
+                Image = x.Image
             });
         }
 
@@ -108,38 +110,34 @@ namespace Website.ViewModels
 
 
         // .............................................................................Set Sort Option.....................................................................
-        public IOrderedQueryable<Product> SetSortOption(IQueryable<Product> source)
+        public IOrderedEnumerable<QueriedProduct> OrderBy(IEnumerable<QueriedProduct> source)
         {
-            IOrderedQueryable<Product> sortOption = null;
+            IOrderedEnumerable<QueriedProduct> orderBy = null;
+
+
+            orderBy = source.OrderBy(x => x.Name.ToLower().StartsWith(queryParams.Query.ToLower()) ? (x.Name.ToLower() == queryParams.Query.ToLower() ? 0 : 1) :
+                EF.Functions.Like(x.Name, queryParams.Query + " %") ||
+                EF.Functions.Like(x.Name, "% " + queryParams.Query + " %") ||
+                EF.Functions.Like(x.Name, "% " + queryParams.Query)
+                ? 2 : 3)
+                .ThenByDescending(x => x.Weight);
+
 
 
             switch (queryParams.Sort)
             {
                 case "price-asc":
-                    sortOption = source.OrderBy(x => x.MinPrice);
+                    orderBy = orderBy.ThenBy(x => x.MinPrice);
                     break;
                 case "price-desc":
-                    sortOption = source.OrderByDescending(x => x.MinPrice);
+                    orderBy = orderBy.ThenByDescending(x => x.MinPrice);
                     break;
                 case "rating":
-                    sortOption = source.OrderByDescending(x => x.Rating);
-                    break;
-                default:
-                    if (queryParams.Query != string.Empty)
-                    {
-                        // Best Match
-                        sortOption = source.OrderBy(x => x.Name.StartsWith(queryParams.Query) ? (x.Name == queryParams.Query ? 0 : 1) : 2);
-                    }
-                    else
-                    {
-                        // Price: Low to High
-                        sortOption = source.OrderBy(x => x.MinPrice);
-                    }
-
+                    orderBy = orderBy.ThenByDescending(x => x.Rating);
                     break;
             }
 
-            return sortOption;
+            return orderBy;
         }
 
 

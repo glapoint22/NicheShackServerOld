@@ -28,6 +28,7 @@ namespace Website.Repositories
         public IRepository<OrderProduct> OrderProducts { get; }
         public IRepository<ProductKeyword> ProductKeywords { get; }
         public IRepository<Keyword> Keywords { get; }
+        public IRepository<KeywordSearchVolume> KeywordSearchVolumes { get; }
         public IRepository<ProductFilter> ProductFilters { get; }
         public IRepository<Niche> Niches { get; }
 
@@ -60,6 +61,7 @@ namespace Website.Repositories
             OrderProducts = new Repository<OrderProduct>(context);
             ProductKeywords = new Repository<ProductKeyword>(context);
             Keywords = new Repository<Keyword>(context);
+            KeywordSearchVolumes = new Repository<KeywordSearchVolume>(context);
             ProductFilters = new Repository<ProductFilter>(context);
             Niches = new Repository<Niche>(context);
         }
