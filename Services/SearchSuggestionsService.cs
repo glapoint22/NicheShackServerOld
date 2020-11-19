@@ -143,7 +143,7 @@ namespace Services
 
 
             // Return the suggestions
-            return searchWords
+            var suggestions = searchWords
                 .OrderByDescending(x => x.SearchVolume)
                 .Select((x, index) => new Suggestion
                 {
@@ -161,6 +161,9 @@ namespace Services
                 })
                 .Take(maxSuggestions)
                 .ToList();
+
+            if (suggestions[0].Category != null) suggestions.Insert(0, new Suggestion { Name = suggestions[0].Name });
+            return suggestions;
         }
 
 
