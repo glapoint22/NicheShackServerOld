@@ -1,15 +1,19 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
+using DataAccess.Classes;
 using DataAccess.Interfaces;
 using DataAccess.Models;
+using Microsoft.EntityFrameworkCore;
 using Website.Classes;
 
 namespace Website.ViewModels
 {
-    public class ProductViewModel : ISelect<Product, ProductViewModel>, ISort<Product>, IWhere<Product>
+    // ISort<Product>, ISelect<Product, ProductViewModel>, 
+    public class ProductViewModel : IWhere<Product>
     {
         private readonly QueryParams queryParams;
-        private readonly IEnumerable<FilteredProduct> filteredProducts;
 
         public int Id { get; set; }
         public string Name { get; set; }
@@ -26,10 +30,9 @@ namespace Website.ViewModels
         // Constructors
         public ProductViewModel() { }
 
-        public ProductViewModel(QueryParams queryParams, IEnumerable<FilteredProduct> filteredProducts)
+        public ProductViewModel(QueryParams queryParams)
         {
             this.queryParams = queryParams;
-            this.filteredProducts = filteredProducts;
         }
 
 
@@ -86,18 +89,19 @@ namespace Website.ViewModels
 
 
         // ..................................................................................Set Select.....................................................................
-        public IQueryable<ProductViewModel> ViewModelSelect(IQueryable<Product> source)
+        public IEnumerable<ProductViewModel> Select(IEnumerable<QueriedProduct> source)
         {
             return source.Select(x => new ProductViewModel
             {
                 Id = x.Id,
+                UrlId = x.UrlId,
                 Name = x.Name,
                 UrlName = x.UrlName,
                 Rating = x.Rating,
                 TotalReviews = x.TotalReviews,
                 MinPrice = x.MinPrice,
                 MaxPrice = x.MaxPrice,
-                //Image = x.Image
+                Image = x.Image
             });
         }
 
@@ -106,38 +110,34 @@ namespace Website.ViewModels
 
 
         // .............................................................................Set Sort Option.....................................................................
-        public IOrderedQueryable<Product> SetSortOption(IQueryable<Product> source)
+        public IOrderedEnumerable<QueriedProduct> OrderBy(IEnumerable<QueriedProduct> source)
         {
-            IOrderedQueryable<Product> sortOption = null;
+            IOrderedEnumerable<QueriedProduct> orderBy = null;
+
+
+            orderBy = source.OrderBy(x => x.Name.ToLower().StartsWith(queryParams.Query.ToLower()) ? (x.Name.ToLower() == queryParams.Query.ToLower() ? 0 : 1) :
+                EF.Functions.Like(x.Name, queryParams.Query + " %") ||
+                EF.Functions.Like(x.Name, "% " + queryParams.Query + " %") ||
+                EF.Functions.Like(x.Name, "% " + queryParams.Query)
+                ? 2 : 3)
+                .ThenByDescending(x => x.Weight);
+
 
 
             switch (queryParams.Sort)
             {
                 case "price-asc":
-                    sortOption = source.OrderBy(x => x.MinPrice);
+                    orderBy = orderBy.ThenBy(x => x.MinPrice);
                     break;
                 case "price-desc":
-                    sortOption = source.OrderByDescending(x => x.MinPrice);
+                    orderBy = orderBy.ThenByDescending(x => x.MinPrice);
                     break;
                 case "rating":
-                    sortOption = source.OrderByDescending(x => x.Rating);
-                    break;
-                default:
-                    if (queryParams.SearchWords != string.Empty)
-                    {
-                        // Best Match
-                        sortOption = source.OrderBy(x => x.Name.StartsWith(queryParams.SearchWords) ? (x.Name == queryParams.SearchWords ? 0 : 1) : 2);
-                    }
-                    else
-                    {
-                        // Price: Low to High
-                        sortOption = source.OrderBy(x => x.MinPrice);
-                    }
-
+                    orderBy = orderBy.ThenByDescending(x => x.Rating);
                     break;
             }
 
-            return sortOption;
+            return orderBy;
         }
 
 
@@ -149,83 +149,116 @@ namespace Website.ViewModels
         public IQueryable<Product> SetWhere(IQueryable<Product> source)
         {
             //Search words
-            if (queryParams.SearchWords != string.Empty)
+            if (queryParams.Query != string.Empty)
             {
-                string[] searchWordsArray = queryParams.SearchWords.Split(' ');
-                source = source.Where(x => searchWordsArray.Any(z => x.Name.ToLower().Contains(z.ToLower())));
+                string[] searchWordsArray = queryParams.Query.Split(' ').ToArray();
+
+                source = source.WhereAny(searchWordsArray.Select(w => (Expression<Func<Product, bool>>)(x =>
+
+                EF.Functions.Like(x.Name, w + "[^a-z]%") ||
+                EF.Functions.Like(x.Name, "%[^a-z]" + w + "[^a-z]%") ||
+                EF.Functions.Like(x.Name, "%[^a-z]" + w)
+
+                ||
+
+
+                EF.Functions.Like(x.Description, w + "[^a-z]%") ||
+                EF.Functions.Like(x.Description, "%[^a-z]" + w + "[^a-z]%") ||
+                EF.Functions.Like(x.Description, "%[^a-z]" + w)
+
+
+                || queryParams.KeywordProductIds.Contains(x.Id)
+
+                )).ToArray());
+
             }
 
 
             //Category
-            if (queryParams.CategoryId >= 0)
+            if (queryParams.CategoryId != string.Empty)
             {
-                source = source.Where(x => x.Niche.CategoryId == queryParams.CategoryId);
+                source = source.Where(x => x.Niche.Category.UrlId == queryParams.CategoryId);
             }
 
 
             //Niche
-            if (queryParams.NicheId >= 0)
+            if (queryParams.NicheId != string.Empty)
             {
-                source = source.Where(x => x.NicheId == queryParams.NicheId);
+                source = source.Where(x => x.Niche.UrlId == queryParams.NicheId);
             }
 
 
-            //Filters
-            if (queryParams.Filters.Count > 0)
+            
+
+
+            //Price Filter
+            if (queryParams.PriceFilter != null || queryParams.PriceRangeFilter != null)
             {
+                List<Expression<Func<Product, bool>>> priceRangeQueries = new List<Expression<Func<Product, bool>>>();
+                List<string> priceRanges = new List<string>();
 
-                //Price Filter
-                if (queryParams.Filters.Any(x => x.Key == "Price"))
+                // Get all price ranges from the price filter
+                if (queryParams.PriceFilter != null)
                 {
-                    PriceFilterOption priceRange = queryParams.GetPriceRange();
-
-                    if (priceRange.Min == priceRange.Max)
-                    {
-                        source = source.Where(x =>
-                        (x.MaxPrice > x.MinPrice && priceRange.Min >= x.MinPrice && priceRange.Min <= x.MaxPrice) ||
-                        (x.MaxPrice <= x.MinPrice && x.MinPrice == priceRange.Min)
-                        );
-                    }
-                    else
-                    {
-                        source = source.Where(x =>
-                            (x.MaxPrice > x.MinPrice && priceRange.Min >= x.MinPrice && priceRange.Min <= x.MaxPrice) ||
-                            (x.MaxPrice > x.MinPrice && priceRange.Max >= x.MinPrice && priceRange.Max <= x.MaxPrice) ||
-                            (x.MaxPrice > x.MinPrice && priceRange.Min <= x.MinPrice && priceRange.Max >= x.MaxPrice) ||
-                            (x.MaxPrice <= x.MinPrice && x.MinPrice >= priceRange.Min && x.MinPrice <= priceRange.Max)
-                        );
-                    }
+                    priceRanges = queryParams.PriceFilter.Options.Select(x => x.Label).ToList();
                 }
 
-
-                // Customer Rating filter
-                if (queryParams.Filters.Any(x => x.Key == "Customer Rating"))
+                // Get the price range from the price range filter
+                if (queryParams.PriceRangeFilter != null)
                 {
-                    int rating = queryParams.GetMinRating();
-                    source = source.Where(x => x.Rating >= rating);
+                    priceRanges.Add(queryParams.PriceRangeFilter.Options.Select(x => x.Label).Single());
                 }
 
-
-                // Custom filters
-                if (filteredProducts.Count() > 0)
+                // Loop through the price ranges and add them to the query
+                foreach (string priceRange in priceRanges)
                 {
-                    // Group the filtered products into their respective filters outputting only product ids
-                    List<List<int>> productIds = filteredProducts
-                    .GroupBy(x => x.FilterId)
-                    .Select(x => x
-                        .Where(a => a.FilterId == x
-                            .Select(b => b.FilterId)
-                            .FirstOrDefault())
-                        .Select(a => a.ProductId)
-                        .ToList())
-                    .ToList();
+                    var priceRangeArray = priceRange.Split('-').Select(x => double.Parse(x)).OrderBy(x => x).ToArray();
+                    priceRangeQueries.Add(x => x.MinPrice >= priceRangeArray[0] && x.MinPrice <= priceRangeArray[1]);
+                }
 
-                    // Set the where clause for each group of product ids
-                    for (int i = 0; i < productIds.Count; i++)
-                    {
-                        var ids = productIds[i];
-                        source = source.Where(x => ids.Contains(x.Id));
-                    }
+                source = source.WhereAny(priceRangeQueries.ToArray());
+            }
+
+
+
+
+
+
+
+
+            // Rating filter
+            if (queryParams.RatingFilter != null)
+            {
+                int rating = queryParams.RatingFilter.Options.Select(x => x.Id).Min();
+                source = source.Where(x => x.Rating >= rating);
+            }
+
+
+
+
+
+
+
+
+
+
+
+            // Custom filters
+            if (queryParams.FilteredProducts.Count() > 0)
+            {
+                // Group the filtered products into their respective filters outputting only product ids
+                var productIds = queryParams.FilteredProducts
+                .GroupBy(x => x.FilterId)
+                .Select(x => x.Select(z => z.ProductId).ToList())
+                .ToList();
+
+
+
+                // Set the where clause for each group of product ids
+                for (int i = 0; i < productIds.Count; i++)
+                {
+                    var ids = productIds[i];
+                    source = source.Where(x => ids.Contains(x.Id));
                 }
             }
             return source;

@@ -25,7 +25,11 @@ namespace Services
             }
 
             node.IsWord = true;
-            if (!node.Categories.ContainsKey(searchWord.Category.UrlId)) node.Categories.Add(searchWord.Category.UrlId, searchWord.Category);
+
+            foreach (SearchWordCategory category in searchWord.Categories)
+            {
+                node.Categories.Add(category.UrlId, category);
+            }
 
             node.SearchVolume = searchWord.SearchVolume;
         }
@@ -109,28 +113,14 @@ namespace Services
                 // If the fragments form a word
                 if (node.IsWord)
                 {
-
                     // If a category id was not passed in or a category id was passed in and the current node has that category
                     if (categoryId == null || node.Categories.ContainsKey(categoryId))
                     {
-                        SearchWordCategory category = null;
-
-                        // If we are not passing in a category id and this node has more than one category
-                        // Use the node with the highest sales count
-                        if (node.Categories.Count > 1 && categoryId == null)
-                        {
-                            category = node.Categories
-                            .OrderByDescending(x => x.Value.SalesCount)
-                            .Select(x => x.Value)
-                            .FirstOrDefault();
-                        }
-
-
                         // Add this word to the list of search words
                         searchWords.Add(new SearchWord
                         {
                             Name = fragments,
-                            Category = category,
+                            Categories = node.Categories.Select(x => x.Value).ToList(),
                             SearchVolume = node.SearchVolume
                         });
                     }
@@ -153,21 +143,27 @@ namespace Services
 
 
             // Return the suggestions
-            return searchWords
+            var suggestions = searchWords
                 .OrderByDescending(x => x.SearchVolume)
                 .Select((x, index) => new Suggestion
                 {
                     Name = x.Name,
-                    Category = x.Category != null && index == 0 ? new SuggestionCategory
+                    Category = x.Categories.Count > 0 && index == 0 && categoryId == null ? x.Categories
+                    .OrderByDescending(z => z.Weight)
+                    .Select(z => new SuggestionCategory
                     {
-                        Name = x.Category.Name,
-                        UrlName = x.Category.UrlName,
-                        UrlId = x.Category.UrlId
-                    }
+                        Name = z.Name,
+                        UrlId = z.UrlId,
+                        UrlName = z.UrlName
+                    })
+                    .FirstOrDefault()
                     : null
                 })
                 .Take(maxSuggestions)
                 .ToList();
+
+            if (suggestions[0].Category != null) suggestions.Insert(0, new Suggestion { Name = suggestions[0].Name });
+            return suggestions;
         }
 
 

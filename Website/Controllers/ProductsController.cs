@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using DataAccess.Models;
 using Microsoft.AspNetCore.Mvc;
 using Services;
 using Website.Classes;
@@ -56,7 +58,7 @@ namespace Website.Controllers
 
 
 
-
+        // ..................................................................................Get Media.....................................................................
         public async Task<IEnumerable<ProductMediaViewModel>> GetMedia(int id)
         {
             var mediaIds = await unitOfWork.ProductMedia.GetCollection(x => x.ProductId == id, x => x.MediaId);
@@ -69,6 +71,10 @@ namespace Website.Controllers
                 type = x.Type
             });
         }
+
+
+
+
 
 
 
@@ -132,6 +138,10 @@ namespace Website.Controllers
 
 
 
+
+
+
+        // ..................................................................................Get Suggestions.....................................................................
         [HttpGet]
         [Route("GetSuggestions")]
         public ActionResult GetSuggestions(string searchWords, string categoryId)
@@ -142,41 +152,57 @@ namespace Website.Controllers
 
 
 
+
+
+
+
+
+
+
+
+        // ..................................................................................Get Products.....................................................................
         [HttpGet]
-        public async Task<ActionResult> GetProducts(string query)
+        public async Task<ActionResult> GetProducts(string query, string filters = "", string categoryId = "", string nicheId = "", string sort = "", int limit = 24, int page = 1)
         {
-            var products = await unitOfWork.Products.GetProducts(query);
+            QueryParams queryParams = new QueryParams(query, filters, categoryId, nicheId, sort);
+            await queryParams.Init(unitOfWork);
 
-            QueryParams queryParams = new QueryParams(query, "", 0, 0, "");
+            IEnumerable<QueriedProduct> products = await unitOfWork.Products.GetProducts(queryParams);
 
-            var filters = await unitOfWork.Products.GetProductFilters(queryParams, products);
+            // If the query is a keyword, add it to the keyword search volumes
+            int keywordId = await unitOfWork.Keywords.Get(x => x.Name == query, x => x.Id);
+            if(keywordId > 0)
+            {
+                unitOfWork.KeywordSearchVolumes.Add(new KeywordSearchVolume
+                {
+                    KeywordId = keywordId,
+                    Date = DateTime.Now
+                });
+                await unitOfWork.Save();
+            }
 
-            return Ok();
+
+
+            ProductViewModel productViewModel = new ProductViewModel(queryParams);
+
+
+            var response = new
+            {
+                products = products
+                    .OrderBy(productViewModel)
+                    .Select(productViewModel)
+                    .Skip((page - 1) * limit)
+                    .Take(limit)
+                    .ToList(),
+                totalProducts = products.Count(),
+                filters = await unitOfWork.Products.GetProductFilters(products, queryParams),
+                numProductsPerPageOptions = productViewModel.GetNumProductsPerPageOptions(),
+                sortOptions = query != string.Empty ? productViewModel.GetSearchSortOptions() : productViewModel.GetBrowseSortOptions()
+            };
+
+
+
+            return Ok(response);
         }
-
-        // ..................................................................................Get Queried Products.....................................................................
-        //[HttpGet]
-        //public async Task<ActionResult> GetQueriedProducts(string query = "", string sort = "", int limit = 24, int categoryId = -1, int nicheId = -1, int page = 1, string filter = "")
-        //{
-        //    // Set the query params object
-        //    QueryParams queryParams = new QueryParams(query, sort, categoryId, nicheId, filter);
-
-        //    // Query the products
-        //    IEnumerable<ProductViewModel> products = await unitOfWork.Products.GetQueriedProducts(queryParams);
-
-        //    ProductViewModel productDTO = new ProductViewModel();
-
-        //    var response = new
-        //    {
-        //        products = products.Skip((page - 1) * limit).Take(limit).ToList(),
-        //        totalProducts = products.Count(),
-        //        categories = await unitOfWork.Categories.GetQueriedCategories(queryParams, products),
-        //        filters = await unitOfWork.Products.GetProductFilters(queryParams, products),
-        //        numProductsPerPageOptions = productDTO.GetNumProductsPerPageOptions(),
-        //        sortOptions = query != string.Empty ? productDTO.GetSearchSortOptions() : productDTO.GetBrowseSortOptions()
-        //    };
-
-        //    return Ok(response);
-        //}
     }
 }

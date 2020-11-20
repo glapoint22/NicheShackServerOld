@@ -1,8 +1,6 @@
-﻿using Website.Interfaces;
-
-namespace Website.Classes
+﻿namespace Website.Classes
 {
-    public struct PriceFilterOption : IQueryFilterOption
+    public struct PriceFilterOption
     {
         public string Label { get; set; }
         public double Min { get; set; }

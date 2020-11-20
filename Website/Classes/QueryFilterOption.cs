@@ -1,10 +1,8 @@
-﻿using Website.Interfaces;
-
-namespace Website.Classes
+﻿namespace Website.Classes
 {
-    public struct QueryFilterOption : IQueryFilterOption
+    public struct QueryFilterOption
     {
-        public string Id { get; set; }
+        public int Id { get; set; }
         public string Label { get; set; }
     }
 }

@@ -28,6 +28,9 @@ namespace Website.Repositories
         IRepository<Page> Pages { get; }
         IRepository<OrderProduct> OrderProducts { get; }
         IRepository<ProductKeyword> ProductKeywords { get; }
+        IRepository<Keyword> Keywords { get; }
+        IRepository<KeywordSearchVolume> KeywordSearchVolumes { get; }
+        IRepository<ProductFilter> ProductFilters { get; }
         IRepository<Niche> Niches { get; }
 
 
