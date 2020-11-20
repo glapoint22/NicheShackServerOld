@@ -45,4 +45,13 @@ namespace Manager.Classes
         public List<double> DoubleValue { get; set; }
         public List<DateTime> DateValue { get; set; }
     }
+
+
+
+    public class TempClass
+    {
+        public QueryType QueryType { get; set; }
+        public int LogicalOperator { get; set; }
+        public int IntValue { get; set; }
+    }
 }

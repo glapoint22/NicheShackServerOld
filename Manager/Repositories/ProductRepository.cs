@@ -141,8 +141,6 @@ namespace Manager.Repositories
 
         public async Task<IEnumerable<QueryBuilderViewModel>> GetAlita(List<Query> queries)
         {
-            int categoryQueryIndex = queries.FindIndex(x => x.QueryType == QueryType.Category);
-            int nicheQueryIndex = queries.FindIndex(x => x.QueryType == QueryType.Niche);
             int subgroupQueryIndex = queries.FindIndex(x => x.QueryType == QueryType.ProductSubgroup);
             int keywordQueryIndex = queries.FindIndex(x => x.QueryType == QueryType.ProductKeywords);
             int productIdsQueryIndex = -1;
