@@ -141,66 +141,80 @@ namespace Manager.Repositories
 
         public async Task<IEnumerable<QueryBuilderViewModel>> GetAlita(List<Query> queries)
         {
+            
+            List<Query> queries3 = new List<Query>();
+            //queries3.Add(new Query { QueryType = QueryType.ProductRating, DoubleValue = 3, ComparisonOperator = ComparisonOperatorType.GreaterThanOrEqual });
+            //queries3.Add(new Query { QueryType = QueryType.ProductPrice, DoubleValue = 16, ComparisonOperator = ComparisonOperatorType.LessThanOrEqual, LogicalOperator = LogicalOperatorType.And });
+            //queries3.Add(new Query { QueryType = QueryType.ProductCreationDate, DateValue = new DateTime(2020, 5, 1, 8, 30, 52), ComparisonOperator = ComparisonOperatorType.GreaterThan, LogicalOperator = LogicalOperatorType.And });
+            var stringValues = new List<string>();
+            stringValues.Add("voice");
+            stringValues.Add("jazzy");
+            queries3.Add(new Query { QueryType = QueryType.ProductKeywords, StringValues = stringValues, IntValues = null, LogicalOperator = LogicalOperatorType.Or });
+
+
+
+
+            List<Query> queries2 = new List<Query>();
+            //queries2.Add(new Query { QueryType = QueryType.Category, IntValue = 3 });
+            //queries2.Add(new Query { QueryType = QueryType.Niche, IntValue = 5, LogicalOperator = LogicalOperatorType.Or });
+            queries2.Add(new Query { QueryType = QueryType.ProductSubgroup, IntValue = 1, IntValues = null, LogicalOperator = LogicalOperatorType.Or });
+            queries2.Add(new Query { QueryType = QueryType.SubQuery, SubQueries = queries3, LogicalOperator = LogicalOperatorType.Or });
+
+
+
+
+
             queries.Add(new Query { QueryType = QueryType.Category, IntValue = 1 });
-            queries.Add(new Query { QueryType = QueryType.Category, IntValue = 2, LogicalOperator = LogicalOperatorType.Or });
-            queries.Add(new Query { QueryType = QueryType.Niche, IntValue = 3, LogicalOperator = LogicalOperatorType.And });
-            queries.Add(new Query { QueryType = QueryType.Niche, IntValue = 4, LogicalOperator = LogicalOperatorType.Or });
-            queries.Add(new Query { QueryType = QueryType.ProductRating, DoubleValue = 3, ComparisonOperator = ComparisonOperatorType.GreaterThanOrEqual, LogicalOperator = LogicalOperatorType.And });
-            queries.Add(new Query { QueryType = QueryType.ProductPrice, DoubleValue = 16, ComparisonOperator = ComparisonOperatorType.LessThanOrEqual, LogicalOperator = LogicalOperatorType.And });
-            queries.Add(new Query { QueryType = QueryType.ProductCreationDate, DateValue = new DateTime(2020, 5, 1, 8, 30, 52), ComparisonOperator = ComparisonOperatorType.GreaterThan, LogicalOperator = LogicalOperatorType.And });
+            //queries.Add(new Query { QueryType = QueryType.Category, IntValue = 2, LogicalOperator = LogicalOperatorType.Or });
+            //queries.Add(new Query { QueryType = QueryType.Niche, IntValue = 3, LogicalOperator = LogicalOperatorType.And });
+            //queries.Add(new Query { QueryType = QueryType.Niche, IntValue = 4, LogicalOperator = LogicalOperatorType.Or });
+            //queries.Add(new Query { QueryType = QueryType.ProductRating, DoubleValue = 3, ComparisonOperator = ComparisonOperatorType.GreaterThanOrEqual, LogicalOperator = LogicalOperatorType.And });
+            //queries.Add(new Query { QueryType = QueryType.ProductPrice, DoubleValue = 16, ComparisonOperator = ComparisonOperatorType.LessThanOrEqual, LogicalOperator = LogicalOperatorType.And });
+            //queries.Add(new Query { QueryType = QueryType.ProductCreationDate, DateValue = new DateTime(2020, 5, 1, 8, 30, 52), ComparisonOperator = ComparisonOperatorType.GreaterThan, LogicalOperator = LogicalOperatorType.And });
+            queries.Add(new Query { QueryType = QueryType.SubQuery, SubQueries = queries2, LogicalOperator = LogicalOperatorType.Or });
 
 
-            //int subgroupQueryIndex = queries.FindIndex(x => x.QueryType == QueryType.ProductSubgroup);
-            //int keywordQueryIndex = queries.FindIndex(x => x.QueryType == QueryType.ProductKeywords);
-            //int productIdsQueryIndex = -1;
 
 
-            ////If a subgroup query exists
-            //if (subgroupQueryIndex != -1)
-            //{
-            //    productIdsQueryIndex = queries.FindIndex(x => x.QueryType == QueryType.ProductIds);
-            //    List<int> productIds = await context.SubgroupProducts.Where(x => queries[subgroupQueryIndex].IntValue.Contains(x.SubgroupId)).Select(x => x.ProductId).ToListAsync();
-
-            //    //If a products id query does NOT exist
-            //    if (productIdsQueryIndex == -1)
-            //    {
-            //        //Create one
-            //        queries.Add(new Query { QueryType = QueryType.ProductIds, ComparisonOperator = new List<ComparisonOperatorType> { ComparisonOperatorType.Equal }, IntValue = new List<int>() });
-            //        productIdsQueryIndex = queries.Count - 1;
-            //    }
 
 
-            //    //Loop through each product id
-            //    foreach (var productId in productIds)
-            //    {
-            //        //Add each product id to the productid query
-            //        queries[productIdsQueryIndex].IntValue.Add(productId);
-            //    }
-            //}
+           
 
 
-            ////If a keyword query exists
-            //if (keywordQueryIndex != -1)
-            //{
-            //    productIdsQueryIndex = queries.FindIndex(x => x.QueryType == QueryType.ProductIds);
-            //    List<int> keywordIds = await context.ProductKeywords.Where(x => queries[keywordQueryIndex].StringValue.Contains(x.Keyword.Name)).Select(x => x.Keyword.Id).Distinct().ToListAsync();
-            //    List<int> productIds = await context.ProductKeywords.Where(x => keywordIds.Contains(x.KeywordId)).Select(x => x.ProductId).ToListAsync();
+            async Task UpdateQueries(IEnumerable<Query> queries)
+            {
+                foreach (Query query in queries)
+                {
+                    if (query.QueryType == QueryType.ProductSubgroup)
+                    {
+                        query.IntValues = await context.SubgroupProducts.Where(x => x.SubgroupId == query.IntValue).Select(x => x.ProductId).ToListAsync();
+                    }
 
-            //    //If a products id query does NOT exist
-            //    if (productIdsQueryIndex == -1)
-            //    {
-            //        //Create one
-            //        queries.Add(new Query { QueryType = QueryType.ProductIds, ComparisonOperator = new List<ComparisonOperatorType> { ComparisonOperatorType.Equal }, IntValue = new List<int>() });
-            //        productIdsQueryIndex = queries.Count - 1;
-            //    }
 
-            //    //Loop through each product id
-            //    foreach (var productId in productIds)
-            //    {
-            //        //Add each product id to the productid query
-            //        queries[productIdsQueryIndex].IntValue.Add(productId);
-            //    }
-            //}
+                    if (query.QueryType == QueryType.ProductKeywords)
+                    {
+                        List<int> keywordIds = await context.ProductKeywords.Where(x => query.StringValues.Contains(x.Keyword.Name)).Select(x => x.Keyword.Id).Distinct().ToListAsync();
+                        query.IntValues = await context.ProductKeywords.Where(x => keywordIds.Contains(x.KeywordId)).Select(x => x.ProductId).ToListAsync();
+                    }
+
+
+                    if (query.QueryType == QueryType.SubQuery)
+                    {
+                        await UpdateQueries(query.SubQueries);
+                    }
+                }
+            }
+            await UpdateQueries(queries);
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -18,7 +18,7 @@ namespace Manager.Classes
         ProductRating,
         ProductKeywords,
         ProductCreationDate,
-        ProductIds
+        SubQuery
     }
 
 
@@ -41,6 +41,7 @@ namespace Manager.Classes
     }
 
 
+
     public class Niches
     {
         public IEnumerable<int> CategoryIds { get; set; }
@@ -53,8 +54,10 @@ namespace Manager.Classes
         public ComparisonOperatorType ComparisonOperator { get; set; }
         public LogicalOperatorType LogicalOperator { get; set; }
         public int IntValue { get; set; }
-        public string StringValue { get; set; }
+        public List<int> IntValues { get; set; }
+        public List<string> StringValues { get; set; }
         public double DoubleValue { get; set; }
         public DateTime DateValue { get; set; }
+        public List<Query> SubQueries { get; set; }
     }
 }
