@@ -38,22 +38,7 @@ namespace Website.ViewModels
 
 
 
-        // ..............................................................................Get Num Products Per Page Options.................................................................
-        public List<KeyValuePair<string, string>> GetNumProductsPerPageOptions()
-        {
-            return new List<KeyValuePair<string, string>>
-            {
-                new KeyValuePair<string, string>("24", "24"),
-                new KeyValuePair<string, string>("48", "48"),
-                new KeyValuePair<string, string>("72", "72"),
-                new KeyValuePair<string, string>("96", "96")
-            };
-        }
-
-
-
-
-
+        
 
 
         // ..............................................................................Get Browse Sort Options.................................................................
@@ -127,13 +112,13 @@ namespace Website.ViewModels
             switch (queryParams.Sort)
             {
                 case "price-asc":
-                    orderBy = orderBy.ThenBy(x => x.MinPrice);
+                    orderBy = orderBy.OrderBy(x => x.MinPrice);
                     break;
                 case "price-desc":
-                    orderBy = orderBy.ThenByDescending(x => x.MinPrice);
+                    orderBy = orderBy.OrderByDescending(x => x.MinPrice);
                     break;
                 case "rating":
-                    orderBy = orderBy.ThenByDescending(x => x.Rating);
+                    orderBy = orderBy.OrderByDescending(x => x.Rating);
                     break;
             }
 

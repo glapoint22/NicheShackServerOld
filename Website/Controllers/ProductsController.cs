@@ -162,8 +162,9 @@ namespace Website.Controllers
 
         // ..................................................................................Get Products.....................................................................
         [HttpGet]
-        public async Task<ActionResult> GetProducts(string query, string filters = "", string categoryId = "", string nicheId = "", string sort = "", int limit = 24, int page = 1)
+        public async Task<ActionResult> GetProducts(string query, string filters = "", string categoryId = "", string nicheId = "", string sort = "", double page = 1)
         {
+            double productsPerPage = 40;
             QueryParams queryParams = new QueryParams(query, filters, categoryId, nicheId, sort);
             await queryParams.Init(unitOfWork);
 
@@ -171,7 +172,7 @@ namespace Website.Controllers
 
             // If the query is a keyword, add it to the keyword search volumes
             int keywordId = await unitOfWork.Keywords.Get(x => x.Name == query, x => x.Id);
-            if(keywordId > 0)
+            if (keywordId > 0)
             {
                 unitOfWork.KeywordSearchVolumes.Add(new KeywordSearchVolume
                 {
@@ -184,19 +185,21 @@ namespace Website.Controllers
 
 
             ProductViewModel productViewModel = new ProductViewModel(queryParams);
-
+            int totalProducts = products.Count();
 
             var response = new
             {
                 products = products
                     .OrderBy(productViewModel)
                     .Select(productViewModel)
-                    .Skip((page - 1) * limit)
-                    .Take(limit)
+                    .Skip((int)((page - 1) * productsPerPage))
+                    .Take((int)productsPerPage)
                     .ToList(),
-                totalProducts = products.Count(),
+                totalProducts = totalProducts,
+                pageCount = Math.Ceiling(totalProducts / productsPerPage),
                 filters = await unitOfWork.Products.GetProductFilters(products, queryParams),
-                numProductsPerPageOptions = productViewModel.GetNumProductsPerPageOptions(),
+                start = ((page - 1) * productsPerPage) + 1,
+                end = Math.Min(page * productsPerPage, totalProducts),
                 sortOptions = query != string.Empty ? productViewModel.GetSearchSortOptions() : productViewModel.GetBrowseSortOptions()
             };
 
