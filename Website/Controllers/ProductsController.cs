@@ -198,8 +198,8 @@ namespace Website.Controllers
                 totalProducts = totalProducts,
                 pageCount = Math.Ceiling(totalProducts / productsPerPage),
                 filters = await unitOfWork.Products.GetProductFilters(products, queryParams),
-                start = ((page - 1) * productsPerPage) + 1,
-                end = Math.Min(page * productsPerPage, totalProducts),
+                productCountStart = ((page - 1) * productsPerPage) + 1,
+                productCountEnd = Math.Min(page * productsPerPage, totalProducts),
                 sortOptions = query != string.Empty ? productViewModel.GetSearchSortOptions() : productViewModel.GetBrowseSortOptions()
             };
 
