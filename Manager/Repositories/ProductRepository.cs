@@ -142,45 +142,6 @@ namespace Manager.Repositories
         public async Task<IEnumerable<QueryBuilderViewModel>> GetAlita(List<Query> queries)
         {
             
-            List<Query> queries3 = new List<Query>();
-            //queries3.Add(new Query { QueryType = QueryType.ProductRating, DoubleValue = 3, ComparisonOperator = ComparisonOperatorType.GreaterThanOrEqual });
-            //queries3.Add(new Query { QueryType = QueryType.ProductPrice, DoubleValue = 16, ComparisonOperator = ComparisonOperatorType.LessThanOrEqual, LogicalOperator = LogicalOperatorType.And });
-            //queries3.Add(new Query { QueryType = QueryType.ProductCreationDate, DateValue = new DateTime(2020, 5, 1, 8, 30, 52), ComparisonOperator = ComparisonOperatorType.GreaterThan, LogicalOperator = LogicalOperatorType.And });
-            var stringValues = new List<string>();
-            stringValues.Add("voice");
-            stringValues.Add("jazzy");
-            queries3.Add(new Query { QueryType = QueryType.ProductKeywords, StringValues = stringValues, IntValues = null, LogicalOperator = LogicalOperatorType.Or });
-
-
-
-
-            List<Query> queries2 = new List<Query>();
-            //queries2.Add(new Query { QueryType = QueryType.Category, IntValue = 3 });
-            //queries2.Add(new Query { QueryType = QueryType.Niche, IntValue = 5, LogicalOperator = LogicalOperatorType.Or });
-            queries2.Add(new Query { QueryType = QueryType.ProductSubgroup, IntValue = 1, IntValues = null, LogicalOperator = LogicalOperatorType.Or });
-            queries2.Add(new Query { QueryType = QueryType.SubQuery, SubQueries = queries3, LogicalOperator = LogicalOperatorType.Or });
-
-
-
-
-
-            queries.Add(new Query { QueryType = QueryType.Category, IntValue = 1 });
-            //queries.Add(new Query { QueryType = QueryType.Category, IntValue = 2, LogicalOperator = LogicalOperatorType.Or });
-            //queries.Add(new Query { QueryType = QueryType.Niche, IntValue = 3, LogicalOperator = LogicalOperatorType.And });
-            //queries.Add(new Query { QueryType = QueryType.Niche, IntValue = 4, LogicalOperator = LogicalOperatorType.Or });
-            //queries.Add(new Query { QueryType = QueryType.ProductRating, DoubleValue = 3, ComparisonOperator = ComparisonOperatorType.GreaterThanOrEqual, LogicalOperator = LogicalOperatorType.And });
-            //queries.Add(new Query { QueryType = QueryType.ProductPrice, DoubleValue = 16, ComparisonOperator = ComparisonOperatorType.LessThanOrEqual, LogicalOperator = LogicalOperatorType.And });
-            //queries.Add(new Query { QueryType = QueryType.ProductCreationDate, DateValue = new DateTime(2020, 5, 1, 8, 30, 52), ComparisonOperator = ComparisonOperatorType.GreaterThan, LogicalOperator = LogicalOperatorType.And });
-            queries.Add(new Query { QueryType = QueryType.SubQuery, SubQueries = queries2, LogicalOperator = LogicalOperatorType.Or });
-
-
-
-
-
-
-           
-
-
             async Task UpdateQueries(IEnumerable<Query> queries)
             {
                 foreach (Query query in queries)
@@ -205,17 +166,6 @@ namespace Manager.Repositories
                 }
             }
             await UpdateQueries(queries);
-
-
-
-
-
-
-
-
-
-
-
 
 
             return await context
