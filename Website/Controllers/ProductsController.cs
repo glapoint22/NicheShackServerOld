@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DataAccess.Models;
 using Microsoft.AspNetCore.Mvc;
 using Services;
+using Services.Classes;
 using Website.Classes;
 using Website.Repositories;
 using Website.ViewModels;
@@ -18,11 +19,13 @@ namespace Website.Controllers
     {
         private readonly IUnitOfWork unitOfWork;
         private readonly SearchSuggestionsService searchSuggestionsService;
+        private readonly QueryService queryService;
 
-        public ProductsController(IUnitOfWork unitOfWork, SearchSuggestionsService searchSuggestionsService)
+        public ProductsController(IUnitOfWork unitOfWork, SearchSuggestionsService searchSuggestionsService, QueryService queryService)
         {
             this.unitOfWork = unitOfWork;
             this.searchSuggestionsService = searchSuggestionsService;
+            this.queryService = queryService;
         }
 
 
@@ -153,61 +156,28 @@ namespace Website.Controllers
 
 
 
-
-
-
-
-
-
-
-        // ..................................................................................Get Products.....................................................................
-        [HttpGet]
-        public async Task<ActionResult> GetProducts(string query, string filters = "", string categoryId = "", string nicheId = "", string sort = "", double page = 1)
+        // ..................................................................................Get Grid Data.....................................................................
+        [HttpPost]
+        [Route("GridData")]
+        public async Task<ActionResult> GetGridData(QueryParams queryParams)
         {
-            //double productsPerPage = 40;
-            //QueryParams queryParams = new QueryParams(query, filters, categoryId, nicheId, sort);
-            //await queryParams.Init(unitOfWork);
+            // If the query is a keyword, add it to the keyword search volumes
+            if(queryParams.Search != null && queryParams.Search != string.Empty)
+            {
+                int keywordId = await unitOfWork.Keywords.Get(x => x.Name == queryParams.Search, x => x.Id);
+                if (keywordId > 0)
+                {
+                    unitOfWork.KeywordSearchVolumes.Add(new KeywordSearchVolume
+                    {
+                        KeywordId = keywordId,
+                        Date = DateTime.Now
+                    });
+                    await unitOfWork.Save();
+                }
+            }
+            
 
-            //IEnumerable<QueriedProduct> products = await unitOfWork.Products.GetProducts(queryParams);
-
-            //// If the query is a keyword, add it to the keyword search volumes
-            //int keywordId = await unitOfWork.Keywords.Get(x => x.Name == query, x => x.Id);
-            //if (keywordId > 0)
-            //{
-            //    unitOfWork.KeywordSearchVolumes.Add(new KeywordSearchVolume
-            //    {
-            //        KeywordId = keywordId,
-            //        Date = DateTime.Now
-            //    });
-            //    await unitOfWork.Save();
-            //}
-
-
-
-            //ProductViewModel productViewModel = new ProductViewModel(queryParams);
-            //int totalProducts = products.Count();
-
-            //var response = new
-            //{
-            //    products = products
-            //        .OrderBy(productViewModel)
-            //        .Select(productViewModel)
-            //        .Skip((int)((page - 1) * productsPerPage))
-            //        .Take((int)productsPerPage)
-            //        .ToList(),
-            //    totalProducts = totalProducts,
-            //    pageCount = Math.Ceiling(totalProducts / productsPerPage),
-            //    filters = await unitOfWork.Products.GetProductFilters(products, queryParams),
-            //    productCountStart = ((page - 1) * productsPerPage) + 1,
-            //    productCountEnd = Math.Min(page * productsPerPage, totalProducts),
-            //    sortOptions = query != string.Empty ? productViewModel.GetSearchSortOptions() : productViewModel.GetBrowseSortOptions()
-            //};
-
-
-
-            //return Ok(response);
-
-            return Ok();
+            return Ok(await queryService.GetGridData(queryParams));
         }
     }
 }

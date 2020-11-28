@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Services.Classes
 {
@@ -8,5 +6,6 @@ namespace Services.Classes
     {
         public int NicheId { get; set; }
         public double Weight { get; set; }
+        public DateTime Date { get; set; }
     }
 }

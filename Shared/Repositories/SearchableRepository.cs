@@ -25,10 +25,20 @@ namespace DataAccess.Repositories
 
             return await context.Set<T>()
                 .AsNoTracking()
-                .OrderBy(x => x.Name.StartsWith(searchWords) ? (x.Name == searchWords ? 0 : 1) : 2)
-                .WhereAny(searchWordsArray.Select(w => (Expression<Func<T, bool>>)(x => EF.Functions.Like(x.Name, w))).ToArray())
+                .OrderBy(x => x.Name.ToLower().StartsWith(searchWords.ToLower()) ? (x.Name.ToLower() == searchWords.ToLower() ? 0 : 1) :
+                    EF.Functions.Like(x.Name, searchWords + " %") ||
+                    EF.Functions.Like(x.Name, "% " + searchWords + " %") ||
+                    EF.Functions.Like(x.Name, "% " + searchWords)
+                    ? 2 : 3)
+                .WhereAny(searchWordsArray.Select(w => (Expression<Func<T, bool>>)(x =>
+                    EF.Functions.Like(x.Name, w + "[^a-z]%") ||
+                    EF.Functions.Like(x.Name, "%[^a-z]" + w + "[^a-z]%") ||
+                    EF.Functions.Like(x.Name, "%[^a-z]" + w))).ToArray())
                 .Select<T, TOut>()
                 .ToListAsync();
+
+
+            
         }
 
 
@@ -42,9 +52,16 @@ namespace DataAccess.Repositories
 
             return await context.Set<T>()
                 .AsNoTracking()
-                .OrderBy(x => x.Name.StartsWith(searchWords) ? (x.Name == searchWords ? 0 : 1) : 2)
+                .OrderBy(x => x.Name.ToLower().StartsWith(searchWords.ToLower()) ? (x.Name.ToLower() == searchWords.ToLower() ? 0 : 1) :
+                    EF.Functions.Like(x.Name, searchWords + " %") ||
+                    EF.Functions.Like(x.Name, "% " + searchWords + " %") ||
+                    EF.Functions.Like(x.Name, "% " + searchWords)
+                    ? 2 : 3)
                 .Where(predicate)
-                .WhereAny(searchWordsArray.Select(w => (Expression<Func<T, bool>>)(x => EF.Functions.Like(x.Name, w))).ToArray())
+                .WhereAny(searchWordsArray.Select(w => (Expression<Func<T, bool>>)(x =>
+                    EF.Functions.Like(x.Name, w + "[^a-z]%") ||
+                    EF.Functions.Like(x.Name, "%[^a-z]" + w + "[^a-z]%") ||
+                    EF.Functions.Like(x.Name, "%[^a-z]" + w))).ToArray())
                 .Select<T, TOut>()
                 .ToListAsync();
         }

@@ -87,6 +87,7 @@ namespace Services
                 minPrice = x.MinPrice,
                 maxPrice = x.MaxPrice,
                 nicheId = x.NicheId,
+                date = x.Date,
                 image = new Image
                 {
                     Name = x.Media.Name,
@@ -146,6 +147,7 @@ namespace Services
                 MaxPrice = product.maxPrice,
                 Image = product.image,
                 Rating = product.rating,
+                Date = product.date,
                 Weight = (product.rating * 0.8) + (productSalesCount.count * 0.15) + (product.mediaCount * .05)
             }).ToList();
         }

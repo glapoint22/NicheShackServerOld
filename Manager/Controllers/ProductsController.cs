@@ -8,8 +8,6 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using Manager.Classes;
 using System;
-using Manager.ViewModels;
-using System.Collections;
 using Services.Classes;
 using Services;
 
