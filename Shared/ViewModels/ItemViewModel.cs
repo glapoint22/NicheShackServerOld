@@ -13,9 +13,9 @@ namespace DataAccess.ViewModels
 
 
 
-    public class ItemViewModel<T>: ItemViewModel, ISelect<T, ItemViewModel<T>> where T: class, IItem
+    public class ItemViewModel<T>: ItemViewModel, IQueryableSelect<T, ItemViewModel<T>> where T: class, IItem
     {
-        public IQueryable<ItemViewModel<T>> ViewModelSelect(IQueryable<T> source)
+        public IQueryable<ItemViewModel<T>> Select(IQueryable<T> source)
         {
             return source.Select(x => new ItemViewModel<T>
             {

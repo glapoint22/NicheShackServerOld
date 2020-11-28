@@ -4,13 +4,13 @@ using System.Linq;
 
 namespace Manager.ViewModels
 {
-    public class ProductImageNotificationViewModel: GeneralNotificationViewModel, ISelect<Notification, ProductImageNotificationViewModel>
+    public class ProductImageNotificationViewModel: GeneralNotificationViewModel, IQueryableSelect<Notification, ProductImageNotificationViewModel>
     {
         public ImageViewModel Image { get; set; }
 
-        public new IQueryable<ProductImageNotificationViewModel> ViewModelSelect(IQueryable<Notification> source)
+        public new IQueryable<ProductImageNotificationViewModel> Select(IQueryable<Notification> source)
         {
-            GeneralNotificationViewModel generalNotificationViewModel = base.ViewModelSelect(source).SingleOrDefault();
+            GeneralNotificationViewModel generalNotificationViewModel = base.Select(source).SingleOrDefault();
 
 
             return source.Select(x => new ProductImageNotificationViewModel

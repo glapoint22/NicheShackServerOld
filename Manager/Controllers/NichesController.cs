@@ -37,13 +37,7 @@ namespace Manager.Controllers
         }
 
 
-        [Route("CategoryIds")]
-        [HttpPost]
-        public async Task<ActionResult> GetMultiNiches(Niches niches)
-        {
-            return Ok(await unitOfWork.Niches.GetCollection(x => niches.CategoryIds.Contains(x.CategoryId)));
-        }
-
+        
 
 
         [HttpPut]

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Website.Classes
+namespace Services.Classes
 {
     public struct Filters
     {

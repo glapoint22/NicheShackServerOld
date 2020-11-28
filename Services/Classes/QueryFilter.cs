@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
-namespace Website.Classes
+namespace Services.Classes
 {
     public class QueryFilter
     {

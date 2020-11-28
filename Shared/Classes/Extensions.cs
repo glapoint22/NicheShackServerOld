@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using DataAccess.Interfaces;
@@ -7,27 +8,39 @@ namespace DataAccess.Classes
 {
     public static class Extensions
     {
-        // ..................................................................................Sort By.....................................................................
-        public static IOrderedQueryable<T> SortBy<T>(this IQueryable<T> source, ISort<T> dto) where T : class
+        // ..................................................................................Order By.....................................................................
+        public static IOrderedQueryable<T> OrderBy<T>(this IQueryable<T> source, IQueryableOrderBy<T> obj) where T : class
         {
-            return dto.SetSortOption(source);
+            return obj.OrderBy(source);
+        }
+
+
+        public static IOrderedEnumerable<T> OrderBy<T>(this IEnumerable<T> source, IEnumerableOrderBy<T> obj) where T : class
+        {
+            return obj.OrderBy(source);
         }
 
 
         // ..................................................................................Where.....................................................................
-        public static IQueryable<T> Where<T>(this IQueryable<T> source, IWhere<T> dto) where T : class
+        public static IQueryable<T> Where<T>(this IQueryable<T> source, IWhere<T> obj) where T : class
         {
-            return dto.SetWhere(source);
+            return obj.SetWhere(source);
         }
 
 
 
         
         // ..................................................................................Select.....................................................................
-        public static IQueryable<TOut> ExtensionSelect<T, TOut>(this IQueryable<T> source) where T : class where TOut : class, new()
+        public static IQueryable<TOut> Select<T, TOut>(this IQueryable<T> source) where T : class where TOut : class, new()
         {
-            ISelect<T, TOut> viewModel = (ISelect<T, TOut>)new TOut();
-            return viewModel.ViewModelSelect(source);
+            IQueryableSelect<T, TOut> obj = (IQueryableSelect<T, TOut>)new TOut();
+            return obj.Select(source);
+        }
+
+
+        public static IEnumerable<TOut> Select<T, TOut>(this IEnumerable<T> source, IEnumerableSelect<T, TOut> obj) where T : class where TOut : class
+        {
+            return obj.Select(source);
         }
 
 

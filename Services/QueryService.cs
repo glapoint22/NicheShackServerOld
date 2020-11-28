@@ -1,37 +1,64 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DataAccess.Classes;
+using DataAccess.Models;
+using Microsoft.EntityFrameworkCore;
+using Services.Classes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Website.Classes;
-using DataAccess.Models;
-using DataAccess.Repositories;
-using DataAccess.Classes;
-using Website.ViewModels;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 
-namespace Website.Repositories
+namespace Services
 {
-    public class ProductRepository : Repository<Product>, IProductRepository
+    public class QueryService
     {
-        // Set the context
         private readonly NicheShackContext context;
-        public ProductRepository(NicheShackContext context) : base(context)
+
+        public QueryService(NicheShackContext context)
         {
             this.context = context;
         }
 
 
-
-
-        // ..................................................................................Query Products.....................................................................
-        private async Task<List<T>> QueryProducts<T>(QueryParams queryParams, Expression<Func<Product, T>> select)
+        // ..................................................................................Get Grid Data.....................................................................
+        public async Task<GridData> GetGridData(QueryParams queryParams)
         {
-            ProductViewModel productViewModel = new ProductViewModel(queryParams);
+            await queryParams.Init(context);
+
+            List<QueryResult> products = await QueryProducts(queryParams);
+            QueryBuilder queryBuilder = new QueryBuilder(queryParams);
+            int totalProducts = products.Count();
+
+            return new GridData
+            {
+                Products = products
+                    .OrderBy(queryBuilder)
+                    .Select(queryBuilder)
+                    .Skip((int)((queryParams.Page - 1) * queryParams.Limit))
+                    .Take((int)queryParams.Limit)
+                    .ToList(),
+                TotalProducts = totalProducts,
+                PageCount = Math.Ceiling(totalProducts / queryParams.Limit),
+                Filters = await GetProductFilters(products, queryParams),
+                ProductCountStart = ((queryParams.Page - 1) * queryParams.Limit) + 1,
+                ProductCountEnd = Math.Min(queryParams.Page * queryParams.Limit, totalProducts),
+                SortOptions = queryParams.Search != null && queryParams.Search != string.Empty ? queryBuilder.GetSearchSortOptions() : queryBuilder.GetBrowseSortOptions()
+            };
+        }
+
+
+
+
+
+
+        // ..................................................................................Get Products.....................................................................
+        private async Task<List<T>> GetProducts<T>(QueryParams queryParams, Expression<Func<Product, T>> select)
+        {
+            QueryBuilder queryBuilder = new QueryBuilder(queryParams);
 
             return await context.Products
                 .AsNoTracking()
-                .Where(productViewModel)
+                .Where(queryBuilder)
                 .Select(select)
                 .ToListAsync();
         }
@@ -45,11 +72,11 @@ namespace Website.Repositories
 
 
 
-        // ..................................................................................Get Products.....................................................................
-        public async Task<IEnumerable<QueriedProduct>> GetProducts(QueryParams queryParams)
+        // ..................................................................................Query Products.....................................................................
+        private async Task<List<QueryResult>> QueryProducts(QueryParams queryParams)
         {
             // Query the products
-            var products = await QueryProducts(queryParams, x => new
+            var products = await GetProducts(queryParams, x => new
             {
                 id = x.Id,
                 name = x.Name,
@@ -60,7 +87,7 @@ namespace Website.Repositories
                 minPrice = x.MinPrice,
                 maxPrice = x.MaxPrice,
                 nicheId = x.NicheId,
-                image = new ImageViewModel
+                image = new Image
                 {
                     Name = x.Media.Name,
                     Url = x.Media.Url
@@ -107,7 +134,7 @@ namespace Website.Repositories
 
 
             // Join the products and product sales counts to get the final result
-            return products.Join(productSalesCounts, x => x.id, y => y.productId, (product, productSalesCount) => new QueriedProduct
+            return products.Join(productSalesCounts, x => x.id, y => y.productId, (product, productSalesCount) => new QueryResult
             {
                 Id = product.id,
                 Name = product.name,
@@ -127,14 +154,8 @@ namespace Website.Repositories
 
 
 
-
-
-
-
-
-
         // ..................................................................................Get Product Filters.....................................................................
-        public async Task<Filters> GetProductFilters(IEnumerable<QueriedProduct> products, QueryParams queryParams)
+        public async Task<Filters> GetProductFilters(IEnumerable<QueryResult> products, QueryParams queryParams)
         {
             Filters filters = new Filters();
             List<int> productIds = products.Select(x => x.Id).ToList();
@@ -266,7 +287,8 @@ namespace Website.Repositories
                             Niches = new NichesFilter
                             {
                                 ShowHidden = false,
-                                Visible = z.Niches.Where(w => w.key).Select(n => n.niches.Select(a => new NicheFilter { 
+                                Visible = z.Niches.Where(w => w.key).Select(n => n.niches.Select(a => new NicheFilter
+                                {
                                     UrlId = a.UrlId,
                                     UrlName = a.UrlName,
                                     Name = a.Name
@@ -324,7 +346,7 @@ namespace Website.Repositories
             }
 
 
-            
+
 
 
 
@@ -340,7 +362,7 @@ namespace Website.Repositories
                 queryParams.PriceFilter = null;
 
                 // Query products without the price filter
-                var prods = await QueryProducts(queryParams, x => new
+                var prods = await GetProducts(queryParams, x => new
                 {
                     x.MinPrice,
                     x.MaxPrice
@@ -423,7 +445,7 @@ namespace Website.Repositories
                 // This is so we can get other rating filters that belong in the results
                 var ratingFilter = queryParams.RatingFilter;
                 queryParams.RatingFilter = null;
-                productRatings = await QueryProducts(queryParams, x => x.Rating);
+                productRatings = await GetProducts(queryParams, x => x.Rating);
                 queryParams.RatingFilter = ratingFilter;
 
                 List<double> selectedRatingOptions = ratingFilter.Options.Select(x => Convert.ToDouble(x.Id)).ToList();
@@ -510,7 +532,7 @@ namespace Website.Repositories
                 queryParams.CustomFilters = customFilters.Where(x => x.Caption != customFilter.Caption).ToList();
 
                 await queryParams.SetFilteredProducts();
-                var pIds = await QueryProducts(queryParams, x => x.Id);
+                var pIds = await GetProducts(queryParams, x => x.Id);
 
                 List<int> optionsIds;
 
@@ -565,7 +587,4 @@ namespace Website.Repositories
             return filters;
         }
     }
-
-
-
 }

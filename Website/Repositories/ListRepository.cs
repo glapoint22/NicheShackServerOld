@@ -66,7 +66,7 @@ namespace Website.Repositories
             // Gets products based on collaborators from a list.
             var products = await context.ListProducts
                 .AsNoTracking()
-                .SortBy(new ListProductViewModel(sort))
+                .OrderBy(new ListProductViewModel(sort))
                 .Where(x => collaboratorIds
                     .Contains(x.CollaboratorId))
                 .Select(x => new ListProductViewModel

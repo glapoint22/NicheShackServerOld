@@ -4,13 +4,13 @@ using System.Linq;
 
 namespace Manager.ViewModels
 {
-    public class ProductDescriptionNotificationViewModel: GeneralNotificationViewModel, ISelect<Notification, ProductDescriptionNotificationViewModel>
+    public class ProductDescriptionNotificationViewModel: GeneralNotificationViewModel, IQueryableSelect<Notification, ProductDescriptionNotificationViewModel>
     {
         public string ProductDescription { get; set; }
 
-        public new IQueryable<ProductDescriptionNotificationViewModel> ViewModelSelect(IQueryable<Notification> source)
+        public new IQueryable<ProductDescriptionNotificationViewModel> Select(IQueryable<Notification> source)
         {
-            GeneralNotificationViewModel generalNotificationViewModel = base.ViewModelSelect(source).SingleOrDefault();
+            GeneralNotificationViewModel generalNotificationViewModel = base.Select(source).SingleOrDefault();
 
             return source.Select(x => new ProductDescriptionNotificationViewModel
             {

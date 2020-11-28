@@ -10,6 +10,8 @@ using Manager.Classes;
 using System;
 using Manager.ViewModels;
 using System.Collections;
+using Services.Classes;
+using Services;
 
 namespace Manager.Controllers
 {
@@ -18,10 +20,12 @@ namespace Manager.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly IUnitOfWork unitOfWork;
+        private readonly QueryService queryService;
 
-        public ProductsController(IUnitOfWork unitOfWork)
+        public ProductsController(IUnitOfWork unitOfWork, QueryService queryService)
         {
             this.unitOfWork = unitOfWork;
+            this.queryService = queryService;
         }
 
         [HttpGet]
@@ -34,189 +38,11 @@ namespace Manager.Controllers
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
         [HttpPost]
-        [Route("Alita")]
-        public async Task<ActionResult> Alita(List<Query> queries)
+        [Route("GridData")]
+        public async Task<ActionResult> GetGridData(QueryParams queryParams)
         {
-
-
-
-
-            ////---------CATEGORIES ONLY---------\\
-            //int[] categoryIds = new int[] { 1, 2 };
-            //IEnumerable<int> nicheIds = await unitOfWork.Niches.GetCollection(x => categoryIds.Contains(x.CategoryId), x => x.Id);
-            //IEnumerable<QueryBuilderViewModel> products = await unitOfWork.Products.GetCollection(x => nicheIds.Contains(x.NicheId), x => new QueryBuilderViewModel
-            //{
-            //    Name = x.Name,
-            //    Rating = x.Rating,
-            //    TotalReviews = x.TotalReviews,
-            //    MinPrice = x.MinPrice,
-            //    MaxPrice = x.MaxPrice,
-            //    ImageName = x.Media.Name,
-            //    ImageUrl = x.Media.Url
-            //});
-
-
-
-
-
-
-            ////---------NICHES ONLY---------\\
-            //int[] nicheIds = new int[] { 1, 2 };
-            //IEnumerable<QueryBuilderViewModel> products = await unitOfWork.Products.GetCollection(x => nicheIds.Contains(x.NicheId), x => new QueryBuilderViewModel
-            //{
-            //    Name = x.Name,
-            //    Rating = x.Rating,
-            //    TotalReviews = x.TotalReviews,
-            //    MinPrice = x.MinPrice,
-            //    MaxPrice = x.MaxPrice,
-            //    ImageName = x.Media.Name,
-            //    ImageUrl = x.Media.Url
-            //});
-
-
-
-
-
-
-
-
-            ////---------NICHES PLUS---------\\
-            //int[] nicheIds = new int[] { 1, 2 };
-            //string[] keywords = new string[] { "voice", "jazzy" };
-            //IEnumerable<int> productIds = await unitOfWork.ProductKeywords.GetCollection(x => keywords.Contains(x.Name), x => x.ProductId);
-
-
-            //IEnumerable<QueryBuilderViewModel> products = await unitOfWork.Products.GetCollection(x =>
-
-
-            //nicheIds.Contains(x.NicheId)
-
-            //&& x.Rating > 3
-
-            //&& ((x.MaxPrice == 0 && x.MinPrice > 10) || (x.MaxPrice != 0 && x.MaxPrice > 10))
-
-            //&& productIds.Contains(x.Id)
-
-
-
-            //, x => new QueryBuilderViewModel
-            //{
-            //    Name = x.Name,
-            //    Rating = x.Rating,
-            //    TotalReviews = x.TotalReviews,
-            //    MinPrice = x.MinPrice,
-            //    MaxPrice = x.MaxPrice,
-            //    ImageName = x.Media.Name,
-            //    ImageUrl = x.Media.Url
-            //});
-
-
-
-
-
-
-
-
-            ////---------RATING ONLY---------\\
-            //IEnumerable<QueryBuilderViewModel> products = await unitOfWork.Products.GetCollection(x => x.Rating > 3, x => new QueryBuilderViewModel
-            //{
-            //    Name = x.Name,
-            //    Rating = x.Rating,
-            //    TotalReviews = x.TotalReviews,
-            //    MinPrice = x.MinPrice,
-            //    MaxPrice = x.MaxPrice,
-            //    ImageName = x.Media.Name,
-            //    ImageUrl = x.Media.Url
-            //});
-
-
-
-            ////---------PRICE ONLY---------\\
-            //IEnumerable<QueryBuilderViewModel> products = await unitOfWork.Products.GetCollection(x => (x.MaxPrice == 0 && x.MinPrice > 17) || (x.MaxPrice != 0 && x.MaxPrice > 17), x => new QueryBuilderViewModel
-            //{
-            //    Name = x.Name,
-            //    Rating = x.Rating,
-            //    TotalReviews = x.TotalReviews,
-            //    MinPrice = x.MinPrice,
-            //    MaxPrice = x.MaxPrice,
-            //    ImageName = x.Media.Name,
-            //    ImageUrl = x.Media.Url
-            //});
-
-
-            ////---------KEYWORDS ONLY---------\\
-            //string[] keywords = new string[] { "voice", "jazzy" };
-            //IEnumerable<int> productIds = await unitOfWork.ProductKeywords.GetCollection(x => keywords.Contains(x.Name), x => x.ProductId);
-            //IEnumerable<QueryBuilderViewModel> products = await unitOfWork.Products.GetCollection(x => productIds.Contains(x.Id), x => new QueryBuilderViewModel
-            //{
-            //    Name = x.Name,
-            //    Rating = x.Rating,
-            //    TotalReviews = x.TotalReviews,
-            //    MinPrice = x.MinPrice,
-            //    MaxPrice = x.MaxPrice,
-            //    ImageName = x.Media.Name,
-            //    ImageUrl = x.Media.Url
-            //});
-
-
-
-            ////---------FEATURED ONLY---------\\
-            //int[] productIds = new int[] { 1, 2 };
-            //IEnumerable<QueryBuilderViewModel> products = await unitOfWork.Products.GetCollection(x => productIds.Contains(x.Id), x => new QueryBuilderViewModel
-            //{
-            //    Name = x.Name,
-            //    Rating = x.Rating,
-            //    TotalReviews = x.TotalReviews,
-            //    MinPrice = x.MinPrice,
-            //    MaxPrice = x.MaxPrice,
-            //    ImageName = x.Media.Name,
-            //    ImageUrl = x.Media.Url
-            //});
-
-
-
-
-            //return Ok(products);
-
-
-
-            //var queryBuilderData = new QueryBuilderData();
-
-            //List<int> categoryIds = new List<int>();
-            //categoryIds.Add(1);
-            //categoryIds.Add(2);
-
-            //List<string> keywords = new List<string>();
-            //keywords.Add("voice");
-            //keywords.Add("jazzy");
-
-
-
-
-
-            //queryBuilderData.CategoryIds = categoryIds;
-            //queryBuilderData.Keywords = keywords;
-
-
-            var battle = await unitOfWork.Products.GetAlita(queries);
-
-
-            return Ok(battle);
-
+            return Ok(await queryService.GetGridData(queryParams));
         }
 
 

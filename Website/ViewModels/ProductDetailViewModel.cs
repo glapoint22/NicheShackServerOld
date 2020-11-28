@@ -4,7 +4,7 @@ using DataAccess.Models;
 
 namespace Website.ViewModels
 {
-    public class ProductDetailViewModel : ISelect<Product, ProductDetailViewModel>
+    public class ProductDetailViewModel : IQueryableSelect<Product, ProductDetailViewModel>
     {
         public int Id { get; set; }
         public string UrlId { get; set; }
@@ -25,7 +25,7 @@ namespace Website.ViewModels
 
 
         // ..................................................................................Set Select.....................................................................
-        public IQueryable<ProductDetailViewModel> ViewModelSelect(IQueryable<Product> source)
+        public IQueryable<ProductDetailViewModel> Select(IQueryable<Product> source)
         {
             return source.Select(x => new ProductDetailViewModel
             {

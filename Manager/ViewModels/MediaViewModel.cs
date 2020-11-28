@@ -4,13 +4,13 @@ using System.Linq;
 
 namespace Manager.ViewModels
 {
-    public class MediaViewModel : ImageViewModel, ISelect<Media, MediaViewModel>, IItem
+    public class MediaViewModel : ImageViewModel, IQueryableSelect<Media, MediaViewModel>, IItem
     {
         public string Thumbnail { get; set; }
         public int Type { get; set; }
 
 
-        public IQueryable<MediaViewModel> ViewModelSelect(IQueryable<Media> source)
+        public IQueryable<MediaViewModel> Select(IQueryable<Media> source)
         {
             return source.Select(x => new MediaViewModel
             {

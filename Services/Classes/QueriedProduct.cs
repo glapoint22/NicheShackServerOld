@@ -1,6 +1,6 @@
-﻿namespace Website.ViewModels
+﻿namespace Services.Classes
 {
-    public class ProductViewModel
+    public class QueriedProduct
     {
         public int Id { get; set; }
         public string Name { get; set; }
@@ -10,6 +10,6 @@
         public int TotalReviews { get; set; }
         public double MinPrice { get; set; }
         public double MaxPrice { get; set; }
-        public ImageViewModel Image { get; set; }
+        public Image Image { get; set; }
     }
 }

@@ -12,9 +12,9 @@ namespace Website.ViewModels
     }
 
 
-    public class UrlItemViewModel<T> : UrlItemViewModel, ISelect<T, UrlItemViewModel<T>> where T : class, IUrlItem
+    public class UrlItemViewModel<T> : UrlItemViewModel, IQueryableSelect<T, UrlItemViewModel<T>> where T : class, IUrlItem
     {
-        public IQueryable<UrlItemViewModel<T>> ViewModelSelect(IQueryable<T> source)
+        public IQueryable<UrlItemViewModel<T>> Select(IQueryable<T> source)
         {
             return source.Select(x => new UrlItemViewModel<T>
             {

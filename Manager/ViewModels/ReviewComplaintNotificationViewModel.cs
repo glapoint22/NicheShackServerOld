@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace Manager.ViewModels
 {
-    public class ReviewComplaintNotificationViewModel: GeneralNotificationViewModel, ISelect<Notification, ReviewComplaintNotificationViewModel>
+    public class ReviewComplaintNotificationViewModel: GeneralNotificationViewModel, IQueryableSelect<Notification, ReviewComplaintNotificationViewModel>
     {
         public NotificationTextViewModel Review { get; set; }
 
-        public new IQueryable<ReviewComplaintNotificationViewModel> ViewModelSelect(IQueryable<Notification> source)
+        public new IQueryable<ReviewComplaintNotificationViewModel> Select(IQueryable<Notification> source)
         {
-            GeneralNotificationViewModel generalNotificationViewModel = base.ViewModelSelect(source).SingleOrDefault();
+            GeneralNotificationViewModel generalNotificationViewModel = base.Select(source).SingleOrDefault();
 
             return source.Select(x => new ReviewComplaintNotificationViewModel
             {

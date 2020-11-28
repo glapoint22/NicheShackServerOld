@@ -14,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Services;
 
 namespace Manager
 {
@@ -39,6 +40,7 @@ namespace Manager
             });
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<QueryService>();
 
             services.AddControllers();
         }

@@ -5,9 +5,9 @@ using DataAccess.Models;
 
 namespace Website.ViewModels
 {
-    public class ListProductViewModel : ISort<ListProduct>
+    public class ListProductViewModel : IQueryableOrderBy<ListProduct>
     {
-        private readonly string sortBy;
+        private readonly string orderBy;
 
         public int Id { get; set; }
         public string UrlId { get; set; }
@@ -25,9 +25,9 @@ namespace Website.ViewModels
         // Constructors
         public ListProductViewModel() { }
 
-        public ListProductViewModel(string sortBy)
+        public ListProductViewModel(string orderBy)
         {
-            this.sortBy = sortBy;
+            this.orderBy = orderBy;
         }
 
 
@@ -46,32 +46,32 @@ namespace Website.ViewModels
 
 
 
-        // .............................................................................Set Sort Option.....................................................................
-        public IOrderedQueryable<ListProduct> SetSortOption(IQueryable<ListProduct> source)
+        // .............................................................................Order By.....................................................................
+        public IOrderedQueryable<ListProduct> OrderBy(IQueryable<ListProduct> source)
         {
-            IOrderedQueryable<ListProduct> sortResult = null;
+            IOrderedQueryable<ListProduct> orderResult = null;
 
 
-            switch (sortBy)
+            switch (orderBy)
             {
                 case "price-asc":
-                    sortResult = source.OrderBy(x => x.Product.MinPrice);
+                    orderResult = source.OrderBy(x => x.Product.MinPrice);
                     break;
                 case "price-desc":
-                    sortResult = source.OrderByDescending(x => x.Product.MinPrice);
+                    orderResult = source.OrderByDescending(x => x.Product.MinPrice);
                     break;
                 case "rating":
-                    sortResult = source.OrderByDescending(x => x.Product.Rating);
+                    orderResult = source.OrderByDescending(x => x.Product.Rating);
                     break;
                 case "title":
-                    sortResult = source.OrderBy(x => x.Product.Name);
+                    orderResult = source.OrderBy(x => x.Product.Name);
                     break;
                 default:
-                    sortResult = source.OrderByDescending(x => x.DateAdded);
+                    orderResult = source.OrderByDescending(x => x.DateAdded);
                     break;
             }
 
-            return sortResult;
+            return orderResult;
         }
     }
 }

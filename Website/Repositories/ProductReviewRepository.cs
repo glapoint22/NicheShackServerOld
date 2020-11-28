@@ -28,10 +28,10 @@ namespace Website.Repositories
 
             return await context.ProductReviews
                 .AsNoTracking()
-                .SortBy(productReviewDTO)
+                .OrderBy(productReviewDTO)
                 .ThenByDescending(x => x.Date)
                 .Where(x => x.Product.UrlId == productId)
-                .ExtensionSelect<ProductReview, ProductReviewViewModel>()
+                .Select<ProductReview, ProductReviewViewModel>()
                 .Skip((page - 1) * productReviewDTO.GetReviewsPerPage())
                 .Take(productReviewDTO.GetReviewsPerPage())
                 .ToListAsync();
@@ -50,7 +50,7 @@ namespace Website.Repositories
                 .ThenByDescending(x => x.Likes)
                 .ThenByDescending(x => x.Date)
                 .Where(x => x.Product.UrlId == productId && x.Likes > 0)
-                .ExtensionSelect<ProductReview, ProductReviewViewModel>()
+                .Select<ProductReview, ProductReviewViewModel>()
                 .FirstOrDefaultAsync();
         }
 
@@ -67,7 +67,7 @@ namespace Website.Repositories
                 .ThenByDescending(x => x.Likes)
                 .ThenByDescending(x => x.Date)
                 .Where(x => x.Product.UrlId == productId && x.Likes > 0)
-                .ExtensionSelect<ProductReview, ProductReviewViewModel>()
+                .Select<ProductReview, ProductReviewViewModel>()
                 .FirstOrDefaultAsync();
         }
     }

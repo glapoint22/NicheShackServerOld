@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Manager.ViewModels
 {
-    public class GeneralNotificationViewModel: NotificationViewModel, ISelect<Notification, GeneralNotificationViewModel>
+    public class GeneralNotificationViewModel: NotificationViewModel, IQueryableSelect<Notification, GeneralNotificationViewModel>
     {
         public string ProductThumbnail { get; set; }
         public string ProductName { get; set; }
@@ -12,10 +12,10 @@ namespace Manager.ViewModels
         public int? VendorId { get; set; }
         public string Hoplink { get; set; }
 
-        public new IQueryable<GeneralNotificationViewModel> ViewModelSelect(IQueryable<Notification> source)
+        public new IQueryable<GeneralNotificationViewModel> Select(IQueryable<Notification> source)
         {
 
-            NotificationViewModel notificationViewModel = base.ViewModelSelect(source).SingleOrDefault();
+            NotificationViewModel notificationViewModel = base.Select(source).SingleOrDefault();
 
             return source.Select(x => new GeneralNotificationViewModel
             {

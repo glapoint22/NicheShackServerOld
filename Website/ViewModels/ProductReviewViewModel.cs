@@ -5,9 +5,9 @@ using DataAccess.Models;
 
 namespace Website.ViewModels
 {
-    public class ProductReviewViewModel : ISelect<ProductReview, ProductReviewViewModel>, ISort<ProductReview>
+    public class ProductReviewViewModel : IQueryableSelect<ProductReview, ProductReviewViewModel>, IQueryableOrderBy<ProductReview>
     {
-        private readonly string sortBy;
+        private readonly string orderBy;
 
         public int Id { get; set; }
         public string Title { get; set; }
@@ -26,9 +26,9 @@ namespace Website.ViewModels
         // Constructors
         public ProductReviewViewModel() { }
 
-        public ProductReviewViewModel(string sortBy)
+        public ProductReviewViewModel(string orderBy)
         {
-            this.sortBy = sortBy;
+            this.orderBy = orderBy;
         }
 
 
@@ -59,7 +59,7 @@ namespace Website.ViewModels
 
 
         // ..................................................................................Set Select.....................................................................
-        public IQueryable<ProductReviewViewModel> ViewModelSelect(IQueryable<ProductReview> source)
+        public IQueryable<ProductReviewViewModel> Select(IQueryable<ProductReview> source)
         {
             return source.Select(x => new ProductReviewViewModel
             {
@@ -80,37 +80,37 @@ namespace Website.ViewModels
 
 
 
-        // .............................................................................Set Sort Option.....................................................................
-        public IOrderedQueryable<ProductReview> SetSortOption(IQueryable<ProductReview> source)
+        // .............................................................................Order By.....................................................................
+        public IOrderedQueryable<ProductReview> OrderBy(IQueryable<ProductReview> source)
         {
-            IOrderedQueryable<ProductReview> sortOption = null;
+            IOrderedQueryable<ProductReview> orderResult = null;
 
 
-            switch (sortBy)
+            switch (orderBy)
             {
                 case "low-high-rating":
-                    sortOption = source.OrderBy(x => x.Rating);
+                    orderResult = source.OrderBy(x => x.Rating);
                     break;
 
                 case "new-old":
-                    sortOption = source.OrderByDescending(x => x.Date);
+                    orderResult = source.OrderByDescending(x => x.Date);
                     break;
 
                 case "old-new":
-                    sortOption = source.OrderBy(x => x.Date);
+                    orderResult = source.OrderBy(x => x.Date);
                     break;
 
                 case "most-helpful":
-                    sortOption = source.OrderByDescending(x => x.Likes);
+                    orderResult = source.OrderByDescending(x => x.Likes);
                     break;
 
                 default:
                     // High to low rating
-                    sortOption = source.OrderByDescending(x => x.Rating);
+                    orderResult = source.OrderByDescending(x => x.Rating);
                     break;
             }
 
-            return sortOption;
+            return orderResult;
         }
     }
 }

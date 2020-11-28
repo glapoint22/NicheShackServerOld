@@ -2,10 +2,8 @@
 using DataAccess.Models;
 using DataAccess.Repositories;
 using DataAccess.ViewModels;
-using Manager.Classes;
 using Manager.ViewModels;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -126,63 +124,6 @@ namespace Manager.Repositories
                     MaxPrice = x.MaxPrice
                 }).SingleOrDefaultAsync();
 
-
-
-
-
-
-
-        }
-
-
-
-
-
-
-        public async Task<IEnumerable<QueryBuilderViewModel>> GetAlita(List<Query> queries)
-        {
-            
-            async Task UpdateQueries(IEnumerable<Query> queries)
-            {
-                foreach (Query query in queries)
-                {
-                    if (query.QueryType == QueryType.ProductSubgroup)
-                    {
-                        query.IntValues = await context.SubgroupProducts.Where(x => x.SubgroupId == query.IntValue).Select(x => x.ProductId).ToListAsync();
-                    }
-
-
-                    if (query.QueryType == QueryType.ProductKeywords)
-                    {
-                        List<int> keywordIds = await context.ProductKeywords.Where(x => query.StringValues.Contains(x.Keyword.Name)).Select(x => x.Keyword.Id).Distinct().ToListAsync();
-                        query.IntValues = await context.ProductKeywords.Where(x => keywordIds.Contains(x.KeywordId)).Select(x => x.ProductId).ToListAsync();
-                    }
-
-
-                    if (query.QueryType == QueryType.SubQuery)
-                    {
-                        await UpdateQueries(query.SubQueries);
-                    }
-                }
-            }
-            await UpdateQueries(queries);
-
-
-            return await context
-            .Products
-            .AsNoTracking()
-            .Where(new QueryBuilderViewModel(queries))
-            .Select(x => new QueryBuilderViewModel
-            {
-                Name = x.Name,
-                Rating = x.Rating,
-                TotalReviews = x.TotalReviews,
-                MinPrice = x.MinPrice,
-                MaxPrice = x.MaxPrice,
-                ImageName = x.Media.Name,
-                ImageUrl = x.Media.Url
-
-            }).ToListAsync();
         }
     }
 }

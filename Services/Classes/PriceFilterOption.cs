@@ -1,4 +1,4 @@
-﻿namespace Website.Classes
+﻿namespace Services.Classes
 {
     public struct PriceFilterOption
     {

@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Manager.ViewModels
 {
-    public class ProductContentNotificationViewModel: GeneralNotificationViewModel, ISelect<Notification, ProductContentNotificationViewModel>
+    public class ProductContentNotificationViewModel: GeneralNotificationViewModel, IQueryableSelect<Notification, ProductContentNotificationViewModel>
     {
         public IEnumerable<ProductContentViewModel> Content { get; set; }
         public IEnumerable<ProductPricePointViewModel> PricePoints { get; set; }
@@ -13,9 +13,9 @@ namespace Manager.ViewModels
         public double MaxPrice { get; set; }
 
 
-        public new IQueryable<ProductContentNotificationViewModel> ViewModelSelect(IQueryable<Notification> source)
+        public new IQueryable<ProductContentNotificationViewModel> Select(IQueryable<Notification> source)
         {
-            GeneralNotificationViewModel generalNotificationViewModel = base.ViewModelSelect(source).SingleOrDefault();
+            GeneralNotificationViewModel generalNotificationViewModel = base.Select(source).SingleOrDefault();
 
             return source.Select(x => new ProductContentNotificationViewModel
             {

@@ -7,17 +7,17 @@ using System.Threading.Tasks;
 
 namespace Manager.ViewModels
 {
-    public class MessageNotificationViewModel : NotificationViewModel, ISelect<Notification, MessageNotificationViewModel>
+    public class MessageNotificationViewModel : NotificationViewModel, IQueryableSelect<Notification, MessageNotificationViewModel>
     {
 
         public string MessengerName { get; set; }
         public string Email { get; set; }
 
 
-        public new IQueryable<MessageNotificationViewModel> ViewModelSelect(IQueryable<Notification> source)
+        public new IQueryable<MessageNotificationViewModel> Select(IQueryable<Notification> source)
         {
 
-            NotificationViewModel notificationViewModel = base.ViewModelSelect(source).SingleOrDefault();
+            NotificationViewModel notificationViewModel = base.Select(source).SingleOrDefault();
 
             return source.Select(x => new MessageNotificationViewModel
             {

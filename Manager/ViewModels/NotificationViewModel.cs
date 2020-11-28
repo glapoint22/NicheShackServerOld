@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Manager.ViewModels
 {
-    public class NotificationViewModel: ISelect<Notification, NotificationViewModel>
+    public class NotificationViewModel: IQueryableSelect<Notification, NotificationViewModel>
     {
         public string Name { get; set; }
         public NotificationTextViewModel CustomerText { get; set; }
@@ -14,7 +14,7 @@ namespace Manager.ViewModels
         public int Type { get; set; }
 
 
-        public IQueryable<NotificationViewModel> ViewModelSelect(IQueryable<Notification> source)
+        public IQueryable<NotificationViewModel> Select(IQueryable<Notification> source)
         {
             return source.Select(x => new NotificationViewModel
             {

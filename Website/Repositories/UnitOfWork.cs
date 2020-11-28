@@ -7,13 +7,13 @@ namespace Website.Repositories
     public class UnitOfWork : IUnitOfWork
     {
         public ICategoryRepository Categories { get; private set; }
-        public IProductRepository Products { get; private set; }
         public IProductReviewRepository ProductReviews { get; private set; }
         public IListRepository Lists { get; }
         public IProductOrderRepository ProductOrders { get; }
 
 
         // Generic repositories
+        public IRepository<Product> Products { get; private set; }
         public IRepository<ProductMedia> ProductMedia { get; private set; }
         public IRepository<ProductContent> ProductContent { get; private set; }
         public IRepository<ProductPricePoint> PricePoints { get; private set; }
@@ -41,12 +41,12 @@ namespace Website.Repositories
             this.context = context;
 
             Categories = new CategoryRepository(context);
-            Products = new ProductRepository(context);
             ProductReviews = new ProductReviewRepository(context);
             Lists = new ListRepository(context);
             ProductOrders = new ProductOrderRepository(context);
 
             // Generic repositories
+            Products = new Repository<Product>(context);
             ProductMedia = new Repository<ProductMedia>(context);
             ProductContent = new Repository<ProductContent>(context);
             PricePoints = new Repository<ProductPricePoint>(context);

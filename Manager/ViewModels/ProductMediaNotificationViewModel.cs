@@ -6,14 +6,14 @@ using static Manager.Classes.Utility;
 
 namespace Manager.ViewModels
 {
-    public class ProductMediaNotificationViewModel: GeneralNotificationViewModel, ISelect<Notification, ProductMediaNotificationViewModel>
+    public class ProductMediaNotificationViewModel: GeneralNotificationViewModel, IQueryableSelect<Notification, ProductMediaNotificationViewModel>
     {
         public IEnumerable<MediaViewModel> Media { get; set; }
 
-        public new IQueryable<ProductMediaNotificationViewModel> ViewModelSelect(IQueryable<Notification> source)
+        public new IQueryable<ProductMediaNotificationViewModel> Select(IQueryable<Notification> source)
         {
 
-            GeneralNotificationViewModel generalNotificationViewModel = base.ViewModelSelect(source).SingleOrDefault();
+            GeneralNotificationViewModel generalNotificationViewModel = base.Select(source).SingleOrDefault();
 
             return source.Select(x => new ProductMediaNotificationViewModel
             {
