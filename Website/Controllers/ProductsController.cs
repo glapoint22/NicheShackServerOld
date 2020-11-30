@@ -179,5 +179,18 @@ namespace Website.Controllers
 
             return Ok(await queryService.GetGridData(queryParams));
         }
+
+
+
+
+
+
+        // ..................................................................................Get Product Group.....................................................................
+        [HttpPost]
+        [Route("ProductGroup")]
+        public async Task<ActionResult> GetProductGroup(QueryParams queryParams)
+        {
+            return Ok(await queryService.GetProductGroup(queryParams));
+        }
     }
 }

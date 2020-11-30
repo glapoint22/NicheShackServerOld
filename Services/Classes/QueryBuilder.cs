@@ -255,7 +255,7 @@ namespace Services.Classes
 
 
             // Custom filters
-            if (queryParams.FilteredProducts.Count() > 0)
+            if (queryParams.FilteredProducts != null && queryParams.FilteredProducts.Count() > 0)
             {
                 // Group the filtered products into their respective filters outputting only product ids
                 var productIds = queryParams.FilteredProducts

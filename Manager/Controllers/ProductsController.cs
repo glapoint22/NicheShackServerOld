@@ -45,6 +45,18 @@ namespace Manager.Controllers
 
 
 
+
+
+
+        [HttpPost]
+        [Route("ProductGroup")]
+        public async Task<ActionResult> GetProductGroup(QueryParams queryParams)
+        {
+            return Ok(await queryService.GetProductGroup(queryParams));
+        }
+
+
+
         [HttpPut]
         public async Task<ActionResult> UpdateProductName(ItemViewModel product)
         {
