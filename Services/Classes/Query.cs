@@ -9,6 +9,7 @@ namespace Services.Classes
 
     public enum QueryType
     {
+        None,
         Category,
         Niche,
         ProductSubgroup,
@@ -25,7 +26,7 @@ namespace Services.Classes
 
     public enum ComparisonOperatorType
     {
-        Equal,
+        Equal = 1,
         NotEqual,
         GreaterThan,
         GreaterThanOrEqual,
@@ -36,7 +37,7 @@ namespace Services.Classes
 
     public enum LogicalOperatorType
     {
-        And,
+        And = 1,
         Or
     }
 
