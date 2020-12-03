@@ -164,18 +164,9 @@ namespace Services.Classes
             {
                 string[] searchWordsArray = queryParams.Search.Split(' ').ToArray();
 
-                source = source.WhereAny(searchWordsArray.Select(w => (Expression<Func<Product, bool>>)(x =>
-
-                EF.Functions.Like(x.Name, w + "[^a-z]%") ||
-                EF.Functions.Like(x.Name, "%[^a-z]" + w + "[^a-z]%") ||
-                EF.Functions.Like(x.Name, "%[^a-z]" + w)
-
-                ||
-
-
-                EF.Functions.Like(x.Description, w + "[^a-z]%") ||
-                EF.Functions.Like(x.Description, "%[^a-z]" + w + "[^a-z]%") ||
-                EF.Functions.Like(x.Description, "%[^a-z]" + w)
+                source = source
+                    .WhereAny(searchWordsArray.Select(w => (Expression<Func<Product, bool>>)(x =>
+                        EF.Functions.Like(x.Name, "%" + w + "%")
 
 
                 || queryParams.KeywordProductIds.Contains(x.Id)
@@ -331,9 +322,7 @@ namespace Services.Classes
                     if (queryParams.Search != null && queryParams.Search != string.Empty)
                     {
                         orderBy = source.OrderBy(x => x.Name.ToLower().StartsWith(queryParams.Search.ToLower()) ? (x.Name.ToLower() == queryParams.Search.ToLower() ? 0 : 1) :
-                        EF.Functions.Like(x.Name, queryParams.Search + " %") ||
-                        EF.Functions.Like(x.Name, "% " + queryParams.Search + " %") ||
-                        EF.Functions.Like(x.Name, "% " + queryParams.Search)
+                        EF.Functions.Like(x.Name, "% " + queryParams.Search + " %")
                         ? 2 : 3)
                         .ThenByDescending(x => x.Weight);
                     }
@@ -372,7 +361,7 @@ namespace Services.Classes
         // ..............................................................................Get Search Sort Options.................................................................
         public List<SortOption> GetSearchSortOptions()
         {
-            
+
             return new List<SortOption>
             {
                 new SortOption { Key = "Best Match", Value = "best-match" },

@@ -272,6 +272,45 @@ namespace Manager.Controllers
 
 
 
+        [HttpGet]
+        [Route("Detail")]
+        public async Task<ActionResult> GetNichessDetail()
+        {
+            return Ok(await unitOfWork.Niches.GetCollection(x => new {
+                name = x.Name,
+                urlName = x.UrlName,
+                icon = new
+                {
+                    name = x.Media.Name,
+                    url = x.Media.Url
+                }
+            }));
+        }
+
+
+
+
+
+        [HttpGet]
+        [Route("Detail/Search")]
+        public async Task<ActionResult> DetailSearch(string searchWords)
+        {
+            return Ok(await unitOfWork.Niches.GetCollection(searchWords, x => new {
+                name = x.Name,
+                urlName = x.UrlName,
+                icon = new
+                {
+                    name = x.Media.Name,
+                    url = x.Media.Url
+                }
+            }));
+        }
+
+
+
+
+
+
 
         [HttpGet]
         [Route("Search")]

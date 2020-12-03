@@ -21,6 +21,7 @@ namespace DataAccess.Models
         public virtual ICollection<ProductMedia> ProductMedia { get; set; }
         public virtual ICollection<ProductContent> ProductContent { get; set; }
         public virtual ICollection<Category> Categtories { get; set; }
+        public virtual ICollection<Niche> Niches { get; set; }
 
 
         public Media()
@@ -29,6 +30,7 @@ namespace DataAccess.Models
             ProductMedia = new HashSet<ProductMedia>();
             ProductContent = new HashSet<ProductContent>();
             Categtories = new HashSet<Category>();
+            Niches = new HashSet<Niche>();
         }
     }
 }
