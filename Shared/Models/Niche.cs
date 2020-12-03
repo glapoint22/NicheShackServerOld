@@ -17,10 +17,15 @@ namespace DataAccess.Models
 
         [ForeignKey("Category")]
         public int CategoryId { get; set; }
+
+        [ForeignKey("Media")]
+        public int? ImageId { get; set; }
+
         [Required]
         [MaxLength(100)]
         public string Name { get; set; }
         public virtual Category Category { get; set; }
+        public virtual Media Media { get; set; }
         public virtual ICollection<Product> Products { get; set; }
         public virtual ICollection<LeadPage> LeadPages { get; set; }
 

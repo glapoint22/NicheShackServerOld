@@ -8,8 +8,6 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using Manager.Classes;
 using System;
-using Manager.ViewModels;
-using System.Collections;
 using Services.Classes;
 using Services;
 
@@ -43,6 +41,18 @@ namespace Manager.Controllers
         public async Task<ActionResult> GetGridData(QueryParams queryParams)
         {
             return Ok(await queryService.GetGridData(queryParams));
+        }
+
+
+
+
+
+
+        [HttpPost]
+        [Route("ProductGroup")]
+        public async Task<ActionResult> GetProductGroup(QueryParams queryParams)
+        {
+            return Ok(await queryService.GetProductGroup(queryParams));
         }
 
 

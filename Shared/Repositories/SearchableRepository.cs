@@ -21,12 +21,15 @@ namespace DataAccess.Repositories
 
         public async Task<IEnumerable<TOut>> GetCollection<TOut>(string searchWords) where TOut : class, new()
         {
-            string[] searchWordsArray = searchWords.Split(' ').Select(x => "%" + x + "%").ToArray();
+            string[] searchWordsArray = searchWords.Split(' ').ToArray();
 
             return await context.Set<T>()
                 .AsNoTracking()
-                .OrderBy(x => x.Name.StartsWith(searchWords) ? (x.Name == searchWords ? 0 : 1) : 2)
-                .WhereAny(searchWordsArray.Select(w => (Expression<Func<T, bool>>)(x => EF.Functions.Like(x.Name, w))).ToArray())
+                .OrderBy(x => x.Name.ToLower().StartsWith(searchWords.ToLower()) ? (x.Name.ToLower() == searchWords.ToLower() ? 0 : 1) :
+                    EF.Functions.Like(x.Name, "% " + searchWords + " %")
+                    ? 2 : 3)
+                .WhereAny(searchWordsArray.Select(w => (Expression<Func<T, bool>>)(x =>
+                    EF.Functions.Like(x.Name,"%" + w + "%"))).ToArray())
                 .Select<T, TOut>()
                 .ToListAsync();
         }
@@ -36,15 +39,37 @@ namespace DataAccess.Repositories
 
 
 
-        public async Task<IEnumerable<TOut>> GetCollection<TOut>(Expression<Func<T, bool>> predicate, string searchWords) where TOut : class, new()
+        public async Task<IEnumerable<TOut>> GetCollection<TOut>(string searchWords, Expression<Func<T, TOut>> select)
         {
-            string[] searchWordsArray = searchWords.Split(' ').Select(x => "%" + x + "%").ToArray();
+            string[] searchWordsArray = searchWords.Split(' ').ToArray();
 
             return await context.Set<T>()
                 .AsNoTracking()
-                .OrderBy(x => x.Name.StartsWith(searchWords) ? (x.Name == searchWords ? 0 : 1) : 2)
+                .OrderBy(x => x.Name.ToLower().StartsWith(searchWords.ToLower()) ? (x.Name.ToLower() == searchWords.ToLower() ? 0 : 1) :
+                    EF.Functions.Like(x.Name, "% " + searchWords + " %")
+                    ? 2 : 3)
+                .WhereAny(searchWordsArray.Select(w => (Expression<Func<T, bool>>)(x =>
+                    EF.Functions.Like(x.Name, "%" + w + "%"))).ToArray())
+                .Select(select)
+                .ToListAsync();
+        }
+
+
+
+
+
+        public async Task<IEnumerable<TOut>> GetCollection<TOut>(Expression<Func<T, bool>> predicate, string searchWords) where TOut : class, new()
+        {
+            string[] searchWordsArray = searchWords.Split(' ').ToArray();
+
+            return await context.Set<T>()
+                .AsNoTracking()
+                .OrderBy(x => x.Name.ToLower().StartsWith(searchWords.ToLower()) ? (x.Name.ToLower() == searchWords.ToLower() ? 0 : 1) :
+                    EF.Functions.Like(x.Name, "% " + searchWords + " %")
+                    ? 2 : 3)
                 .Where(predicate)
-                .WhereAny(searchWordsArray.Select(w => (Expression<Func<T, bool>>)(x => EF.Functions.Like(x.Name, w))).ToArray())
+                .WhereAny(searchWordsArray.Select(w => (Expression<Func<T, bool>>)(x =>
+                    EF.Functions.Like(x.Name, "%" + w + "%"))).ToArray())
                 .Select<T, TOut>()
                 .ToListAsync();
         }

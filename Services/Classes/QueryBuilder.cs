@@ -164,18 +164,9 @@ namespace Services.Classes
             {
                 string[] searchWordsArray = queryParams.Search.Split(' ').ToArray();
 
-                source = source.WhereAny(searchWordsArray.Select(w => (Expression<Func<Product, bool>>)(x =>
-
-                EF.Functions.Like(x.Name, w + "[^a-z]%") ||
-                EF.Functions.Like(x.Name, "%[^a-z]" + w + "[^a-z]%") ||
-                EF.Functions.Like(x.Name, "%[^a-z]" + w)
-
-                ||
-
-
-                EF.Functions.Like(x.Description, w + "[^a-z]%") ||
-                EF.Functions.Like(x.Description, "%[^a-z]" + w + "[^a-z]%") ||
-                EF.Functions.Like(x.Description, "%[^a-z]" + w)
+                source = source
+                    .WhereAny(searchWordsArray.Select(w => (Expression<Func<Product, bool>>)(x =>
+                        EF.Functions.Like(x.Name, "%" + w + "%")
 
 
                 || queryParams.KeywordProductIds.Contains(x.Id)
@@ -186,7 +177,7 @@ namespace Services.Classes
 
 
             //Category
-            if (queryParams.CategoryId !=null && queryParams.CategoryId != string.Empty)
+            if (queryParams.CategoryId != null && queryParams.CategoryId != string.Empty)
             {
                 source = source.Where(x => x.Niche.Category.UrlId == queryParams.CategoryId);
             }
@@ -255,7 +246,7 @@ namespace Services.Classes
 
 
             // Custom filters
-            if (queryParams.FilteredProducts.Count() > 0)
+            if (queryParams.FilteredProducts != null && queryParams.FilteredProducts.Count() > 0)
             {
                 // Group the filtered products into their respective filters outputting only product ids
                 var productIds = queryParams.FilteredProducts
@@ -311,32 +302,34 @@ namespace Services.Classes
         {
             IOrderedEnumerable<QueryResult> orderBy = null;
 
-            if(queryParams.Search != null && queryParams.Search != string.Empty)
-            {
-                orderBy = source.OrderBy(x => x.Name.ToLower().StartsWith(queryParams.Search.ToLower()) ? (x.Name.ToLower() == queryParams.Search.ToLower() ? 0 : 1) :
-                EF.Functions.Like(x.Name, queryParams.Search + " %") ||
-                EF.Functions.Like(x.Name, "% " + queryParams.Search + " %") ||
-                EF.Functions.Like(x.Name, "% " + queryParams.Search)
-                ? 2 : 3)
-                .ThenByDescending(x => x.Weight);
-            } else
-            {
-                orderBy = source.OrderByDescending(x => x.Weight);
-            }
-            
-
 
 
             switch (queryParams.Sort)
             {
                 case "price-asc":
-                    orderBy = orderBy.OrderBy(x => x.MinPrice);
+                    orderBy = source.OrderBy(x => x.MinPrice);
                     break;
                 case "price-desc":
-                    orderBy = orderBy.OrderByDescending(x => x.MinPrice);
+                    orderBy = source.OrderByDescending(x => x.MinPrice);
                     break;
                 case "rating":
-                    orderBy = orderBy.OrderByDescending(x => x.Rating);
+                    orderBy = source.OrderByDescending(x => x.Rating);
+                    break;
+                case "newest":
+                    orderBy = source.OrderByDescending(x => x.Date);
+                    break;
+                default:
+                    if (queryParams.Search != null && queryParams.Search != string.Empty)
+                    {
+                        orderBy = source.OrderBy(x => x.Name.ToLower().StartsWith(queryParams.Search.ToLower()) ? (x.Name.ToLower() == queryParams.Search.ToLower() ? 0 : 1) :
+                        EF.Functions.Like(x.Name, "% " + queryParams.Search + " %")
+                        ? 2 : 3)
+                        .ThenByDescending(x => x.Weight);
+                    }
+                    else
+                    {
+                        orderBy = source.OrderByDescending(x => x.Weight);
+                    }
                     break;
             }
 
@@ -351,9 +344,11 @@ namespace Services.Classes
         {
             return new List<SortOption>
             {
+                new SortOption{Key = "Best Sellers", Value ="best-sellers" },
                 new SortOption{Key = "Price: Low to High", Value ="price-asc" },
                 new SortOption{Key = "Price: High to Low", Value = "price-desc" },
-                new SortOption{Key = "Highest Rating", Value = "rating" }
+                new SortOption{Key = "Highest Rating", Value = "rating" },
+                new SortOption{Key = "Newest", Value = "newest" }
             };
         }
 
@@ -366,11 +361,15 @@ namespace Services.Classes
         // ..............................................................................Get Search Sort Options.................................................................
         public List<SortOption> GetSearchSortOptions()
         {
-            List<SortOption> options = new List<SortOption>();
-            options.Add(new SortOption { Key = "Best Match", Value = "best-match" });
-            options.AddRange(GetBrowseSortOptions());
 
-            return options;
+            return new List<SortOption>
+            {
+                new SortOption { Key = "Best Match", Value = "best-match" },
+                new SortOption{Key = "Price: Low to High", Value ="price-asc" },
+                new SortOption{Key = "Price: High to Low", Value = "price-desc" },
+                new SortOption{Key = "Highest Rating", Value = "rating" },
+                new SortOption{Key = "Newest", Value = "newest" }
+            };
         }
     }
 }

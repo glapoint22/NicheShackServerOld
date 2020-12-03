@@ -33,9 +33,25 @@ namespace Manager.Controllers
 
         [HttpGet]
         [Route("Detail")]
-        public async Task<ActionResult> GetCategoriesWithIcon()
+        public async Task<ActionResult> GetCategoriesDetails()
         {
             return Ok(await unitOfWork.Categories.GetCollection(x => new { 
+                name = x.Name,
+                urlName = x.UrlName,
+                icon = new
+                {
+                    name = x.Media.Name,
+                    url = x.Media.Url
+                }
+            }));
+        }
+
+
+        [HttpGet]
+        [Route("Detail/Search")]
+        public async Task<ActionResult> DetailSearch(string searchWords)
+        {
+            return Ok(await unitOfWork.Categories.GetCollection(searchWords, x => new {
                 name = x.Name,
                 urlName = x.UrlName,
                 icon = new
