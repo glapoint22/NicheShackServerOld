@@ -60,9 +60,10 @@ namespace Manager.Repositories
         public async Task<ProductViewModel> GetProduct(int productId)
         {
 
-            return await context.Products
+            var product = await context.Products
                 .AsNoTracking()
-                .Where(x => x.Id == productId).Select(x => new ProductViewModel
+                .Where(x => x.Id == productId)
+                .Select(x => new ProductViewModel
                 {
                     Id = x.Id,
                     Name = x.Name,
@@ -71,31 +72,59 @@ namespace Manager.Repositories
                         Id = x.Vendor.Id,
                         Name = x.Vendor.Name
                     },
-                    Keywords = x.ProductKeywords.Select(y => new ItemViewModel
-                    {
-                        Id = y.Id,
-                        Name = y.Keyword.Name
-                    }),
                     Rating = x.Rating,
                     TotalReviews = x.TotalReviews,
                     Hoplink = x.Hoplink,
                     Description = x.Description,
-                    Content = x.ProductContent.Select(y => new ProductContentViewModel
+                    Image = new ImageViewModel
                     {
-                        Id = y.Id,
-                        Name = y.Name,
-                        Icon = new ImageViewModel
-                        {
-                            Id = y.Media.Id,
-                            Name = y.Media.Name,
-                            Url = y.Media.Url
-                        },
-                        PriceIndices = y.Product.ProductPricePoints
+                        Id = x.Media.Id,
+                        Name = x.Media.Name,
+                        Url = x.Media.Url
+                    },
+                    MinPrice = x.MinPrice,
+                    MaxPrice = x.MaxPrice
+                }).SingleOrDefaultAsync();
+
+
+            // Keywords
+            product.Keywords = await context.ProductKeywords
+                .AsNoTracking()
+                .Where(x => x.ProductId == productId)
+                .Select(x => new ItemViewModel
+                {
+                    Id = x.Id,
+                    Name = x.Keyword.Name
+                }).ToListAsync();
+
+
+            // Content
+            product.Content = await context.ProductContent
+                .AsNoTracking()
+                .Where(x => x.ProductId == productId)
+
+                .Select(y => new ProductContentViewModel
+                {
+                    Id = y.Id,
+                    Name = y.Name,
+                    Icon = new ImageViewModel
+                    {
+                        Id = y.Media.Id,
+                        Name = y.Media.Name,
+                        Url = y.Media.Url
+                    },
+                    PriceIndices = y.Product.ProductPricePoints
                         .OrderBy(z => z.Index)
                         .Select(z => y.PriceIndices.Select(w => w.Index).Contains(z.Index))
 
-                    }),
-                    PricePoints = x.ProductPricePoints
+                }).ToListAsync();
+
+
+
+            // Price points
+            product.PricePoints = await context.ProductPricePoints
+                .AsNoTracking()
+                .Where(x => x.ProductId == productId)
                 .OrderBy(y => y.Index)
                 .Select(y => new ProductPricePointViewModel
                 {
@@ -104,26 +133,26 @@ namespace Manager.Repositories
                     WholeNumber = y.WholeNumber,
                     Decimal = y.Decimal,
                     TextAfter = y.TextAfter
-                }),
-                    Image = new ImageViewModel
-                    {
-                        Id = x.Media.Id,
-                        Name = x.Media.Name,
-                        Url = x.Media.Url
-                    },
-                    Media = x.ProductMedia.Select(y => new ProductMediaViewModel
-                    {
-                        ItemId = y.Id,
-                        Id = y.Media.Id,
-                        Name = y.Media.Name,
-                        Url = y.Media.Url,
-                        Thumbnail = y.Media.Thumbnail,
-                        Type = y.Media.Type
-                    }),
-                    MinPrice = x.MinPrice,
-                    MaxPrice = x.MaxPrice
-                }).SingleOrDefaultAsync();
+                })
+                .ToListAsync();
 
+
+            // Media
+            product.Media = await context.ProductMedia
+                .AsNoTracking()
+                .Where(x => x.ProductId == productId)
+                .Select(y => new ProductMediaViewModel
+                {
+                    ItemId = y.Id,
+                    Id = y.Media.Id,
+                    Name = y.Media.Name,
+                    Url = y.Media.Url,
+                    Thumbnail = y.Media.Thumbnail,
+                    Type = y.Media.Type
+                })
+                .ToListAsync();
+
+            return product;
         }
     }
 }

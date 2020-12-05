@@ -8,6 +8,7 @@ using System;
 using System.Text.RegularExpressions;
 using System.Collections;
 using System.Linq;
+using Manager.ViewModels;
 
 namespace Manager.Controllers
 {
@@ -335,6 +336,39 @@ namespace Manager.Controllers
 
 
             return Ok();
+        }
+
+
+
+
+        [HttpPut]
+        [Route("Image")]
+        public async Task<ActionResult> UpdateNicheImage(UpdatedProperty updatedProperty)
+        {
+            Niche niche = await unitOfWork.Niches.Get(updatedProperty.ItemId);
+
+            niche.ImageId = updatedProperty.PropertyId;
+
+            // Update and save
+            unitOfWork.Niches.Update(niche);
+            await unitOfWork.Save();
+
+            return Ok();
+        }
+
+
+
+
+        [HttpGet]
+        [Route("Image")]
+        public async Task<ActionResult> GetNicheImage(int nicheId)
+        {
+            return Ok(await unitOfWork.Media.Get(x => x.Id == x.Niches.Where(y => y.Id == nicheId).Select(y => y.ImageId).FirstOrDefault(), x => new ImageViewModel
+            {
+                Id = x.Id,
+                Name = x.Name,
+                Url = x.Url
+            }));
         }
     }
 }
