@@ -34,6 +34,14 @@ namespace Manager.Controllers
 
 
 
+        [HttpGet]
+        [Route("QueryBuilder")]
+        public async Task<ActionResult> GetQueryBuilderProducts()
+        {
+            return Ok(await unitOfWork.Products.GetCollection<ItemViewModel<Product>>());
+        }
+
+
 
 
         [HttpPost]
@@ -504,6 +512,26 @@ namespace Manager.Controllers
 
 
 
+        [HttpGet]
+        [Route("Keywords")]
+        public async Task<ActionResult> GetQueryBuilderKeywords()
+        {
+            var alita = unitOfWork.Keywords.GetCollection<ItemViewModel<Keyword>>();
+            return Ok(await alita);
+        }
+
+
+
+
+        [HttpGet]
+        [Route("Keywords/Search")]
+        public async Task<ActionResult> SearchQueryBuilderKeywords(string searchWords)
+        {
+            return Ok(await unitOfWork.Keywords.GetCollection<ItemViewModel<Keyword>>(searchWords));
+        }
+
+
+
 
 
         [Route("Description")]
@@ -544,15 +572,27 @@ namespace Manager.Controllers
 
 
 
+        public async Task<ActionResult> SearchProducts(string searchWords)
+        {
+            return Ok(await unitOfWork.Products.GetCollection<ItemViewModel<Product>>(searchWords));
+        }
+
 
 
         [HttpGet]
         [Route("Search")]
         public async Task<ActionResult> Search(string searchWords)
         {
-            return Ok(await unitOfWork.Products.GetCollection<ItemViewModel<Product>>(searchWords));
+            return await SearchProducts(searchWords);
         }
 
+
+        [HttpGet]
+        [Route("QueryBuilder/Search")]
+        public async Task<ActionResult> SearchQueryBuilderProducts(string searchWords)
+        {
+            return await SearchProducts(searchWords);
+        }
 
 
 
