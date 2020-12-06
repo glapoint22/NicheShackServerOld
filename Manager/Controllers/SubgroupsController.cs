@@ -57,23 +57,7 @@ namespace Manager.Controllers
 
 
 
-        [Route("Subgroup")]
-        [HttpPost]
-        public async Task<ActionResult> AddSubgroup(ProductItem subgroup)
-        {
-            SubgroupProduct newSubgroup = new SubgroupProduct
-            {
-                ProductId = subgroup.ProductId,
-                SubgroupId = subgroup.ItemId
-            };
-
-
-            // Add and save
-            unitOfWork.SubgroupProducts.Add(newSubgroup);
-            await unitOfWork.Save();
-
-            return Ok();
-        }
+        
 
 
 

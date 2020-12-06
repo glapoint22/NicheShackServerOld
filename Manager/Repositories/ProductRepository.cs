@@ -105,7 +105,7 @@ namespace Manager.Repositories
                 .Where(x => x.ProductId == productId)
                 .Select(x => new ItemViewModel
                 {
-                    
+                    Id = x.Id,
                     Name = x.Subgroup.Name
                 }).ToListAsync();
 

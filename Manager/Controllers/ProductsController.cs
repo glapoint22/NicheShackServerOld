@@ -494,8 +494,43 @@ namespace Manager.Controllers
 
 
 
-        
 
+        [Route("Subgroup")]
+        [HttpPost]
+        public async Task<ActionResult> AddSubgroup(ProductItem subgroup)
+        {
+            SubgroupProduct newSubgroup = new SubgroupProduct
+            {
+                ProductId = subgroup.ProductId,
+                SubgroupId = subgroup.ItemId
+            };
+
+
+            // Add and save
+            unitOfWork.SubgroupProducts.Add(newSubgroup);
+            await unitOfWork.Save();
+
+            return Ok(newSubgroup.Id);
+        }
+
+
+
+
+        [HttpDelete]
+        [Route("Subgroup")]
+        public async Task<ActionResult> DeleteSubgroups([FromQuery] int[] ids)
+        {
+            foreach (int id in ids)
+            {
+                SubgroupProduct subgroup = await unitOfWork.SubgroupProducts.Get(id);
+                unitOfWork.SubgroupProducts.Remove(subgroup);
+            }
+
+
+            await unitOfWork.Save();
+
+            return Ok();
+        }
 
 
 
