@@ -4,6 +4,7 @@ namespace DataAccess.Models
 {
     public class SubgroupProduct
     {
+        public int Id { get; set; }
         [ForeignKey("Subgroup")]
         public int SubgroupId { get; set; }
         [ForeignKey("Product")]

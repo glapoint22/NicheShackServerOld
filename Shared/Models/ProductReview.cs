@@ -23,6 +23,8 @@ namespace DataAccess.Models
         public string Text { get; set; }
         public int Likes { get; set; }
         public int Dislikes { get; set; }
+        public bool Deleted { get; set; }
+
         public virtual Product Product { get; set; }
         public virtual Customer Customer { get; set; }
         public virtual ICollection<NotificationText> NotificationText { get; set; }

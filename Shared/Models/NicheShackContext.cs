@@ -223,16 +223,6 @@ namespace DataAccess.Models
                 entity.HasKey(e => new { e.Id, e.CustomerId })
                     .HasName("PK_RefreshTokens");
             });
-
-
-
-            // Subgroup Products
-            modelBuilder.Entity<SubgroupProduct>(entity =>
-            {
-                entity.HasKey(x => new { x.ProductId, x.SubgroupId })
-                .HasName("PK_SubgroupProducts");
-            });
-
         }
     }
 }
