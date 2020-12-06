@@ -452,25 +452,6 @@ namespace Manager.Controllers
 
 
 
-        [Route("Keyword")]
-        [HttpPut]
-        public async Task<ActionResult> UpdateKeyword(ItemViewModel updatedProperty)
-        {
-            Keyword keyword = await unitOfWork.Keywords.Get(updatedProperty.Id);
-
-            keyword.Name = updatedProperty.Name;
-
-            // Update and save
-            unitOfWork.Keywords.Update(keyword);
-            await unitOfWork.Save();
-
-            return Ok();
-        }
-
-
-
-
-
 
         [Route("Keyword")]
         [HttpPost]
@@ -513,23 +494,7 @@ namespace Manager.Controllers
 
 
 
-        [HttpGet]
-        [Route("Keywords")]
-        public async Task<ActionResult> GetQueryBuilderKeywords()
-        {
-            var alita = unitOfWork.Keywords.GetCollection<ItemViewModel<Keyword>>();
-            return Ok(await alita);
-        }
-
-
-
-
-        [HttpGet]
-        [Route("Keywords/Search")]
-        public async Task<ActionResult> SearchQueryBuilderKeywords(string searchWords)
-        {
-            return Ok(await unitOfWork.Keywords.GetCollection<ItemViewModel<Keyword>>(searchWords));
-        }
+        
 
 
 

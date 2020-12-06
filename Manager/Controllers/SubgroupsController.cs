@@ -27,6 +27,16 @@ namespace Manager.Controllers
 
 
 
+        [HttpGet]
+        [Route("Search")]
+        public async Task<ActionResult> SearchSubgroups(string searchWords)
+        {
+            return Ok(await unitOfWork.Subgroups.GetCollection<ItemViewModel<Subgroup>>(searchWords));
+        }
+
+
+
+
         [HttpPost]
         public async Task<ActionResult> AddSubgroup(ItemViewModel subgroup)
         {
@@ -78,14 +88,6 @@ namespace Manager.Controllers
             await unitOfWork.Save();
 
             return Ok();
-        }
-
-
-        [HttpGet]
-        [Route("Search")]
-        public async Task<ActionResult> SearchSubgroups(string searchWords)
-        {
-            return Ok(await unitOfWork.Subgroups.GetCollection<ItemViewModel<Subgroup>>(searchWords));
         }
     }
 }
