@@ -474,16 +474,17 @@ namespace Manager.Controllers
 
         [Route("Keyword")]
         [HttpPost]
-        public async Task<ActionResult> AddKeyword(ItemViewModel keyword)
+        public async Task<ActionResult> AddKeyword(NewKeyword keyword)
         {
-            Keyword newKeyword = new Keyword
+            ProductKeyword newKeyword = new ProductKeyword
             {
-                Name = keyword.Name
+                ProductId = keyword.ProductId,
+                KeywordId = keyword.KeywordId
             };
 
 
             // Add and save
-            unitOfWork.Keywords.Add(newKeyword);
+            unitOfWork.ProductKeywords.Add(newKeyword);
             await unitOfWork.Save();
 
             return Ok(newKeyword.Id);
