@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace Manager.Classes
 {
-    public class NewKeyword
+    public class ProductItem
     {
         public int ProductId { get; set; }
-        public int KeywordId { get; set; }
+        public int ItemId { get; set; }
     }
 }

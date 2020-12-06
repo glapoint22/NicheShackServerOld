@@ -1,5 +1,6 @@
 ﻿using DataAccess.Models;
 using DataAccess.ViewModels;
+using Manager.Classes;
 using Manager.Repositories;
 using Manager.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -41,6 +42,27 @@ namespace Manager.Controllers
             await unitOfWork.Save();
 
             return Ok(newSubgroup.Id);
+        }
+
+
+
+
+        [Route("Subgroup")]
+        [HttpPost]
+        public async Task<ActionResult> AddSubgroup(ProductItem subgroup)
+        {
+            SubgroupProduct newSubgroup = new SubgroupProduct
+            {
+                ProductId = subgroup.ProductId,
+                SubgroupId = subgroup.ItemId
+            };
+
+
+            // Add and save
+            unitOfWork.SubgroupProducts.Add(newSubgroup);
+            await unitOfWork.Save();
+
+            return Ok();
         }
 
 

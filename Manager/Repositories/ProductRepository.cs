@@ -2,6 +2,7 @@
 using DataAccess.Models;
 using DataAccess.Repositories;
 using DataAccess.ViewModels;
+using Manager.Classes;
 using Manager.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -95,6 +96,17 @@ namespace Manager.Repositories
                 {
                     Id = x.Id,
                     Name = x.Keyword.Name
+                }).ToListAsync();
+
+
+            // Subgroups
+            product.Subgroups = await context.SubgroupProducts
+                .AsNoTracking()
+                .Where(x => x.ProductId == productId)
+                .Select(x => new ItemViewModel
+                {
+                    
+                    Name = x.Subgroup.Name
                 }).ToListAsync();
 
 

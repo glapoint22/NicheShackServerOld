@@ -474,12 +474,12 @@ namespace Manager.Controllers
 
         [Route("Keyword")]
         [HttpPost]
-        public async Task<ActionResult> AddKeyword(NewKeyword keyword)
+        public async Task<ActionResult> AddKeyword(ProductItem keyword)
         {
             ProductKeyword newKeyword = new ProductKeyword
             {
                 ProductId = keyword.ProductId,
-                KeywordId = keyword.KeywordId
+                KeywordId = keyword.ItemId
             };
 
 

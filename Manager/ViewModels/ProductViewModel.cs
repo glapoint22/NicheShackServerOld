@@ -1,4 +1,5 @@
 ﻿using DataAccess.ViewModels;
+using Manager.Classes;
 using System.Collections.Generic;
 
 namespace Manager.ViewModels
@@ -19,5 +20,6 @@ namespace Manager.ViewModels
         public double MinPrice { get; set; }
         public double MaxPrice { get; set; }
         public IEnumerable<ItemViewModel> Keywords { get; set; }
+        public IEnumerable<ItemViewModel> Subgroups { get; set; }
     }
 }
