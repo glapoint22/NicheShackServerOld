@@ -32,7 +32,7 @@ namespace Manager.Repositories
         public IRepository<ProductMedia> ProductMedia { get; }
         public IRepository<ProductKeyword> ProductKeywords { get; }
         public IRepository<NotificationText> NotificationText { get; }
-        public IRepository<Subgroup> Subgroups { get; }
+        public ISearchableRepository<Subgroup> Subgroups { get; }
         public IRepository<SubgroupProduct> SubgroupProducts { get; }
 
 
@@ -66,7 +66,7 @@ namespace Manager.Repositories
             ProductMedia = new Repository<ProductMedia>(context);
             ProductKeywords = new Repository<ProductKeyword>(context);
             NotificationText = new Repository<NotificationText>(context);
-            Subgroups = new Repository<Subgroup>(context);
+            Subgroups = new SearchableRepository<Subgroup>(context);
             SubgroupProducts = new Repository<SubgroupProduct>(context);
 
             // Custom Repositories

@@ -32,7 +32,7 @@ namespace Manager.Repositories
         IRepository<ProductMedia> ProductMedia { get; }
         IRepository<ProductKeyword> ProductKeywords { get; }
         IRepository<NotificationText> NotificationText { get; }
-        IRepository<Subgroup> Subgroups { get; }
+        ISearchableRepository<Subgroup> Subgroups { get; }
         IRepository<SubgroupProduct> SubgroupProducts { get; }
 
 
