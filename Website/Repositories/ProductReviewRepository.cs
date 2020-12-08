@@ -30,7 +30,7 @@ namespace Website.Repositories
                 .AsNoTracking()
                 .OrderBy(productReviewDTO)
                 .ThenByDescending(x => x.Date)
-                .Where(x => x.Product.UrlId == productId)
+                .Where(x => x.Product.UrlId == productId && !x.Deleted)
                 .Select<ProductReview, ProductReviewViewModel>()
                 .Skip((page - 1) * productReviewDTO.GetReviewsPerPage())
                 .Take(productReviewDTO.GetReviewsPerPage())
@@ -49,7 +49,7 @@ namespace Website.Repositories
                 .OrderBy(x => x.Rating)
                 .ThenByDescending(x => x.Likes)
                 .ThenByDescending(x => x.Date)
-                .Where(x => x.Product.UrlId == productId && x.Likes > 0)
+                .Where(x => x.Product.UrlId == productId && x.Likes > 0 && !x.Deleted)
                 .Select<ProductReview, ProductReviewViewModel>()
                 .FirstOrDefaultAsync();
         }
@@ -66,7 +66,7 @@ namespace Website.Repositories
                 .OrderByDescending(x => x.Rating)
                 .ThenByDescending(x => x.Likes)
                 .ThenByDescending(x => x.Date)
-                .Where(x => x.Product.UrlId == productId && x.Likes > 0)
+                .Where(x => x.Product.UrlId == productId && x.Likes > 0 && !x.Deleted)
                 .Select<ProductReview, ProductReviewViewModel>()
                 .FirstOrDefaultAsync();
         }

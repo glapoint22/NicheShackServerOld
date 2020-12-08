@@ -71,13 +71,11 @@ namespace Manager.Controllers
             Product updatedProduct = await unitOfWork.Products.Get(product.Id);
 
             updatedProduct.Name = product.Name;
+            updatedProduct.UrlName = Utility.GetUrlName(product.Name);
 
             // Update and save
             unitOfWork.Products.Update(updatedProduct);
             await unitOfWork.Save();
-
-
-            // TODO: Update url name
 
             return Ok();
         }
@@ -593,6 +591,19 @@ namespace Manager.Controllers
         public async Task<ActionResult> SearchQueryBuilderProducts(string searchWords)
         {
             return await SearchProducts(searchWords);
+        }
+
+
+
+
+        [HttpGet]
+        [Route("Link")]
+        public async Task<ActionResult> Link(string searchWords)
+        {
+            return Ok(await unitOfWork.Products.GetCollection(searchWords, x => new { 
+                Name = x.Name,
+                Link = x.UrlName + "/" + x.UrlId
+            }));
         }
 
 

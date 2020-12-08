@@ -1,8 +1,5 @@
 ﻿using DataAccess.Interfaces;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Text;
 
 namespace DataAccess.Models
 {
@@ -12,6 +9,16 @@ namespace DataAccess.Models
         [Required]
         [MaxLength(256)]
         public string Name { get; set; }
+
+
+        [Required]
+        [MaxLength(10)]
+        public string UrlId { get; set; }
+        [Required]
+        [MaxLength(256)]
+        public string UrlName { get; set; }
+
+
         [Required]
         public string Content { get; set; }
     }

@@ -70,6 +70,7 @@ namespace Manager.Controllers
             Category updatedCategory = await unitOfWork.Categories.Get(category.Id);
 
             updatedCategory.Name = category.Name;
+            updatedCategory.UrlName = Utility.GetUrlName(category.Name);
 
             // Update and save
             unitOfWork.Categories.Update(updatedCategory);

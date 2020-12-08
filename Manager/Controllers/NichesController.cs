@@ -47,6 +47,7 @@ namespace Manager.Controllers
             Niche updatedNiche = await unitOfWork.Niches.Get(niche.Id);
 
             updatedNiche.Name = niche.Name;
+            updatedNiche.UrlName = Utility.GetUrlName(niche.Name);
 
             // Update and save
             unitOfWork.Niches.Update(updatedNiche);

@@ -47,6 +47,7 @@ namespace Manager.Controllers
             Page page = await unitOfWork.Pages.Get(updatedPage.PageId);
 
             page.Name = updatedPage.Name;
+            page.UrlName = Utility.GetUrlName(updatedPage.Name);
             page.Content = updatedPage.Content;
 
             // Update and save
@@ -73,6 +74,8 @@ namespace Manager.Controllers
             Page page = new Page
             {
                 Name = pageName,
+                UrlId = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper(),
+                UrlName = Utility.GetUrlName(pageName),
                 Content = ""
             };
 
@@ -149,6 +152,18 @@ namespace Manager.Controllers
         public async Task<ActionResult> Search(string searchWords)
         {
             return Ok(await unitOfWork.Pages.GetCollection<ItemViewModel<Page>>(searchWords));
+        }
+
+
+
+        [HttpGet]
+        [Route("Link")]
+        public async Task<ActionResult> Link(string searchWords)
+        {
+            return Ok(await unitOfWork.Pages.GetCollection(searchWords, x => new {
+                Name = x.Name,
+                Link = "cp/" + x.UrlName + "/" + x.UrlId
+            }));
         }
     }
 }
