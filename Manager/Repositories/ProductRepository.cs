@@ -57,8 +57,7 @@ namespace Manager.Repositories
 
 
 
-
-        public async Task<ProductViewModel> GetProduct(int productId)
+            public async Task<ProductViewModel> GetProduct(int productId)
         {
 
             var product = await context.Products
