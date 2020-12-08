@@ -34,6 +34,7 @@ namespace Manager.Repositories
         public IRepository<NotificationText> NotificationText { get; }
         public ISearchableRepository<Subgroup> Subgroups { get; }
         public IRepository<SubgroupProduct> SubgroupProducts { get; }
+        public IRepository<ProductReview> ProductReviews { get; }
 
 
         // Custom Repositories
@@ -68,6 +69,7 @@ namespace Manager.Repositories
             NotificationText = new Repository<NotificationText>(context);
             Subgroups = new SearchableRepository<Subgroup>(context);
             SubgroupProducts = new Repository<SubgroupProduct>(context);
+            ProductReviews = new Repository<ProductReview>(context);
 
             // Custom Repositories
             Products = new ProductRepository(context);

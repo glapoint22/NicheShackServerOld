@@ -34,7 +34,7 @@ namespace Manager.Repositories
         IRepository<NotificationText> NotificationText { get; }
         ISearchableRepository<Subgroup> Subgroups { get; }
         IRepository<SubgroupProduct> SubgroupProducts { get; }
-
+        IRepository<ProductReview> ProductReviews { get; }
 
 
 

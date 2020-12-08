@@ -28,6 +28,7 @@ namespace Manager.ViewModels
                 Type = x.Type,
                 Review = x.NotificationText.Select(y => new NotificationTextViewModel
                 {
+                    ReviewId = y.ProductReview.Id,
                     TimeStamp = y.ProductReview.Date.ToString("MMMM dd, yyyy hh:mm tt"),
                     Thumbnail = y.ProductReview.Customer.Image,
                     Text = y.ProductReview.Text
