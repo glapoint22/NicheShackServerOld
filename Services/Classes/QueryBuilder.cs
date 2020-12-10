@@ -52,10 +52,22 @@ namespace Services.Classes
 
                         if (query.QueryType == QueryType.Niche)
                         {
-                            PropertyInfo nicheProperty = typeof(Product).GetProperty("NicheId");
-                            MemberExpression nicheId = Expression.Property(product, nicheProperty);
-                            ConstantExpression value = Expression.Constant(query.IntValue);
-                            right = Expression.Equal(nicheId, value);
+                            if (query.IntValue > 0)
+                            {
+                                PropertyInfo nicheProperty = typeof(Product).GetProperty("NicheId");
+                                MemberExpression nicheId = Expression.Property(product, nicheProperty);
+                                ConstantExpression value = Expression.Constant(query.IntValue);
+                                right = Expression.Equal(nicheId, value);
+                            }
+                            else
+                            {
+                                PropertyInfo categoryProperty1 = typeof(Product).GetProperty("Niche");
+                                PropertyInfo categoryProperty2 = categoryProperty1.PropertyType.GetProperty("UrlId");
+                                MemberExpression niche = Expression.Property(product, categoryProperty1);
+                                MemberExpression niche_Url_Id = Expression.Property(niche, categoryProperty2);
+                                ConstantExpression value = Expression.Constant(query.StringValue);
+                                right = Expression.Equal(niche_Url_Id, value);
+                            }
                         }
 
 

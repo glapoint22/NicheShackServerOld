@@ -53,6 +53,7 @@ namespace Services.Classes
         public LogicalOperatorType LogicalOperator { get; set; }
         public int IntValue { get; set; }
         public List<int> IntValues { get; set; }
+        public string StringValue { get; set; }
         public List<string> StringValues { get; set; }
         public double DoubleValue { get; set; }
         public DateTime DateValue { get; set; }
