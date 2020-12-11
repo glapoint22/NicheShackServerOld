@@ -1,14 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DataAccess.Models;
 using DataAccess.ViewModels;
 using Manager.Classes;
 using Manager.Repositories;
-using Microsoft.AspNetCore.Http;
+using Manager.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using static Manager.Classes.Utility;
 
 namespace Manager.Controllers
 {
@@ -47,12 +46,14 @@ namespace Manager.Controllers
             Page page = await unitOfWork.Pages.Get(updatedPage.PageId);
 
             page.Name = updatedPage.Name;
-            page.UrlName = Utility.GetUrlName(updatedPage.Name);
+            page.UrlName = GetUrlName(updatedPage.Name);
+            page.DisplayType = (int)updatedPage.DisplayType;
             page.Content = updatedPage.Content;
 
             // Update and save
             unitOfWork.Pages.Update(page);
             await unitOfWork.Save();
+
 
             return Ok();
         }
@@ -87,7 +88,7 @@ namespace Manager.Controllers
             page.Content = "{\"id\":" + page.Id + ",\"name\":\"" + pageName + "\",\"background\":{\"color\":\"#ffffff\"}}";
             unitOfWork.Pages.Update(page);
 
-           
+
             await unitOfWork.Save();
 
 
@@ -160,10 +161,50 @@ namespace Manager.Controllers
         [Route("Link")]
         public async Task<ActionResult> Link(string searchWords)
         {
-            return Ok(await unitOfWork.Pages.GetCollection(searchWords, x => new {
+            return Ok(await unitOfWork.Pages.GetCollection(searchWords, x => new
+            {
                 Name = x.Name,
                 Link = "cp/" + x.UrlName + "/" + x.UrlId
             }));
+        }
+
+
+
+
+        [HttpPost]
+        [Route("PageDisplayTypeId")]
+        public async Task<ActionResult> AddPageDisplayTypeId(PageDisplayTypeIdViewModel newPageDisplayTypeId)
+        {
+            PageDisplayTypeId pageDisplayTypeId = new PageDisplayTypeId
+            {
+                PageId = newPageDisplayTypeId.PageId,
+                DisplayId = newPageDisplayTypeId.DisplayId
+            };
+
+
+            // Add and save
+            unitOfWork.PageDisplayTypeIds.Add(pageDisplayTypeId);
+            await unitOfWork.Save();
+
+            return Ok(pageDisplayTypeId.Id);
+        }
+
+
+
+
+
+        [HttpDelete]
+        [Route("PageDisplayTypeId")]
+        public async Task<ActionResult> DeletePageDisplayTypeId([FromQuery] int[] ids)
+        {
+            foreach (int id in ids)
+            {
+                PageDisplayTypeId pageDisplayTypeId = await unitOfWork.PageDisplayTypeIds.Get(id);
+                unitOfWork.PageDisplayTypeIds.Remove(pageDisplayTypeId);
+            }
+
+            await unitOfWork.Save();
+            return Ok();
         }
     }
 }

@@ -52,6 +52,16 @@ namespace Manager.Classes
         }
 
 
+        public enum PageDisplayType
+        {
+            Custom,
+            Home,
+            Browse,
+            Search,
+            Grid
+        }
+
+
         public static string GetNotificationName(int type)
         {
             string name = string.Empty;

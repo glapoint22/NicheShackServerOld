@@ -4,14 +4,16 @@ using DataAccess.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(NicheShackContext))]
-    partial class NicheShackContextModelSnapshot : ModelSnapshot
+    [Migration("20201210164551_PagesUpdate")]
+    partial class PagesUpdate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -602,6 +604,9 @@ namespace DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("DisplayId")
+                        .HasColumnType("int");
+
                     b.Property<int>("DisplayType")
                         .HasColumnType("int");
 
@@ -623,26 +628,6 @@ namespace DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Pages");
-                });
-
-            modelBuilder.Entity("DataAccess.Models.PageDisplayTypeId", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("DisplayId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PageId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PageId");
-
-                    b.ToTable("PageDisplayTypeIds");
                 });
 
             modelBuilder.Entity("DataAccess.Models.PriceIndex", b =>
@@ -1397,15 +1382,6 @@ namespace DataAccess.Migrations
                     b.HasOne("DataAccess.Models.ProductOrder", "ProductOrder")
                         .WithMany("OrderProducts")
                         .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("DataAccess.Models.PageDisplayTypeId", b =>
-                {
-                    b.HasOne("DataAccess.Models.Page", "Page")
-                        .WithMany("PageDisplayTypeIds")
-                        .HasForeignKey("PageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

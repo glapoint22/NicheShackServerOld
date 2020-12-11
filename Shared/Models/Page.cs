@@ -1,4 +1,5 @@
 ﻿using DataAccess.Interfaces;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace DataAccess.Models
@@ -21,5 +22,17 @@ namespace DataAccess.Models
 
         [Required]
         public string Content { get; set; }
+
+        public int DisplayType { get; set; }
+
+
+        public virtual ICollection<PageDisplayTypeId> PageDisplayTypeIds { get; set; }
+
+
+
+        public Page()
+        {
+            PageDisplayTypeIds = new HashSet<PageDisplayTypeId>();
+        }
     }
 }
