@@ -1,7 +1,7 @@
 ﻿using DataAccess.ViewModels;
+using Services.Classes;
 using System.Collections;
 using System.Collections.Generic;
-using static Manager.Classes.Utility;
 
 namespace Manager.Classes
 {

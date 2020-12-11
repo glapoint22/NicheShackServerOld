@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Services.Classes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,9 +32,23 @@ namespace Website.Controllers
 
         [Route("Search")]
         [HttpGet]
-        public async Task<ActionResult> GetSearchPage()
+        public async Task<ActionResult> GetSearchPage(string searchTerm)
         {
-            return Ok(await unitOfWork.Pages.Get(x => x.Name == "Search", x => x.Content));
+            int keywordId = await unitOfWork.Keywords.Get(x => x.Name == searchTerm, x => x.Id);
+
+            if(keywordId > 0)
+            {
+                int pageId = await unitOfWork.PageReferenceItems.Get(x => x.ItemId == keywordId, x => x.PageId);
+
+                if(pageId > 0)
+                {
+                    return Ok(await unitOfWork.Pages.Get(x => x.Id == pageId, x => x.Content));
+                }
+            }
+
+
+
+            return Ok(await unitOfWork.Pages.Get(x => x.DisplayType == (int)PageDisplayType.Grid, x => x.Content));
         }
 
 
@@ -41,9 +56,20 @@ namespace Website.Controllers
 
         [Route("Browse")]
         [HttpGet]
-        public async Task<ActionResult> GetBrowsePage()
+        public async Task<ActionResult> GetBrowsePage(string urlId)
         {
-            return Ok(await unitOfWork.Pages.Get(x => x.Name == "Browse", x => x.Content));
+            int nicheId = await unitOfWork.Niches.Get(x => x.UrlId == urlId, x => x.Id);
+
+            if (nicheId == 0) return NotFound();
+
+            int pageId = await unitOfWork.PageReferenceItems.Get(x => x.ItemId == nicheId, x => x.PageId);
+
+            if (pageId > 0)
+            {
+                return Ok(await unitOfWork.Pages.Get(x => x.Id == pageId, x => x.Content));
+            }
+
+            return Ok(await unitOfWork.Pages.Get(x => x.DisplayType == (int)PageDisplayType.Grid, x => x.Content));
         }
     }
 }

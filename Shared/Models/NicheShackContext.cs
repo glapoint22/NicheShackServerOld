@@ -54,7 +54,7 @@ namespace DataAccess.Models
         public virtual DbSet<Page> Pages { get; set; }
 
 
-        public virtual DbSet<PageDisplayTypeId> PageDisplayTypeIds { get; set; }
+        public virtual DbSet<PageReferenceItem> PageReferenceItems { get; set; }
 
 
         public virtual DbSet<PriceIndex> PriceIndices { get; set; }

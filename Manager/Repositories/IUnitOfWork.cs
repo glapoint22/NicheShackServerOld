@@ -35,7 +35,7 @@ namespace Manager.Repositories
         ISearchableRepository<Subgroup> Subgroups { get; }
         IRepository<SubgroupProduct> SubgroupProducts { get; }
         IRepository<ProductReview> ProductReviews { get; }
-        IRepository<PageDisplayTypeId> PageDisplayTypeIds { get; }
+        IRepository<PageReferenceItem> PageReferenceItems { get; }
 
 
 

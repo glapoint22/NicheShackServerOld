@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Services.Classes;
 using Website.Repositories;
 
 namespace Website.Controllers
@@ -20,7 +21,7 @@ namespace Website.Controllers
         // ..................................................................................Get.....................................................................
         public async Task<ActionResult> Get()
         {
-            return Ok(await unitOfWork.Pages.Get(x => x.Name == "Home", x => x.Content));
+            return Ok(await unitOfWork.Pages.Get(x => x.DisplayType == (int)PageDisplayType.Home, x => x.Content));
         }
     }
 }

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Manager.ViewModels
 {
-    public class PageDisplayTypeIdViewModel
+    public class PageReferenceItemViewModel
     {
         public int PageId { get; set; }
         public int DisplayId { get; set; }

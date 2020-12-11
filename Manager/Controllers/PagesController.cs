@@ -172,21 +172,21 @@ namespace Manager.Controllers
 
 
         [HttpPost]
-        [Route("PageDisplayTypeId")]
-        public async Task<ActionResult> AddPageDisplayTypeId(PageDisplayTypeIdViewModel newPageDisplayTypeId)
+        [Route("PageReferenceItem")]
+        public async Task<ActionResult> AddPageReferenceItem(PageReferenceItemViewModel newPageReferenceItem)
         {
-            PageDisplayTypeId pageDisplayTypeId = new PageDisplayTypeId
+            PageReferenceItem pageReferenceItem = new PageReferenceItem
             {
-                PageId = newPageDisplayTypeId.PageId,
-                DisplayId = newPageDisplayTypeId.DisplayId
+                PageId = newPageReferenceItem.PageId,
+                ItemId = newPageReferenceItem.DisplayId
             };
 
 
             // Add and save
-            unitOfWork.PageDisplayTypeIds.Add(pageDisplayTypeId);
+            unitOfWork.PageReferenceItems.Add(pageReferenceItem);
             await unitOfWork.Save();
 
-            return Ok(pageDisplayTypeId.Id);
+            return Ok(pageReferenceItem.Id);
         }
 
 
@@ -194,13 +194,13 @@ namespace Manager.Controllers
 
 
         [HttpDelete]
-        [Route("PageDisplayTypeId")]
-        public async Task<ActionResult> DeletePageDisplayTypeId([FromQuery] int[] ids)
+        [Route("PageReferenceItem")]
+        public async Task<ActionResult> DeletePageReferenceItem([FromQuery] int[] ids)
         {
             foreach (int id in ids)
             {
-                PageDisplayTypeId pageDisplayTypeId = await unitOfWork.PageDisplayTypeIds.Get(id);
-                unitOfWork.PageDisplayTypeIds.Remove(pageDisplayTypeId);
+                PageReferenceItem pageReferenceItem = await unitOfWork.PageReferenceItems.Get(id);
+                unitOfWork.PageReferenceItems.Remove(pageReferenceItem);
             }
 
             await unitOfWork.Save();

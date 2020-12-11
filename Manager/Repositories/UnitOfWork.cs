@@ -35,7 +35,7 @@ namespace Manager.Repositories
         public ISearchableRepository<Subgroup> Subgroups { get; }
         public IRepository<SubgroupProduct> SubgroupProducts { get; }
         public IRepository<ProductReview> ProductReviews { get; }
-        public IRepository<PageDisplayTypeId> PageDisplayTypeIds { get; }
+        public IRepository<PageReferenceItem> PageReferenceItems { get; }
 
 
         // Custom Repositories
@@ -71,7 +71,7 @@ namespace Manager.Repositories
             Subgroups = new SearchableRepository<Subgroup>(context);
             SubgroupProducts = new Repository<SubgroupProduct>(context);
             ProductReviews = new Repository<ProductReview>(context);
-            PageDisplayTypeIds = new Repository<PageDisplayTypeId>(context);
+            PageReferenceItems = new Repository<PageReferenceItem>(context);
 
             // Custom Repositories
             Products = new ProductRepository(context);

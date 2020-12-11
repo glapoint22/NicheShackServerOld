@@ -32,6 +32,7 @@ namespace Website.Repositories
         IRepository<KeywordSearchVolume> KeywordSearchVolumes { get; }
         IRepository<ProductFilter> ProductFilters { get; }
         IRepository<Niche> Niches { get; }
+        IRepository<PageReferenceItem> PageReferenceItems { get; }
 
 
 

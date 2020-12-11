@@ -5,7 +5,7 @@ using System.Text;
 
 namespace DataAccess.Models
 {
-    public class PageDisplayTypeId
+    public class PageReferenceItem
     {
         public int Id { get; set; }
 
@@ -13,7 +13,7 @@ namespace DataAccess.Models
         public int PageId { get; set; }
 
 
-        public int DisplayId { get; set; }
+        public int ItemId { get; set; }
 
 
         public virtual Page Page { get; set; }

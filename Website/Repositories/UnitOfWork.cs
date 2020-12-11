@@ -31,6 +31,7 @@ namespace Website.Repositories
         public IRepository<KeywordSearchVolume> KeywordSearchVolumes { get; }
         public IRepository<ProductFilter> ProductFilters { get; }
         public IRepository<Niche> Niches { get; }
+        public IRepository<PageReferenceItem> PageReferenceItems { get; }
 
 
         // Declare the Nicheshack context
@@ -64,6 +65,7 @@ namespace Website.Repositories
             KeywordSearchVolumes = new Repository<KeywordSearchVolume>(context);
             ProductFilters = new Repository<ProductFilter>(context);
             Niches = new Repository<Niche>(context);
+            PageReferenceItems = new Repository<PageReferenceItem>(context);
         }
 
 

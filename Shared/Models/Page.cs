@@ -26,13 +26,13 @@ namespace DataAccess.Models
         public int DisplayType { get; set; }
 
 
-        public virtual ICollection<PageDisplayTypeId> PageDisplayTypeIds { get; set; }
+        public virtual ICollection<PageReferenceItem> PageReferenceItems { get; set; }
 
 
 
         public Page()
         {
-            PageDisplayTypeIds = new HashSet<PageDisplayTypeId>();
+            PageReferenceItems = new HashSet<PageReferenceItem>();
         }
     }
 }
