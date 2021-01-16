@@ -101,6 +101,7 @@ namespace Website.Controllers
 
 
 
+                
 
                 var response = new
                 {
@@ -137,6 +138,31 @@ namespace Website.Controllers
             return NotFound();
         }
 
+
+
+
+
+
+        [Route("PageContent")]
+        [HttpGet]
+        public async Task<ActionResult> GetPageContent(string urlId)
+        {
+            int productId = await unitOfWork.Products.Get(x => x.UrlId == urlId, x => x.Id);
+
+            if (productId > 0)
+            {
+                int pageId = await unitOfWork.PageReferenceItems.Get(x => x.ItemId == productId, x => x.PageId);
+
+                if (pageId > 0)
+                {
+                    return Ok(await unitOfWork.Pages.Get(x => x.Id == pageId, x => x.Content));
+                }
+            }
+
+
+            return Ok();
+            
+        }
 
 
 

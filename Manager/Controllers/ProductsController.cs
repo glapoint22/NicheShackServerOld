@@ -29,7 +29,14 @@ namespace Manager.Controllers
         [HttpGet]
         public async Task<ActionResult> GetProducts(int nicheId)
         {
-            return Ok(await unitOfWork.Products.GetCollection<ItemViewModel<Product>>(x => x.NicheId == nicheId));
+            if(nicheId > 0)
+            {
+                return Ok(await unitOfWork.Products.GetCollection<ItemViewModel<Product>>(x => x.NicheId == nicheId));
+            } else
+            {
+                return Ok(await unitOfWork.Products.GetCollection<ItemViewModel<Product>>());
+            }
+            
         }
 
 
