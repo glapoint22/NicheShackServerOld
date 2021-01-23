@@ -560,10 +560,17 @@ namespace Services
 
                 List<int> optionsIds;
 
+                List<int> filterOptIds = await context.FilterOptions
+                    .AsNoTracking()
+                    .Where(x => x.Filter.Name == customFilter.Caption)
+                    .Select(x => x.Id)
+                    .ToListAsync();
+
+
                 optionsIds = await context.ProductFilters
                     .AsNoTracking()
                     .Where(x => pIds
-                        .Contains(x.ProductId) && x.FilterOption.Filter.Name == customFilter.Caption)
+                        .Contains(x.ProductId) && filterOptIds.Contains(x.FilterOptionId))
                     .Select(x => x.FilterOptionId).Distinct()
                     .ToListAsync();
 
