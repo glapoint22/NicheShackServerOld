@@ -1,9 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Services.Classes;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Website.Repositories;
 
@@ -36,17 +32,17 @@ namespace Website.Controllers
         {
             int keywordId = await unitOfWork.Keywords.Get(x => x.Name == searchTerm, x => x.Id);
 
-            if(keywordId > 0)
+            if (keywordId > 0)
             {
                 int pageId = await unitOfWork.PageReferenceItems.Get(x => x.ItemId == keywordId, x => x.PageId);
 
-                if(pageId > 0)
+                if (pageId > 0)
                 {
-                    return Ok(await unitOfWork.Pages.Get(x => x.Id == pageId, x => x.Content));
+                    string content = await unitOfWork.Pages.Get(x => x.Id == pageId && x.DisplayType == (int)PageDisplayType.Search, x => x.Content);
+
+                    if (content != null) return Ok(content);
                 }
             }
-
-
 
             return Ok(await unitOfWork.Pages.Get(x => x.DisplayType == (int)PageDisplayType.Grid, x => x.Content));
         }
@@ -66,7 +62,10 @@ namespace Website.Controllers
 
             if (pageId > 0)
             {
-                return Ok(await unitOfWork.Pages.Get(x => x.Id == pageId, x => x.Content));
+                string content = await unitOfWork.Pages.Get(x => x.Id == pageId && x.DisplayType == (int)PageDisplayType.Browse, x => x.Content);
+
+                if (content != null) return Ok(content);
+
             }
 
             return Ok(await unitOfWork.Pages.Get(x => x.DisplayType == (int)PageDisplayType.Grid, x => x.Content));

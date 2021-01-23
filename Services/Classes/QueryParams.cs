@@ -163,14 +163,26 @@ namespace Services.Classes
                 {
                     if (query.QueryType == QueryType.ProductSubgroup)
                     {
-                        query.IntValues = await Context.SubgroupProducts.Where(x => x.SubgroupId == query.IntValue).Select(x => x.ProductId).ToListAsync();
+                        query.IntValues = await Context.SubgroupProducts
+                            .AsNoTracking()
+                            .Where(x => x.SubgroupId == query.IntValue)
+                            .Select(x => x.ProductId).ToListAsync();
                     }
 
 
                     if (query.QueryType == QueryType.ProductKeywords)
                     {
-                        List<int> keywordIds = await Context.ProductKeywords.Where(x => query.StringValues.Contains(x.Keyword.Name)).Select(x => x.Keyword.Id).Distinct().ToListAsync();
-                        query.IntValues = await Context.ProductKeywords.Where(x => keywordIds.Contains(x.KeywordId)).Select(x => x.ProductId).ToListAsync();
+                        List<int> keywordIds = await Context.ProductKeywords
+                            .AsNoTracking()
+                            .Where(x => query.StringValues.Contains(x.Keyword.Name))
+                            .Select(x => x.Keyword.Id).Distinct()
+                            .ToListAsync();
+
+
+                        query.IntValues = await Context.ProductKeywords
+                            .Where(x => keywordIds.Contains(x.KeywordId))
+                            .Select(x => x.ProductId)
+                            .ToListAsync();
                     }
 
 

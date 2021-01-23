@@ -155,7 +155,9 @@ namespace Website.Controllers
 
                 if (pageId > 0)
                 {
-                    return Ok(await unitOfWork.Pages.Get(x => x.Id == pageId, x => x.Content));
+                    string content = await unitOfWork.Pages.Get(x => x.Id == pageId && x.DisplayType == (int)PageDisplayType.Product, x => x.Content);
+
+                    if (content != null) return Ok(content);
                 }
             }
 

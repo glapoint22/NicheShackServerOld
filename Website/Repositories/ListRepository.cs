@@ -28,31 +28,67 @@ namespace Website.Repositories
         // ................................................................................Get Lists.....................................................................
         public async Task<IEnumerable<ListViewModel>> GetLists(string customerId)
         {
-            // Returns all of the customer's lists.
-            return await context.ListCollaborators
+            // Get the list ids
+            var listIds = await context.ListCollaborators
                 .AsNoTracking()
-                .OrderByDescending(x => x.IsOwner)
                 .Where(x => x.CustomerId == customerId && !x.IsRemoved)
-                .Select(x => new ListViewModel
+                .Select(x => new
                 {
-                    Id = x.ListId,
-                    Name = x.List.Name,
-                    Description = x.List.Description,
-                    TotalItems = context.ListProducts
-                        .Count(z => x.List.Collaborators
-                            .Select(y => y.Id)
-                            .Contains(z.CollaboratorId)),
-                    Owner = x.List.Collaborators
-                        .Where(y => y.ListId == x.ListId && y.IsOwner)
-                        .Select(y => y.CustomerId == customerId ? "You" : y.Customer.FirstName)
-                        .FirstOrDefault(),
-                    CollaborateId = x.List.CollaborateId,
-                    ProfilePic = x.List.Collaborators
-                        .Where(y => y.ListId == x.ListId && y.IsOwner)
-                        .Select(y => y.Customer.Image)
-                        .FirstOrDefault()
+                    x.ListId,
+                    x.IsOwner
                 })
                 .ToListAsync();
+
+            // Get the list info
+            var lists = await context.Lists
+                .AsNoTracking()
+                .Where(x => listIds.Select(z => z.ListId).ToList().Contains(x.Id))
+                .Select(x => new
+                {
+                    x.Id,
+                    x.Name,
+                    x.Description,
+                    x.CollaborateId,
+                    Owner = x.Collaborators
+                        .Where(y => y.ListId == x.Id && y.IsOwner)
+                        .Select(y => new
+                        {
+                            y.Id,
+                            Name = y.CustomerId == customerId ? "You" : y.Customer.FirstName,
+                            ProfilePic = y.Customer.Image
+
+                        }).FirstOrDefault(),
+                    TotalItems = context.ListProducts
+                        .Count(z => x.Collaborators
+                            .Select(y => y.Id)
+                            .Contains(z.CollaboratorId))
+
+                }).ToListAsync();
+
+
+            // Returns all of the customer's lists
+            return listIds.Join(lists, x => x.ListId, x => x.Id, (x, y) => new
+            {
+                y.Id,
+                y.Name,
+                y.Description,
+                y.TotalItems,
+                Owner = y.Owner.Name,
+                y.CollaborateId,
+                ProfilePic = y.Owner.ProfilePic,
+                x.IsOwner
+            })
+                .OrderByDescending(x => x.IsOwner)
+                .Select(x => new ListViewModel
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    Description = x.Description,
+                    TotalItems = x.TotalItems,
+                    Owner = x.Owner,
+                    CollaborateId = x.CollaborateId,
+                    ProfilePic = x.ProfilePic
+                }).ToList();
         }
 
 
