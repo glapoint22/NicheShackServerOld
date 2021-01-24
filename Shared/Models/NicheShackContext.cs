@@ -119,7 +119,154 @@ namespace DataAccess.Models
                 entity.Property(x => x.EmailPrefListNameChange).HasDefaultValue(true);
                 entity.Property(x => x.EmailPrefDeletedList).HasDefaultValue(true);
                 entity.Property(x => x.EmailPrefReview).HasDefaultValue(true);
+                entity
+                .HasIndex(x => x.Id)
+                .IncludeProperties(x => new
+                {
+                    x.FirstName,
+                    x.Image
+                })
+                .IsClustered(false);
+
+                entity
+                .HasIndex(x => x.EmailPrefDeletedList)
+                .IncludeProperties(x => x.Id)
+                .IsClustered(false);
+
+                entity
+                .HasIndex(x => x.EmailPrefRemovedListItem)
+                .IncludeProperties(x => x.Id)
+                .IsClustered(false);
+
+                entity
+                .HasIndex(x => x.EmailPrefNewCollaborator)
+                .IncludeProperties(x => x.Id)
+                .IsClustered(false);
+
+                entity
+                .HasIndex(x => x.EmailPrefAddedListItem)
+                .IncludeProperties(x => x.Id)
+                .IsClustered(false);
+
+                entity
+                .HasIndex(x => x.EmailPrefListNameChange)
+                .IncludeProperties(x => x.Id)
+                .IsClustered(false);
+
+                entity
+                .HasIndex(x => x.EmailPrefMovedListItem)
+                .IncludeProperties(x => x.Id)
+                .IsClustered(false);
+
+                entity
+                .HasIndex(x => x.EmailPrefNameChange)
+                .IncludeProperties(x => x.Id)
+                .IsClustered(false);
+
+                entity
+                .HasIndex(x => x.EmailPrefEmailChange)
+                .IncludeProperties(x => x.Id)
+                .IsClustered(false);
+
+                entity
+                .HasIndex(x => x.EmailPrefPasswordChange)
+                .IncludeProperties(x => x.Id)
+                .IsClustered(false);
+
+                entity
+                .HasIndex(x => x.EmailPrefProfilePicChange)
+                .IncludeProperties(x => x.Id)
+                .IsClustered(false);
+
+                entity
+                .HasIndex(x => x.EmailPrefRemovedCollaborator)
+                .IncludeProperties(x => x.Id)
+                .IsClustered(false);
+
+
+                entity
+                .HasIndex(x => x.EmailPrefReview)
+                .IncludeProperties(x => x.Id)
+                .IsClustered(false);
+
+
+                entity
+                .HasIndex(x => x.NormalizedEmail)
+                .IncludeProperties(x => new
+                {
+                    x.Id,
+                    x.UserName,
+                    x.NormalizedUserName,
+                    x.Email,
+                    x.EmailConfirmed,
+                    x.PasswordHash,
+                    x.SecurityStamp,
+                    x.ConcurrencyStamp,
+                    x.PhoneNumber,
+                    x.PhoneNumberConfirmed,
+                    x.TwoFactorEnabled,
+                    x.LockoutEnd,
+                    x.LockoutEnabled,
+                    x.AccessFailedCount,
+                    x.FirstName,
+                    x.LastName,
+                    x.ReviewName,
+                    x.Image,
+                    x.EmailPrefAddedListItem,
+                    x.EmailPrefDeletedList,
+                    x.EmailPrefEmailChange,
+                    x.EmailPrefListNameChange,
+                    x.EmailPrefMovedListItem,
+                    x.EmailPrefNameChange,
+                    x.EmailPrefNewCollaborator,
+                    x.EmailPrefPasswordChange,
+                    x.EmailPrefProfilePicChange,
+                    x.EmailPrefRemovedCollaborator,
+                    x.EmailPrefRemovedListItem,
+                    x.EmailPrefReview
+                })
+                .IsClustered(false);
             });
+
+
+
+
+            // Emails
+            modelBuilder.Entity<Email>(entity =>
+            {
+                entity
+                .HasIndex(x => x.Name)
+                .IncludeProperties(x => x.Content)
+                .IsClustered(false);
+            });
+
+
+
+            // Filters
+            modelBuilder.Entity<Filter>(entity =>
+            {
+                entity
+                .HasIndex(x => x.Name)
+                .IncludeProperties(x => x.Id)
+                .IsClustered(false);
+            });
+
+
+
+
+
+            // FilterOptions
+            modelBuilder.Entity<FilterOption>(entity =>
+            {
+                entity
+                .HasIndex(x => new {
+                    x.Id,
+                    x.FilterId
+                })
+                .IncludeProperties(x => x.Name)
+                .IsClustered(false);
+            });
+
 
 
 
@@ -136,7 +283,70 @@ namespace DataAccess.Models
             {
                 entity.HasKey(e => new { e.KeywordId, e.Date })
                     .HasName("PK_KeywordSearchVolumes");
+
+                entity
+                .HasIndex(x => x.Date)
+                .IncludeProperties(x => x.KeywordId)
+                .IsClustered(false);
             });
+
+
+
+            // Lists
+            modelBuilder.Entity<List>(entity =>
+            {
+                entity
+                .HasIndex(x => x.CollaborateId)
+                .IncludeProperties(x => new
+                {
+                    x.Id,
+                    x.Name,
+                    x.Description
+                })
+                .IsClustered(false);
+            });
+
+
+
+            // ListCollaborators
+            modelBuilder.Entity<ListCollaborator>(entity =>
+            {
+                entity
+                .HasIndex(x => new
+                {
+                    x.CustomerId,
+                    x.ListId,
+                    x.IsRemoved
+                })
+                .IncludeProperties(x => x.IsOwner)
+                .IsClustered(false);
+
+                entity
+                .HasIndex(x => new
+                {
+                    x.ListId,
+                    x.IsOwner
+                })
+                .IncludeProperties(x => x.CustomerId)
+                .IsClustered(false);
+
+                entity
+                .HasIndex(x => new
+                {
+                    x.ListId,
+                    x.IsRemoved
+                })
+                .IncludeProperties(x => new
+                {
+                    x.Id,
+                    x.CustomerId,
+                    x.IsOwner
+                })
+                .IsClustered(false);
+            });
+
+
+
 
 
 
@@ -146,7 +356,39 @@ namespace DataAccess.Models
             {
                 entity.HasKey(e => new { e.ProductId, e.CollaboratorId })
                     .HasName("PK_ListProducts");
+
+                entity
+                .HasIndex(x => x.CollaboratorId)
+                .IncludeProperties(x => new
+                {
+                    x.ProductId,
+                    x.DateAdded
+                })
+                .IsClustered(false);
             });
+
+
+
+
+            // Niches
+            modelBuilder.Entity<Niche>(entity =>
+            {
+                entity
+                .HasIndex(x => x.CategoryId)
+                .IncludeProperties(x => new
+                {
+                    x.Id,
+                    x.UrlId,
+                    x.UrlName,
+                    x.Name
+                })
+                .IsClustered(false);
+
+                entity
+                .HasIndex(x => x.UrlId)
+                .IsClustered(false);
+            });
+
 
 
 
@@ -165,7 +407,71 @@ namespace DataAccess.Models
 
 
 
-            
+            // OrderProducts
+            modelBuilder.Entity<OrderProduct>(entity =>
+            {
+                entity
+                .HasIndex(x => x.OrderId)
+                .IncludeProperties(x => new
+                {
+                    x.Id,
+                    x.Name,
+                    x.Quantity,
+                    x.Price,
+                    x.LineItemType,
+                    x.RebillFrequency,
+                    x.RebillAmount,
+                    x.PaymentsRemaining
+                })
+                .IsClustered(false);
+            });
+
+
+
+
+            // Pages
+            modelBuilder.Entity<Page>(entity =>
+            {
+                entity
+                .HasIndex(x => x.DisplayType)
+                .IncludeProperties(x => x.Content)
+                .IsClustered(false);
+
+                entity
+                .HasIndex(x => x.UrlId)
+                .IncludeProperties(x => x.Content)
+                .IsClustered(false);
+            });
+
+
+
+
+
+
+            // PageReferenceItems
+            modelBuilder.Entity<PageReferenceItem>(entity =>
+            {
+                entity
+                .HasIndex(x => x.ItemId)
+                .IncludeProperties(x => x.PageId)
+                .IsClustered(false);
+            });
+
+
+
+
+            // PriceIndices
+            modelBuilder.Entity<PriceIndex>(entity =>
+            {
+                entity
+                .HasIndex(x => x.ProductContentId)
+                .IncludeProperties(x => new
+                {
+                    x.Id,
+                    x.Index
+                })
+                .IsClustered(false);
+            });
 
 
 
@@ -181,6 +487,50 @@ namespace DataAccess.Models
                 entity.HasOne(x => x.Vendor)
                 .WithMany(x => x.Products)
                 .OnDelete(DeleteBehavior.Cascade);
+
+
+                entity
+                .HasIndex(x => x.UrlId)
+                .IncludeProperties(x => new
+                {
+                    x.Id,
+                    x.ImageId,
+                    x.Name,
+                    x.Hoplink,
+                    x.Description,
+                    x.MinPrice,
+                    x.MaxPrice,
+                    x.TotalReviews,
+                    x.Rating,
+                    x.OneStar,
+                    x.TwoStars,
+                    x.ThreeStars,
+                    x.FourStars,
+                    x.FiveStars,
+                    x.UrlName
+                })
+                .IsClustered(false);
+
+
+                entity
+                .HasIndex(x => new
+                {
+                    x.Name,
+                    x.Id
+                })
+                .IncludeProperties(x => new
+                {
+                    x.ImageId,
+                    x.NicheId,
+                    x.UrlId,
+                    x.UrlName,
+                    x.MinPrice,
+                    x.MaxPrice,
+                    x.TotalReviews,
+                    x.Rating,
+                    x.Date
+                })
+                .IsClustered(false);
             });
 
 
@@ -204,6 +554,29 @@ namespace DataAccess.Models
                 entity.HasOne(x => x.Media)
                 .WithMany(x => x.ProductContent)
                 .OnDelete(DeleteBehavior.Restrict);
+
+
+                entity
+                .HasIndex(x => x.ProductId)
+                .IncludeProperties(x => new
+                {
+                    x.Id,
+                    x.IconId,
+                    x.Name
+                })
+                .IsClustered(false);
+            });
+
+
+
+
+            // ProductKeywords
+            modelBuilder.Entity<ProductKeyword>(entity =>
+            {
+                entity
+                .HasIndex(x => x.KeywordId)
+                .IncludeProperties(x => x.ProductId)
+                .IsClustered(false);
             });
 
 
@@ -215,6 +588,110 @@ namespace DataAccess.Models
                 entity.HasOne(x => x.Media)
                 .WithMany(x => x.ProductMedia)
                 .OnDelete(DeleteBehavior.Restrict);
+
+
+                entity
+                .HasIndex(x => x.ProductId)
+                .IncludeProperties(x => new
+                {
+                    x.Id,
+                    x.MediaId
+                })
+                .IsClustered(false);
+            });
+
+
+
+
+
+            // ProductOrders
+            modelBuilder.Entity<ProductOrder>(entity =>
+            {
+                entity
+                .HasIndex(x => x.CustomerId)
+                .IncludeProperties(x => new
+                {
+                    x.Id,
+                    x.ProductId,
+                    x.Date
+                })
+                .IsClustered(false);
+
+
+                entity
+                .HasIndex(x => new
+                {
+                    x.CustomerId,
+                    x.Date
+                })
+                .IncludeProperties(x => new
+                {
+                    x.Id,
+                    x.ProductId,
+                    x.PaymentMethod,
+                    x.Subtotal,
+                    x.ShippingHandling,
+                    x.Discount,
+                    x.Tax,
+                    x.Total
+                })
+                .IsClustered(false);
+
+
+
+                entity
+                .HasIndex(x => x.Date)
+                .IncludeProperties(x => x.ProductId)
+                .IsClustered(false);
+            });
+
+
+
+
+
+
+            // ProductPricePoints
+            modelBuilder.Entity<ProductPricePoint>(entity =>
+            {
+                entity
+                .HasIndex(x => x.ProductId)
+                .IncludeProperties(x => new
+                {
+                    x.Id,
+                    x.TextBefore,
+                    x.WholeNumber,
+                    x.Decimal,
+                    x.TextAfter,
+                    x.Index
+                })
+                .IsClustered(false);
+            });
+
+
+
+
+
+            // ProductReviews
+            modelBuilder.Entity<ProductReview>(entity =>
+            {
+                entity
+                .HasIndex(x => new
+                {
+                    x.ProductId,
+                    x.Deleted
+                })
+                .IncludeProperties(x => new
+                {
+                    x.CustomerId,
+                    x.Title,
+                    x.Rating,
+                    x.Date,
+                    x.Text,
+                    x.Likes,
+                    x.Dislikes,
+                    x.Id
+                })
+                .IsClustered(false);
             });
 
 
@@ -225,6 +702,17 @@ namespace DataAccess.Models
             {
                 entity.HasKey(e => new { e.Id, e.CustomerId })
                     .HasName("PK_RefreshTokens");
+            });
+
+
+
+            // SubgroupProducts
+            modelBuilder.Entity<SubgroupProduct>(entity =>
+            {
+                entity
+                .HasIndex(x => x.SubgroupId)
+                .IncludeProperties(x => x.ProductId)
+                .IsClustered(false);
             });
         }
     }
