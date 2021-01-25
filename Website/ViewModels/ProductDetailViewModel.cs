@@ -21,6 +21,8 @@ namespace Website.ViewModels
         public double ThreeStars { get; set; }
         public double FourStars { get; set; }
         public double FiveStars { get; set; }
+        public ImageViewModel Image { get; set; }
+
 
 
 

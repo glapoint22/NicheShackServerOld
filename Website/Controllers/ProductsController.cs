@@ -35,26 +35,34 @@ namespace Website.Controllers
         [HttpGet]
         public async Task<ActionResult> Get(string id)
         {
-            return Ok(await unitOfWork.Products.Get(x => x.UrlId == id, x => new
+
+            var product = await unitOfWork.Products.Get(x => x.UrlId == id, x => new ProductDetailViewModel
             {
-                id = x.Id,
-                urlId = x.UrlId,
-                title = x.Name,
-                minPrice = x.MinPrice,
-                maxPrice = x.MaxPrice,
-                image = new
-                {
-                    name = x.Media.Name,
-                    url = x.Media.Url
-                },
-                rating = x.Rating,
-                totalReviews = x.TotalReviews,
-                oneStar = x.OneStar,
-                twoStars = x.TwoStars,
-                threeStars = x.ThreeStars,
-                fourStars = x.FourStars,
-                fiveStars = x.FiveStars
-            }));
+                Id = x.Id,
+                UrlId = x.UrlId,
+                Name = x.Name,
+                MinPrice = x.MinPrice,
+                MaxPrice = x.MaxPrice,
+                Rating = x.Rating,
+                TotalReviews = x.TotalReviews,
+                OneStar = x.OneStar,
+                TwoStars = x.TwoStars,
+                ThreeStars = x.ThreeStars,
+                FourStars = x.FourStars,
+                FiveStars = x.FiveStars
+            });
+
+            var mediaId = await unitOfWork.ProductMedia.Get(x => x.ProductId == product.Id, x => x.MediaId);
+
+            product.Image = await unitOfWork.Media.Get(x => x.Id == mediaId, x => new ImageViewModel
+            {
+                Name = x.Name,
+                Url = x.Url
+            });
+
+
+
+            return Ok(product);
 
 
         }
