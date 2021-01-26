@@ -2,11 +2,13 @@
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MimeKit;
 using MimeKit.Text;
 using Services.Classes;
+using System;
 using System.Linq;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -19,14 +21,16 @@ namespace Services
 
     {
         private readonly EmailService emailService;
+        private readonly IConfiguration configuration;
         private readonly NicheShackContext context;
         private readonly IServiceScope scope;
 
-        public EmailWorkerService(IServiceScopeFactory serviceScopeFactory, EmailService emailService)
+        public EmailWorkerService(IServiceScopeFactory serviceScopeFactory, EmailService emailService, IConfiguration configuration)
         {
             scope = serviceScopeFactory.CreateScope();
             context = scope.ServiceProvider.GetRequiredService<NicheShackContext>();
             this.emailService = emailService;
+            this.configuration = configuration;
         }
 
 
@@ -37,9 +41,9 @@ namespace Services
                 await Task.Delay(1000 * 5);
 
 
-                
 
-                while(emailService.emailSetupMethods.Count > 0)
+
+                while (emailService.emailSetupMethods.Count > 0)
                 {
                     EmailSetupMethod emailSetupMethod = emailService.emailSetupMethods[0];
 
@@ -52,7 +56,7 @@ namespace Services
 
 
 
-                while(emailService.emails.Count > 0)
+                while (emailService.emails.Count > 0)
                 {
                     EmailMessage emailMessage = emailService.emails[0];
 
@@ -102,7 +106,7 @@ namespace Services
         private MimeMessage GetEmail(string recipient, string subject, string body)
         {
             MimeMessage email = new MimeMessage();
-            email.Sender = MailboxAddress.Parse("no-reply@nicheshack.com");
+            email.Sender = MailboxAddress.Parse(configuration["Email:Sender"]);
             email.To.Add(MailboxAddress.Parse(recipient));
             email.Subject = subject;
             email.Body = new TextPart(TextFormat.Html) { Text = body };
@@ -114,8 +118,8 @@ namespace Services
         private async Task SendEmail(MimeMessage email)
         {
             SmtpClient smtp = new SmtpClient();
-            await smtp.ConnectAsync("smtp.ethereal.email", 587, SecureSocketOptions.StartTls);
-            await smtp.AuthenticateAsync("chelsea.barton@ethereal.email", "hyf4dv5fcFzbVRjUWR");
+            await smtp.ConnectAsync(configuration["Email:Host"], Convert.ToInt32(configuration["Email:Port"]), (SecureSocketOptions)Convert.ToInt32(configuration["Email:SecureSocketOption"]));
+            await smtp.AuthenticateAsync(configuration["Email:UserName"], configuration["Email:Password"]);
             await smtp.SendAsync(email);
             await smtp.DisconnectAsync(true);
         }
