@@ -4,10 +4,10 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using DataAccess.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Services;
 using Services.Classes;
-using Website.Classes;
 using Website.Repositories;
 using Website.ViewModels;
 
@@ -109,7 +109,30 @@ namespace Website.Controllers
 
 
 
-                
+                // Get the products in the browse cookie
+                string products = Request.Cookies["browse"];
+
+                // If the cookie does not exist, add the first product
+                if (products == null)
+                {
+                    products = product.Id.ToString();
+                }
+                else
+                {
+                    // Add this product to the list of products in the browse cookie
+                    List<string> productsList = products.Split(',').ToList();
+                    productsList.Insert(0, product.Id.ToString());
+                    productsList = productsList.Take(20).Distinct().ToList();
+                    products = string.Join(',', productsList);
+                }
+
+
+                // Set the cookie
+                Response.Cookies.Append("browse", products, new CookieOptions
+                {
+                    Expires = new DateTimeOffset(DateTime.Now.AddYears(100))
+                });
+
 
                 var response = new
                 {
@@ -171,7 +194,7 @@ namespace Website.Controllers
 
 
             return Ok();
-            
+
         }
 
 
@@ -198,7 +221,7 @@ namespace Website.Controllers
         public async Task<ActionResult> GetGridData(QueryParams queryParams)
         {
             // If the query is a keyword, add it to the keyword search volumes
-            if(queryParams.Search != null && queryParams.Search != string.Empty)
+            if (queryParams.Search != null && queryParams.Search != string.Empty)
             {
                 int keywordId = await unitOfWork.Keywords.Get(x => x.Name == queryParams.Search, x => x.Id);
                 if (keywordId > 0)
@@ -211,7 +234,7 @@ namespace Website.Controllers
                     await unitOfWork.Save();
                 }
             }
-            
+
 
             return Ok(await queryService.GetGridData(queryParams));
         }
