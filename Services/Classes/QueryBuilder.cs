@@ -106,8 +106,14 @@ namespace Services.Classes
                         }
 
 
+                        if (query.QueryType == QueryType.CustomerRelatedProducts)
+                        {
+                            var alita = query.IntValue;
 
-                        if (query.QueryType == QueryType.ProductSubgroup || query.QueryType == QueryType.ProductKeywords || query.QueryType == QueryType.FeaturedProducts)
+                            
+                        }
+
+                            if (query.QueryType == QueryType.ProductSubgroup || query.QueryType == QueryType.ProductKeywords || query.QueryType == QueryType.FeaturedProducts)
                         {
                             PropertyInfo productProperty = typeof(Product).GetProperty("Id");
                             MemberExpression productId = Expression.Property(product, productProperty);
