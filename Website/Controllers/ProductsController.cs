@@ -190,11 +190,12 @@ namespace Website.Controllers
 
                     if (content != null) return Ok(content);
                 }
+
+                return Ok(await unitOfWork.Pages.Get(x => x.DisplayType == (int)PageDisplayType.DefaultProduct, x => x.Content));
             }
 
 
             return Ok();
-
         }
 
 

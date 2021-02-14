@@ -37,7 +37,42 @@ namespace Services.Classes
 
                     foreach (Query query in queries)
                     {
-                        if (query.QueryType == QueryType.Category)
+
+                        // Auto
+                        if (query.QueryType == QueryType.Auto)
+                        {
+                            // Browsed Products
+                            if (query.IntValue == 1)
+                            {
+                                if (query.IntValues == null) continue;
+
+                                PropertyInfo productProperty = typeof(Product).GetProperty("Id");
+                                MemberExpression productId = Expression.Property(product, productProperty);
+                                ConstantExpression values = Expression.Constant(query.IntValues);
+                                MethodInfo method = query.IntValues.GetType().GetMethod("Contains");
+                                MethodCallExpression call = Expression.Call(values, method, productId);
+                                right = Expression.Equal(call, Expression.Constant(true));
+                            }
+
+                            // Related products
+                            else if (query.IntValue == 2)
+                            {
+                                if (query.StringValue == null) continue;
+
+                                PropertyInfo nicheProperty = typeof(Product).GetProperty("NicheId");
+                                PropertyInfo urlIdProperty = typeof(Product).GetProperty("UrlId");
+                                MemberExpression urlId = Expression.Property(product, urlIdProperty);
+                                ConstantExpression stringValue = Expression.Constant(query.StringValue);
+                                MemberExpression nicheId = Expression.Property(product, nicheProperty);
+                                ConstantExpression value = Expression.Constant(query.IntValues[0]);
+
+                                right = Expression.AndAlso(Expression.Equal(nicheId, value), Expression.NotEqual(urlId, stringValue));
+                            }
+                        }
+
+
+                        // Category
+                        else if (query.QueryType == QueryType.Category)
                         {
                             PropertyInfo categoryProperty1 = typeof(Product).GetProperty("Niche");
                             PropertyInfo categoryProperty2 = categoryProperty1.PropertyType.GetProperty("Category");
@@ -50,7 +85,8 @@ namespace Services.Classes
                         }
 
 
-                        if (query.QueryType == QueryType.Niche)
+                        // Niche
+                        else if (query.QueryType == QueryType.Niche)
                         {
                             if (query.IntValue > 0)
                             {
@@ -71,8 +107,8 @@ namespace Services.Classes
                         }
 
 
-
-                        if (query.QueryType == QueryType.ProductRating)
+                        // Product Rating
+                        else if (query.QueryType == QueryType.ProductRating)
                         {
                             PropertyInfo ratingProperty = typeof(Product).GetProperty("Rating");
                             MemberExpression rating = Expression.Property(product, ratingProperty);
@@ -87,8 +123,8 @@ namespace Services.Classes
                         }
 
 
-
-                        if (query.QueryType == QueryType.ProductPrice)
+                        // Product Price
+                        else if (query.QueryType == QueryType.ProductPrice)
                         {
                             PropertyInfo priceProperty1 = typeof(Product).GetProperty("MinPrice");
                             PropertyInfo priceProperty2 = typeof(Product).GetProperty("MaxPrice");
@@ -106,14 +142,8 @@ namespace Services.Classes
                         }
 
 
-                        if (query.QueryType == QueryType.CustomerRelatedProducts)
-                        {
-                            var alita = query.IntValue;
-
-                            
-                        }
-
-                            if (query.QueryType == QueryType.ProductSubgroup || query.QueryType == QueryType.ProductKeywords || query.QueryType == QueryType.FeaturedProducts)
+                        // Product Subgroup, Product Keywords, or Featured Products
+                        else if (query.QueryType == QueryType.ProductSubgroup || query.QueryType == QueryType.ProductKeywords || query.QueryType == QueryType.FeaturedProducts)
                         {
                             PropertyInfo productProperty = typeof(Product).GetProperty("Id");
                             MemberExpression productId = Expression.Property(product, productProperty);
@@ -124,8 +154,8 @@ namespace Services.Classes
                         }
 
 
-
-                        if (query.QueryType == QueryType.ProductCreationDate)
+                        // Product Creation Date
+                        else if (query.QueryType == QueryType.ProductCreationDate)
                         {
                             PropertyInfo dateProperty = typeof(Product).GetProperty("Date");
                             MemberExpression date = Expression.Property(product, dateProperty);
@@ -140,7 +170,8 @@ namespace Services.Classes
                         }
 
 
-                        if (query.QueryType == QueryType.SubQuery)
+                        // Subquery
+                        else if (query.QueryType == QueryType.SubQuery)
                         {
                             right = GetQueries(query.SubQueries);
                         }

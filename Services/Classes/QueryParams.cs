@@ -25,7 +25,7 @@ namespace Services.Classes
         public List<int> KeywordProductIds = new List<int>();
         public NicheShackContext Context { get; set; }
 
-        
+
 
 
         // ..................................................................................Init....................................................................
@@ -63,7 +63,7 @@ namespace Services.Classes
 
             }
         }
-        
+
 
 
 
@@ -157,11 +157,22 @@ namespace Services.Classes
         // ..................................................................................Update Queries....................................................................
         async Task UpdateQueries(IEnumerable<Query> queries)
         {
-            if(queries != null && queries.Count() > 0)
+            if (queries != null && queries.Count() > 0)
             {
                 foreach (Query query in queries)
                 {
-                    if (query.QueryType == QueryType.ProductSubgroup)
+
+                    // Auto
+                    if (query.QueryType == QueryType.Auto && query.IntValue == 2)
+                    {
+                        query.IntValues = await Context.Products
+                            .AsNoTracking()
+                            .Where(x => x.UrlId == query.StringValue)
+                            .Select(x => x.NicheId).ToListAsync();
+                    }
+
+                    // Product Subgroup
+                    else if (query.QueryType == QueryType.ProductSubgroup)
                     {
                         query.IntValues = await Context.SubgroupProducts
                             .AsNoTracking()
@@ -169,8 +180,8 @@ namespace Services.Classes
                             .Select(x => x.ProductId).ToListAsync();
                     }
 
-
-                    if (query.QueryType == QueryType.ProductKeywords)
+                    // Product Keywords
+                    else if (query.QueryType == QueryType.ProductKeywords)
                     {
                         List<int> keywordIds = await Context.ProductKeywords
                             .AsNoTracking()
@@ -185,8 +196,8 @@ namespace Services.Classes
                             .ToListAsync();
                     }
 
-
-                    if (query.QueryType == QueryType.SubQuery)
+                    // Subquery
+                    else if (query.QueryType == QueryType.SubQuery)
                     {
                         await UpdateQueries(query.SubQueries);
                     }

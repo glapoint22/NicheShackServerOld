@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Services.Classes
 {
@@ -14,12 +12,12 @@ namespace Services.Classes
         Niche,
         ProductSubgroup,
         FeaturedProducts,
-        CustomerRelatedProducts,
         ProductPrice,
         ProductRating,
         ProductKeywords,
         ProductCreationDate,
-        SubQuery
+        SubQuery,
+        Auto
     }
 
 

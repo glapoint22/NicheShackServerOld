@@ -7,6 +7,7 @@
         Browse,
         Search,
         Grid,
-        Product
+        Product,
+        DefaultProduct
     }
 }
