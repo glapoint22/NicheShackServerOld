@@ -64,16 +64,14 @@ namespace Services.Classes
                             // Related products
                             else if (query.IntValue == 2)
                             {
-                                if (query.StringValue == null) continue;
-
                                 PropertyInfo nicheProperty = typeof(Product).GetProperty("NicheId");
-                                PropertyInfo urlIdProperty = typeof(Product).GetProperty("UrlId");
-                                MemberExpression urlId = Expression.Property(product, urlIdProperty);
-                                ConstantExpression stringValue = Expression.Constant(query.StringValue);
+                                PropertyInfo idProperty = typeof(Product).GetProperty("Id");
+                                MemberExpression id = Expression.Property(product, idProperty);
+                                ConstantExpression productId = Expression.Constant(queryParams.ProductId);
                                 MemberExpression nicheId = Expression.Property(product, nicheProperty);
                                 ConstantExpression value = Expression.Constant(query.IntValues[0]);
 
-                                right = Expression.AndAlso(Expression.Equal(nicheId, value), Expression.NotEqual(urlId, stringValue));
+                                right = Expression.AndAlso(Expression.Equal(nicheId, value), Expression.NotEqual(id, productId));
                             }
                         }
 

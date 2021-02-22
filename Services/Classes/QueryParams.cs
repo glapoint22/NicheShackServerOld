@@ -26,6 +26,7 @@ namespace Services.Classes
         public List<KeyValuePair<string, string>> Cookies { get; set; }
         public string Id { get; set; }
         public bool UsesFilters { get; set; }
+        public int ProductId { get; set; }
 
 
 
@@ -167,7 +168,7 @@ namespace Services.Classes
                     {
                         query.IntValues = await context.Products
                             .AsNoTracking()
-                            .Where(x => x.UrlId == query.StringValue)
+                            .Where(x => x.Id == ProductId)
                             .Select(x => x.NicheId).ToListAsync();
                     }
 

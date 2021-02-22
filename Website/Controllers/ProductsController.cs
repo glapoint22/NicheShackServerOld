@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using DataAccess.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Services;
@@ -20,14 +19,12 @@ namespace Website.Controllers
     {
         private readonly IUnitOfWork unitOfWork;
         private readonly SearchSuggestionsService searchSuggestionsService;
-        private readonly QueryService queryService;
         private readonly IPageService pageService;
 
-        public ProductsController(IUnitOfWork unitOfWork, SearchSuggestionsService searchSuggestionsService, QueryService queryService, IPageService pageService)
+        public ProductsController(IUnitOfWork unitOfWork, SearchSuggestionsService searchSuggestionsService, IPageService pageService)
         {
             this.unitOfWork = unitOfWork;
             this.searchSuggestionsService = searchSuggestionsService;
-            this.queryService = queryService;
             this.pageService = pageService;
         }
 
@@ -63,11 +60,7 @@ namespace Website.Controllers
                 Url = x.Url
             });
 
-
-
             return Ok(product);
-
-
         }
 
 
@@ -99,7 +92,6 @@ namespace Website.Controllers
         {
             // Get the product based on the id
             ProductDetailViewModel product = await unitOfWork.Products.Get<ProductDetailViewModel>(x => x.UrlId == id);
-
 
 
             // If the product is found in the database, return the product with other product details
@@ -137,14 +129,15 @@ namespace Website.Controllers
                 });
 
 
-                string pageContent = null;
+                // Set the query params
                 QueryParams queryParams = new QueryParams();
-
-
                 queryParams.Cookies = Request.Cookies.ToList();
+                queryParams.ProductId = product.Id;
 
+
+                // Set the page stuff
+                string pageContent = null;
                 int pageId = await unitOfWork.PageReferenceItems.Get(x => x.ItemId == product.Id, x => x.PageId);
-
 
                 if (pageId > 0)
                 {
@@ -157,8 +150,10 @@ namespace Website.Controllers
                 }
 
 
+                
 
-                var response = new
+
+                var productData = new
                 {
                     productInfo = new
                     {
@@ -188,40 +183,12 @@ namespace Website.Controllers
                     })
                 };
 
-                return Ok(response);
+                return Ok(productData);
             }
 
             return NotFound();
         }
 
-
-
-
-
-
-        //[Route("PageContent")]
-        //[HttpGet]
-        //public async Task<ActionResult> GetPageContent(string urlId)
-        //{
-        //    int productId = await unitOfWork.Products.Get(x => x.UrlId == urlId, x => x.Id);
-
-        //    if (productId > 0)
-        //    {
-        //        int pageId = await unitOfWork.PageReferenceItems.Get(x => x.ItemId == productId, x => x.PageId);
-
-        //        if (pageId > 0)
-        //        {
-        //            string content = await unitOfWork.Pages.Get(x => x.Id == pageId && x.DisplayType == (int)PageDisplayType.Product, x => x.Content);
-
-        //            if (content != null) return Ok(content);
-        //        }
-
-        //        return Ok(await unitOfWork.Pages.Get(x => x.DisplayType == (int)PageDisplayType.DefaultProduct, x => x.Content));
-        //    }
-
-
-        //    return Ok();
-        //}
 
 
 
@@ -236,46 +203,5 @@ namespace Website.Controllers
         {
             return Ok(searchSuggestionsService.GetSuggestions(searchWords, categoryId));
         }
-
-
-
-
-
-        // ..................................................................................Get Grid Data.....................................................................
-        //[HttpPost]
-        //[Route("GridData")]
-        //public async Task<ActionResult> GetGridData(QueryParams queryParams)
-        //{
-        //    // If the query is a keyword, add it to the keyword search volumes
-        //    if (queryParams.Search != null && queryParams.Search != string.Empty)
-        //    {
-        //        int keywordId = await unitOfWork.Keywords.Get(x => x.Name == queryParams.Search, x => x.Id);
-        //        if (keywordId > 0)
-        //        {
-        //            unitOfWork.KeywordSearchVolumes.Add(new KeywordSearchVolume
-        //            {
-        //                KeywordId = keywordId,
-        //                Date = DateTime.Now
-        //            });
-        //            await unitOfWork.Save();
-        //        }
-        //    }
-
-
-        //    return Ok(await queryService.GetGridData(queryParams));
-        //}
-
-
-
-
-
-
-        //// ..................................................................................Get Product Group.....................................................................
-        //[HttpPost]
-        //[Route("ProductGroup")]
-        //public async Task<ActionResult> GetProductGroup(QueryParams queryParams)
-        //{
-        //    return Ok(await queryService.GetProductGroup(queryParams));
-        //}
     }
 }
