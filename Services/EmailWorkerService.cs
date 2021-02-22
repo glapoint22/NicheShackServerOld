@@ -62,7 +62,7 @@ namespace Services
 
                     string emailContent = await GetEmailContent(emailMessage.EmailType);
 
-                    string emailBody = GetEmailBody(emailContent, emailMessage.EmailProperties);
+                    string emailBody = await GetEmailBody(emailContent, emailMessage.EmailProperties);
 
                     MimeMessage email = GetEmail(emailMessage.EmailAddress, emailMessage.Subject, emailBody);
 
@@ -87,7 +87,7 @@ namespace Services
         }
 
 
-        private string GetEmailBody(string content, EmailProperties emailProperties)
+        private async Task<string> GetEmailBody(string content, EmailProperties emailProperties)
         {
             // Deserialize the content into an EmailPage object
             EmailPage emailPage = JsonSerializer.Deserialize<EmailPage>(content, new JsonSerializerOptions
@@ -97,7 +97,7 @@ namespace Services
 
 
             // Create the body
-            string body = emailPage.CreateBody();
+            string body = await emailPage.CreateBody(context);
             return emailProperties.Set(body);
         }
 

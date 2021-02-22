@@ -29,14 +29,15 @@ namespace Manager.Controllers
         [HttpGet]
         public async Task<ActionResult> GetProducts(int nicheId)
         {
-            if(nicheId > 0)
+            if (nicheId > 0)
             {
                 return Ok(await unitOfWork.Products.GetCollection<ItemViewModel<Product>>(x => x.NicheId == nicheId));
-            } else
+            }
+            else
             {
                 return Ok(await unitOfWork.Products.GetCollection<ItemViewModel<Product>>());
             }
-            
+
         }
 
 
@@ -55,6 +56,7 @@ namespace Manager.Controllers
         [Route("GridData")]
         public async Task<ActionResult> GetGridData(QueryParams queryParams)
         {
+            queryParams.Cookies = Request.Cookies.ToList();
             return Ok(await queryService.GetGridData(queryParams));
         }
 
@@ -67,6 +69,7 @@ namespace Manager.Controllers
         [Route("ProductGroup")]
         public async Task<ActionResult> GetProductGroup(QueryParams queryParams)
         {
+            queryParams.Cookies = Request.Cookies.ToList();
             return Ok(await queryService.GetProductGroup(queryParams));
         }
 
@@ -607,7 +610,9 @@ namespace Manager.Controllers
         [Route("Link")]
         public async Task<ActionResult> Link(string searchWords)
         {
-            return Ok(await unitOfWork.Products.GetCollection(searchWords, x => new { 
+            return Ok(await unitOfWork.Products.GetCollection(searchWords, x => new
+            {
+                Id = x.Id,
                 Name = x.Name,
                 Link = x.UrlName + "/" + x.UrlId
             }));

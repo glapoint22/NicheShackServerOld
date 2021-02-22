@@ -555,7 +555,7 @@ namespace Services
             {
                 queryParams.CustomFilters = customFilters.Where(x => x.Caption != customFilter.Caption).ToList();
 
-                await queryParams.SetFilteredProducts();
+                await queryParams.SetFilteredProducts(context);
                 var pIds = await GetProducts(queryParams, x => x.Id);
 
                 List<int> optionsIds;

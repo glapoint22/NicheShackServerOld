@@ -26,14 +26,15 @@ namespace Manager.Controllers
         [HttpGet]
         public async Task<ActionResult> GetNiches(int categoryId)
         {
-            if(categoryId > 0)
+            if (categoryId > 0)
             {
                 return Ok(await unitOfWork.Niches.GetCollection<ItemViewModel<Niche>>(x => x.CategoryId == categoryId));
-            } else
+            }
+            else
             {
                 return Ok(await unitOfWork.Niches.GetCollection<ItemViewModel<Niche>>());
             }
-            
+
         }
 
 
@@ -45,7 +46,7 @@ namespace Manager.Controllers
         }
 
 
-        
+
 
 
         [HttpPut]
@@ -285,7 +286,9 @@ namespace Manager.Controllers
         [Route("Detail")]
         public async Task<ActionResult> GetNichessDetail()
         {
-            return Ok(await unitOfWork.Niches.GetCollection(x => new {
+            return Ok(await unitOfWork.Niches.GetCollection(x => new
+            {
+                id = x.Id,
                 name = x.Name,
                 urlName = x.UrlName,
                 icon = new
@@ -304,7 +307,9 @@ namespace Manager.Controllers
         [Route("Detail/Search")]
         public async Task<ActionResult> DetailSearch(string searchWords)
         {
-            return Ok(await unitOfWork.Niches.GetCollection(searchWords, x => new {
+            return Ok(await unitOfWork.Niches.GetCollection(searchWords, x => new
+            {
+                id = x.Id,
                 name = x.Name,
                 urlName = x.UrlName,
                 icon = new

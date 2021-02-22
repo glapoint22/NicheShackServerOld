@@ -7,5 +7,10 @@
         Image,
         Container,
         Line,
+        Video,
+        ProductGroup,
+        Shop,
+        Carousel,
+        Grid
     }
 }

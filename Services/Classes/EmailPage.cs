@@ -1,19 +1,14 @@
-﻿using HtmlAgilityPack;
+﻿using DataAccess.Models;
+using HtmlAgilityPack;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Services.Classes
 {
-    public struct EmailPage
+    public class EmailPage : Page
     {
-        public string Name { get; set; }
-        public int Width { get; set; }
-        public Background Background { get; set; }
-        public IEnumerable<Row> Rows { get; set; }
-
-
-
-        public string CreateBody()
+        public async Task<string> CreateBody(NicheShackContext context)
         {
             // Document
             HtmlDocument doc = new HtmlDocument();
@@ -41,11 +36,11 @@ namespace Services.Classes
 
 
             // Main Table
-            HtmlNode mainTable = Table.Create(doc.DocumentNode.FirstChild.LastChild, new TableOptions
+            HtmlNode mainTable = await Table.Create(doc.DocumentNode.FirstChild.LastChild, new TableOptions
             {
                 Background = new Background { Color = "#edf0f3" },
                 CreateRow = true
-            });
+            }, context);
 
             // Set alignment to center
             HtmlNode td = mainTable.SelectSingleNode("tr/td");
@@ -53,17 +48,17 @@ namespace Services.Classes
 
 
             // Body
-            HtmlNode body = Table.Create(td, new TableOptions
+            HtmlNode body = await Table.Create(td, new TableOptions
             {
                 Width = Width,
                 Background = Background
-            });
+            }, context);
 
 
             // Rows
             if (Rows != null && Rows.Count() > 0)
             {
-                CreateRows(Rows, body);
+                await CreateRows(Rows, body, context);
             }
 
 
@@ -72,63 +67,32 @@ namespace Services.Classes
 
 
 
-        private void CreateRows(IEnumerable<Row> rows, HtmlNode parent)
+        private async Task CreateRows(IEnumerable<Row> rows, HtmlNode parent, NicheShackContext context)
         {
             foreach (Row row in rows)
             {
                 // Create the row
-                HtmlNode tr = row.Create(parent);
+                HtmlNode tr = await row.Create(parent, context);
 
                 foreach (Column column in row.Columns)
                 {
                     // Create the column
-                    HtmlNode td = column.Create(tr);
+                    HtmlNode td = await column.Create(tr, context);
 
 
                     // Create the widget
                     Widget widget = GetWidget(column.WidgetData.WidgetType, column.WidgetData);
-                    HtmlNode widgetNode = widget.Create(td);
+                    HtmlNode widgetNode = await widget.Create(td, context);
 
                     if (column.WidgetData.WidgetType == WidgetType.Container)
                     {
                         ContainerWidget container = (ContainerWidget)column.WidgetData;
 
-                        if (container.Rows != null && container.Rows.Count() > 0) CreateRows(container.Rows, widgetNode);
+                        if (container.Rows != null && container.Rows.Count() > 0) await CreateRows(container.Rows, widgetNode, context);
                     }
                 }
             }
 
-        }
-
-
-
-
-
-
-        private Widget GetWidget(WidgetType widgetType, Widget widgetData)
-        {
-            Widget widget = null;
-
-            switch (widgetType)
-            {
-                case WidgetType.Button:
-                    widget = (ButtonWidget)widgetData;
-                    break;
-                case WidgetType.Text:
-                    widget = (TextWidget)widgetData;
-                    break;
-                case WidgetType.Image:
-                    widget = (ImageWidget)widgetData;
-                    break;
-                case WidgetType.Container:
-                    widget = (ContainerWidget)widgetData;
-                    break;
-                case WidgetType.Line:
-                    widget = (LineWidget)widgetData;
-                    break;
-            }
-
-            return widget;
         }
     }
 }

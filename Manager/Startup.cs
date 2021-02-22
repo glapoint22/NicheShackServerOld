@@ -15,6 +15,7 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Services;
+using Services.Interfaces;
 
 namespace Manager
 {
@@ -41,6 +42,7 @@ namespace Manager
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<QueryService>();
+            services.AddScoped<IPageService, PageService>();
 
             services.AddControllers();
         }

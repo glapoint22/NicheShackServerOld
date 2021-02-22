@@ -1,10 +1,13 @@
-﻿using HtmlAgilityPack;
+﻿using DataAccess.Models;
+using HtmlAgilityPack;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Services.Classes
 {
     public struct Row
     {
+        public string Name { get; set; }
         public float Top { get; set; }
         public Background Background { get; set; }
         public Border Border { get; set; }
@@ -13,10 +16,12 @@ namespace Services.Classes
         public Padding Padding { get; set; }
         public string VerticalAlignment { get; set; }
         public List<Column> Columns { get; set; }
+        public List<Breakpoint> Breakpoints { get; set; }
 
 
 
-        public HtmlNode Create(HtmlNode table)
+
+        public async Task<HtmlNode> Create(HtmlNode table, NicheShackContext context)
         {
             // Insert a row for spacing
             if (Top > 0)
@@ -30,7 +35,7 @@ namespace Services.Classes
             HtmlNode row = table.AppendChild(HtmlNode.CreateNode("<tr>"));
 
             // Set the styles
-            if (Background != null) Background.SetStyle(row);
+            if (Background != null) await Background.SetStyle(row, context);
             if (Border != null) Border.SetStyle(row);
             if (Corners != null) Corners.SetStyle(row);
             if (Shadow != null) Shadow.SetStyle(row);

@@ -1,15 +1,19 @@
-﻿using HtmlAgilityPack;
+﻿using DataAccess.Models;
+using HtmlAgilityPack;
+using System.Collections.Generic;
 using System.Text.Json;
-using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 
 namespace Services.Classes
 {
-    public class Widget
+    public abstract class Widget
     {
+        public string Name { get; set; }
         public float Width { get; set; }
         public float Height { get; set; }
         public WidgetType WidgetType { get; set; }
         public string HorizontalAlignment { get; set; }
+        public List<Breakpoint> Breakpoints { get; set; }
 
 
         public virtual void SetProperty(string property, ref Utf8JsonReader reader, JsonSerializerOptions options)
@@ -31,15 +35,15 @@ namespace Services.Classes
         }
 
 
-        public virtual HtmlNode Create(HtmlNode column)
+        public virtual async Task<HtmlNode> Create(HtmlNode column, NicheShackContext context)
         {
             // Create the table
-            HtmlNode table = Table.Create(column, new TableOptions
+            HtmlNode table = await Table.Create(column, new TableOptions
             {
                 Width = Width,
                 HorizontalAlignment = HorizontalAlignment,
                 CreateRow = true
-            });
+            }, context);
 
 
             HtmlNode td = table.SelectSingleNode("tr/td");
@@ -49,5 +53,8 @@ namespace Services.Classes
 
             return table;
         }
+
+
+        public abstract Task SetData(NicheShackContext context, QueryParams queryParams);
     }
 }

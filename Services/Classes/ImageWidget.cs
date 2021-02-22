@@ -1,5 +1,7 @@
-﻿using HtmlAgilityPack;
+﻿using DataAccess.Models;
+using HtmlAgilityPack;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace Services.Classes
 {
@@ -12,10 +14,10 @@ namespace Services.Classes
         public Link Link { get; set; }
 
 
-        public override HtmlNode Create(HtmlNode column)
+        public async override Task<HtmlNode> Create(HtmlNode column, NicheShackContext context)
         {
             // Call the base
-            HtmlNode widget = base.Create(column);
+            HtmlNode widget = await base.Create(column, context);
 
             // Td
             HtmlNode td = widget.SelectSingleNode("tr/td");
@@ -33,7 +35,7 @@ namespace Services.Classes
             if (Shadow != null) Shadow.SetStyle(img);
 
 
-            Image.SetStyle(img);
+            await Image.SetStyle(img, context);
 
             if (Link != null && Link.Url != null)
             {
@@ -52,7 +54,6 @@ namespace Services.Classes
                 return img;
             }
         }
-
 
 
 
@@ -82,6 +83,16 @@ namespace Services.Classes
                     Link = (Link)JsonSerializer.Deserialize(ref reader, typeof(Link), options);
                     break;
             }
+        }
+
+
+
+
+
+        public override async Task SetData(NicheShackContext context, QueryParams queryParams)
+        {
+            await Image.SetData(context);
+            if (Link != null) await Link.SetData(context);
         }
     }
 }

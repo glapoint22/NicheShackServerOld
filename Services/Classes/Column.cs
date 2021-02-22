@@ -1,23 +1,29 @@
-﻿using HtmlAgilityPack;
+﻿using DataAccess.Models;
+using HtmlAgilityPack;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 
 namespace Services.Classes
 {
     public struct Column
     {
+        public string Name { get; set; }
         public Background Background { get; set; }
         public Border Border { get; set; }
         public Corners Corners { get; set; }
         public Shadow Shadow { get; set; }
         public Padding Padding { get; set; }
         public float Width { get; set; }
+        public int ColumnSpan { get; set; }
+        public List<Breakpoint> Breakpoints { get; set; }
 
 
         [JsonConverter(typeof(WidgetJsonConverter))]
         public Widget WidgetData { get; set; }
 
 
-        public HtmlNode Create(HtmlNode row)
+        public async Task<HtmlNode> Create(HtmlNode row, NicheShackContext context)
         {
             // Create the column
             HtmlNode column = row.AppendChild(HtmlNode.CreateNode("<td>"));
@@ -27,7 +33,7 @@ namespace Services.Classes
 
 
             // Set the styles
-            if (Background != null) Background.SetStyle(column);
+            if (Background != null) await Background.SetStyle(column, context);
             if (Border != null) Border.SetStyle(column);
             if (Corners != null) Corners.SetStyle(column);
             if (Shadow != null) Shadow.SetStyle(column);

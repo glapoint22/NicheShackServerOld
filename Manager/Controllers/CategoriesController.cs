@@ -12,7 +12,8 @@ namespace Manager.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CategoriesController : ControllerBase {
+    public class CategoriesController : ControllerBase
+    {
         private readonly IUnitOfWork unitOfWork;
 
         public CategoriesController(IUnitOfWork unitOfWork)
@@ -35,7 +36,9 @@ namespace Manager.Controllers
         [Route("Detail")]
         public async Task<ActionResult> GetCategoriesDetails()
         {
-            return Ok(await unitOfWork.Categories.GetCollection(x => new { 
+            return Ok(await unitOfWork.Categories.GetCollection(x => new
+            {
+                id = x.Id,
                 name = x.Name,
                 urlName = x.UrlName,
                 icon = new
@@ -51,7 +54,9 @@ namespace Manager.Controllers
         [Route("Detail/Search")]
         public async Task<ActionResult> DetailSearch(string searchWords)
         {
-            return Ok(await unitOfWork.Categories.GetCollection(searchWords, x => new {
+            return Ok(await unitOfWork.Categories.GetCollection(searchWords, x => new
+            {
+                id = x.Id,
                 name = x.Name,
                 urlName = x.UrlName,
                 icon = new

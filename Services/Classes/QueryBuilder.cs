@@ -14,6 +14,7 @@ namespace Services.Classes
     public class QueryBuilder : IWhere<Product>, IEnumerableOrderBy<QueryResult>, IEnumerableSelect<QueryResult, QueriedProduct>
     {
         private readonly QueryParams queryParams;
+        private bool hasWhere = false;
 
         public QueryBuilder(QueryParams queryParams)
         {
@@ -44,12 +45,18 @@ namespace Services.Classes
                             // Browsed Products
                             if (query.IntValue == 1)
                             {
-                                if (query.IntValues == null) continue;
+                                if (queryParams.Cookies == null || queryParams.Cookies.Count(x => x.Key == "browse") == 0) continue;
+
+                                string browseCookie = queryParams.Cookies.Where(x => x.Key == "browse").Select(x => x.Value).SingleOrDefault();
+
+                                if (browseCookie == null) continue;
+
+                                List<int> productIds = browseCookie.Split(',').Select(x => Int32.Parse(x)).ToList();
 
                                 PropertyInfo productProperty = typeof(Product).GetProperty("Id");
                                 MemberExpression productId = Expression.Property(product, productProperty);
-                                ConstantExpression values = Expression.Constant(query.IntValues);
-                                MethodInfo method = query.IntValues.GetType().GetMethod("Contains");
+                                ConstantExpression values = Expression.Constant(productIds);
+                                MethodInfo method = productIds.GetType().GetMethod("Contains");
                                 MethodCallExpression call = Expression.Call(values, method, productId);
                                 right = Expression.Equal(call, Expression.Constant(true));
                             }
@@ -195,17 +202,27 @@ namespace Services.Classes
                         }
                     }
 
+                    if (left.Count == 0) return null;
+
                     return left[^1];
                 }
 
 
 
+                BinaryExpression queries = GetQueries(queryParams.Queries);
 
-                var exp = Expression.Lambda<Func<Product, bool>>(GetQueries(queryParams.Queries), product);
-                source = source.Where(exp);
+                if (queries != null)
+                {
+                    var exp = Expression.Lambda<Func<Product, bool>>(queries, product);
+                    source = source.Where(exp);
+                    hasWhere = true;
+                }
+
             }
 
 
+
+            if (!queryParams.UsesFilters) return source;
 
 
             //Search words
@@ -221,7 +238,7 @@ namespace Services.Classes
                 || queryParams.KeywordProductIds.Contains(x.Id)
 
                 )).ToArray());
-
+                hasWhere = true;
             }
 
 
@@ -229,6 +246,7 @@ namespace Services.Classes
             if (queryParams.CategoryId != null && queryParams.CategoryId != string.Empty)
             {
                 source = source.Where(x => x.Niche.Category.UrlId == queryParams.CategoryId);
+                hasWhere = true;
             }
 
 
@@ -236,6 +254,7 @@ namespace Services.Classes
             if (queryParams.NicheId != null && queryParams.NicheId != string.Empty)
             {
                 source = source.Where(x => x.Niche.UrlId == queryParams.NicheId);
+                hasWhere = true;
             }
 
 
@@ -268,6 +287,7 @@ namespace Services.Classes
                 }
 
                 source = source.WhereAny(priceRangeQueries.ToArray());
+                hasWhere = true;
             }
 
 
@@ -282,6 +302,7 @@ namespace Services.Classes
             {
                 int rating = queryParams.RatingFilter.Options.Select(x => x.Id).Min();
                 source = source.Where(x => x.Rating >= rating);
+                hasWhere = true;
             }
 
 
@@ -310,11 +331,14 @@ namespace Services.Classes
                 {
                     var ids = productIds[i];
                     source = source.Where(x => ids.Contains(x.Id));
+                    hasWhere = true;
                 }
             }
 
 
 
+
+            if (!hasWhere) source = source.Take(0);
 
             return source;
         }

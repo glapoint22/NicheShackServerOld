@@ -1,5 +1,7 @@
-﻿using HtmlAgilityPack;
+﻿using DataAccess.Models;
+using HtmlAgilityPack;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace Services.Classes
 {
@@ -9,10 +11,10 @@ namespace Services.Classes
         public Shadow Shadow { get; set; }
 
 
-        public override HtmlNode Create(HtmlNode column)
+        public async override Task<HtmlNode> Create(HtmlNode column, NicheShackContext context)
         {
             // Call the base
-            HtmlNode widget = base.Create(column);
+            HtmlNode widget = await base.Create(column, context);
 
 
             // Td
@@ -36,8 +38,7 @@ namespace Services.Classes
             return widget;
         }
 
-
-
+        
 
         public override void SetProperty(string property, ref Utf8JsonReader reader, JsonSerializerOptions options)
         {
@@ -53,6 +54,15 @@ namespace Services.Classes
                     Shadow = (Shadow)JsonSerializer.Deserialize(ref reader, typeof(Shadow), options);
                     break;
             }
+        }
+
+
+
+
+
+        public override Task SetData(NicheShackContext context, QueryParams queryParams)
+        {
+            return Task.FromResult(false);
         }
     }
 }

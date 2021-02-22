@@ -1,4 +1,6 @@
-﻿using HtmlAgilityPack;
+﻿using DataAccess.Models;
+using HtmlAgilityPack;
+using System.Threading.Tasks;
 
 namespace Services.Classes
 {
@@ -6,9 +8,11 @@ namespace Services.Classes
     {
         public string Color { get; set; }
         public BackgroundImage Image { get; set; }
+        public bool Enable { get; set; }
 
 
-        public void SetStyle(HtmlNode node)
+
+        public async Task SetStyle(HtmlNode node, NicheShackContext context)
         {
             string styles = node.GetAttributeValue("style", "");
 
@@ -22,6 +26,8 @@ namespace Services.Classes
             // Image
             if (Image != null)
             {
+                await Image.SetData(context);
+
                 node.SetAttributeValue("background", "{host}/images/" + Image.Url);
                 styles += "background-image: url({host}/images/" + Image.Url + ");";
                 Image.SetStyle(ref styles);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DataAccess.Models;
@@ -7,6 +8,8 @@ using Manager.Classes;
 using Manager.Repositories;
 using Manager.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Services.Classes;
+using Services.Interfaces;
 using static Manager.Classes.Utility;
 
 namespace Manager.Controllers
@@ -16,17 +19,19 @@ namespace Manager.Controllers
     public class PagesController : ControllerBase
     {
         private readonly IUnitOfWork unitOfWork;
+        private readonly IPageService pageService;
 
-        public PagesController(IUnitOfWork unitOfWork)
+        public PagesController(IUnitOfWork unitOfWork, IPageService pageService)
         {
             this.unitOfWork = unitOfWork;
+            this.pageService = pageService;
         }
 
 
         [HttpGet]
         public async Task<ActionResult> GetPages()
         {
-            return Ok(await unitOfWork.Pages.GetCollection<ItemViewModel<Page>>());
+            return Ok(await unitOfWork.Pages.GetCollection<ItemViewModel<DataAccess.Models.Page>>());
         }
 
 
@@ -35,7 +40,13 @@ namespace Manager.Controllers
         [Route("Page")]
         public async Task<ActionResult> GetPage(int id)
         {
-            return Ok(await unitOfWork.Pages.Get(x => x.Id == id, x => x.Content));
+            string pageContent = await unitOfWork.Pages.Get(x => x.Id == id, x => x.Content);
+
+            QueryParams queryParams = new QueryParams();
+            queryParams.Cookies = Request.Cookies.ToList();
+            
+
+            return Ok(await pageService.GePage(pageContent, queryParams));
         }
 
 
@@ -43,7 +54,7 @@ namespace Manager.Controllers
         [Route("Page")]
         public async Task<ActionResult> UpdatePage(UpdatedPage updatedPage)
         {
-            Page page = await unitOfWork.Pages.Get(updatedPage.PageId);
+            DataAccess.Models.Page page = await unitOfWork.Pages.Get(updatedPage.PageId);
 
             page.Name = updatedPage.Name;
             page.UrlName = GetUrlName(updatedPage.Name);
@@ -72,11 +83,11 @@ namespace Manager.Controllers
 
 
             // Create the new page
-            Page page = new Page
+            DataAccess.Models.Page page = new DataAccess.Models.Page
             {
                 Name = pageName,
                 UrlId = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper(),
-                UrlName = Utility.GetUrlName(pageName),
+                UrlName = GetUrlName(pageName),
                 Content = ""
             };
 
@@ -108,7 +119,7 @@ namespace Manager.Controllers
         public async Task<ActionResult> DuplicatePage(int pageId)
         {
             // Get the page
-            Page page = await unitOfWork.Pages.Get(pageId);
+            DataAccess.Models.Page page = await unitOfWork.Pages.Get(pageId);
             page.Id = 0;
 
             // Add the duplicated page and save
@@ -133,7 +144,7 @@ namespace Manager.Controllers
         [HttpDelete]
         public async Task<ActionResult> DeletePage(int pageId)
         {
-            Page page = await unitOfWork.Pages.Get(pageId);
+            DataAccess.Models.Page page = await unitOfWork.Pages.Get(pageId);
 
             unitOfWork.Pages.Remove(page);
             await unitOfWork.Save();
@@ -152,7 +163,7 @@ namespace Manager.Controllers
         [Route("Search")]
         public async Task<ActionResult> Search(string searchWords)
         {
-            return Ok(await unitOfWork.Pages.GetCollection<ItemViewModel<Page>>(searchWords));
+            return Ok(await unitOfWork.Pages.GetCollection<ItemViewModel<DataAccess.Models.Page>>(searchWords));
         }
 
 
@@ -161,11 +172,41 @@ namespace Manager.Controllers
         [Route("Link")]
         public async Task<ActionResult> Link(string searchWords)
         {
-            return Ok(await unitOfWork.Pages.GetCollection(searchWords, x => new
+            var pages = await unitOfWork.Pages.GetCollection(searchWords, x => new
             {
-                Name = x.Name,
-                Link = "cp/" + x.UrlName + "/" + x.UrlId
-            }));
+                x.Id,
+                x.Name,
+                x.DisplayType,
+                x.UrlName,
+                x.UrlId
+            });
+
+
+
+            return Ok(pages.Select(x => new
+            {
+                x.Id,
+                x.Name,
+                Link = GetPageDisplay((Services.Classes.PageDisplayType)x.DisplayType) + x.UrlName + "/" + x.UrlId
+            }).ToList());
+        }
+
+
+        private string GetPageDisplay(Services.Classes.PageDisplayType pageDisplayType)
+        {
+            string value = "";
+
+            switch (pageDisplayType)
+            {
+                case Services.Classes.PageDisplayType.Custom:
+                    value = "cp/";
+                    break;
+                case Services.Classes.PageDisplayType.Browse:
+                    value = "browse/";
+                    break;
+            }
+
+            return value;
         }
 
 

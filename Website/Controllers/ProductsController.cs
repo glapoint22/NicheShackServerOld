@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Services;
 using Services.Classes;
+using Services.Interfaces;
 using Website.Repositories;
 using Website.ViewModels;
 
@@ -20,12 +21,14 @@ namespace Website.Controllers
         private readonly IUnitOfWork unitOfWork;
         private readonly SearchSuggestionsService searchSuggestionsService;
         private readonly QueryService queryService;
+        private readonly IPageService pageService;
 
-        public ProductsController(IUnitOfWork unitOfWork, SearchSuggestionsService searchSuggestionsService, QueryService queryService)
+        public ProductsController(IUnitOfWork unitOfWork, SearchSuggestionsService searchSuggestionsService, QueryService queryService, IPageService pageService)
         {
             this.unitOfWork = unitOfWork;
             this.searchSuggestionsService = searchSuggestionsService;
             this.queryService = queryService;
+            this.pageService = pageService;
         }
 
 
@@ -134,6 +137,27 @@ namespace Website.Controllers
                 });
 
 
+                string pageContent = null;
+                QueryParams queryParams = new QueryParams();
+
+
+                queryParams.Cookies = Request.Cookies.ToList();
+
+                int pageId = await unitOfWork.PageReferenceItems.Get(x => x.ItemId == product.Id, x => x.PageId);
+
+
+                if (pageId > 0)
+                {
+                    pageContent = await unitOfWork.Pages.Get(x => x.Id == pageId && x.DisplayType == (int)PageDisplayType.Product, x => x.Content);
+                }
+
+                if (pageContent == null)
+                {
+                    pageContent = await unitOfWork.Pages.Get(x => x.DisplayType == (int)PageDisplayType.DefaultProduct, x => x.Content);
+                }
+
+
+
                 var response = new
                 {
                     productInfo = new
@@ -154,6 +178,7 @@ namespace Website.Controllers
                         .Select(y => y.Index)
                         .ToList()
                     }),
+                    pageContent = await pageService.GePage(pageContent, queryParams),
                     pricePoints = await unitOfWork.PricePoints.GetCollection(x => x.Index, x => x.ProductId == product.Id, y => new
                     {
                         y.TextBefore,
@@ -174,29 +199,29 @@ namespace Website.Controllers
 
 
 
-        [Route("PageContent")]
-        [HttpGet]
-        public async Task<ActionResult> GetPageContent(string urlId)
-        {
-            int productId = await unitOfWork.Products.Get(x => x.UrlId == urlId, x => x.Id);
+        //[Route("PageContent")]
+        //[HttpGet]
+        //public async Task<ActionResult> GetPageContent(string urlId)
+        //{
+        //    int productId = await unitOfWork.Products.Get(x => x.UrlId == urlId, x => x.Id);
 
-            if (productId > 0)
-            {
-                int pageId = await unitOfWork.PageReferenceItems.Get(x => x.ItemId == productId, x => x.PageId);
+        //    if (productId > 0)
+        //    {
+        //        int pageId = await unitOfWork.PageReferenceItems.Get(x => x.ItemId == productId, x => x.PageId);
 
-                if (pageId > 0)
-                {
-                    string content = await unitOfWork.Pages.Get(x => x.Id == pageId && x.DisplayType == (int)PageDisplayType.Product, x => x.Content);
+        //        if (pageId > 0)
+        //        {
+        //            string content = await unitOfWork.Pages.Get(x => x.Id == pageId && x.DisplayType == (int)PageDisplayType.Product, x => x.Content);
 
-                    if (content != null) return Ok(content);
-                }
+        //            if (content != null) return Ok(content);
+        //        }
 
-                return Ok(await unitOfWork.Pages.Get(x => x.DisplayType == (int)PageDisplayType.DefaultProduct, x => x.Content));
-            }
+        //        return Ok(await unitOfWork.Pages.Get(x => x.DisplayType == (int)PageDisplayType.DefaultProduct, x => x.Content));
+        //    }
 
 
-            return Ok();
-        }
+        //    return Ok();
+        //}
 
 
 
@@ -217,40 +242,40 @@ namespace Website.Controllers
 
 
         // ..................................................................................Get Grid Data.....................................................................
-        [HttpPost]
-        [Route("GridData")]
-        public async Task<ActionResult> GetGridData(QueryParams queryParams)
-        {
-            // If the query is a keyword, add it to the keyword search volumes
-            if (queryParams.Search != null && queryParams.Search != string.Empty)
-            {
-                int keywordId = await unitOfWork.Keywords.Get(x => x.Name == queryParams.Search, x => x.Id);
-                if (keywordId > 0)
-                {
-                    unitOfWork.KeywordSearchVolumes.Add(new KeywordSearchVolume
-                    {
-                        KeywordId = keywordId,
-                        Date = DateTime.Now
-                    });
-                    await unitOfWork.Save();
-                }
-            }
+        //[HttpPost]
+        //[Route("GridData")]
+        //public async Task<ActionResult> GetGridData(QueryParams queryParams)
+        //{
+        //    // If the query is a keyword, add it to the keyword search volumes
+        //    if (queryParams.Search != null && queryParams.Search != string.Empty)
+        //    {
+        //        int keywordId = await unitOfWork.Keywords.Get(x => x.Name == queryParams.Search, x => x.Id);
+        //        if (keywordId > 0)
+        //        {
+        //            unitOfWork.KeywordSearchVolumes.Add(new KeywordSearchVolume
+        //            {
+        //                KeywordId = keywordId,
+        //                Date = DateTime.Now
+        //            });
+        //            await unitOfWork.Save();
+        //        }
+        //    }
 
 
-            return Ok(await queryService.GetGridData(queryParams));
-        }
-
-
-
+        //    return Ok(await queryService.GetGridData(queryParams));
+        //}
 
 
 
-        // ..................................................................................Get Product Group.....................................................................
-        [HttpPost]
-        [Route("ProductGroup")]
-        public async Task<ActionResult> GetProductGroup(QueryParams queryParams)
-        {
-            return Ok(await queryService.GetProductGroup(queryParams));
-        }
+
+
+
+        //// ..................................................................................Get Product Group.....................................................................
+        //[HttpPost]
+        //[Route("ProductGroup")]
+        //public async Task<ActionResult> GetProductGroup(QueryParams queryParams)
+        //{
+        //    return Ok(await queryService.GetProductGroup(queryParams));
+        //}
     }
 }

@@ -23,7 +23,9 @@ namespace Services.Classes
         public string Filters { get; set; }
         public List<FilteredProduct> FilteredProducts { get; set; }
         public List<int> KeywordProductIds = new List<int>();
-        public NicheShackContext Context { get; set; }
+        public List<KeyValuePair<string, string>> Cookies { get; set; }
+        public string Id { get; set; }
+        public bool UsesFilters { get; set; }
 
 
 
@@ -31,23 +33,21 @@ namespace Services.Classes
         // ..................................................................................Init....................................................................
         public async Task Init(NicheShackContext context)
         {
-            Context = context;
-
             SetFilters();
-            await SetFilteredProducts();
-            await SetKeywords();
-            await UpdateQueries(Queries);
+            await SetFilteredProducts(context);
+            await SetKeywords(context);
+            await UpdateQueries(Queries, context);
         }
 
 
 
 
 
-        private async Task SetKeywords()
+        private async Task SetKeywords(NicheShackContext context)
         {
             if (Search == null || Search == string.Empty) return;
 
-            int keywordId = await Context.Keywords
+            int keywordId = await context.Keywords
                 .AsNoTracking()
                 .Where(x => x.Name == Search)
                 .Select(x => x.Id)
@@ -55,7 +55,7 @@ namespace Services.Classes
 
             if (keywordId > 0)
             {
-                KeywordProductIds = await Context.ProductKeywords
+                KeywordProductIds = await context.ProductKeywords
                     .AsNoTracking()
                     .Where(x => x.KeywordId == keywordId)
                     .Select(x => x.ProductId)
@@ -126,7 +126,7 @@ namespace Services.Classes
 
 
         // ..................................................................................Set Filtered Products....................................................................
-        public async Task SetFilteredProducts()
+        public async Task SetFilteredProducts(NicheShackContext context)
         {
             FilteredProducts = new List<FilteredProduct>();
 
@@ -138,7 +138,7 @@ namespace Services.Classes
 
                 if (filterOptionIds.Count > 0)
                 {
-                    FilteredProducts = await Context.ProductFilters
+                    FilteredProducts = await context.ProductFilters
                         .AsNoTracking()
                         .Where(x => filterOptionIds.Contains(x.FilterOptionId))
                         .Select(x => new FilteredProduct
@@ -155,7 +155,7 @@ namespace Services.Classes
 
 
         // ..................................................................................Update Queries....................................................................
-        async Task UpdateQueries(IEnumerable<Query> queries)
+        async Task UpdateQueries(IEnumerable<Query> queries, NicheShackContext context)
         {
             if (queries != null && queries.Count() > 0)
             {
@@ -165,7 +165,7 @@ namespace Services.Classes
                     // Auto
                     if (query.QueryType == QueryType.Auto && query.IntValue == 2)
                     {
-                        query.IntValues = await Context.Products
+                        query.IntValues = await context.Products
                             .AsNoTracking()
                             .Where(x => x.UrlId == query.StringValue)
                             .Select(x => x.NicheId).ToListAsync();
@@ -174,7 +174,7 @@ namespace Services.Classes
                     // Product Subgroup
                     else if (query.QueryType == QueryType.ProductSubgroup)
                     {
-                        query.IntValues = await Context.SubgroupProducts
+                        query.IntValues = await context.SubgroupProducts
                             .AsNoTracking()
                             .Where(x => x.SubgroupId == query.IntValue)
                             .Select(x => x.ProductId).ToListAsync();
@@ -183,14 +183,14 @@ namespace Services.Classes
                     // Product Keywords
                     else if (query.QueryType == QueryType.ProductKeywords)
                     {
-                        List<int> keywordIds = await Context.ProductKeywords
+                        List<int> keywordIds = await context.ProductKeywords
                             .AsNoTracking()
                             .Where(x => query.StringValues.Contains(x.Keyword.Name))
                             .Select(x => x.Keyword.Id).Distinct()
                             .ToListAsync();
 
 
-                        query.IntValues = await Context.ProductKeywords
+                        query.IntValues = await context.ProductKeywords
                             .Where(x => keywordIds.Contains(x.KeywordId))
                             .Select(x => x.ProductId)
                             .ToListAsync();
@@ -199,7 +199,7 @@ namespace Services.Classes
                     // Subquery
                     else if (query.QueryType == QueryType.SubQuery)
                     {
-                        await UpdateQueries(query.SubQueries);
+                        await UpdateQueries(query.SubQueries, context);
                     }
                 }
             }

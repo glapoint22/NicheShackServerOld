@@ -1,8 +1,10 @@
-﻿using HtmlAgilityPack;
+﻿using DataAccess.Models;
+using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace Services.Classes
 {
@@ -22,10 +24,10 @@ namespace Services.Classes
         }
 
 
-        public override HtmlNode Create(HtmlNode column)
+        public async override Task<HtmlNode> Create(HtmlNode column, NicheShackContext context)
         {
             // Call the base
-            HtmlNode widget = base.Create(column);
+            HtmlNode widget = await base.Create(column, context);
 
             // Td
             HtmlNode td = widget.SelectSingleNode("tr/td");
@@ -33,7 +35,7 @@ namespace Services.Classes
             td.SetAttributeValue("style", "height: " + Height + "px;");
 
             // Set the styles
-            if (Background != null) Background.SetStyle(td);
+            if (Background != null) await Background.SetStyle(td, context);
             if (Border != null) Border.SetStyle(td);
             if (Corners != null) Corners.SetStyle(td);
             if (Shadow != null) Shadow.SetStyle(td);
@@ -79,5 +81,12 @@ namespace Services.Classes
             }
         }
 
+        public override async Task SetData(NicheShackContext context, QueryParams queryParams)
+        {
+            if (Background != null && Background.Image != null)
+            {
+                await Background.Image.SetData(context);
+            }
+        }
     }
 }

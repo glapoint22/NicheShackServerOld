@@ -51,6 +51,21 @@ namespace Services.Classes
                             case WidgetType.Line:
                                 widget = new LineWidget();
                                 break;
+                            case WidgetType.Video:
+                                widget = new VideoWidget();
+                                break;
+                            case WidgetType.ProductGroup:
+                                widget = new ProductGroupWidget();
+                                break;
+                            case WidgetType.Shop:
+                                widget = new ShopWidget();
+                                break;
+                            case WidgetType.Carousel:
+                                widget = new CarouselWidget();
+                                break;
+                            case WidgetType.Grid:
+                                widget = new GridWidget();
+                                break;
                         }
 
                         widget.WidgetType = widgetType;
@@ -66,9 +81,43 @@ namespace Services.Classes
             throw new JsonException();
         }
 
-        public override void Write(Utf8JsonWriter writer, Widget value, JsonSerializerOptions options)
+        public override void Write(Utf8JsonWriter writer, Widget widget, JsonSerializerOptions options)
         {
-            throw new NotImplementedException();
+            switch (widget.WidgetType)
+            {
+                case WidgetType.Button:
+                    JsonSerializer.Serialize(writer, (ButtonWidget)widget, options);
+                    break;
+                case WidgetType.Text:
+                    JsonSerializer.Serialize(writer, (TextWidget)widget, options);
+                    break;
+                case WidgetType.Image:
+                    JsonSerializer.Serialize(writer, (ImageWidget)widget, options);
+                    break;
+                case WidgetType.Container:
+                    JsonSerializer.Serialize(writer, (ContainerWidget)widget, options);
+                    break;
+                case WidgetType.Line:
+                    JsonSerializer.Serialize(writer, (LineWidget)widget, options);
+                    break;
+                case WidgetType.Video:
+                    JsonSerializer.Serialize(writer, (VideoWidget)widget, options);
+                    break;
+                case WidgetType.ProductGroup:
+                    JsonSerializer.Serialize(writer, (ProductGroupWidget)widget, options);
+                    break;
+                case WidgetType.Shop:
+                    JsonSerializer.Serialize(writer, (ShopWidget)widget, options);
+                    break;
+                case WidgetType.Carousel:
+                    JsonSerializer.Serialize(writer, (CarouselWidget)widget, options);
+                    break;
+                case WidgetType.Grid:
+                    JsonSerializer.Serialize(writer, (GridWidget)widget, options);
+                    break;
+            }
+
+            
         }
     }
 }

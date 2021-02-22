@@ -1,5 +1,7 @@
-﻿using HtmlAgilityPack;
+﻿using DataAccess.Models;
+using HtmlAgilityPack;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace Services.Classes
 {
@@ -11,10 +13,10 @@ namespace Services.Classes
 
 
 
-        public override HtmlNode Create(HtmlNode column)
+        public async override Task<HtmlNode> Create(HtmlNode column, NicheShackContext context)
         {
             // Call the base
-            HtmlNode textWidget = base.Create(column);
+            HtmlNode textWidget = await base.Create(column, context);
 
             // Select the td node
             HtmlNode td = textWidget.SelectSingleNode("tr/td");
@@ -28,7 +30,7 @@ namespace Services.Classes
 
             // Apply the styles
             td.SetAttributeValue("style", "font-family: Arial, Helvetica, sans-serif;font-size: 14px;color: #000000;line-height: normal;");
-            if (Background != null) Background.SetStyle(td);
+            if (Background != null) await Background.SetStyle(td, context);
             if (Padding != null) Padding.SetStyle(td);
 
             // Assign the content
@@ -36,6 +38,8 @@ namespace Services.Classes
 
             return textWidget;
         }
+
+        
 
         public override void SetProperty(string property, ref Utf8JsonReader reader, JsonSerializerOptions options)
         {
@@ -55,6 +59,17 @@ namespace Services.Classes
                 case "htmlContent":
                     HtmlContent = (string)JsonSerializer.Deserialize(ref reader, typeof(string), options);
                     break;
+            }
+        }
+
+
+
+
+        public override async Task SetData(NicheShackContext context, QueryParams queryParams)
+        {
+            if (Background != null && Background.Image != null)
+            {
+                await Background.Image.SetData(context);
             }
         }
     }

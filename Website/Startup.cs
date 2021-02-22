@@ -13,6 +13,7 @@ using Website.Repositories;
 using Microsoft.Extensions.FileProviders;
 using System.IO;
 using Services;
+using Services.Interfaces;
 
 namespace Website
 {
@@ -83,6 +84,7 @@ namespace Website
             services.AddSingleton<EmailService>();
             services.AddSingleton<SearchSuggestionsService>();
             services.AddScoped<QueryService>();
+            services.AddScoped<IPageService, PageService>();
             services.AddControllers();
         }
 

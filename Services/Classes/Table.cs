@@ -1,4 +1,6 @@
-﻿using HtmlAgilityPack;
+﻿using DataAccess.Models;
+using HtmlAgilityPack;
+using System.Threading.Tasks;
 
 namespace Services.Classes
 {
@@ -23,7 +25,7 @@ namespace Services.Classes
         }
 
 
-        public static HtmlNode Create(HtmlNode parent, TableOptions tableOptions)
+        public async static Task<HtmlNode> Create(HtmlNode parent, TableOptions tableOptions, NicheShackContext contetxt)
         {
             
 
@@ -45,7 +47,7 @@ namespace Services.Classes
             // Background
             if (tableOptions.Background != null)
             {
-                tableOptions.Background.SetStyle(table);
+                await tableOptions.Background.SetStyle(table, contetxt);
             }
 
 
