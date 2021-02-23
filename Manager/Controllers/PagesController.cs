@@ -96,7 +96,7 @@ namespace Manager.Controllers
             await unitOfWork.Save();
 
             // Update the content with the new Id and update
-            page.Content = "{\"id\":" + page.Id + ",\"name\":\"" + pageName + "\",\"background\":{\"color\":\"#ffffff\"}}";
+            page.Content = "{\"id\":" + page.Id + ",\"name\":\"" + pageName + "\",\"background\":{\"color\":\"#00000000\"}}";
             unitOfWork.Pages.Update(page);
 
 
