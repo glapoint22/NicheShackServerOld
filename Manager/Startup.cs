@@ -55,10 +55,9 @@ namespace Manager
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseStaticFiles(new StaticFileOptions { 
-                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "images")),
-                RequestPath = "/images"
-            });
+            app.UseDefaultFiles();
+
+            app.UseStaticFiles();
 
             app.UseRouting();
 
