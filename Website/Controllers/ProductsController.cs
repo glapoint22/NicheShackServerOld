@@ -68,14 +68,12 @@ namespace Website.Controllers
         // ..................................................................................Get Media.....................................................................
         public async Task<IEnumerable<ProductMediaViewModel>> GetMedia(int id)
         {
-            var mediaIds = await unitOfWork.ProductMedia.GetCollection(x => x.ProductId == id, x => x.MediaId);
-
-            return await unitOfWork.Media.GetCollection(x => mediaIds.Contains(x.Id), x => new ProductMediaViewModel
+            return await unitOfWork.ProductMedia.GetCollection(x => x.ProductId == id, x => new ProductMediaViewModel
             {
-                name = x.Name,
-                url = x.Url,
-                thumbnail = x.Thumbnail,
-                type = x.Type
+                name = x.Media.Name,
+                url = x.Media.Url,
+                thumbnail = x.Media.Thumbnail,
+                type = x.Media.Type
             });
         }
 
