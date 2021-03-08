@@ -144,7 +144,8 @@ namespace Manager.Controllers
             string imageUrl = Guid.NewGuid().ToString("N") + fileExtension;
 
             // Place the new image into the images folder
-            string imagesFolder = Path.Combine(Directory.GetCurrentDirectory(), "images");
+            string wwwroot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            string imagesFolder = Path.Combine(wwwroot, "images");
             string filePath = Path.Combine(imagesFolder, imageUrl);
 
             // Create the file stream
