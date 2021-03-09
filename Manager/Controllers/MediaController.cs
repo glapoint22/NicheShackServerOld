@@ -111,11 +111,14 @@ namespace Manager.Controllers
             // Get the id of the image
             Media media = await unitOfWork.Media.Get(id);
 
-            
+
 
 
             // Delete the old image
-            System.IO.File.Delete(Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "images"), media.Url));
+            string wwwroot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            string imagesFolder = Path.Combine(wwwroot, "images");
+            string filePath = Path.Combine(imagesFolder, media.Url);
+            System.IO.File.Delete(filePath);
 
             // Update the url
             media.Url = imageUrl;
