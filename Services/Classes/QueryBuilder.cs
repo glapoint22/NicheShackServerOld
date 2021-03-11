@@ -62,7 +62,7 @@ namespace Services.Classes
                             }
 
                             // Related products
-                            else if (query.IntValue == 2)
+                            else if (query.IntValue == 2 && queryParams.ProductId > 0)
                             {
                                 PropertyInfo nicheProperty = typeof(Product).GetProperty("NicheId");
                                 PropertyInfo idProperty = typeof(Product).GetProperty("Id");

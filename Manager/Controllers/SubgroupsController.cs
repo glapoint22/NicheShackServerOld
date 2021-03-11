@@ -1,9 +1,9 @@
 ﻿using DataAccess.Models;
 using DataAccess.ViewModels;
-using Manager.Classes;
 using Manager.Repositories;
-using Manager.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Manager.Controllers
@@ -22,7 +22,9 @@ namespace Manager.Controllers
         [HttpGet]
         public async Task<ActionResult> GetSubgroups()
         {
-            return Ok(await unitOfWork.Subgroups.GetCollection<ItemViewModel<Subgroup>>());
+            IEnumerable<ItemViewModel<Subgroup>> subgroups = await unitOfWork.Subgroups.GetCollection<ItemViewModel<Subgroup>>();
+
+            return Ok(subgroups.OrderBy(x => x.Name));
         }
 
 
@@ -32,7 +34,9 @@ namespace Manager.Controllers
         [Route("Search")]
         public async Task<ActionResult> SearchSubgroups(string searchWords)
         {
-            return Ok(await unitOfWork.Subgroups.GetCollection<ItemViewModel<Subgroup>>(searchWords));
+            IEnumerable<ItemViewModel<Subgroup>> subgroups = await unitOfWork.Subgroups.GetCollection<ItemViewModel<Subgroup>>(searchWords);
+
+            return Ok(subgroups.OrderBy(x => x.Name));
         }
 
 
@@ -41,9 +45,14 @@ namespace Manager.Controllers
         [HttpPost]
         public async Task<ActionResult> AddSubgroup(ItemViewModel subgroup)
         {
+            string subgroupName = subgroup.Name.Trim();
+
+            if (await unitOfWork.Subgroups.Any(x => x.Name.ToLower() == subgroupName.ToLower())) return Ok();
+
+
             Subgroup newSubgroup = new Subgroup
             {
-                Name = subgroup.Name
+                Name = subgroupName
             };
 
 
@@ -57,7 +66,7 @@ namespace Manager.Controllers
 
 
 
-        
+
 
 
 
@@ -66,9 +75,13 @@ namespace Manager.Controllers
         [HttpPut]
         public async Task<ActionResult> UpdateSubgroup(ItemViewModel updatedSubgroup)
         {
+            string subgroupName = updatedSubgroup.Name.Trim();
+
+            if (await unitOfWork.Subgroups.Any(x => x.Name.ToLower() == subgroupName.ToLower())) return Ok();
+
             Subgroup subgroup = await unitOfWork.Subgroups.Get(updatedSubgroup.Id);
 
-            subgroup.Name = updatedSubgroup.Name;
+            subgroup.Name = subgroupName;
 
             // Update and save
             unitOfWork.Subgroups.Update(subgroup);

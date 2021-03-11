@@ -2,6 +2,8 @@
 using DataAccess.ViewModels;
 using Manager.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Manager.Controllers
@@ -22,7 +24,8 @@ namespace Manager.Controllers
         [HttpGet]
         public async Task<ActionResult> GetKeywords()
         {
-            return Ok(await unitOfWork.Keywords.GetCollection<ItemViewModel<Keyword>>());
+            IEnumerable<ItemViewModel<Keyword>> keywords = await unitOfWork.Keywords.GetCollection<ItemViewModel<Keyword>>();
+            return Ok(keywords.OrderBy(x => x.Name));
         }
 
 
@@ -32,7 +35,8 @@ namespace Manager.Controllers
         [Route("Search")]
         public async Task<ActionResult> SearchKeywords(string searchWords)
         {
-            return Ok(await unitOfWork.Keywords.GetCollection<ItemViewModel<Keyword>>(searchWords));
+            IEnumerable<ItemViewModel<Keyword>> keywords = await unitOfWork.Keywords.GetCollection<ItemViewModel<Keyword>>(searchWords);
+            return Ok(keywords.OrderBy(x => x.Name));
         }
 
 
@@ -43,9 +47,13 @@ namespace Manager.Controllers
         [HttpPost]
         public async Task<ActionResult> AddKeyword(ItemViewModel keyword)
         {
+            string keywordName = keyword.Name.Trim().ToLower();
+
+            if (await unitOfWork.Keywords.Any(x => x.Name == keywordName)) return Ok();
+
             Keyword newKeyword = new Keyword
             {
-                Name = keyword.Name
+                Name = keywordName
             };
 
 
@@ -63,9 +71,14 @@ namespace Manager.Controllers
         [HttpPut]
         public async Task<ActionResult> UpdateKeyword(ItemViewModel updatedProperty)
         {
+            string keywordName = updatedProperty.Name.Trim().ToLower();
+
+            if (await unitOfWork.Keywords.Any(x => x.Name == keywordName)) return Ok();
+
+
             Keyword keyword = await unitOfWork.Keywords.Get(updatedProperty.Id);
 
-            keyword.Name = updatedProperty.Name;
+            keyword.Name = keywordName;
 
             // Update and save
             unitOfWork.Keywords.Update(keyword);
