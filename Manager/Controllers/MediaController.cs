@@ -14,6 +14,7 @@ using Manager.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
+using static Manager.Classes.Utility;
 
 namespace Manager.Controllers
 {
@@ -177,6 +178,7 @@ namespace Manager.Controllers
         [Route("Video")]
         public async Task<ActionResult> NewVideo(ItemViewModel videoLink)
         {
+
             Media video = await GetVideo(videoLink.Name);
 
             // Add the new video to the database
@@ -185,7 +187,7 @@ namespace Manager.Controllers
                 Name = "",
                 Url = video.Url,
                 Thumbnail = video.Thumbnail,
-                Type = 7
+                Type = (int)MediaType.Video
             };
 
             unitOfWork.Media.Add(media);
@@ -213,7 +215,9 @@ namespace Manager.Controllers
             Media media = await unitOfWork.Media.Get(video.Id);
 
             // Delete the old thumbnail
-            System.IO.File.Delete(Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "images"), media.Thumbnail));
+            string wwwroot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            string imagesFolder = Path.Combine(wwwroot, "images");
+            System.IO.File.Delete(Path.Combine(imagesFolder, media.Thumbnail));
 
 
             // Get the updated video
@@ -310,7 +314,12 @@ namespace Manager.Controllers
             // Download the thumbnail to the images folder
             using (WebClient client = new WebClient())
             {
-                client.DownloadFileAsync(new Uri(thumbnailUrl), "images/" + thumbnail);
+
+                string wwwroot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+                string imagesFolder = Path.Combine(wwwroot, "images");
+                string filePath = Path.Combine(imagesFolder, thumbnail);
+
+                client.DownloadFileAsync(new Uri(thumbnailUrl), filePath);
             }
 
 
@@ -318,7 +327,7 @@ namespace Manager.Controllers
             {
                 Url = videoUrl,
                 Thumbnail = thumbnail,
-                Type = 7
+                Type = (int)MediaType.Video
             };
 
 

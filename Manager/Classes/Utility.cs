@@ -14,11 +14,12 @@ namespace Manager.Classes
             BackgroundImage,
             BannerImage,
             CategoryImage,
+            NicheImage,
             ProductImage,
+            ProductMediaImage,
             Icon,
             Video,
-            Search,
-            ProductMediaImage
+            Search
         }
 
 
