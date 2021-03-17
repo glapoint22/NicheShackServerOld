@@ -9,6 +9,7 @@ namespace Services.Classes
         public int Blur { get; set; } = 5;
         public int Size { get; set; } = 5;
         public string Color { get; set; } = "#000000bf";
+        public bool Enable { get; set; }
 
 
         public void SetStyle(HtmlNode node)

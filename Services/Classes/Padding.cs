@@ -8,6 +8,7 @@ namespace Services.Classes
         public string Right { get; set; }
         public string Bottom { get; set; }
         public string Left { get; set; }
+        public bool Constrain { get; set; }
 
 
         public void SetStyle(HtmlNode node)
