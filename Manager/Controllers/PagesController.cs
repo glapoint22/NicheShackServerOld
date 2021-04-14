@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DataAccess.Models;
@@ -121,20 +122,29 @@ namespace Manager.Controllers
             // Get the page
             DataAccess.Models.Page page = await unitOfWork.Pages.Get(pageId);
             page.Id = 0;
+            page.Name = "New Page";
+
+            var pageContent = await pageService.GePage(page.Content, new QueryParams());
 
             // Add the duplicated page and save
             unitOfWork.Pages.Add(page);
             await unitOfWork.Save();
 
 
-            // Update the content with the new id and save
+            // Update the content
             page.Content = Regex.Replace(page.Content, "^{\"id\":" + pageId, "{\"id\":" + page.Id);
+            page.Content = Regex.Replace(page.Content, "\"referenceItems\":\\[[\\w\\d\\s\\W\\D\\S]*\\](?=,\"background\")", "\"referenceItems\": null");
+            page.Content = Regex.Replace(page.Content, "\"name\":\"" + pageContent.Name + "\"", "\"name\":\"" + page.Name + "\"");
+            pageContent.Name = page.Name;
+            pageContent.ReferenceItems = null;
+            pageContent.Id = page.Id;
+
             unitOfWork.Pages.Update(page);
             await unitOfWork.Save();
 
 
             // Return the page content
-            return Ok(page.Content);
+            return Ok(pageContent);
         }
 
 
