@@ -17,7 +17,7 @@ namespace Manager.Classes
             NicheImage,
             ProductImage,
             ProductMediaImage,
-            Icon,
+            ProductPriceImage,
             Video,
             Search
         }
