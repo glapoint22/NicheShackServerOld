@@ -2,36 +2,179 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Services
 {
     public class SearchSuggestionsService
     {
         public Node root;
-
-
+        public List<SearchWord> searchWords;
 
 
         // --------------------------------------------------------------------------------Insert---------------------------------------------------------------
-        public void Insert(SearchWord searchWord)
+        public void Insert(SearchWord searchWord, ref Node rootNode, List<SearchWord> words, List<string> categoryIds)
         {
-            Node node = root;
 
-            for (int i = 0; i < searchWord.Name.Length; i++)
+            int index = 0;
+            string currentWord = searchWord.Name;
+            int wordCount = 0;
+
+
+            while (index >= 0 && wordCount < 4)
             {
-                char c = searchWord.Name[i];
-                if (!node.Children.ContainsKey(c)) node.Children.Add(c, new Node(c));
-                node = node.Children[c];
+                Node node = rootNode;
+
+                for (int i = 0; i < currentWord.Length; i++)
+                {
+                    char c = currentWord[i];
+
+                    // If this node existss
+                    if (!node.Children.ContainsKey(c))
+                    {
+                        node.Children.Add(c, new Node(c));
+
+                        node = node.Children[c];
+
+
+                        Regex regEx;
+
+                        if (wordCount == 0)
+                        {
+                            regEx = new Regex("^" + currentWord.Substring(0, i + 1));
+                        }
+                        else
+                        {
+                            regEx = new Regex("^" + searchWord.Name + "|^" + currentWord.Substring(0, i + 1));
+                        }
+
+
+
+
+                        // All Categories
+                        node.Suggestions.Add("All", new List<SearchWordSuggestion>());
+                        node.Suggestions["All"] = words
+                            .OrderByDescending(x => x.SearchVolume)
+                            .Where(x => regEx.IsMatch(x.Name))
+                            .Select((x, index) => new SearchWordSuggestion
+                            {
+                                Name = x.Name,
+                                Category = index == 0 && x.Categories.Count() > 1 ? x.Categories.FirstOrDefault() : null,
+                                SearchVolume = x.SearchVolume
+                            })
+                            .Take(10)
+                            .ToList();
+
+                        foreach (string categoryId in categoryIds)
+                        {
+                            // Current category
+                            node.Suggestions.Add(categoryId, new List<SearchWordSuggestion>());
+                            node.Suggestions[categoryId] = words
+                                .OrderByDescending(x => x.SearchVolume)
+                                .Where(x => regEx.IsMatch(x.Name))
+                                .Where(x => x.Categories.Select(z => z.UrlId).ToList().Contains(categoryId))
+                                .Select((x, index) => new SearchWordSuggestion
+                                {
+                                    Name = x.Name,
+                                    SearchVolume = x.SearchVolume
+                                })
+                                .Take(10)
+                                .ToList();
+                        }
+                    }
+
+                    // Node does exist
+                    else
+                    {
+                        node = node.Children[c];
+
+                        // Word count within the current search word is greater than 0
+                        if (wordCount > 0)
+                        {
+
+                            // Get the current search word
+                            List<SearchWordSuggestion> currentSearchWords = words
+                            .Where(x => x.Name == searchWord.Name)
+                            .Select(x => new SearchWordSuggestion
+                            {
+                                Name = x.Name,
+                                SearchVolume = x.SearchVolume,
+                                Category = x.Categories.Count() > 1 ? x.Categories.FirstOrDefault() : null,
+                            })
+                            .ToList();
+
+
+                            // Concat the current search word with all other suggestions
+                            node.Suggestions["All"] = currentSearchWords.Concat(node.Suggestions["All"])
+
+                                .Select(x => new
+                                {
+                                    Name = x.Name,
+                                    Category = x.Category,
+                                    SearchVolume = x.SearchVolume
+                                })
+                                .OrderByDescending(x => x.SearchVolume)
+                                .Distinct()
+                                .Select((x, index) => new SearchWordSuggestion
+                                {
+                                    Name = x.Name,
+                                    Category = index == 0 && x.Category != null ? x.Category : null,
+                                    SearchVolume = x.SearchVolume
+                                })
+                                .Take(10)
+                                .ToList();
+
+
+                            // Each category
+                            foreach (string categoryId in categoryIds)
+                            {
+                                // Get the current search word
+                                currentSearchWords = words
+                                .Where(x => x.Name == searchWord.Name)
+                                .Where(x => x.Categories.Select(z => z.UrlId).ToList().Contains(categoryId))
+                                .Select(x => new SearchWordSuggestion
+                                {
+                                    Name = x.Name,
+                                    SearchVolume = x.SearchVolume,
+                                })
+                                .ToList();
+
+
+                                if (currentSearchWords.Count() > 0)
+                                {
+                                    // Concat the current search word with all other suggestions
+                                    node.Suggestions[categoryId] = currentSearchWords.Concat(node.Suggestions[categoryId])
+                                    .Select((x, index) => new
+                                    {
+                                        Name = x.Name,
+                                        SearchVolume = x.SearchVolume
+                                    })
+                                    .OrderByDescending(x => x.SearchVolume)
+                                    .Distinct()
+                                    .Select((x, index) => new SearchWordSuggestion
+                                    {
+                                        Name = x.Name,
+                                        SearchVolume = x.SearchVolume
+                                    })
+                                    .Take(10)
+                                    .ToList();
+                                }
+                            }
+                        }
+                    }
+                }
+
+
+                index = searchWord.Name.IndexOf(" ", index);
+                if (index != -1)
+                {
+                    currentWord = searchWord.Name.Substring(index + 1);
+                    index++;
+                    wordCount++;
+                }
             }
 
-            node.IsWord = true;
 
-            foreach (SearchWordCategory category in searchWord.Categories)
-            {
-                node.Categories.Add(category.UrlId, category);
-            }
-
-            node.SearchVolume = searchWord.SearchVolume;
         }
 
 
@@ -47,7 +190,6 @@ namespace Services
 
 
             Node node = root;
-            int maxSuggestions = 10;
 
 
             // Get the current node in the trie by looping through each character in the prefix
@@ -63,22 +205,11 @@ namespace Services
                 else
                 {
                     // No nodes exists for the current character so we need to get a new prefix
-                    Prefix newPrefix = new Prefix();
+                    if (i == 0) prefix = null;
 
-                    if (i == 0)
-                    {
-                        node = root;
-                    }
-                    else
-                    {
-                        node = root.Children[prefix[0]];
-                    }
 
-                    // This will get a new prefix based on the current prefix
-                    GetNewPrefix(node, prefix, ref newPrefix);
-
-                    prefix = newPrefix.Word;
-                    node = newPrefix.Node;
+                    // This will get a new prefix based on the first character of the current prefix
+                    if (i > 0) prefix = GetNewPrefix(prefix[0], prefix);
 
                     break;
                 }
@@ -87,83 +218,16 @@ namespace Services
             // If we have no prefix, return
             if (prefix == null) return null;
 
+            if (categoryId == null) categoryId = "All";
 
-
-            // This is a queue that will save each character as we traverse through the trie
-            // When a word is formed, the word will be saved and the queue item will be removed
-            List<QueueItem> queue = new List<QueueItem>();
-            queue.Add(new QueueItem
-            {
-                Node = node,
-                Fragments = prefix
-            });
-
-            List<SearchWord> searchWords = new List<SearchWord>();
-
-
-            // Find all matching words
-            while (queue.Count > 0)
-            {
-                // Get the node and fragments from the queue item and then remove the queue item
-                QueueItem queueItem = queue[0];
-                node = queueItem.Node;
-                string fragments = queueItem.Fragments;
-                queue.RemoveAt(0);
-
-                // If the fragments form a word
-                if (node.IsWord)
-                {
-                    // If a category id was not passed in or a category id was passed in and the current node has that category
-                    if (categoryId == null || node.Categories.ContainsKey(categoryId))
-                    {
-                        // Add this word to the list of search words
-                        searchWords.Add(new SearchWord
-                        {
-                            Name = fragments,
-                            Categories = node.Categories.Select(x => x.Value).ToList(),
-                            SearchVolume = node.SearchVolume
-                        });
-                    }
-                }
-
-
-                // Add all children of this node to the queue
-                foreach (var currentNode in node.Children)
-                {
-                    var child = currentNode.Value;
-                    var childWord = fragments + child.Char;
-
-                    queue.Add(new QueueItem
-                    {
-                        Node = child,
-                        Fragments = childWord
-                    });
-                }
-            }
-
-
-            // Return the suggestions
-            var suggestions = searchWords
-                .OrderByDescending(x => x.SearchVolume)
-                .Select((x, index) => new Suggestion
+            if (node.Suggestions[categoryId].Count > 0 && node.Suggestions[categoryId][0].Category != null) node.Suggestions[categoryId].Insert(0, new SearchWordSuggestion { Name = node.Suggestions[categoryId][0].Name });
+            return node.Suggestions[categoryId]
+                .Select(x => new Suggestion
                 {
                     Name = x.Name,
-                    Category = x.Categories.Count > 0 && index == 0 && categoryId == null ? x.Categories
-                    .OrderByDescending(z => z.Weight)
-                    .Select(z => new SuggestionCategory
-                    {
-                        Name = z.Name,
-                        UrlId = z.UrlId,
-                        UrlName = z.UrlName
-                    })
-                    .FirstOrDefault()
-                    : null
+                    Category = x.Category
                 })
-                .Take(maxSuggestions)
                 .ToList();
-
-            if (suggestions[0].Category != null) suggestions.Insert(0, new Suggestion { Name = suggestions[0].Name });
-            return suggestions;
         }
 
 
@@ -172,45 +236,15 @@ namespace Services
 
 
         // --------------------------------------------------------------------------------Get New Prefix---------------------------------------------------------------
-        private void GetNewPrefix(Node node, string prefix, ref Prefix newPrefix, string word = "")
+        private string GetNewPrefix(char character, string prefix)
         {
-            float maxEditDistance = 3;
+            Regex regEx = new Regex("^" + character);
 
-            if (word == string.Empty)
-            {
-                word = node.Char.ToString();
-            }
-
-            foreach (var currentNode in node.Children)
-            {
-                Node childNode = currentNode.Value;
-                string currentWord = word + childNode.Char;
-
-                // Get the edit distance between the prefix and the current word
-                float editDistance = GetEditDistance(prefix, currentWord);
-
-
-                // If the edit distance is less or equal to the max distance 
-                // and the current word is a full word
-                if (editDistance <= maxEditDistance && childNode.IsWord)
-                {
-                    // If we don't have a queue item or the current edit distance is less 
-                    // than the queueitem edit distance, save a new queue item
-                    if (newPrefix.Word == null || editDistance <= newPrefix.EditDistance)
-                    {
-                        newPrefix = new Prefix
-                        {
-                            Word = currentWord,
-                            Node = childNode,
-                            EditDistance = editDistance
-                        };
-                    }
-
-
-                }
-
-                GetNewPrefix(childNode, prefix, ref newPrefix, currentWord);
-            }
+            return searchWords
+                .Where(x => regEx.IsMatch(x.Name))
+                .Where(x => GetEditDistance(prefix, x.Name) == 1)
+                .Select(x => x.Name)
+                .FirstOrDefault();
         }
 
 
@@ -267,14 +301,8 @@ namespace Services
                 }
             }
 
-            float sum = 0;
-            for (int i = 1; i < yLength; i++)
-            {
-                sum += a[xLength - 1, i];
-            }
 
-            // Return the avg edit distance
-            return sum / (float)(yLength - 1);
+            return a[str1.Length, str2.Length];
         }
     }
 }
