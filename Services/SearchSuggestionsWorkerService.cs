@@ -100,7 +100,7 @@ namespace Services
                         mediaCount = z.productIds.Select(w => w.mediaCount).Sum(),
                         rating = z.productIds.Select(w => w.Rating).Sum() / z.productIds.Count()
                     })
-                    .Select(z => new SearchWordCategory
+                    .Select(z => new
                     {
                         UrlId = z.UrlId,
                         Name = z.Name,
@@ -113,22 +113,45 @@ namespace Services
                     Name = x.name,
                     SearchVolume = x.searchVolume,
                     Categories = x.categories
+                        .OrderByDescending(z => z.Weight)
+                        .Select(z => new SuggestionCategory
+                        {
+                            UrlId = z.UrlId,
+                            Name = z.Name,
+                            UrlName = z.UrlName
+                        })
+                        .ToList()
                 })
                 .ToList();
 
 
                 
 
-                // Clear the root node
-                searchSuggestionsService.root = new Node();
+                Node rootNode = new Node();
+                List<string> categoryIds = await context.Categories.Select(x => x.UrlId).ToListAsync();
 
 
                 // Insert the search words
                 foreach (SearchWord searchWord in searchWords)
                 {
-                    searchSuggestionsService.Insert(searchWord);
+                    searchSuggestionsService.Insert(searchWord, ref rootNode, searchWords, categoryIds);
                 }
 
+
+                searchSuggestionsService.root = rootNode;
+                searchSuggestionsService.searchWords = searchWords;
+
+
+
+                // Delete keyword search volumes
+                List<KeywordSearchVolume> keywordSearchVolumes = await context.KeywordSearchVolumes.Where(x => x.Date < DateTime.Now.Date.AddMonths(-1)).ToListAsync();
+                
+                if(keywordSearchVolumes.Count > 0)
+                {
+                    context.RemoveRange(keywordSearchVolumes);
+                    await context.SaveChangesAsync();
+                }
+                
 
                 // 1 hour
                 await Task.Delay(1000 * 60 * 60);
