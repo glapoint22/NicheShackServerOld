@@ -11,6 +11,8 @@
         ProductGroup,
         Shop,
         Carousel,
-        Grid
+        Grid,
+        Section,
+        Divider
     }
 }
