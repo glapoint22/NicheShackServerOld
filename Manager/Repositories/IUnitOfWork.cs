@@ -26,9 +26,6 @@ namespace Manager.Repositories
         ISearchableRepository<Keyword> Keywords { get; }
         IRepository<Notification> Notifications { get; }
         IRepository<ProductFilter> ProductFilters { get; }
-        IRepository<ProductPricePoint> ProductPricePoints { get; }
-        IRepository<PriceIndex> PriceIndices { get; }
-        IRepository<ProductContent> ProductContent { get; }
         IRepository<ProductMedia> ProductMedia { get; }
         IRepository<ProductKeyword> ProductKeywords { get; }
         IRepository<NotificationText> NotificationText { get; }
@@ -36,6 +33,7 @@ namespace Manager.Repositories
         IRepository<SubgroupProduct> SubgroupProducts { get; }
         IRepository<ProductReview> ProductReviews { get; }
         IRepository<PageReferenceItem> PageReferenceItems { get; }
+        IRepository<ProductPrice> ProductPrices { get; }
 
 
 

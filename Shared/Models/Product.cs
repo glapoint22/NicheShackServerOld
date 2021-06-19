@@ -27,10 +27,7 @@ namespace DataAccess.Models
         [MaxLength(256)]
         public string Hoplink { get; set; }
         public string Description { get; set; }
-        [Required]
-        public double MinPrice { get; set; }
-        [Required]
-        public double MaxPrice { get; set; }
+       
         public int TotalReviews { get; set; }
         public double Rating { get; set; }
         public int OneStar { get; set; }
@@ -39,13 +36,13 @@ namespace DataAccess.Models
         public int FourStars { get; set; }
         public int FiveStars { get; set; }
         public DateTime Date { get; set; }
+        public bool IsMultiPrice { get; set; }
         public virtual Niche Niche { get; set; }
         public virtual Media Media { get; set; }
         public virtual  Vendor Vendor { get; set; }
         public virtual ICollection<ProductFilter> ProductFilters { get; set; }
         public virtual ICollection<ProductMedia> ProductMedia { get; set; }
-        public virtual ICollection<ProductContent> ProductContent { get; set; }
-        public virtual ICollection<ProductPricePoint> ProductPricePoints { get; set; }
+        public virtual ICollection<ProductPrice> ProductPrices { get; set; }
         public virtual ICollection<ProductReview> ProductReviews { get; set; }
         public virtual ICollection<ListProduct> ListProducts { get; set; }
         public virtual ICollection<ProductOrder> ProductOrders { get; set; }
@@ -56,12 +53,12 @@ namespace DataAccess.Models
 
 
 
+
         public Product()
         {
             ProductFilters = new HashSet<ProductFilter>();
             ProductMedia = new HashSet<ProductMedia>();
-            ProductContent = new HashSet<ProductContent>();
-            ProductPricePoints = new HashSet<ProductPricePoint>();
+            ProductPrices = new HashSet<ProductPrice>();
             ProductReviews = new HashSet<ProductReview>();
             ListProducts = new HashSet<ListProduct>();
             ProductOrders = new HashSet<ProductOrder>();

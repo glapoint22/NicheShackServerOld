@@ -489,296 +489,118 @@ namespace Manager.Controllers
 
 
 
-        //[Route("Price")]
-        //[HttpPut]
-        //public async Task<ActionResult> UpdatePrice(UpdatedPrice updatedProduct)
-        //{
-        //    Product product = await unitOfWork.Products.Get(updatedProduct.Id);
 
-        //    product.MinPrice = updatedProduct.MinPrice;
-        //    product.MaxPrice = updatedProduct.MaxPrice;
 
-        //    // Update and save
-        //    unitOfWork.Products.Update(product);
-        //    await unitOfWork.Save();
 
-        //    return Ok();
-        //}
 
 
 
 
-        //[Route("Content")]
-        //[HttpPost]
-        //public async Task<ActionResult> AddContent(ItemViewModel content)
-        //{
-        //    ProductContent newContent = new ProductContent
-        //    {
-        //        ProductId = content.Id,
-        //        Name = ""
-        //    };
 
 
-        //    // Add and save
-        //    unitOfWork.ProductContent.Add(newContent);
-        //    await unitOfWork.Save();
 
-        //    return Ok(newContent.Id);
-        //}
 
 
 
 
 
-        //[Route("ContentTitle")]
-        //[HttpPut]
-        //public async Task<ActionResult> UpdateContentTitle(ItemViewModel updatedProperty)
-        //{
-        //    ProductContent productContent = await unitOfWork.ProductContent.Get(updatedProperty.Id);
 
-        //    productContent.Name = updatedProperty.Name;
 
-        //    // Update and save
-        //    unitOfWork.ProductContent.Update(productContent);
-        //    await unitOfWork.Save();
 
-        //    return Ok();
-        //}
 
 
 
 
 
-        //[Route("ContentIcon")]
-        //[HttpPut]
-        //public async Task<ActionResult> UpdateContentIcon(UpdatedProperty updatedProperty)
-        //{
-        //    ProductContent productContent = await unitOfWork.ProductContent.Get(updatedProperty.ItemId);
+        [HttpPost]
+        [Route("Price")]
+        public async Task<ActionResult> AddProductPrice(ProductPriceProperties productPriceProperties)
+        {
+            ProductPrice productPrice = new ProductPrice
+            {
+                ProductId = productPriceProperties.ProductId
+            };
 
-        //    productContent.IconId = updatedProperty.PropertyId;
+            
 
-        //    // Update and save
-        //    unitOfWork.ProductContent.Update(productContent);
-        //    await unitOfWork.Save();
+            // Update and save
+            unitOfWork.ProductPrices.Add(productPrice);
+            await unitOfWork.Save();
 
-        //    return Ok();
-        //}
+            return Ok(productPrice.Id);
+        }
 
 
 
-        //[HttpDelete]
-        //[Route("Content")]
-        //public async Task<ActionResult> DeleteContent(int id)
-        //{
-        //    ProductContent content = await unitOfWork.ProductContent.Get(id);
 
-        //    unitOfWork.ProductContent.Remove(content);
-        //    await unitOfWork.Save();
 
-        //    return Ok();
-        //}
 
+        [Route("IsMultiPrice")]
+        [HttpPut]
+        public async Task<ActionResult> UpdateIsMultiPrice(ProductItem productItem)
+        {
+            Product product = await unitOfWork.Products.Get(x => x.Id == productItem.ProductId);
 
+            product.IsMultiPrice = productItem.IsMultiPrice;
 
+            // Update and save
+            unitOfWork.Products.Update(product);
+            await unitOfWork.Save();
 
-        //[Route("PricePoint")]
-        //[HttpPost]
-        //public async Task<ActionResult> AddPricePoint(UpdatedProperty updatedProperty)
-        //{
-        //    ProductPricePoint newPricePoint = new ProductPricePoint
-        //    {
-        //        ProductId = updatedProperty.ItemId,
-        //        Index = await unitOfWork.ProductPricePoints.GetCount(x => x.ProductId == updatedProperty.ItemId)
-        //    };
+            return Ok();
+        }
 
-        //    unitOfWork.ProductPricePoints.Add(newPricePoint);
-        //    await unitOfWork.Save();
 
 
-        //    return Ok(newPricePoint.Id);
-        //}
 
+        [Route("Price")]
+        [HttpPut]
+        public async Task<ActionResult> UpdateProductPrice(ProductPriceProperties productPriceProperties)
+        {
+            ProductPrice productPrice = await unitOfWork.ProductPrices.Get(x => x.ProductId == productPriceProperties.ProductId && x.Id == productPriceProperties.Id);
 
+            productPrice.Header = productPriceProperties.Header;
+            productPrice.Quantity = productPriceProperties.Quantity;
+            productPrice.ImageId = productPriceProperties.ImageId;
+            productPrice.UnitPrice = productPriceProperties.UnitPrice;
+            productPrice.Unit = productPriceProperties.Unit;
+            productPrice.StrikethroughPrice = productPriceProperties.StrikethroughPrice;
+            productPrice.Price = productPriceProperties.Price;
+            productPrice.Shipping = productPriceProperties.Shipping;
+            productPrice.ShippingPrice = productPriceProperties.ShippingPrice;
 
 
-        //[Route("PricePoint")]
-        //[HttpPut]
-        //public async Task<ActionResult> UpdatePricePoint(ProductPricePoint updatedProductPricePoint)
-        //{
-        //    ProductPricePoint productPricePoint = await unitOfWork.ProductPricePoints.Get(updatedProductPricePoint.Id);
 
-        //    productPricePoint.TextBefore = updatedProductPricePoint.TextBefore;
-        //    productPricePoint.WholeNumber = updatedProductPricePoint.WholeNumber;
-        //    productPricePoint.Decimal = updatedProductPricePoint.Decimal;
-        //    productPricePoint.TextAfter = updatedProductPricePoint.TextAfter;
+            // Update and save
+            unitOfWork.ProductPrices.Update(productPrice);
+            await unitOfWork.Save();
 
-        //    await unitOfWork.Save();
+            return Ok();
+        }
 
-        //    return Ok();
-        //}
 
 
 
+        [HttpDelete]
+        [Route("Price")]
+        public async Task<ActionResult> DeleteProductPrice(int productId, int priceId)
+        {
 
+            ProductPrice productPrice = await unitOfWork.ProductPrices.Get(x => x.ProductId == productId && x.Id == priceId);
 
-        //[HttpDelete]
-        //[Route("PricePoint")]
-        //public async Task<ActionResult> DeletePricePoints([FromQuery] int[] ids)
-        //{
+            unitOfWork.ProductPrices.Remove(productPrice);
 
-        //    int productId = await unitOfWork.ProductPricePoints.Get(x => x.Id == ids[0], x => x.ProductId);
+            await unitOfWork.Save();
 
+            return Ok();
+        }
 
-        //    IEnumerable<ProductPricePoint> productPricePoints = await unitOfWork.ProductPricePoints.GetCollection(x => x.ProductId == productId);
 
 
-        //    IEnumerable<int> contentIds = await unitOfWork.ProductContent.GetCollection(x => x.ProductId == productId, x => x.Id);
 
 
-        //    IEnumerable<PriceIndex> priceIndices = await unitOfWork.PriceIndices.GetCollection(x => contentIds.Contains(x.ProductContentId));
 
 
-        //    ProductPricePoint[] pricePointsArray = productPricePoints.OrderBy(x => x.Index).ToArray();
 
-
-        //    int index = 0;
-
-        //    foreach (ProductPricePoint pricePoint in pricePointsArray)
-        //    {
-        //        if (ids.Contains(pricePoint.Id))
-        //        {
-        //            unitOfWork.ProductPricePoints.Remove(pricePoint);
-
-        //            PriceIndex[] removedPriceIndices = priceIndices.Where(x => x.Index == pricePoint.Index).ToArray();
-
-        //            foreach (PriceIndex priceIndex in removedPriceIndices)
-        //            {
-        //                unitOfWork.PriceIndices.Remove(priceIndex);
-        //            }
-
-        //        }
-        //        else
-        //        {
-        //            if (pricePoint.Index != index)
-        //            {
-        //                PriceIndex[] updatedPriceIndices = priceIndices.Where(x => x.Index == pricePoint.Index).ToArray();
-
-        //                foreach (PriceIndex priceIndex in updatedPriceIndices)
-        //                {
-        //                    priceIndex.Index = index;
-        //                    unitOfWork.PriceIndices.Update(priceIndex);
-        //                }
-
-        //                pricePoint.Index = index;
-        //                unitOfWork.ProductPricePoints.Update(pricePoint);
-        //            }
-
-        //            index++;
-
-        //        }
-        //    }
-
-
-
-        //    await unitOfWork.Save();
-
-        //    return Ok();
-        //}
-
-
-
-
-        //[Route("PricePointMove")]
-        //[HttpPut]
-        //public async Task<ActionResult> PricePointMove(UpdatedPricePoint updatedPricePoint)
-        //{
-        //    IEnumerable<ProductPricePoint> productPricePoints = await unitOfWork.ProductPricePoints
-        //        .GetCollection(x => x.ProductId == updatedPricePoint.ProductId &&
-        //            (x.Index == updatedPricePoint.FromIndex || x.Index == updatedPricePoint.ToIndex));
-
-
-        //    foreach (ProductPricePoint productPricePoint in productPricePoints)
-        //    {
-        //        if (productPricePoint.Index == updatedPricePoint.FromIndex)
-        //        {
-        //            productPricePoint.Index = updatedPricePoint.ToIndex;
-
-        //        }
-        //        else
-        //        {
-        //            productPricePoint.Index = updatedPricePoint.FromIndex;
-        //        }
-
-        //        unitOfWork.ProductPricePoints.Update(productPricePoint);
-        //    }
-
-
-        //    IEnumerable<int> contentIds = await unitOfWork.ProductContent.GetCollection(x => x.ProductId == updatedPricePoint.ProductId, x => x.Id);
-
-
-
-        //    IEnumerable<PriceIndex> priceIndices = await unitOfWork.PriceIndices.GetCollection(x => contentIds.Contains(x.ProductContentId) &&
-        //    (x.Index == updatedPricePoint.FromIndex || x.Index == updatedPricePoint.ToIndex));
-
-
-
-
-        //    foreach (PriceIndex priceIndex in priceIndices)
-        //    {
-        //        if (priceIndex.Index == updatedPricePoint.FromIndex)
-        //        {
-        //            priceIndex.Index = updatedPricePoint.ToIndex;
-
-        //        }
-        //        else
-        //        {
-        //            priceIndex.Index = updatedPricePoint.FromIndex;
-        //        }
-
-        //        unitOfWork.PriceIndices.Update(priceIndex);
-        //    }
-
-
-
-        //    await unitOfWork.Save();
-
-        //    return Ok();
-        //}
-
-
-
-
-        //[Route("PriceIndices")]
-        //[HttpPut]
-        //public async Task<ActionResult> UpdatePriceIndices(UpdatedPriceIndices updatedPriceIndices)
-        //{
-        //    IEnumerable<PriceIndex> priceIndices = await unitOfWork.PriceIndices.GetCollection(x => x.ProductContentId == updatedPriceIndices.ProductContentId);
-
-
-        //    for (int i = 0; i < updatedPriceIndices.PriceIndices.Count(); i++)
-        //    {
-        //        PriceIndex priceIndex = priceIndices.SingleOrDefault(x => x.Index == i);
-
-        //        if (priceIndex != null)
-        //        {
-        //            if (updatedPriceIndices.PriceIndices[i] == false)
-        //            {
-        //                unitOfWork.PriceIndices.Remove(priceIndex);
-        //            }
-        //        }
-        //        else
-        //        {
-        //            if (updatedPriceIndices.PriceIndices[i] == true)
-        //            {
-        //                priceIndex = new PriceIndex { ProductContentId = updatedPriceIndices.ProductContentId, Index = i };
-        //                unitOfWork.PriceIndices.Add(priceIndex);
-        //            }
-        //        }
-        //    }
-
-        //    await unitOfWork.Save();
-
-        //    return Ok();
-        //}
     }
 }

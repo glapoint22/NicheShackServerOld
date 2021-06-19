@@ -15,8 +15,6 @@ namespace Website.Repositories
         // Generic repositories
         public IRepository<Product> Products { get; private set; }
         public IRepository<ProductMedia> ProductMedia { get; private set; }
-        public IRepository<ProductContent> ProductContent { get; private set; }
-        public IRepository<ProductPricePoint> PricePoints { get; private set; }
         public IRepository<RefreshToken> RefreshTokens { get; private set; }
         public IRepository<ListCollaborator> Collaborators { get; }
         public IRepository<Customer> Customers { get; }
@@ -49,8 +47,6 @@ namespace Website.Repositories
             // Generic repositories
             Products = new Repository<Product>(context);
             ProductMedia = new Repository<ProductMedia>(context);
-            ProductContent = new Repository<ProductContent>(context);
-            PricePoints = new Repository<ProductPricePoint>(context);
             RefreshTokens = new Repository<RefreshToken>(context);
             Collaborators = new Repository<ListCollaborator>(context);
             Customers = new Repository<Customer>(context);

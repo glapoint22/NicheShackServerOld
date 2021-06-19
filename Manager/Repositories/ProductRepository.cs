@@ -23,6 +23,10 @@ namespace Manager.Repositories
 
 
 
+
+
+
+
         public async Task<IEnumerable<ProductFilterViewModel>> GetProductFilters(int productId, int filterId)
         {
             // Get filter options based on the filter id
@@ -57,7 +61,7 @@ namespace Manager.Repositories
 
 
 
-            public async Task<ProductViewModel> GetProduct(int productId)
+        public async Task<ProductViewModel> GetProduct(int productId)
         {
 
             var product = await context.Products
@@ -73,6 +77,7 @@ namespace Manager.Repositories
                         Name = x.Vendor.Name
                     },
                     Rating = x.Rating,
+                    IsMultiPrice = x.IsMultiPrice,
                     TotalReviews = x.TotalReviews,
                     Hoplink = x.Hoplink,
                     Description = x.Description,
@@ -81,10 +86,32 @@ namespace Manager.Repositories
                         Id = x.Media.Id,
                         Name = x.Media.Name,
                         Url = x.Media.Url
-                    },
-                    MinPrice = x.MinPrice,
-                    MaxPrice = x.MaxPrice
+                    }
                 }).SingleOrDefaultAsync();
+
+
+            // Product Price
+            product.Price = await context.ProductPrices
+                 .AsNoTracking()
+                 .Where(x => x.ProductId == productId)
+                 .Select(x => new ProductPriceViewModel
+                 {
+                     Id = x.Id,
+                     Image = new ImageViewModel
+                     {
+                         Id = x.Media.Id,
+                         Name = x.Media.Name,
+                         Url = x.Media.Url
+                     },
+                     Header = x.Header,
+                     Quantity = x.Quantity,
+                     UnitPrice = x.UnitPrice,
+                     Unit = x.Unit,
+                     StrikethroughPrice = x.StrikethroughPrice,
+                     Price = x.Price,
+                     Shipping = x.Shipping,
+                     ShippingPrice = x.ShippingPrice
+                 }).ToListAsync();
 
 
             // Keywords
@@ -110,42 +137,42 @@ namespace Manager.Repositories
 
 
             // Content
-            product.Content = await context.ProductContent
-                .AsNoTracking()
-                .Where(x => x.ProductId == productId)
+            //product.Content = await context.ProductContent
+            //    .AsNoTracking()
+            //    .Where(x => x.ProductId == productId)
 
-                .Select(y => new ProductContentViewModel
-                {
-                    Id = y.Id,
-                    Name = y.Name,
-                    Icon = new ImageViewModel
-                    {
-                        Id = y.Media.Id,
-                        Name = y.Media.Name,
-                        Url = y.Media.Url
-                    },
-                    PriceIndices = y.Product.ProductPricePoints
-                        .OrderBy(z => z.Index)
-                        .Select(z => y.PriceIndices.Select(w => w.Index).Contains(z.Index))
+            //    .Select(y => new ProductContentViewModel
+            //    {
+            //        Id = y.Id,
+            //        Name = y.Name,
+                    //Icon = new ImageViewModel
+                    //{
+                    //    Id = y.Media.Id,
+                    //    Name = y.Media.Name,
+                    //    Url = y.Media.Url
+                    //},
+            //        PriceIndices = y.Product.ProductPricePoints
+            //            .OrderBy(z => z.Index)
+            //            .Select(z => y.PriceIndices.Select(w => w.Index).Contains(z.Index))
 
-                }).ToListAsync();
+            //    }).ToListAsync();
 
 
 
-            // Price points
-            product.PricePoints = await context.ProductPricePoints
-                .AsNoTracking()
-                .Where(x => x.ProductId == productId)
-                .OrderBy(y => y.Index)
-                .Select(y => new ProductPricePointViewModel
-                {
-                    Id = y.Id,
-                    TextBefore = y.TextBefore,
-                    WholeNumber = y.WholeNumber,
-                    Decimal = y.Decimal,
-                    TextAfter = y.TextAfter
-                })
-                .ToListAsync();
+            //// Price points
+            //product.PricePoints = await context.ProductPricePoints
+            //    .AsNoTracking()
+            //    .Where(x => x.ProductId == productId)
+            //    .OrderBy(y => y.Index)
+            //    .Select(y => new ProductPricePointViewModel
+            //    {
+            //        Id = y.Id,
+            //        TextBefore = y.TextBefore,
+            //        WholeNumber = y.WholeNumber,
+            //        Decimal = y.Decimal,
+            //        TextAfter = y.TextAfter
+            //    })
+            //    .ToListAsync();
 
 
             // Media

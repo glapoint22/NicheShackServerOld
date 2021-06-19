@@ -83,14 +83,14 @@ namespace Manager.Controllers
                 notification = await unitOfWork.Notifications.Get<ProductMediaNotificationViewModel>(x => x.Id == id);
             }
 
-            // Product Content Notification
-            if (type == NotificationType.ProductPriceTooHigh
-              || type == NotificationType.ProductPriceNotCorrect
-              || type == NotificationType.ProductPriceOther)
-            {
+            //// Product Content Notification
+            //if (type == NotificationType.ProductPriceTooHigh
+            //  || type == NotificationType.ProductPriceNotCorrect
+            //  || type == NotificationType.ProductPriceOther)
+            //{
 
-                notification = await unitOfWork.Notifications.Get<ProductContentNotificationViewModel>(x => x.Id == id);
-            }
+            //    notification = await unitOfWork.Notifications.Get<ProductContentNotificationViewModel>(x => x.Id == id);
+            //}
 
 
             return Ok(notification);

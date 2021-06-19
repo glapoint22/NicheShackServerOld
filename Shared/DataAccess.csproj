@@ -11,6 +11,12 @@
     <Compile Remove="Migrations\20201016145941_EmailPrefs.Designer.cs" />
     <Compile Remove="Migrations\20201029183757_UpdateKeywords.cs" />
     <Compile Remove="Migrations\20201029183757_UpdateKeywords.Designer.cs" />
+    <Compile Remove="Migrations\20210529224031_ProductPrice.cs" />
+    <Compile Remove="Migrations\20210529224031_ProductPrice.Designer.cs" />
+    <Compile Remove="Migrations\20210614220513_ProductPrices.cs" />
+    <Compile Remove="Migrations\20210614220513_ProductPrices.Designer.cs" />
+    <Compile Remove="Migrations\20210614230106_ProductPrices.cs" />
+    <Compile Remove="Migrations\20210614230106_ProductPrices.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

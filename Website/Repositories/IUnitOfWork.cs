@@ -16,8 +16,6 @@ namespace Website.Repositories
         // Generic repositories
         IRepository<Product> Products { get; }
         IRepository<ProductMedia> ProductMedia { get;  }
-        IRepository<ProductContent> ProductContent { get; }
-        IRepository<ProductPricePoint> PricePoints { get; }
         IRepository<RefreshToken> RefreshTokens { get; }
         IRepository<ListCollaborator> Collaborators { get; }
         IRepository<Customer> Customers { get; }

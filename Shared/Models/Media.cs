@@ -19,7 +19,7 @@ namespace DataAccess.Models
         public int Type { get; set; }
         public virtual ICollection<Product> Products { get; set; }
         public virtual ICollection<ProductMedia> ProductMedia { get; set; }
-        public virtual ICollection<ProductContent> ProductContent { get; set; }
+        public virtual ICollection<ProductPrice> ProductPrices { get; set; }
         public virtual ICollection<Category> Categtories { get; set; }
         public virtual ICollection<Niche> Niches { get; set; }
 
@@ -28,7 +28,7 @@ namespace DataAccess.Models
         {
             Products = new HashSet<Product>();
             ProductMedia = new HashSet<ProductMedia>();
-            ProductContent = new HashSet<ProductContent>();
+            ProductPrices = new HashSet<ProductPrice>();
             Categtories = new HashSet<Category>();
             Niches = new HashSet<Niche>();
         }

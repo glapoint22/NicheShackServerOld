@@ -41,8 +41,8 @@ namespace Website.Controllers
                 Id = x.Id,
                 UrlId = x.UrlId,
                 Name = x.Name,
-                MinPrice = x.MinPrice,
-                MaxPrice = x.MaxPrice,
+                //MinPrice = x.MinPrice,
+                //MaxPrice = x.MaxPrice,
                 Rating = x.Rating,
                 TotalReviews = x.TotalReviews,
                 OneStar = x.OneStar,
@@ -158,27 +158,27 @@ namespace Website.Controllers
                         product,
                         media = await GetMedia(product.Id)
                     },
-                    content = await unitOfWork.ProductContent.GetCollection(x => x.ProductId == product.Id, x => new
-                    {
-                        Icon = new
-                        {
-                            x.Media.Name,
-                            x.Media.Url
-                        },
-                        x.Name,
-                        PriceIndices = x.PriceIndices
-                        .OrderBy(y => y.Index)
-                        .Select(y => y.Index)
-                        .ToList()
-                    }),
+                    //content = await unitOfWork.ProductContent.GetCollection(x => x.ProductId == product.Id, x => new
+                    //{
+                    //    Icon = new
+                    //    {
+                    //        x.Media.Name,
+                    //        x.Media.Url
+                    //    },
+                    //    x.Name,
+                    //    PriceIndices = x.PriceIndices
+                    //    .OrderBy(y => y.Index)
+                    //    .Select(y => y.Index)
+                    //    .ToList()
+                    //}),
                     pageContent = await pageService.GePage(pageContent, queryParams),
-                    pricePoints = await unitOfWork.PricePoints.GetCollection(x => x.Index, x => x.ProductId == product.Id, y => new
-                    {
-                        y.TextBefore,
-                        y.WholeNumber,
-                        y.Decimal,
-                        y.TextAfter
-                    })
+                    //pricePoints = await unitOfWork.PricePoints.GetCollection(x => x.Index, x => x.ProductId == product.Id, y => new
+                    //{
+                    //    y.TextBefore,
+                    //    y.WholeNumber,
+                    //    y.Decimal,
+                    //    y.TextAfter
+                    //})
                 };
 
                 return Ok(productData);

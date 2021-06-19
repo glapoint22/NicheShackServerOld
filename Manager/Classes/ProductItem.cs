@@ -9,5 +9,7 @@ namespace Manager.Classes
     {
         public int ProductId { get; set; }
         public int ItemId { get; set; }
+
+        public bool IsMultiPrice { get; set; }
     }
 }

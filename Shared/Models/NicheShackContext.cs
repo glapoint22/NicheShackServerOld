@@ -57,10 +57,10 @@ namespace DataAccess.Models
         public virtual DbSet<PageReferenceItem> PageReferenceItems { get; set; }
 
 
-        public virtual DbSet<PriceIndex> PriceIndices { get; set; }
+        
         public virtual DbSet<PriceRange> PriceRanges { get; set; }
         public virtual DbSet<Product> Products { get; set; }
-        public virtual DbSet<ProductContent> ProductContent { get; set; }
+        
 
 
         public virtual DbSet<ProductEmail> ProductEmails { get; set; }
@@ -72,7 +72,7 @@ namespace DataAccess.Models
         public virtual DbSet<ProductKeyword> ProductKeywords { get; set; }
         public virtual DbSet<ProductMedia> ProductMedia { get; set; }
         public virtual DbSet<ProductOrder> ProductOrders { get; set; }
-        public virtual DbSet<ProductPricePoint> ProductPricePoints { get; set; }
+        public virtual DbSet<ProductPrice> ProductPrices { get; set; }
         public virtual DbSet<ProductReview> ProductReviews { get; set; }
         public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
 
@@ -460,19 +460,7 @@ namespace DataAccess.Models
 
 
 
-            // PriceIndices
-            modelBuilder.Entity<PriceIndex>(entity =>
-            {
-                entity
-                .HasIndex(x => x.ProductContentId)
-                .IncludeProperties(x => new
-                {
-                    x.Id,
-                    x.Index
-                })
-                .IsClustered(false);
-            });
-
+           
 
 
 
@@ -498,8 +486,6 @@ namespace DataAccess.Models
                     x.Name,
                     x.Hoplink,
                     x.Description,
-                    x.MinPrice,
-                    x.MaxPrice,
                     x.TotalReviews,
                     x.Rating,
                     x.OneStar,
@@ -524,14 +510,15 @@ namespace DataAccess.Models
                     x.NicheId,
                     x.UrlId,
                     x.UrlName,
-                    x.MinPrice,
-                    x.MaxPrice,
                     x.TotalReviews,
                     x.Rating,
                     x.Date
                 })
                 .IsClustered(false);
+
+                entity.Property(e => e.IsMultiPrice).HasDefaultValue(false);
             });
+
 
 
 
@@ -548,24 +535,7 @@ namespace DataAccess.Models
 
 
 
-            // ProductContent
-            modelBuilder.Entity<ProductContent>(entity =>
-            {
-                entity.HasOne(x => x.Media)
-                .WithMany(x => x.ProductContent)
-                .OnDelete(DeleteBehavior.Restrict);
-
-
-                entity
-                .HasIndex(x => x.ProductId)
-                .IncludeProperties(x => new
-                {
-                    x.Id,
-                    x.IconId,
-                    x.Name
-                })
-                .IsClustered(false);
-            });
+            
 
 
 
@@ -647,24 +617,18 @@ namespace DataAccess.Models
 
 
 
+            
 
-
-
-            // ProductPricePoints
-            modelBuilder.Entity<ProductPricePoint>(entity =>
+            // Product Price
+            modelBuilder.Entity<ProductPrice>(entity =>
             {
-                entity
-                .HasIndex(x => x.ProductId)
-                .IncludeProperties(x => new
-                {
-                    x.Id,
-                    x.TextBefore,
-                    x.WholeNumber,
-                    x.Decimal,
-                    x.TextAfter,
-                    x.Index
-                })
-                .IsClustered(false);
+                entity.HasKey(e => new { e.ProductId, e.Id })
+                    .HasName("PK_ProductPrices");
+                entity.Property(e => e.Id)
+                .ValueGeneratedOnAdd();
+                entity.Property(e => e.Price).HasDefaultValue(0.0);
+                entity.Property(e => e.Shipping).HasDefaultValue(0);
+
             });
 
 
