@@ -51,6 +51,12 @@ namespace Services.Classes
                 case WidgetType.Grid:
                     widget = (GridWidget)widgetData;
                     break;
+                case WidgetType.Section:
+                    widget = (SectionWidget)widgetData;
+                    break;
+                case WidgetType.Divider:
+                    widget = (DividerWidget)widgetData;
+                    break;
             }
 
             return widget;

@@ -66,6 +66,12 @@ namespace Services.Classes
                             case WidgetType.Grid:
                                 widget = new GridWidget();
                                 break;
+                            case WidgetType.Section:
+                                widget = new SectionWidget();
+                                break;
+                            case WidgetType.Divider:
+                                widget = new DividerWidget();
+                                break;
                         }
 
                         widget.WidgetType = widgetType;
@@ -114,6 +120,12 @@ namespace Services.Classes
                     break;
                 case WidgetType.Grid:
                     JsonSerializer.Serialize(writer, (GridWidget)widget, options);
+                    break;
+                case WidgetType.Section:
+                    JsonSerializer.Serialize(writer, (SectionWidget)widget, options);
+                    break;
+                case WidgetType.Divider:
+                    JsonSerializer.Serialize(writer, (DividerWidget)widget, options);
                     break;
             }
 

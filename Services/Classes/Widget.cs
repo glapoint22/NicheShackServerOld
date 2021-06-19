@@ -31,6 +31,10 @@ namespace Services.Classes
                 case "horizontalAlignment":
                     HorizontalAlignment = (string)JsonSerializer.Deserialize(ref reader, typeof(string), options);
                     break;
+
+                case "breakpoints":
+                    Breakpoints = (List<Breakpoint>)JsonSerializer.Deserialize(ref reader, typeof(List<Breakpoint>), options);
+                    break;
             }
         }
 
