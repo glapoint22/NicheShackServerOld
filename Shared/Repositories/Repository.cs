@@ -180,6 +180,13 @@ namespace DataAccess.Repositories
         }
 
 
+        // Remove Range
+        public void RemoveRange(IEnumerable<T> entities)
+        {
+            context.Set<T>().RemoveRange(entities);
+        }
+
+
         // Any
         public async Task<bool> Any(Expression<Func<T, bool>> predicate)
         {

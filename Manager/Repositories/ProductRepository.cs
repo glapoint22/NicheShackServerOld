@@ -61,6 +61,7 @@ namespace Manager.Repositories
 
 
 
+
         public async Task<ProductViewModel> GetProduct(int productId)
         {
 
@@ -145,12 +146,12 @@ namespace Manager.Repositories
             //    {
             //        Id = y.Id,
             //        Name = y.Name,
-                    //Icon = new ImageViewModel
-                    //{
-                    //    Id = y.Media.Id,
-                    //    Name = y.Media.Name,
-                    //    Url = y.Media.Url
-                    //},
+            //Icon = new ImageViewModel
+            //{
+            //    Id = y.Media.Id,
+            //    Name = y.Media.Name,
+            //    Url = y.Media.Url
+            //},
             //        PriceIndices = y.Product.ProductPricePoints
             //            .OrderBy(z => z.Index)
             //            .Select(z => y.PriceIndices.Select(w => w.Index).Contains(z.Index))

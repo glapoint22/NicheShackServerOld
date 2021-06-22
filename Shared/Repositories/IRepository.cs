@@ -42,6 +42,9 @@ namespace DataAccess.Repositories
         // Remove
         void Remove(T entity);
 
+        // Remove Range
+        void RemoveRange(IEnumerable<T> entities);
+
 
         // Any
         Task<bool> Any(Expression<Func<T, bool>> predicate);
