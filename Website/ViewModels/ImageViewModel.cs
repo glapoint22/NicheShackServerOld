@@ -1,8 +1,11 @@
-﻿namespace Website.ViewModels
+﻿using DataAccess.ViewModels;
+
+namespace Website.ViewModels
 {
-    public class ImageViewModel
+    public class ImageViewModel : ItemViewModel
     {
-        public string Name { get; set; }
+
+        
         public string Url { get; set; }
     }
 }
