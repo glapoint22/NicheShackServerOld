@@ -108,6 +108,9 @@ namespace Manager.Controllers
             unitOfWork.Products.Add(newProduct);
             await unitOfWork.Save();
 
+            // Add a new row to the Product Prices table
+            await AddPrice(newProduct.Id);
+
             return Ok(newProduct.Id);
         }
 
@@ -504,7 +507,19 @@ namespace Manager.Controllers
 
 
 
+        private async Task<int> AddPrice(int Id)
+        {
+            ProductPrice productPrice = new ProductPrice
+            {
+                ProductId = Id
+            };
 
+            // Add and save
+            unitOfWork.ProductPrices.Add(productPrice);
+            await unitOfWork.Save();
+
+            return productPrice.Id;
+        }
 
 
 
@@ -516,18 +531,8 @@ namespace Manager.Controllers
         [Route("Price")]
         public async Task<ActionResult> AddProductPrice(ProductPriceProperties productPriceProperties)
         {
-            ProductPrice productPrice = new ProductPrice
-            {
-                ProductId = productPriceProperties.ProductId
-            };
-
-            
-
-            // Update and save
-            unitOfWork.ProductPrices.Add(productPrice);
-            await unitOfWork.Save();
-
-            return Ok(productPrice.Id);
+            var priceId = await AddPrice(productPriceProperties.ProductId);
+            return Ok(priceId);
         }
 
 
@@ -585,11 +590,10 @@ namespace Manager.Controllers
         [Route("Price")]
         public async Task<ActionResult> DeleteProductPrice(int productId, int priceId)
         {
-
             ProductPrice productPrice = await unitOfWork.ProductPrices.Get(x => x.ProductId == productId && x.Id == priceId);
 
+            // Remove and save
             unitOfWork.ProductPrices.Remove(productPrice);
-
             await unitOfWork.Save();
 
             return Ok();
@@ -597,6 +601,22 @@ namespace Manager.Controllers
 
 
 
+
+        [HttpDelete]
+        [Route("Prices")]
+        public async Task<ActionResult> DeleteMultipleProductPrices(int productId)
+        {
+            // Get all the price points of the product
+            IEnumerable<ProductPrice> productPrices = await unitOfWork.ProductPrices.GetCollection(x => x.ProductId == productId);
+
+            // Remove all the price points of that product and save
+            unitOfWork.ProductPrices.RemoveRange(productPrices);
+            await unitOfWork.Save();
+
+            // Add a new price
+            var priceId = await AddPrice(productId);
+            return Ok(priceId);
+        }
 
 
 

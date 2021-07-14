@@ -41,8 +41,6 @@ namespace Website.Controllers
                 Id = x.Id,
                 UrlId = x.UrlId,
                 Name = x.Name,
-                //MinPrice = x.MinPrice,
-                //MaxPrice = x.MaxPrice,
                 Rating = x.Rating,
                 TotalReviews = x.TotalReviews,
                 OneStar = x.OneStar,
@@ -59,6 +57,10 @@ namespace Website.Controllers
                 Name = x.Name,
                 Url = x.Url
             });
+
+
+            
+            
 
             return Ok(product);
         }
@@ -90,6 +92,28 @@ namespace Website.Controllers
         {
             // Get the product based on the id
             ProductDetailViewModel product = await unitOfWork.Products.Get<ProductDetailViewModel>(x => x.UrlId == id);
+
+
+
+            product.Price = await unitOfWork.ProductPrices.GetCollection(x => x.ProductId == product.Id, x => new ProductPriceViewModel
+            {
+                Id = x.Id,
+                Image = new ImageViewModel
+                {
+                    Id = x.Media.Id,
+                    Name = x.Media.Name,
+                    Url = x.Media.Url
+                },
+                Header = x.Header,
+                Quantity = x.Quantity,
+                UnitPrice = x.UnitPrice,
+                Unit = x.Unit,
+                StrikethroughPrice = x.StrikethroughPrice,
+                Price = x.Price,
+                Shipping = x.Shipping,
+                ShippingPrice = x.ShippingPrice
+            });
+
 
 
             // If the product is found in the database, return the product with other product details

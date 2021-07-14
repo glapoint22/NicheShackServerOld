@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using DataAccess.Interfaces;
 using DataAccess.Models;
 
@@ -12,8 +13,12 @@ namespace Website.ViewModels
         public string UrlName { get; set; }
         public double Rating { get; set; }
         public int TotalReviews { get; set; }
-        public double MinPrice { get; set; }
-        public double MaxPrice { get; set; }
+        //public double MinPrice { get; set; }
+        //public double MaxPrice { get; set; }
+
+        public IEnumerable<ProductPriceViewModel> Price { get; set; }
+        public bool IsMultiPrice { get; set; }
+
         public string Description { get; set; }
         public string Hoplink { get; set; }
         public double OneStar { get; set; }
@@ -37,8 +42,7 @@ namespace Website.ViewModels
                 UrlName = x.UrlName,
                 Rating = x.Rating,
                 TotalReviews = x.TotalReviews,
-                //MinPrice = x.MinPrice,
-                //MaxPrice = x.MaxPrice,
+                IsMultiPrice = x.IsMultiPrice,
                 Hoplink = x.Hoplink,
                 Description = x.Description,
                 OneStar = x.OneStar,
