@@ -14,11 +14,13 @@ namespace DataAccess.Models
 
         public virtual ICollection<ProductKeyword> ProductKeywords { get; set; }
         public virtual ICollection<KeywordSearchVolume> KeywordSearchVolumes { get; set; }
+        public virtual ICollection<Keyword_In_KeywordGroup> Keywords_In_KeywordGroup { get; set; }
 
         public Keyword()
         {
             ProductKeywords = new HashSet<ProductKeyword>();
             KeywordSearchVolumes = new HashSet<KeywordSearchVolume>();
+            Keywords_In_KeywordGroup = new HashSet<Keyword_In_KeywordGroup>();
         }
     }
 }

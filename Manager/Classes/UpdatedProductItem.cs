@@ -1,9 +1,9 @@
 ﻿namespace Manager.Classes
 {
-    public struct UpdatedProductFilter
+    public struct UpdatedProductItem
     {
         public int ProductId { get; set; }
-        public int FilterOptionId { get; set; }
+        public int Id { get; set; }
         public bool Checked { get; set; }
     }
 }

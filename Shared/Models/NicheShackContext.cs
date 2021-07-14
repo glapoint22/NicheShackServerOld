@@ -25,6 +25,15 @@ namespace DataAccess.Models
 
         public virtual DbSet<Keyword> Keywords { get; set; }
 
+        public virtual DbSet<Keyword_In_KeywordGroup> Keywords_In_KeywordGroup { get; set; }
+
+
+        public virtual DbSet<KeywordGroup> KeywordGroups { get; set; }
+
+
+        public virtual DbSet<KeywordGroup_Belonging_To_Product> KeywordGroups_Belonging_To_Product { get; set; }
+
+
         public virtual DbSet<KeywordSearchVolume> KeywordSearchVolumes { get; set; }
 
         public virtual DbSet<LeadPage> LeadPages { get; set; }
@@ -276,6 +285,35 @@ namespace DataAccess.Models
             {
                 entity.HasIndex(e => e.Name).IsUnique();
             });
+
+
+
+
+            // Keywords_In_KeywordGroup
+            modelBuilder.Entity<Keyword_In_KeywordGroup>(entity =>
+            {
+                entity.HasKey(e => new { e.KeywordGroupId, e.KeywordId })
+                    .HasName("PK_Keywords_In_KeywordGroup");
+            });
+
+
+            
+            // Keyword Groups
+            modelBuilder.Entity<KeywordGroup>(entity =>
+            {
+                entity.Property(e => e.ForProduct).HasDefaultValue(false);
+            });
+
+
+            // KeywordGroups_Belonging_To_Product
+            modelBuilder.Entity<KeywordGroup_Belonging_To_Product>(entity =>
+            {
+                entity.HasKey(e => new { e.ProductId, e.KeywordGroupId })
+                    .HasName("PK_KeywordGroups_Belonging_To_Product");
+            });
+
+
+
 
 
             // KeywordSearchVolumes

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace DataAccess.Repositories
 {
-    public interface IRepository<T> where T: class
+    public interface IRepository<T> where T : class
     {
         // Get overloads
         Task<T> Get(int id);
@@ -42,6 +42,11 @@ namespace DataAccess.Repositories
         // Remove
         void Remove(T entity);
 
+        // Remove Range
+        void RemoveRange(IEnumerable<T> entities);
+
+        // Add Range
+        void AddRange(IEnumerable<T> entities);
 
         // Any
         Task<bool> Any(Expression<Func<T, bool>> predicate);

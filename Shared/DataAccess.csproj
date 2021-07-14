@@ -17,6 +17,8 @@
     <Compile Remove="Migrations\20210614220513_ProductPrices.Designer.cs" />
     <Compile Remove="Migrations\20210614230106_ProductPrices.cs" />
     <Compile Remove="Migrations\20210614230106_ProductPrices.Designer.cs" />
+    <Compile Remove="Migrations\20210620194019_Keywords.cs" />
+    <Compile Remove="Migrations\20210620194019_Keywords.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

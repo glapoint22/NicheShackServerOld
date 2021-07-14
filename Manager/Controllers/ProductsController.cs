@@ -211,16 +211,16 @@ namespace Manager.Controllers
 
         [Route("Filter")]
         [HttpPut]
-        public async Task<ActionResult> UpdateFilter(UpdatedProductFilter updatedProductFilter)
+        public async Task<ActionResult> UpdateFilter(UpdatedProductItem updatedProductFilter)
         {
 
             if (updatedProductFilter.Checked)
             {
-                unitOfWork.ProductFilters.Add(new ProductFilter { ProductId = updatedProductFilter.ProductId, FilterOptionId = updatedProductFilter.FilterOptionId });
+                unitOfWork.ProductFilters.Add(new ProductFilter { ProductId = updatedProductFilter.ProductId, FilterOptionId = updatedProductFilter.Id });
             }
             else
             {
-                ProductFilter productFilter = await unitOfWork.ProductFilters.Get(x => x.ProductId == updatedProductFilter.ProductId && x.FilterOptionId == updatedProductFilter.FilterOptionId);
+                ProductFilter productFilter = await unitOfWork.ProductFilters.Get(x => x.ProductId == updatedProductFilter.ProductId && x.FilterOptionId == updatedProductFilter.Id);
                 unitOfWork.ProductFilters.Remove(productFilter);
             }
 
