@@ -111,6 +111,58 @@ namespace Manager.Controllers
             // Add a new row to the Product Prices table
             await AddPrice(newProduct.Id);
 
+
+
+
+
+            // Add keyword group to product
+            KeywordGroup keywordGroup = new KeywordGroup
+            {
+                Name = product.Name,
+                ForProduct = true
+            };
+
+            unitOfWork.KeywordGroups.Add(keywordGroup);
+            await unitOfWork.Save();
+
+
+
+            unitOfWork.KeywordGroups_Belonging_To_Product.Add(new KeywordGroup_Belonging_To_Product
+            {
+                ProductId = newProduct.Id,
+                KeywordGroupId = keywordGroup.Id
+            });
+
+
+            Keyword keyword = new Keyword
+            {
+                Name = product.Name.ToLower()
+            };
+
+            unitOfWork.Keywords.Add(keyword);
+
+
+            await unitOfWork.Save();
+
+
+
+            unitOfWork.Keywords_In_KeywordGroup.Add(new Keyword_In_KeywordGroup
+            {
+                KeywordGroupId = keywordGroup.Id,
+                KeywordId = keyword.Id
+            });
+
+
+            unitOfWork.ProductKeywords.Add(new ProductKeyword
+            {
+                ProductId = newProduct.Id,
+                KeywordId = keyword.Id
+            });
+
+
+            await unitOfWork.Save();
+
+
             return Ok(newProduct.Id);
         }
 
@@ -121,6 +173,14 @@ namespace Manager.Controllers
         [HttpDelete]
         public async Task<ActionResult> DeleteProduct(int id)
         {
+            IEnumerable<int> KeywordGroupIds = await unitOfWork.KeywordGroups_Belonging_To_Product.GetCollection(x => x.ProductId == id && x.KeywordGroup.ForProduct, x => x.KeywordGroupId);
+
+            IEnumerable<int> KeywordIds = await unitOfWork.Keywords_In_KeywordGroup.GetCollection(x => KeywordGroupIds.Contains(x.KeywordGroupId), x => x.KeywordId);
+
+            unitOfWork.KeywordGroups.RemoveRange(await unitOfWork.KeywordGroups.GetCollection(x => KeywordGroupIds.Contains(x.Id)));
+
+            unitOfWork.Keywords.RemoveRange(await unitOfWork.Keywords.GetCollection(x => KeywordIds.Contains(x.Id)));
+
             Product product = await unitOfWork.Products.Get(id);
 
             unitOfWork.Products.Remove(product);
