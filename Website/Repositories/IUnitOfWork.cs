@@ -32,7 +32,7 @@ namespace Website.Repositories
         IRepository<Niche> Niches { get; }
         IRepository<PageReferenceItem> PageReferenceItems { get; }
         IRepository<ProductPrice> ProductPrices { get; }
-
+        IRepository<ProductAdditionalInfo> AdditionalInfo { get; }
 
 
         Task<int> Save();

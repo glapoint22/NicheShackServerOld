@@ -1,5 +1,5 @@
 ﻿using DataAccess.ViewModels;
-using Manager.Classes;
+using Services.Classes;
 using System.Collections.Generic;
 
 namespace Manager.ViewModels
@@ -20,5 +20,6 @@ namespace Manager.ViewModels
         public IEnumerable<ProductMediaViewModel> Media { get; set; }
         public IEnumerable<ItemViewModel> Keywords { get; set; }
         public IEnumerable<ItemViewModel> Subgroups { get; set; }
+        public IEnumerable<AdditionalInfoViewModel> AdditionalInfo { get; set; }
     }
 }

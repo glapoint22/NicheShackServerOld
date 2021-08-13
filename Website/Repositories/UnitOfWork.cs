@@ -31,6 +31,7 @@ namespace Website.Repositories
         public IRepository<Niche> Niches { get; }
         public IRepository<PageReferenceItem> PageReferenceItems { get; }
         public IRepository<ProductPrice> ProductPrices { get; }
+        public IRepository<ProductAdditionalInfo> AdditionalInfo { get; }
 
 
         // Declare the Nicheshack context
@@ -64,6 +65,7 @@ namespace Website.Repositories
             Niches = new Repository<Niche>(context);
             PageReferenceItems = new Repository<PageReferenceItem>(context);
             ProductPrices = new Repository<ProductPrice>(context);
+            AdditionalInfo = new Repository<ProductAdditionalInfo>(context);
         }
 
 

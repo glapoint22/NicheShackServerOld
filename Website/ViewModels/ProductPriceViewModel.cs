@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Services.Classes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,7 +16,7 @@ namespace Website.ViewModels
         public string Unit { get; set; }
         public string StrikethroughPrice { get; set; }
         public double Price { get; set; }
-        public int Shipping { get; set; }
-        public double? ShippingPrice { get; set; }
+        public IEnumerable<AdditionalInfoViewModel> AdditionalInfo { get; set; }
+
     }
 }

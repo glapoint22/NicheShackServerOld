@@ -2,6 +2,7 @@
 using System.Linq;
 using DataAccess.Interfaces;
 using DataAccess.Models;
+using Services.Classes;
 
 namespace Website.ViewModels
 {
@@ -17,6 +18,7 @@ namespace Website.ViewModels
         //public double MaxPrice { get; set; }
 
         public IEnumerable<ProductPriceViewModel> Price { get; set; }
+        public IEnumerable<AdditionalInfoViewModel> AdditionalInfo { get; set; }
         public bool IsMultiPrice { get; set; }
 
         public string Description { get; set; }

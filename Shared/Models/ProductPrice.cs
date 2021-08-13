@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
 
 namespace DataAccess.Models
 {
@@ -24,10 +22,16 @@ namespace DataAccess.Models
         public string Unit { get; set; }
         public string StrikethroughPrice { get; set; }
         public double Price { get; set; }
-        public int Shipping { get; set; }
-        public double? ShippingPrice { get; set; }
-
+        public virtual ICollection<ProductPriceAdditionalInfo> ProductPriceAdditionalInfo { get; set; }
         public virtual Product Product { get; set; }
         public virtual Media Media { get; set; }
+
+
+
+
+        public ProductPrice()
+        {
+            ProductPriceAdditionalInfo = new HashSet<ProductPriceAdditionalInfo>();
+        }
     }
 }

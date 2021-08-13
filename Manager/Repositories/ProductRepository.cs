@@ -2,9 +2,9 @@
 using DataAccess.Models;
 using DataAccess.Repositories;
 using DataAccess.ViewModels;
-using Manager.Classes;
 using Manager.ViewModels;
 using Microsoft.EntityFrameworkCore;
+using Services.Classes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -110,8 +110,23 @@ namespace Manager.Repositories
                      Unit = x.Unit,
                      StrikethroughPrice = x.StrikethroughPrice,
                      Price = x.Price,
-                     Shipping = x.Shipping,
-                     ShippingPrice = x.ShippingPrice
+                     AdditionalInfo = context.ProductPriceAdditionalInfo
+                        .AsNoTracking()
+                        .Where(z => z.ProductPriceId == x.Id)
+                        .Select(z => new AdditionalInfoViewModel
+                        {
+                            Id = z.Id,
+                            IsRecurring = z.IsRecurring,
+                            ShippingType = z.ShippingType,
+                            RecurringPayment = new RecurringPayment
+                            {
+                                TrialPeriod = z.TrialPeriod,
+                                Price = z.Price,
+                                RebillFrequency = z.RebillFrequency,
+                                TimeFrameBetweenRebill = z.TimeFrameBetweenRebill,
+                                SubscriptionDuration = z.SubscriptionDuration
+                            }
+                        }).ToList()
                  }).ToListAsync();
 
 
@@ -137,43 +152,7 @@ namespace Manager.Repositories
                 }).ToListAsync();
 
 
-            // Content
-            //product.Content = await context.ProductContent
-            //    .AsNoTracking()
-            //    .Where(x => x.ProductId == productId)
 
-            //    .Select(y => new ProductContentViewModel
-            //    {
-            //        Id = y.Id,
-            //        Name = y.Name,
-            //Icon = new ImageViewModel
-            //{
-            //    Id = y.Media.Id,
-            //    Name = y.Media.Name,
-            //    Url = y.Media.Url
-            //},
-            //        PriceIndices = y.Product.ProductPricePoints
-            //            .OrderBy(z => z.Index)
-            //            .Select(z => y.PriceIndices.Select(w => w.Index).Contains(z.Index))
-
-            //    }).ToListAsync();
-
-
-
-            //// Price points
-            //product.PricePoints = await context.ProductPricePoints
-            //    .AsNoTracking()
-            //    .Where(x => x.ProductId == productId)
-            //    .OrderBy(y => y.Index)
-            //    .Select(y => new ProductPricePointViewModel
-            //    {
-            //        Id = y.Id,
-            //        TextBefore = y.TextBefore,
-            //        WholeNumber = y.WholeNumber,
-            //        Decimal = y.Decimal,
-            //        TextAfter = y.TextAfter
-            //    })
-            //    .ToListAsync();
 
 
             // Media
@@ -190,6 +169,28 @@ namespace Manager.Repositories
                     Type = y.Media.Type
                 })
                 .ToListAsync();
+
+
+            // Additional Info
+            product.AdditionalInfo = await context.ProductAdditionalInfo
+                .AsNoTracking()
+                .Where(x => x.ProductId == productId)
+                .Select(x => new AdditionalInfoViewModel
+                {
+                    Id = x.Id,
+                    IsRecurring = x.IsRecurring,
+                    ShippingType = x.ShippingType,
+                    RecurringPayment = new RecurringPayment
+                    {
+                        TrialPeriod = x.TrialPeriod,
+                        Price = x.Price,
+                        RebillFrequency = x.RebillFrequency,
+                        TimeFrameBetweenRebill = x.TimeFrameBetweenRebill,
+                        SubscriptionDuration = x.SubscriptionDuration
+                    }
+                })
+                .ToListAsync();
+
 
             return product;
         }

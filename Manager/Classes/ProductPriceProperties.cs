@@ -16,7 +16,7 @@ namespace Manager.Classes
         public string Unit { get; set; }
         public string StrikethroughPrice { get; set; }
         public double Price { get; set; }
-        public int Shipping { get; set; }
-        public double? ShippingPrice { get; set; }
+        //public int Shipping { get; set; }
+        //public double? ShippingPrice { get; set; }
     }
 }

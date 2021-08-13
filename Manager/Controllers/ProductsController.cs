@@ -631,8 +631,8 @@ namespace Manager.Controllers
             productPrice.Unit = productPriceProperties.Unit;
             productPrice.StrikethroughPrice = productPriceProperties.StrikethroughPrice;
             productPrice.Price = productPriceProperties.Price;
-            productPrice.Shipping = productPriceProperties.Shipping;
-            productPrice.ShippingPrice = productPriceProperties.ShippingPrice;
+            //productPrice.Shipping = productPriceProperties.Shipping;
+            //productPrice.ShippingPrice = productPriceProperties.ShippingPrice;
 
 
 

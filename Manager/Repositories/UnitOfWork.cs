@@ -1,8 +1,6 @@
-﻿using DataAccess.Models;
+﻿using DataAccess.Interfaces;
+using DataAccess.Models;
 using DataAccess.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Manager.Repositories
@@ -41,7 +39,9 @@ namespace Manager.Repositories
 
         // Custom Repositories
         public IProductRepository Products { get; }
-        
+        public IAdditionalInfoRepository<ProductAdditionalInfo> ProductAdditionalInfo { get; }
+        public IAdditionalInfoRepository<ProductPriceAdditionalInfo> ProductPriceAdditionalInfo { get; }
+
 
 
         public UnitOfWork(NicheShackContext context)
@@ -77,7 +77,9 @@ namespace Manager.Repositories
 
             // Custom Repositories
             Products = new ProductRepository(context);
-            
+            ProductAdditionalInfo = new AdditionalInfoRepository<ProductAdditionalInfo>(context);
+            ProductPriceAdditionalInfo = new AdditionalInfoRepository<ProductPriceAdditionalInfo>(context);
+
         }
 
 

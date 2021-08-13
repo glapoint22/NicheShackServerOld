@@ -19,6 +19,22 @@
     <Compile Remove="Migrations\20210614230106_ProductPrices.Designer.cs" />
     <Compile Remove="Migrations\20210620194019_Keywords.cs" />
     <Compile Remove="Migrations\20210620194019_Keywords.Designer.cs" />
+    <Compile Remove="Migrations\20210809210510_AddedAdditionalInfo.cs" />
+    <Compile Remove="Migrations\20210809210510_AddedAdditionalInfo.Designer.cs" />
+    <Compile Remove="Migrations\20210809220605_AddedAdditionalInfo.cs" />
+    <Compile Remove="Migrations\20210809220605_AddedAdditionalInfo.Designer.cs" />
+    <Compile Remove="Migrations\20210810003043_AdditionalInfo.cs" />
+    <Compile Remove="Migrations\20210810003043_AdditionalInfo.Designer.cs" />
+    <Compile Remove="Migrations\20210810004705_AdditionalInfo.cs" />
+    <Compile Remove="Migrations\20210810004705_AdditionalInfo.Designer.cs" />
+    <Compile Remove="Migrations\20210810194633_AdditionalInfo.cs" />
+    <Compile Remove="Migrations\20210810194633_AdditionalInfo.Designer.cs" />
+    <Compile Remove="Migrations\20210810200019_AdditionalInfo.cs" />
+    <Compile Remove="Migrations\20210810200019_AdditionalInfo.Designer.cs" />
+    <Compile Remove="Migrations\20210810200120_AdditionalInfo.cs" />
+    <Compile Remove="Migrations\20210810200120_AdditionalInfo.Designer.cs" />
+    <Compile Remove="Migrations\20210810200355_AdditionalInfo.cs" />
+    <Compile Remove="Migrations\20210810200355_AdditionalInfo.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

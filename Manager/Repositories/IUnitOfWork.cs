@@ -1,4 +1,5 @@
-﻿using DataAccess.Models;
+﻿using DataAccess.Interfaces;
+using DataAccess.Models;
 using DataAccess.Repositories;
 using System;
 using System.Collections.Generic;
@@ -40,10 +41,11 @@ namespace Manager.Repositories
 
 
 
-
         // Custom Repositories
         IProductRepository Products { get; }
-        
+        IAdditionalInfoRepository<ProductAdditionalInfo> ProductAdditionalInfo { get;}
+        IAdditionalInfoRepository<ProductPriceAdditionalInfo> ProductPriceAdditionalInfo { get; }
+
 
 
         Task<int> Save();
