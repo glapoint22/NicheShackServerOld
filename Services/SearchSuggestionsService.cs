@@ -8,224 +8,121 @@ namespace Services
 {
     public class SearchSuggestionsService
     {
-        public Node root;
-        public List<SearchWord> searchWords;
+        Node root;
 
-
-        // --------------------------------------------------------------------------------Insert---------------------------------------------------------------
-        public void Insert(SearchWord searchWord, ref Node rootNode, List<SearchWord> words, List<string> categoryIds)
+        public void Init(List<int> productOrderIds, List<KeywordInfo> keywords, List<string> categoryIds)
         {
-
-            int index = 0;
-            string currentWord = searchWord.Name;
-            int wordCount = 0;
-
-
-            while (index >= 0 && wordCount < 4)
-            {
-                Node node = rootNode;
-
-                for (int i = 0; i < currentWord.Length; i++)
-                {
-                    char c = currentWord[i];
-
-                    // If this node existss
-                    if (!node.Children.ContainsKey(c))
-                    {
-                        node.Children.Add(c, new Node(c));
-
-                        node = node.Children[c];
+            List<SearchWord> searchWords = GetSearchWords(keywords, productOrderIds);
+            Node rootNode = new Node();
+            List<Phrase> phrases = GetPhrases(searchWords);
+            categoryIds.Insert(0, "All");
 
 
-                        Regex regEx;
+            Dictionary<string, List<string>> bigramsList = new Dictionary<string, List<string>>();
+            Dictionary<string, List<KeyValuePair<int, int>>> bigramIndices = new Dictionary<string, List<KeyValuePair<int, int>>>();
+            Dictionary<KeyValuePair<string, string>, double> bigrams = new Dictionary<KeyValuePair<string, string>, double>();
+            Dictionary<string, List<string>> splitWords = new Dictionary<string, List<string>>();
 
-                        if (wordCount == 0)
-                        {
-                            regEx = new Regex("^" + currentWord.Substring(0, i + 1));
-                        }
-                        else
-                        {
-                            regEx = new Regex("^" + searchWord.Name + "|^" + currentWord.Substring(0, i + 1));
-                        }
+            GetData(phrases, categoryIds, ref rootNode, ref bigramsList, ref bigramIndices, ref bigrams, ref splitWords);
 
 
 
 
-                        // All Categories
-                        node.Suggestions.Add("All", new List<SearchWordSuggestion>());
-                        node.Suggestions["All"] = words
-                            .OrderByDescending(x => x.SearchVolume)
-                            .Where(x => regEx.IsMatch(x.Name))
-                            .Select((x, index) => new SearchWordSuggestion
-                            {
-                                Name = x.Name,
-                                Category = index == 0 && x.Categories.Count() > 1 ? x.Categories.FirstOrDefault() : null,
-                                SearchVolume = x.SearchVolume
-                            })
-                            .Take(10)
-                            .ToList();
-
-                        foreach (string categoryId in categoryIds)
-                        {
-                            // Current category
-                            node.Suggestions.Add(categoryId, new List<SearchWordSuggestion>());
-                            node.Suggestions[categoryId] = words
-                                .OrderByDescending(x => x.SearchVolume)
-                                .Where(x => regEx.IsMatch(x.Name))
-                                .Where(x => x.Categories.Select(z => z.UrlId).ToList().Contains(categoryId))
-                                .Select((x, index) => new SearchWordSuggestion
-                                {
-                                    Name = x.Name,
-                                    SearchVolume = x.SearchVolume
-                                })
-                                .Take(10)
-                                .ToList();
-                        }
-                    }
-
-                    // Node does exist
-                    else
-                    {
-                        node = node.Children[c];
-
-                        // Word count within the current search word is greater than 0
-                        if (wordCount > 0)
-                        {
-
-                            // Get the current search word
-                            List<SearchWordSuggestion> currentSearchWords = words
-                            .Where(x => x.Name == searchWord.Name)
-                            .Select(x => new SearchWordSuggestion
-                            {
-                                Name = x.Name,
-                                SearchVolume = x.SearchVolume,
-                                Category = x.Categories.Count() > 1 ? x.Categories.FirstOrDefault() : null,
-                            })
-                            .ToList();
-
-
-                            // Concat the current search word with all other suggestions
-                            node.Suggestions["All"] = currentSearchWords.Concat(node.Suggestions["All"])
-
-                                .Select(x => new
-                                {
-                                    Name = x.Name,
-                                    Category = x.Category,
-                                    SearchVolume = x.SearchVolume
-                                })
-                                .OrderByDescending(x => x.SearchVolume)
-                                .Distinct()
-                                .Select((x, index) => new SearchWordSuggestion
-                                {
-                                    Name = x.Name,
-                                    Category = index == 0 && x.Category != null ? x.Category : null,
-                                    SearchVolume = x.SearchVolume
-                                })
-                                .Take(10)
-                                .ToList();
-
-
-                            // Each category
-                            foreach (string categoryId in categoryIds)
-                            {
-                                // Get the current search word
-                                currentSearchWords = words
-                                .Where(x => x.Name == searchWord.Name)
-                                .Where(x => x.Categories.Select(z => z.UrlId).ToList().Contains(categoryId))
-                                .Select(x => new SearchWordSuggestion
-                                {
-                                    Name = x.Name,
-                                    SearchVolume = x.SearchVolume,
-                                })
-                                .ToList();
-
-
-                                if (currentSearchWords.Count() > 0)
-                                {
-                                    // Concat the current search word with all other suggestions
-                                    node.Suggestions[categoryId] = currentSearchWords.Concat(node.Suggestions[categoryId])
-                                    .Select((x, index) => new
-                                    {
-                                        Name = x.Name,
-                                        SearchVolume = x.SearchVolume
-                                    })
-                                    .OrderByDescending(x => x.SearchVolume)
-                                    .Distinct()
-                                    .Select((x, index) => new SearchWordSuggestion
-                                    {
-                                        Name = x.Name,
-                                        SearchVolume = x.SearchVolume
-                                    })
-                                    .Take(10)
-                                    .ToList();
-                                }
-                            }
-                        }
-                    }
-                }
-
-
-                index = searchWord.Name.IndexOf(" ", index);
-                if (index != -1)
-                {
-                    currentWord = searchWord.Name.Substring(index + 1);
-                    index++;
-                    wordCount++;
-                }
-            }
-
-
+            root = rootNode;
         }
 
 
 
 
 
-
-
-        // --------------------------------------------------------------------------------Get Suggestions---------------------------------------------------------------
-        public List<Suggestion> GetSuggestions(string prefix, string categoryId)
+        void GetData(List<Phrase> phrases, List<string> categoryIds, ref Node rootNode, ref Dictionary<string, List<string>> bigramsList, ref Dictionary<string, List<KeyValuePair<int, int>>> bigramIndices, ref Dictionary<KeyValuePair<string, string>, double> bigrams, ref Dictionary<string, List<string>> splitWords)
         {
-            if (root == null || prefix == null) return null;
+            Dictionary<string, int> wordCount = new Dictionary<string, int>();
+            Dictionary<KeyValuePair<string, string>, int> bigramCount = new Dictionary<KeyValuePair<string, string>, int>();
 
-
-            Node node = root;
-
-
-            // Get the current node in the trie by looping through each character in the prefix
-            for (int i = 0; i < prefix.Length; i++)
+            for (int i = 0; i < phrases.Count; i++)
             {
-                char c = prefix[i];
-
-
-                if (node.Children.ContainsKey(c))
-                {
-                    node = node.Children[c];
-                }
-                else
-                {
-                    // No nodes exists for the current character so we need to get a new prefix
-                    if (i == 0) prefix = null;
-
-
-                    // This will get a new prefix based on the first character of the current prefix
-                    if (i > 0) prefix = GetNewPrefix(prefix[0], prefix);
-
-                    break;
-                }
+                SetNodes(phrases, i, categoryIds, ref rootNode);
+                SetData(phrases, i, ref splitWords, ref wordCount, ref bigramsList, ref bigramCount);
             }
 
-            // If we have no prefix, return
-            if (prefix == null) return null;
 
-            if (categoryId == null) categoryId = "All";
-
-            if (node.Suggestions[categoryId].Count > 0 && node.Suggestions[categoryId][0].Category != null) node.Suggestions[categoryId].Insert(0, new SearchWordSuggestion { Name = node.Suggestions[categoryId][0].Name });
-            return node.Suggestions[categoryId]
-                .Select(x => new Suggestion
+            bigramsList = bigramsList.ToDictionary(x => x.Key, x => x.Value.OrderBy(z => z.Count()).ToList());
+            bigrams = bigramCount.ToDictionary(x => x.Key, x => Math.Log((double)x.Value / (double)wordCount[x.Key.Key]));
+            bigramIndices = bigramsList
+                .Select(x => new
                 {
-                    Name = x.Name,
-                    Category = x.Category
+                    x.Key,
+                    value = x.Value.Select((z, i) => new
+                    {
+                        name = z,
+                        index = i
+                    })
+                    .GroupBy(z => z.name.Length, (key, z) => new KeyValuePair<int, int>(key, z.Select(y => y.index).FirstOrDefault()))
+                    .ToList()
+
+                }).ToDictionary(x => x.Key, x => x.value);
+        }
+
+
+        List<SearchWord> GetSearchWords(List<KeywordInfo> keywords, List<int> productOrderIds)
+        {
+            return keywords.GroupBy(x => x.Name, (key, x) => new
+            {
+                name = key,
+                searchVolume = x.Select(z => z.SearchVolume).FirstOrDefault(),
+                categories = x.Select(z => new
+                {
+                    z.Category.Name,
+                    z.Category.UrlId,
+                    z.Category.UrlName,
+                    productIds = z.Products.Where(w => w.CategoryId == z.Category.UrlId)
+                    .Select(a => new
+                    {
+                        a.Id,
+                        a.Rating,
+                        a.MediaCount,
+                        salesCount = productOrderIds.Count(c => c == a.Id)
+                    })
+                    .ToList()
+                })
+                    .GroupBy(x => x.UrlId, (key, a) => new
+                    {
+                        UrlId = key,
+                        Name = a.Select(w => w.Name).FirstOrDefault(),
+                        UrlName = a.Select(w => w.UrlName).FirstOrDefault(),
+                        productIds = a.Select(w => w.productIds).FirstOrDefault()
+                    })
+                    .Select(z => new
+                    {
+                        z.UrlId,
+                        z.Name,
+                        z.UrlName,
+                        salesCount = z.productIds.Select(w => w.salesCount).Sum(),
+                        mediaCount = z.productIds.Select(w => w.MediaCount).Sum(),
+                        rating = z.productIds.Select(w => w.Rating).Sum() / z.productIds.Count()
+                    })
+                    .Select(z => new
+                    {
+                        UrlId = z.UrlId,
+                        Name = z.Name,
+                        UrlName = z.UrlName,
+                        Weight = (z.rating * 0.8) + (z.salesCount * 0.15) + (z.mediaCount * .05)
+                    }).ToList()
+            })
+                .Select(x => new SearchWord
+                {
+                    Name = x.name,
+                    SearchVolume = x.searchVolume,
+                    Categories = x.categories
+                        .OrderByDescending(z => z.Weight)
+                        .Select(z => new SuggestionCategory
+                        {
+                            UrlId = z.UrlId,
+                            Name = z.Name,
+                            UrlName = z.UrlName
+                        })
+                        .ToList()
                 })
                 .ToList();
         }
@@ -235,16 +132,137 @@ namespace Services
 
 
 
-        // --------------------------------------------------------------------------------Get New Prefix---------------------------------------------------------------
-        private string GetNewPrefix(char character, string prefix)
-        {
-            Regex regEx = new Regex("^" + character);
 
-            return searchWords
-                .Where(x => regEx.IsMatch(x.Name))
-                .Where(x => GetEditDistance(prefix, x.Name) == 1)
-                .Select(x => x.Name)
-                .FirstOrDefault();
+
+
+        
+
+
+
+
+
+
+
+        // --------------------------------------------------------------------------------Get Suggestions---------------------------------------------------------------
+        public List<Suggestion> GetSuggestions(string searchTerm, string categoryId)
+        {
+            if (root == null || searchTerm == null) return null;
+
+
+            Node node = root;
+            Regex regex = new Regex(@"[\s]{2,}");
+
+            // Remove unwanted spaces
+            searchTerm = searchTerm.TrimStart();
+            searchTerm = regex.Replace(searchTerm, " ");
+
+
+
+            // Get the current node in the trie by looping through each character in the search term
+            for (int i = 0; i < searchTerm.Length; i++)
+            {
+                char c = searchTerm[i];
+
+
+                if (node.Children.ContainsKey(c))
+                {
+                    node = node.Children[c];
+                }
+
+                // No nodes exists for the current character
+                else
+                {
+
+
+                    node = root;
+                    i = -1;
+                }
+            }
+
+            if (categoryId == null) categoryId = "All";
+
+            if (!node.Suggestions.ContainsKey(categoryId)) return null;
+
+            var suggestions = node.Suggestions[categoryId]
+                .Select(x => new Suggestion
+                {
+                    Name = x.Name,
+                    Category = x.Category
+                })
+                .ToList();
+
+            if (categoryId == "All" && suggestions[0].Category != null) suggestions.Insert(0, new Suggestion { Name = suggestions[0].Name });
+
+            return suggestions;
+        }
+
+
+
+
+
+        List<Phrase> GetPhrases(List<SearchWord> searchWords)
+        {
+            List<Phrase> phrases = new List<Phrase>();
+
+            var searchWordSplit = searchWords
+                .Select(x => new
+                {
+                    WordArray = x.Name.Split(' '),
+                    x.Categories,
+                    x.SearchVolume,
+                    Name = x.Name
+
+                })
+                .ToList();
+
+
+
+
+
+            foreach (var word in searchWordSplit)
+            {
+                for (int i = 0; i < word.WordArray.Length; i++)
+                {
+                    if (i > 3) break;
+                    string phrase = string.Empty;
+                    for (int j = i; j < word.WordArray.Length; j++)
+                    {
+                        phrase += word.WordArray[j] + " ";
+                    }
+
+                    phrase = phrase.Trim();
+
+
+
+                    phrases.Add(new Phrase
+                    {
+                        Name = phrase,
+                        Categories = i == 0 ? word.Categories : null,
+                        SearchVolume = i == 0 ? word.SearchVolume : 0,
+                        Parents = i > 0 ? new List<SearchWord>
+                        {
+                            new SearchWord {
+                                Name = word.Name,
+                                Categories = word.Categories,
+                                SearchVolume = word.SearchVolume
+                            }
+
+                        } : null
+
+                    });
+                }
+            }
+
+            return phrases
+                 .GroupBy(x => x.Name, (key, x) => new Phrase
+                 {
+                     Name = key,
+                     Categories = x.Select(z => z.Categories).FirstOrDefault(),
+                     SearchVolume = x.Select(z => z.SearchVolume).FirstOrDefault(),
+                     Parents = x.Where(z => z.Parents != null).Select(z => z.Parents.FirstOrDefault()).ToList()
+                 })
+                 .OrderBy(x => x.Name)
+                 .ToList();
         }
 
 
@@ -253,7 +271,250 @@ namespace Services
 
 
 
+        void SetNodes(List<Phrase> phrases, int index, List<string> categoryIds, ref Node rootNode)
+        {
+            Node node = rootNode;
 
+            for (int i = 0; i < phrases[index].Name.Length; i++)
+            {
+                // This is the current character in the phrase
+                char c = phrases[index].Name[i];
+
+
+                // If this node existss
+                if (!node.Children.ContainsKey(c))
+                {
+                    node.Children.Add(c, new Node(c));
+                }
+                else
+                {
+                    node = node.Children[c];
+                    continue;
+                }
+
+                node = node.Children[c];
+                string substring = phrases[index].Name.Substring(0, i + 1);
+
+
+
+
+                // This is where we are adding suggestions based on the substring of the current phrase
+                // ie. ca would get cat, cart, car...
+                for (int j = index; j < phrases.Count; j++)
+                {
+                    Phrase phrase = phrases[j];
+                    int len = Math.Min(i + 1, phrase.Name.Length);
+
+                    if (phrase.Name.Substring(0, len) == substring)
+                    {
+
+                        // List of phrases we are using for suggestions
+                        List<Phrase> phraseList = new List<Phrase>();
+                        if (phrase.Parents.Count > 0)
+                        {
+                            phraseList.AddRange(phrase.Parents.Select(x => new Phrase
+                            {
+                                Name = x.Name,
+                                Categories = x.Categories,
+                                SearchVolume = x.SearchVolume
+                            }));
+                        }
+                        else
+                        {
+                            phraseList.Add(phrase);
+                        }
+
+
+                        // Add the phrases to the suggestions list based on category id
+                        foreach (Phrase currentPhrase in phraseList)
+                        {
+                            for (int k = 0; k < categoryIds.Count; k++)
+                            {
+                                string categoryId = categoryIds[k];
+
+
+                                if (k == 0 || currentPhrase.Categories.Select(x => x.UrlId).Contains(categoryId))
+                                {
+                                    if (!node.Suggestions.ContainsKey(categoryId)) node.Suggestions.Add(categoryId, new List<SearchWordSuggestion>());
+                                }
+                                else
+                                {
+                                    continue;
+                                }
+
+                                var suggestions = node.Suggestions[categoryId];
+
+
+
+
+                                if (!suggestions.Select(x => x.Name).Contains(currentPhrase.Name))
+                                {
+                                    suggestions.Add(new SearchWordSuggestion
+                                    {
+                                        Name = currentPhrase.Name,
+                                        Category = k == 0 && currentPhrase.Categories.Count() > 1 ? currentPhrase.Categories.FirstOrDefault() : null,
+                                        SearchVolume = currentPhrase.SearchVolume
+                                    });
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+
+
+                // This will order the suggestions by search volume and limit the number of suggestions to 10
+                node.Suggestions = node.Suggestions
+                    .ToDictionary(x => x.Key, x => x.Value
+                        .OrderByDescending(z => z.SearchVolume)
+                        .Select((z, i) => new SearchWordSuggestion
+                        {
+                            Name = z.Name,
+                            Category = (i == 0 ? z.Category : null),
+                            SearchVolume = z.SearchVolume
+                        })
+                        .Take(10)
+                        .ToList());
+            }
+        }
+
+
+
+
+
+        void GenerateSplitWords(string word, int index, List<Phrase> phrases, ref Dictionary<string, List<string>> words)
+        {
+            for (int j = 0; j < word.Length; j++)
+            {
+                string substring = word.Substring(0, j + 1);
+                List<string> wordList;
+
+                if (!words.ContainsKey(substring))
+                {
+                    wordList = new List<string>();
+                    words.Add(substring, wordList);
+                }
+                else
+                {
+                    continue;
+                }
+
+
+
+                for (int k = index; k < phrases.Count; k++)
+                {
+                    int len = Math.Min(j + 1, phrases[k].Name.Length);
+
+                    if (phrases[k].Name.Substring(0, len) == substring)
+                    {
+                        int idx = phrases[k].Name.IndexOf(' ');
+
+                        if (idx == -1) idx = phrases[k].Name.Length;
+
+                        string splitWord = phrases[k].Name.Substring(0, idx);
+
+                        if (!wordList.Contains(splitWord))
+                        {
+                            wordList.Add(splitWord);
+                        }
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+
+
+
+
+        void GenerateWordCount(string firstWord, string secondWord, bool endOfPhrase, ref Dictionary<string, int> wordCount)
+        {
+            if (!wordCount.ContainsKey(firstWord))
+            {
+                wordCount.Add(firstWord, 1);
+            }
+            else
+            {
+                wordCount[firstWord] += 1;
+            }
+
+
+
+            if (endOfPhrase)
+            {
+                if (!wordCount.ContainsKey(secondWord))
+                {
+                    wordCount.Add(secondWord, 1);
+                }
+                else
+                {
+                    wordCount[secondWord] += 1;
+                }
+            }
+        }
+
+
+        void GenerateBigramsCount(string firstWord, string secondWord, ref Dictionary<KeyValuePair<string, string>, int> bigramCount)
+        {
+            var key = new KeyValuePair<string, string>(firstWord, secondWord);
+            if (!bigramCount.ContainsKey(key))
+            {
+                bigramCount.Add(key, 1);
+            }
+            else
+            {
+                bigramCount[key] += 1;
+            }
+        }
+
+
+
+        void GenerateBigramsList(string firstWord, string secondWord, ref Dictionary<string, List<string>> bigramsList)
+        {
+            if (!bigramsList.ContainsKey(firstWord))
+            {
+                bigramsList.Add(firstWord, new List<string> { secondWord });
+            }
+            else
+            {
+                if (!bigramsList[firstWord].Contains(secondWord)) bigramsList[firstWord].Add(secondWord);
+            }
+        }
+
+
+        void SetData(List<Phrase> phrases, int index, ref Dictionary<string, List<string>> splitWords, ref Dictionary<string, int> wordCount, ref Dictionary<string, List<string>> bigramsList, ref Dictionary<KeyValuePair<string, string>, int> bigramCount)
+        {
+            string phrase = phrases[index].Name;
+            string[] wordArray = phrase.Split();
+
+            for (int i = 0; i < wordArray.Length; i++)
+            {
+                string firstWord;
+                string secondWord = wordArray[i];
+
+                if (i == 0)
+                {
+                    firstWord = "<start>";
+                    GenerateSplitWords(secondWord, index, phrases, ref splitWords);
+                }
+
+                else
+                {
+                    firstWord = wordArray[i - 1];
+                }
+
+
+                GenerateWordCount(firstWord, secondWord, i == wordArray.Length - 1, ref wordCount);
+                GenerateBigramsCount(firstWord, secondWord, ref bigramCount);
+                GenerateBigramsList(firstWord, secondWord, ref bigramsList);
+            }
+        }
 
 
 
@@ -304,5 +565,14 @@ namespace Services
 
             return a[str1.Length, str2.Length];
         }
+    }
+
+    public class Phrase
+    {
+        public string Name { get; set; }
+        public List<SuggestionCategory> Categories { get; set; }
+        public float SearchVolume { get; set; }
+        public List<SearchWord> Parents { get; set; }
+
     }
 }

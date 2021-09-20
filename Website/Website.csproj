@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <Folder Include="images\" />
+    <Folder Include="MlModels\" />
     <Folder Include="Repositories\" />
   </ItemGroup>
 
