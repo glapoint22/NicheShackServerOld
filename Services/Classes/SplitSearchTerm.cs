@@ -2,10 +2,11 @@
 
 namespace Services.Classes
 {
-    public class SearchWord
+    public class SplitSearchTerm
     {
-        public string Name { get; set; }
+        public string searchTerm { get; set; }
         public List<SuggestionCategory> Categories { get; set; }
         public float SearchVolume { get; set; }
+        public List<SearchTerm> Parents { get; set; }
     }
 }

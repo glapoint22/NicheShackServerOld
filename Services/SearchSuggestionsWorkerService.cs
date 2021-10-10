@@ -40,7 +40,7 @@ namespace Services
 
 
                 // This will get all keywords info
-                List<KeywordInfo> keywords = await context.ProductKeywords
+                List<KeywordInfo> keywordInfo = await context.ProductKeywords
                     .AsNoTracking()
                     .Select(x => new KeywordInfo
                     {
@@ -75,11 +75,28 @@ namespace Services
                     .Select(x => x.UrlId)
                     .ToListAsync();
 
+                categoryIds.Insert(0, "All");
+
+
+
+
+                // Tramsform the keyword info into search terms
+                List<SearchTerm> searchTerms = KeywordInfo.GetSearchTerms(keywordInfo, productOrderIds);
+
+
+                // Split the search terms
+                List<SplitSearchTerm> splitSearchTerms = SearchTerm.GetSplitSearchTerms(searchTerms);
+
+                // Create the nodes
+                Node rootNode = new Node(splitSearchTerms, categoryIds);
+
+                // Create the ngrams
+                Ngrams ngrams = new Ngrams(splitSearchTerms);
                 
 
-
-
-                searchSuggestionsService.Init(productOrderIds, keywords, categoryIds);
+                // Assign the variables
+                searchSuggestionsService.rootNode = rootNode;
+                searchSuggestionsService.searchTermCorrection = new SearchTermCorrection(ngrams);
 
 
 
