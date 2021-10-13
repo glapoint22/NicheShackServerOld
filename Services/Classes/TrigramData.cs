@@ -33,5 +33,38 @@ namespace Services.Classes
 
             return new NgramList<Trigram>(trigrams, new Trigram(word1, word2, word3));
         }
+
+
+
+
+        public Trigram GetTrigram(Bigram bigram, string partialWord)
+        {
+            if (!partialWords.ContainsKey(bigram.Value) || !partialWords[bigram.Value].ContainsKey(partialWord)) return null;
+            string fullWord = partialWords[bigram.Value][partialWord];
+
+            return new Trigram(bigram.Value.Item1, bigram.Value.Item2, fullWord);
+        }
+
+
+
+
+        public NgramList<Trigram> GetTrigrams(NgramList<Bigram> bigrams, string referenceWord)
+        {
+            List<Trigram> trigrams = new List<Trigram>();
+
+            foreach (Bigram bigram in bigrams.Ngrams)
+            {
+                NgramList<Trigram> trigramList = GetTrigrams(bigram.Value.Item1, bigram.Value.Item2, referenceWord);
+
+                if (trigramList != null)
+                {
+                    trigrams.AddRange(trigramList.Ngrams);
+                }
+            }
+
+            if (trigrams.Count == 0) return null;
+
+            return new NgramList<Trigram>(trigrams, new Trigram(bigrams.Reference.Value.Item1, bigrams.Reference.Value.Item2, referenceWord));
+        }
     }
 }

@@ -9,6 +9,7 @@ namespace Services.Classes
         public UnigramData UnigramData { get; }
         public BigramData bigramData { get; }
         public TrigramData trigramData { get; }
+        public QuadgramData quadgramData { get; }
 
 
         public Ngrams(List<SplitSearchTerm> splitSearchTerms)
@@ -148,6 +149,7 @@ namespace Services.Classes
             UnigramData = new UnigramData(unigramList, unigramIndices);
             bigramData = new BigramData(bigramList, bigramIndices, bigramPartialWords);
             trigramData = new TrigramData(trigramList, trigramIndices, trigramPartialWords);
+            quadgramData = new QuadgramData(quadgramList, quadgramIndices, quadgramPartialWords);
         }
 
 

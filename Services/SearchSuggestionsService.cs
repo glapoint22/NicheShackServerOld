@@ -25,7 +25,7 @@ namespace Services
             searchTerm = regex.Replace(searchTerm, " ");
 
 
-
+            bool searchTermCorrected = false;
 
             for (int i = 0; i < searchTerm.Length; i++)
             {
@@ -40,7 +40,9 @@ namespace Services
                 // No nodes exists for the current character
                 else
                 {
+                    if (searchTermCorrected) return null;
                     searchTerm = searchTermCorrection.GetCorrectedSearchTerm(searchTerm);
+                    searchTermCorrected = true;
 
                     if (searchTerm == null) return null;
 

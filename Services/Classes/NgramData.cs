@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Services.Classes
 {
-    public abstract class NgramData
+    public class NgramData
     {
         protected List<string> GetWords(string referenceWord, List<string> wordsList, List<KeyValuePair<int, int>> indexList)
         {

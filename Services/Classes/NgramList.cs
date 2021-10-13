@@ -24,10 +24,11 @@ namespace Services.Classes
         public T GetNgram()
         {
             T ngram;
-            List<string> reference = Reference.ToList();
 
             if (Ngrams.Count > 1)
             {
+                List<string> reference = Reference.ToList();
+
                 ngram = Ngrams
                 .OrderByDescending(x => WordLikeness(x.ToList().Aggregate((a, b) => a + b), reference.Aggregate((a, b) => a + b)))
                 .FirstOrDefault();

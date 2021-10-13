@@ -32,12 +32,12 @@ namespace Services.Classes
         }
 
 
-        public Bigram GetBigram(string word, string partialWord)
+        public Bigram GetBigram(Unigram unigram, string partialWord)
         {
-            if (!partialWords.ContainsKey(word) || !partialWords[word].ContainsKey(partialWord)) return null;
-            string fullWord = partialWords[word][partialWord];
+            if (!partialWords.ContainsKey(unigram.Value) || !partialWords[unigram.Value].ContainsKey(partialWord)) return null;
+            string fullWord = partialWords[unigram.Value][partialWord];
 
-            return new Bigram(word, fullWord);
+            return new Bigram(unigram.Value, fullWord);
         }
 
 
@@ -53,7 +53,7 @@ namespace Services.Classes
 
                 if (bigramList != null)
                 {
-                    bigrams.Add(bigramList.GetNgram());
+                    bigrams.AddRange(bigramList.Ngrams);
                 }
             }
 
