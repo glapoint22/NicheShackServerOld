@@ -1,5 +1,6 @@
 ﻿using DataAccess.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Services.Classes;
@@ -17,13 +18,14 @@ namespace Services
         private readonly IServiceScope scope;
         private readonly NicheShackContext context;
         private readonly SearchSuggestionsService searchSuggestionsService;
+        private readonly IConfiguration configuration;
 
-
-        public SearchSuggestionsWorkerService(IServiceScopeFactory serviceScopeFactory, SearchSuggestionsService searchSuggestionsService)
+        public SearchSuggestionsWorkerService(IServiceScopeFactory serviceScopeFactory, SearchSuggestionsService searchSuggestionsService, IConfiguration configuration)
         {
             scope = serviceScopeFactory.CreateScope();
             context = scope.ServiceProvider.GetRequiredService<NicheShackContext>();
             this.searchSuggestionsService = searchSuggestionsService;
+            this.configuration = configuration;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -92,17 +94,16 @@ namespace Services
 
                 // Create the ngrams
                 Ngrams ngrams = new Ngrams(splitSearchTerms);
-                
+
 
                 // Assign the variables
                 searchSuggestionsService.rootNode = rootNode;
                 searchSuggestionsService.searchTermCorrection = new SearchTermCorrection(ngrams);
 
 
-
-
-                // 1 hour
-                await Task.Delay(1000 * 60 * 60);
+                // Set the time for the next update
+                int hours = int.Parse(configuration["SearchSuggestions:UpdateInHours"]);
+                await Task.Delay(1000 * 60 * 60 * hours);
             }
         }
 
