@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Services.Classes
 {
-    public class NgramList<T> where T : INgram
+    public class NgramList<T> where T : class, INgram
     {
         public List<T> Ngrams { get; }
 
@@ -23,51 +23,52 @@ namespace Services.Classes
 
         public T GetNgram()
         {
-            T ngram;
+            List<string> reference = Reference.ToList();
 
-            if (Ngrams.Count > 1)
+            var result = Ngrams.Select(x => new
             {
-                List<string> reference = Reference.ToList();
-
-                ngram = Ngrams
-                .OrderByDescending(x => WordLikeness(x.ToList().Aggregate((a, b) => a + b), reference.Aggregate((a, b) => a + b)))
+                ngram = x,
+                likeness = WordLikeness(x.ToList().Aggregate((a, b) => a + b), reference.Aggregate((a, b) => a + b))
+            })
+                .OrderByDescending(x => x.likeness)
                 .FirstOrDefault();
-            }
-            else
-            {
-                ngram = Ngrams.FirstOrDefault();
-            }
-            return ngram;
+
+            if (result.likeness <= 0) return null;
+            return result.ngram;
         }
 
 
 
 
-        private int WordLikeness(string word1, string word2)
+        private int WordLikeness(string word, string reference)
         {
-            int len = Math.Min(word1.Length, word2.Length);
-
             int likeness = 0;
+            int startIndex = 0;
+            int referenceStartIndex = 0;
+            int maxLength = Math.Max(word.Length, reference.Length);
 
-            for (int i = 0; i < len; i++)
+            word = word.PadRight(maxLength);
+            reference = reference.PadRight(maxLength);
+
+
+            for (int i = 0; i < word.Length; i++)
             {
-                if (word1[i] == word2[i])
+                int length = (i + 1) - startIndex;
+                string substring = word.Substring(startIndex, length);
+
+                if (reference.IndexOf(substring, referenceStartIndex) != -1)
                 {
                     likeness++;
                 }
                 else
                 {
                     likeness--;
+                    startIndex = i + 1;
+                    referenceStartIndex = i;
                 }
-
             }
-
-            likeness -= Math.Abs(word1.Length - word2.Length);
 
             return likeness;
         }
-
-
-
     }
 }
