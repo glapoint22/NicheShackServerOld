@@ -64,11 +64,11 @@ namespace Services
                 .Select(x => new Suggestion
                 {
                     Name = x.Name,
-                    Category = x.Category
+                    Niche = x.Category
                 })
                 .ToList();
 
-            if (categoryId == "All" && suggestions[0].Category != null) suggestions.Insert(0, new Suggestion { Name = suggestions[0].Name });
+            if (categoryId == "All" && suggestions[0].Niche != null) suggestions.Insert(0, new Suggestion { Name = suggestions[0].Name });
 
             return suggestions;
         }

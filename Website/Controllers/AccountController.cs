@@ -133,20 +133,27 @@ namespace Website.Controllers
             // If the customer is in the database and the password is valid, create claims for the access token
             if (customer != null && await userManager.CheckPasswordAsync(customer, signIn.Password))
             {
-                List<Claim> claims = GetClaims(customer, signIn.IsPersistent);
+                List<Claim> claims = GetClaims(customer);
 
+                var tokenData = await GenerateTokenData(customer, claims);
+                var customerData = customer.FirstName + "," + customer.LastName + "," + customer.Email + "," + customer.Image;
 
-                return Ok(new
+                CookieOptions cookieOptions = new CookieOptions();
+
+                if (signIn.IsPersistent)
                 {
-                    tokenData = await GenerateTokenData(customer, claims),
-                    customer = new CustomerData
+                    cookieOptions = new CookieOptions
                     {
-                        FirstName = customer.FirstName,
-                        LastName = customer.LastName,
-                        Email = customer.Email,
-                        Image = customer.Image
-                    }
-                });
+                        Expires = DateTimeOffset.UtcNow.AddDays(Convert.ToInt32(configuration["TokenValidation:RefreshExpiresInDays"]))
+                    };
+                }
+
+                Response.Cookies.Append("access", tokenData.AccessToken, cookieOptions);
+                Response.Cookies.Append("refresh", tokenData.RefreshToken, cookieOptions);
+                Response.Cookies.Append("customer", customerData, cookieOptions);
+
+
+                return Ok();
             }
 
             return Conflict("Your password and email do not match. Please try again.");
@@ -161,7 +168,7 @@ namespace Website.Controllers
 
 
         // ..................................................................................Get Claims.....................................................................
-        private List<Claim> GetClaims(Customer customer, bool isPersistent)
+        private List<Claim> GetClaims(Customer customer)
         {
             return new List<Claim>()
                 {
@@ -169,7 +176,6 @@ namespace Website.Controllers
                     new Claim(ClaimTypes.NameIdentifier, customer.Id),
                     new Claim(JwtRegisteredClaimNames.Iss, configuration["TokenValidation:Site"]),
                     new Claim(JwtRegisteredClaimNames.Aud, configuration["TokenValidation:Site"]),
-                    new Claim("isPersistent", isPersistent.ToString())
                 };
         }
 
@@ -201,7 +207,7 @@ namespace Website.Controllers
 
             if (result.Succeeded)
             {
-                List<Claim> claims = GetClaims(customer, true);
+                List<Claim> claims = GetClaims(customer);
 
                 return Ok(new
                 {
@@ -289,7 +295,7 @@ namespace Website.Controllers
                 if (result.Succeeded)
                 {
                     // Send a confirmation email that the customer name has been changed
-                    if(customer.EmailPrefNameChange == true)
+                    if (customer.EmailPrefNameChange == true)
                     {
                         emailService.AddToQueue(EmailType.NameChange, "Name change confirmation", new Recipient
                         {
@@ -298,7 +304,7 @@ namespace Website.Controllers
                             Email = customer.Email
                         }, new EmailProperties { Host = GetHost() });
                     }
-                    
+
 
 
                     return Ok();
@@ -343,7 +349,7 @@ namespace Website.Controllers
                 if (result.Succeeded)
                 {
                     // Send a confirmation email that the customer email has been changed
-                    if(customer.EmailPrefEmailChange == true)
+                    if (customer.EmailPrefEmailChange == true)
                     {
                         emailService.AddToQueue(EmailType.EmailChange, "Email change confirmation", new Recipient
                         {
@@ -357,7 +363,7 @@ namespace Website.Controllers
                             Var2 = updatedEmail.Email
                         });
                     }
-                    
+
 
 
                     return Ok();
@@ -409,8 +415,8 @@ namespace Website.Controllers
                             Email = customer.Email
                         }, new EmailProperties { Host = GetHost() });
                     }
-                    
-                    
+
+
 
 
                     return Ok();
@@ -670,10 +676,10 @@ namespace Website.Controllers
 
 
 
-        // ..................................................................................Sign Out.....................................................................
+        // ..................................................................................Log Out.....................................................................
         [HttpGet]
-        [Route("SignOut")]
-        public async Task<ActionResult> SignOut()
+        [Route("LogOut")]
+        public async Task<ActionResult> LogOut()
         {
             string refresh = Request.Cookies["refresh"];
 
@@ -691,6 +697,7 @@ namespace Website.Controllers
 
             Response.Cookies.Delete("access");
             Response.Cookies.Delete("refresh");
+            Response.Cookies.Delete("customer");
 
             return NoContent();
         }

@@ -1,8 +1,6 @@
 ﻿using System.Threading.Tasks;
-using DataAccess.Models;
 using Microsoft.AspNetCore.Mvc;
 using Website.Repositories;
-using Website.ViewModels;
 
 namespace Website.Controllers
 {
@@ -22,8 +20,17 @@ namespace Website.Controllers
         [HttpGet]
         public async Task<ActionResult> GetCategories()
         {
-            // Get all categories and their niches
-            return Ok(await unitOfWork.Categories.GetCollection<UrlItemViewModel<Category>>());
+            // Get all categories
+            var categories = await unitOfWork.Categories.GetCollection(x => new
+            {
+                id = x.Id,
+                name = x.Name,
+                urlId = x.UrlId,
+                urlName = x.UrlName
+            });
+
+
+            return Ok(categories);
         }
     }
 }

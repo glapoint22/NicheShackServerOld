@@ -255,9 +255,9 @@ namespace Website.Controllers
         // ..................................................................................Get Suggestions.....................................................................
         [HttpGet]
         [Route("GetSuggestions")]
-        public ActionResult GetSuggestions(string searchWords, string categoryId)
+        public ActionResult GetSuggestions(string searchWords, string nicheId)
         {
-            return Ok(searchSuggestionsService.GetSuggestions(searchWords, categoryId));
+            return Ok(searchSuggestionsService.GetSuggestions(searchWords, nicheId));
         }
     }
 }

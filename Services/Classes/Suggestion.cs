@@ -3,6 +3,6 @@
     public class Suggestion
     {
         public string Name { get; set; }
-        public SuggestionCategory Category { get; set; }
+        public SuggestionCategory Niche { get; set; }
     }
 }

@@ -22,10 +22,10 @@ namespace Website.Controllers
 
         // ..................................................................................Get Niches.....................................................................
         [HttpGet]
-        public async Task<ActionResult> GetNiches(int categoryId)
+        public async Task<ActionResult> GetNiches(int id)
         {
             // Get all categories and their niches
-            return Ok(await unitOfWork.Niches.GetCollection<UrlItemViewModel<Niche>>(x => x.CategoryId == categoryId));
+            return Ok(await unitOfWork.Niches.GetCollection<UrlItemViewModel<Niche>>(x => x.CategoryId == id));
         }
     }
 }
