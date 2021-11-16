@@ -133,7 +133,7 @@ namespace Website.Controllers
             // If the customer is in the database and the password is valid, create claims for the access token
             if (customer != null && await userManager.CheckPasswordAsync(customer, signIn.Password))
             {
-                List<Claim> claims = GetClaims(customer);
+                List<Claim> claims = GetClaims(customer, signIn.IsPersistent);
 
                 var tokenData = await GenerateTokenData(customer, claims);
                 var customerData = customer.FirstName + "," + customer.LastName + "," + customer.Email + "," + customer.Image;
@@ -168,15 +168,24 @@ namespace Website.Controllers
 
 
         // ..................................................................................Get Claims.....................................................................
-        private List<Claim> GetClaims(Customer customer)
+        private List<Claim> GetClaims(Customer customer, bool isPersistent)
         {
-            return new List<Claim>()
+            List<Claim> claims = new List<Claim>()
                 {
                     new Claim("acc", "customer"),
                     new Claim(ClaimTypes.NameIdentifier, customer.Id),
                     new Claim(JwtRegisteredClaimNames.Iss, configuration["TokenValidation:Site"]),
-                    new Claim(JwtRegisteredClaimNames.Aud, configuration["TokenValidation:Site"]),
+                    new Claim(JwtRegisteredClaimNames.Aud, configuration["TokenValidation:Site"])
                 };
+
+
+
+            if(isPersistent)
+            {
+                claims.Add(new Claim(ClaimTypes.Expiration, DateTimeOffset.UtcNow.AddDays(Convert.ToInt32(configuration["TokenValidation:RefreshExpiresInDays"])).ToString()));
+            }
+
+            return claims;
         }
 
 
@@ -207,7 +216,7 @@ namespace Website.Controllers
 
             if (result.Succeeded)
             {
-                List<Claim> claims = GetClaims(customer);
+                List<Claim> claims = GetClaims(customer, true);
 
                 return Ok(new
                 {
@@ -274,11 +283,11 @@ namespace Website.Controllers
 
 
 
-        // ..................................................................................Update Customer Name.....................................................................
+        // ..................................................................................Change Name.....................................................................
         [HttpPut]
-        [Route("UpdateName")]
+        [Route("ChangeName")]
         [Authorize(Policy = "Account Policy")]
-        public async Task<ActionResult> UpdateCustomerName(UpdatedCustomerName updatedCustomerName)
+        public async Task<ActionResult> ChangeName(UpdatedCustomerName updatedCustomerName)
         {
             // Get the customer from the database based on the customer id from the claims via the access token
             Customer customer = await userManager.FindByIdAsync(User.FindFirst(ClaimTypes.NameIdentifier).Value);
@@ -307,6 +316,10 @@ namespace Website.Controllers
 
 
 
+                    UpdateCustomerCookie(customer);
+
+                    
+
                     return Ok();
                 }
             }
@@ -318,6 +331,27 @@ namespace Website.Controllers
 
 
 
+
+
+        void UpdateCustomerCookie(Customer customer)
+        {
+            Claim expiration = User.FindFirst(ClaimTypes.Expiration);
+
+
+            CookieOptions cookieOptions = new CookieOptions();
+
+            if (expiration != null)
+            {
+                cookieOptions = new CookieOptions
+                {
+                    Expires = DateTimeOffset.Parse(expiration.Value)
+                };
+            }
+
+            string customerData = customer.FirstName + "," + customer.LastName + "," + customer.Email + "," + customer.Image;
+
+            Response.Cookies.Append("customer", customerData, cookieOptions);
+        }
 
 
 
@@ -365,7 +399,7 @@ namespace Website.Controllers
                     }
 
 
-
+                    UpdateCustomerCookie(customer);
                     return Ok();
                 }
                 else
@@ -417,13 +451,7 @@ namespace Website.Controllers
                     }
 
 
-
-
                     return Ok();
-                }
-                else
-                {
-                    return Conflict();
                 }
             }
 
@@ -809,7 +837,7 @@ namespace Website.Controllers
             {
                 var result = await userManager.FindByEmailAsync(email);
 
-                if (result != null) return Conflict();
+                if (result != null) return Ok(true);
 
                 string token = await userManager.GenerateChangeEmailTokenAsync(customer, email);
                 string host = GetHost();
@@ -819,11 +847,11 @@ namespace Website.Controllers
                 {
                     FirstName = customer.FirstName,
                     LastName = customer.LastName,
-                    Email = customer.Email
+                    Email = email
                 }, new EmailProperties
                 {
                     Host = host,
-                    Link = host + "/account/profile/change-email?email=" + HttpUtility.UrlEncode(email) + "&token=" + HttpUtility.UrlEncode(token)
+                    Var1 = token
                 });
 
                 return Ok();
