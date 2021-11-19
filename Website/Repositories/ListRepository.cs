@@ -49,13 +49,19 @@ namespace Website.Repositories
                     x.Name,
                     x.Description,
                     x.CollaborateId,
+                    CollaboratorCount = x.Collaborators
+                        .Count(y => y.ListId == x.Id && !y.IsOwner && !y.IsRemoved),
                     Owner = x.Collaborators
                         .Where(y => y.ListId == x.Id && y.IsOwner)
                         .Select(y => new
                         {
                             y.Id,
                             Name = y.CustomerId == customerId ? "You" : y.Customer.FirstName,
-                            ProfilePic = y.Customer.Image
+                            ProfilePic = new ProfilePicInfo
+                            {
+                                Name = y.Customer.FirstName + " " + y.Customer.LastName,
+                                Url = y.Customer.Image
+                            }
 
                         }).FirstOrDefault(),
                     TotalItems = context.ListProducts
@@ -76,7 +82,8 @@ namespace Website.Repositories
                 Owner = y.Owner.Name,
                 y.CollaborateId,
                 ProfilePic = y.Owner.ProfilePic,
-                x.IsOwner
+                x.IsOwner,
+                y.CollaboratorCount
             })
                 .OrderByDescending(x => x.IsOwner)
                 .Select(x => new ListViewModel
@@ -87,7 +94,17 @@ namespace Website.Repositories
                     TotalItems = x.TotalItems,
                     Owner = x.Owner,
                     CollaborateId = x.CollaborateId,
-                    ProfilePic = x.ProfilePic
+                    ProfilePic = x.ProfilePic,
+                    CollaboratorCount = x.CollaboratorCount,
+                    ListPermissions = new ListPermissions
+                    {
+                        AddToList = true,
+                        ShareList = true,
+                        EditList = true,
+                        DeleteList = true,
+                        MoveItem = true,
+                        RemoveItem = true
+                    }
                 }).ToList();
         }
 
@@ -105,13 +122,14 @@ namespace Website.Repositories
                 .OrderBy(new ListProductViewModel(sort))
                 .Where(x => collaboratorIds
                     .Contains(x.CollaboratorId))
-                .Select(x => new ListProductViewModel
+                .Select(x => new
                 {
                     Id = x.Product.Id,
                     UrlId = x.Product.UrlId,
                     Title = x.Product.Name,
                     Rating = x.Product.Rating,
                     TotalReviews = x.Product.TotalReviews,
+                    Prices = x.Product.ProductPrices.Select(z => z.Price).ToList(),
                     //MinPrice = x.Product.MinPrice,
                     //MaxPrice = x.Product.MaxPrice,
                     DateAdded = x.DateAdded.ToString("MMMM dd, yyyy"),
@@ -119,7 +137,11 @@ namespace Website.Repositories
                     {
                         Id = x.CollaboratorId,
                         Name = x.Collaborator.CustomerId == customerId ? "you" : x.Collaborator.Customer.FirstName,
-                        Image = x.Collaborator.Customer.Image
+                        Image = new ProfilePicInfo
+                        {
+                            Url = x.Collaborator.Customer.Image,
+                            Name = x.Collaborator.Customer.FirstName + " " + x.Collaborator.Customer.LastName
+                        }
                     } : null,
                     Hoplink = x.Product.Hoplink + (customerId != null ? (x.Product.Hoplink.Contains('?') ? "&" : "?") + "tid=" + x.Product.UrlId + "_" + customerId : ""),
                     Image = new ImageViewModel
@@ -131,7 +153,21 @@ namespace Website.Repositories
                 })
                 .ToListAsync();
 
-            return products;
+            return products.Select(x => new ListProductViewModel
+            {
+                Id = x.Id,
+                UrlId = x.UrlId,
+                Title = x.Title,
+                Rating = x.Rating,
+                TotalReviews = x.TotalReviews,
+                MinPrice = 22.22,//x.Prices.Min(),
+                MaxPrice = 0,//x.Prices.Max(),
+                DateAdded = x.DateAdded,
+                Collaborator = x.Collaborator,
+                Hoplink = x.Hoplink,
+                Image = x.Image,
+                UrlTitle = x.UrlTitle
+            }).ToList();
         }
     }
 }

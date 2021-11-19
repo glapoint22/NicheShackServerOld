@@ -1,4 +1,6 @@
-﻿namespace Website.ViewModels
+﻿using Website.Classes;
+
+namespace Website.ViewModels
 {
     public class ListViewModel
     {
@@ -7,7 +9,9 @@
         public string Description { get; set; }
         public int TotalItems { get; set; }
         public string Owner { get; set; }
-        public string ProfilePic { get; set; }
+        public ProfilePicInfo ProfilePic { get; set; }
         public string CollaborateId { get; set; }
+        public ListPermissions ListPermissions { get; set; }
+        public int CollaboratorCount { get; set; }
     }
 }
