@@ -60,7 +60,7 @@ namespace Website.Repositories
                             ProfilePic = new ProfilePicInfo
                             {
                                 Name = y.Customer.FirstName + " " + y.Customer.LastName,
-                                Url = y.Customer.Image
+                                Url = y.Customer.Image != null ? "images/" + y.Customer.Image : "assets/no-account-pic.png"
                             }
 
                         }).FirstOrDefault(),
@@ -92,18 +92,20 @@ namespace Website.Repositories
                     Name = x.Name,
                     Description = x.Description,
                     TotalItems = x.TotalItems,
-                    Owner = x.Owner,
+                    OwnerName = x.Owner,
+                    IsOwner = x.IsOwner,
                     CollaborateId = x.CollaborateId,
                     ProfilePic = x.ProfilePic,
                     CollaboratorCount = x.CollaboratorCount,
                     ListPermissions = new ListPermissions
                     {
-                        AddToList = true,
-                        ShareList = true,
-                        EditList = true,
-                        DeleteList = true,
-                        MoveItem = true,
-                        RemoveItem = true
+                        AddToList = false,
+                        ShareList = false,
+                        InviteCollaborators = false,
+                        EditList = false,
+                        DeleteList = false,
+                        MoveItem = false,
+                        RemoveItem = false
                     }
                 }).ToList();
         }

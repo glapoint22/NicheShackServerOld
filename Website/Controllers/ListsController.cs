@@ -236,7 +236,8 @@ namespace Website.Controllers
             // Return the new list id to the client
             return Ok(new
             {
-                listId = newList.Id
+                id = newList.Id,
+                collaborateId = newList.CollaborateId
             });
         }
 
