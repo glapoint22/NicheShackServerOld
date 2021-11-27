@@ -36,36 +36,42 @@ namespace Website.Controllers
 
 
 
-        // ..................................................................................List Exists......................................................................
+        // ..................................................................................Get List......................................................................
         [HttpGet]
-        [Authorize(Policy = "Account Policy")]
-        [Route("ListExists")]
-        public async Task<ActionResult> ListExists(string listId)
+        [Route("List")]
+        public async Task<ActionResult> GetList(string listId)
         {
-            string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            var listName = await unitOfWork.Lists.Get(x => x.Id == listId, x => x.Name);
 
-            return Ok(await unitOfWork.Collaborators.Any(x => x.ListId == listId && x.CustomerId == customerId && !x.IsRemoved));
+            if (listName == null) return Ok();
+
+            return Ok(new
+            {
+                id = listId,
+                name = listName,
+                products = await unitOfWork.Lists.GetListProducts(await unitOfWork.Collaborators
+                    .GetCollection(x => x.ListId == listId, x => x.Id), null, null)
+            });
         }
 
 
 
-        // ..................................................................................Get List Owner......................................................................
+
+
+        // ..................................................................................Get First List......................................................................
         [HttpGet]
-        [Route("ListOwner")]
-        public async Task<ActionResult> GetListOwner(string listId)
+        [Route("FirstList")]
+        [Authorize(Policy = "Account Policy")]
+        public async Task<ActionResult> GetFirstList()
         {
-            string ownerName = await unitOfWork.Collaborators.Get(x => x.ListId == listId && x.IsOwner, x => x.Customer.FirstName);
+            // Get the customer Id from the access token
+            string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
-            if (ownerName != null)
+
+            return Ok(await unitOfWork.Collaborators.Get(x => x.CustomerId == customerId && x.IsOwner, x => new
             {
-                return Ok(ownerName);
-            }
-            else
-            {
-                return NotFound();
-            }
-
-
+                id = x.ListId
+            }));
         }
 
 
@@ -86,80 +92,40 @@ namespace Website.Controllers
 
 
 
-        // ..................................................................................Get Dropdown Lists......................................................................
+
+
+
+        // ..................................................................................Get Collaborators......................................................................
         [HttpGet]
-        [Route("DropdownLists")]
+        [Route("Collaborators")]
         [Authorize(Policy = "Account Policy")]
-        public async Task<ActionResult> GetDropdownLists()
+        public async Task<ActionResult> GetCollaborators(string listId)
         {
             // Get the customer Id from the access token
             string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
-            IEnumerable<string> listIds = await unitOfWork.Collaborators.GetCollection(x => x.CustomerId == customerId && !x.IsRemoved, x => x.ListId);
-
-
-            // The customer's lists
-            var lists = await unitOfWork.Collaborators.GetCollection(x => listIds.Contains(x.ListId) && x.IsOwner, x => new
-            {
-                id = x.ListId,
-                name = x.List.Name + (x.CustomerId != customerId ? " (" + x.Customer.FirstName + ")" : string.Empty)
-            });
-
-            return Ok(lists);
-        }
-
-
-
-
-
-        // ..................................................................................Get Sort Options......................................................................
-        [HttpGet]
-        [Route("SortOptions")]
-        public ActionResult GetSortOptions()
-        {
-            return Ok(new ListProductViewModel().GetSortOptions());
-        }
-
-
-
-
-
-
-        // ..................................................................................Get List Data......................................................................
-        [HttpGet]
-        [Route("ListData")]
-        [Authorize(Policy = "Account Policy")]
-        public async Task<ActionResult> GetListData(string listId)
-        {
-            // Get the customer Id from the access token
-            string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            if (!await unitOfWork.Collaborators.Any(x => x.ListId == listId && x.CustomerId == customerId)) return Ok();
 
 
             // Get all collaborators from the selected list
             IEnumerable<Collaborator> collaborators = await unitOfWork.Collaborators
-                    .GetCollection(x => x.ListId == listId && !x.IsRemoved, x => new Collaborator
+                    .GetCollection(x => x.ListId == listId && !x.IsOwner && !x.IsRemoved, x => new Collaborator
                     {
                         Id = x.Id,
-                        CustomerId = x.CustomerId,
-                        ListId = x.ListId,
-                        IsOwner = x.IsOwner,
-                        Name = x.Customer.FirstName
+                        Name = x.Customer.FirstName + " " + x.Customer.LastName,
+                        ListPermissions = new ListPermissions
+                        {
+                            AddToList = x.AddToList,
+                            ShareList = x.ShareList,
+                            EditList = x.EditList,
+                            InviteCollaborators = x.InviteCollaborators,
+                            DeleteList = x.DeleteList,
+                            MoveItem = x.MoveItem,
+                            RemoveItem = x.RemoveItem
+                        }
                     });
 
-            // Is the customer the owner of this list?
-            bool isOwner = collaborators.Any(x => x.CustomerId == customerId && x.ListId == listId && x.IsOwner);
-
-            return Ok(new
-            {
-                // If the customer is the owner of this list, get collaborators (excluding the owner)
-                collaborators = isOwner ? collaborators.Where(x => !x.IsOwner).Select(x => new
-                {
-                    id = x.Id,
-                    name = x.Name
-                }).ToList() : null,
-                isOwner,
-                ownerName = collaborators.Where(x => x.IsOwner).Select(x => x.Name).SingleOrDefault()
-            });
+            return Ok(collaborators);
         }
 
 
@@ -249,16 +215,19 @@ namespace Website.Controllers
 
 
 
-        // ..................................................................................Update List....................................................................
+        // ..................................................................................Edit List....................................................................
         [HttpPut]
         [Authorize(Policy = "Account Policy")]
-        public async Task<ActionResult> UpdateList(UpdatedList list)
+        public async Task<ActionResult> EditList(UpdatedList list)
         {
             // Get the customer id from the access token
             string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
-            // Make sure this customer is the owner of this list
-            if (!await unitOfWork.Collaborators.Any(x => x.ListId == list.Id && x.CustomerId == customerId && x.IsOwner)) return Unauthorized();
+            // Make sure this customer can edit this list
+            if (!await unitOfWork.Collaborators.Any(x => (x.ListId == list.Id && x.CustomerId == customerId && x.EditList == true) || (x.ListId == list.Id && x.CustomerId == customerId && x.IsOwner)))
+            {
+                return Unauthorized();
+            }
 
 
             // Get the list from the database
@@ -348,8 +317,8 @@ namespace Website.Controllers
             // Get the customer id from the access token
             string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
-            // Make sure this customer is the owner of this list
-            if (!await unitOfWork.Collaborators.Any(x => x.ListId == listId && x.CustomerId == customerId && x.IsOwner))
+            // Make sure this customer can delete this list
+            if (!await unitOfWork.Collaborators.Any(x => (x.ListId == listId && x.CustomerId == customerId && x.DeleteList) || (x.ListId == listId && x.CustomerId == customerId && x.IsOwner)))
             {
                 return Unauthorized();
             }
@@ -401,46 +370,61 @@ namespace Website.Controllers
 
 
 
-
-
-        // .........................................................................Remove Collaborator.....................................................................
-        [Route("RemoveCollaborator")]
+        // .........................................................................Update Collaborators.....................................................................
+        [Route("UpdateCollaborators")]
         [HttpPut]
         [Authorize(Policy = "Account Policy")]
-        public async Task<ActionResult> RemoveCollaborator(RemovedCollaborator removedCollaborator)
+        public async Task<ActionResult> UpdateCollaborators(List<Collaborator> collaborators)
         {
-            // Make sure we are the owner of the list
-            if (!await unitOfWork.Collaborators.Any(x => x.ListId == removedCollaborator.ListId && x.CustomerId == User.FindFirst(ClaimTypes.NameIdentifier).Value && x.IsOwner))
+            // Get the list id
+            var listId = await unitOfWork.Collaborators.Get(x => x.Id == collaborators[0].Id, x => x.ListId);
+
+            //Make sure we are the owner of the list
+            if (!await unitOfWork.Collaborators.Any(x => x.ListId == listId && x.CustomerId == User.FindFirst(ClaimTypes.NameIdentifier).Value && x.IsOwner))
             {
                 return Unauthorized();
             }
 
-            // Get the collaborator to remove
-            ListCollaborator collaborator = await unitOfWork.Collaborators.Get(x => x.Id == removedCollaborator.Id && x.ListId == removedCollaborator.ListId);
 
-            // If found, mark the collaborator as removed
-            if (collaborator != null)
+            foreach (var currentCollaborator in collaborators)
             {
-                collaborator.IsRemoved = true;
-                unitOfWork.Collaborators.Update(collaborator);
-                await unitOfWork.Save();
+                var collaborator = await unitOfWork.Collaborators.Get(currentCollaborator.Id);
 
-
-                // Setup the email
-                emailService.SetupEmail(SetupRemovedCollaborator, new EmailSetupParams
+                if (currentCollaborator.IsRemoved)
                 {
-                    Host = GetHost(),
-                    CollaboratorId = collaborator.Id,
-                    ListId1 = removedCollaborator.ListId
-                });
+                    collaborator.IsRemoved = true;
 
+                    // Setup the email
+                    emailService.SetupEmail(SetupRemovedCollaborator, new EmailSetupParams
+                    {
+                        Host = GetHost(),
+                        CollaboratorId = collaborator.Id,
+                        ListId1 = listId
+                    });
+                }
+                else
+                {
+                    collaborator.AddToList = currentCollaborator.ListPermissions.AddToList;
+                    collaborator.ShareList = currentCollaborator.ListPermissions.ShareList;
+                    collaborator.EditList = currentCollaborator.ListPermissions.EditList;
+                    collaborator.InviteCollaborators = currentCollaborator.ListPermissions.InviteCollaborators;
+                    collaborator.DeleteList = currentCollaborator.ListPermissions.DeleteList;
+                    collaborator.MoveItem = currentCollaborator.ListPermissions.MoveItem;
+                    collaborator.RemoveItem = currentCollaborator.ListPermissions.RemoveItem;
+                }
 
+                unitOfWork.Collaborators.Update(collaborator);
+            };
 
-                return Ok();
-            }
+            await unitOfWork.Save();
 
-            return NotFound();
+            return Ok();
         }
+
+
+
+
+
 
 
 
@@ -554,6 +538,17 @@ namespace Website.Controllers
         [Authorize(Policy = "Account Policy")]
         public async Task<ActionResult> AddProduct(NewListProduct newListProduct)
         {
+            string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+
+            // Make sure this customer can add to this list
+            if (!await unitOfWork.Collaborators.Any(x => (x.ListId == newListProduct.ListId && x.CustomerId == customerId && x.AddToList == true) || (x.ListId == newListProduct.ListId && x.CustomerId == customerId && x.IsOwner)))
+            {
+                return Unauthorized();
+            }
+
+
+
             // Test to see if this product is already on this list
             bool isDuplicate = await IsDuplicate(newListProduct.ProductId, newListProduct.ListId);
             if (isDuplicate) return Ok(true);
@@ -569,7 +564,7 @@ namespace Website.Controllers
             emailService.SetupEmail(SetupAddedListItemEmail, new EmailSetupParams
             {
                 ListId1 = newListProduct.ListId,
-                CustomerId = User.FindFirst(ClaimTypes.NameIdentifier).Value,
+                CustomerId = customerId,
                 ProductId = newListProduct.ProductId,
                 Host = GetHost()
             });
@@ -589,6 +584,18 @@ namespace Website.Controllers
         [Authorize(Policy = "Account Policy")]
         public async Task<ActionResult> RemoveProduct(int productId, int collaboratorId, string listId)
         {
+
+            string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+
+            // Make sure this customer can add to this list
+            if (!await unitOfWork.Collaborators.Any(x => (x.ListId == listId && x.CustomerId == customerId && x.RemoveItem) || (x.ListId == listId && x.CustomerId == customerId && x.IsOwner)))
+            {
+                return Unauthorized();
+            }
+
+
+
             // Get the product to remove
             ListProduct listProduct = await unitOfWork.ListProducts.Get(x => x.ProductId == productId && x.CollaboratorId == collaboratorId);
 
@@ -620,6 +627,18 @@ namespace Website.Controllers
         [Authorize(Policy = "Account Policy")]
         public async Task<ActionResult> MoveProduct(MovedListProduct movedListProduct)
         {
+
+            string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+
+            // Make sure this customer can add to this list
+            if (!await unitOfWork.Collaborators.Any(x => (x.ListId == movedListProduct.FromListId && x.CustomerId == customerId && x.MoveItem) || (x.ListId == movedListProduct.FromListId && x.CustomerId == customerId && x.IsOwner)))
+            {
+                return Unauthorized();
+            }
+
+
+
             // Test to see if this product is already on this list
             bool isDuplicate = await IsDuplicate(movedListProduct.ProductId, movedListProduct.ToListId);
             if (isDuplicate) return Ok(true);
@@ -1001,7 +1020,7 @@ namespace Website.Controllers
             return Ok(new
             {
                 listId = list.Id,
-                ownerName = customer != null ? customer.FirstName : null,
+                ownerName = customer != null ? customer.FirstName + " " + customer.LastName : null,
                 profilePic = customer != null ? customer.Image : null,
                 listName = list.Name,
                 exists

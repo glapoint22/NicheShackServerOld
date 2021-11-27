@@ -35,6 +35,12 @@
     <Compile Remove="Migrations\20210810200120_AdditionalInfo.Designer.cs" />
     <Compile Remove="Migrations\20210810200355_AdditionalInfo.cs" />
     <Compile Remove="Migrations\20210810200355_AdditionalInfo.Designer.cs" />
+    <Compile Remove="Migrations\20211121184150_Collaborators.cs" />
+    <Compile Remove="Migrations\20211121184150_Collaborators.Designer.cs" />
+    <Compile Remove="Migrations\20211121225830_Collaborators.cs" />
+    <Compile Remove="Migrations\20211121225830_Collaborators.Designer.cs" />
+    <Compile Remove="Migrations\20211121230319_Collaborators.cs" />
+    <Compile Remove="Migrations\20211121230319_Collaborators.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

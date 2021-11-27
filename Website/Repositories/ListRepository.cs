@@ -8,7 +8,6 @@ using DataAccess.Models;
 using DataAccess.Repositories;
 using DataAccess.Classes;
 using Website.ViewModels;
-using DataAccess.ViewModels;
 
 namespace Website.Repositories
 {
@@ -29,20 +28,27 @@ namespace Website.Repositories
         public async Task<IEnumerable<ListViewModel>> GetLists(string customerId)
         {
             // Get the list ids
-            var listIds = await context.ListCollaborators
+            var listCollaborators = await context.ListCollaborators
                 .AsNoTracking()
                 .Where(x => x.CustomerId == customerId && !x.IsRemoved)
                 .Select(x => new
                 {
                     x.ListId,
-                    x.IsOwner
+                    x.IsOwner,
+                    x.AddToList,
+                    x.ShareList,
+                    x.InviteCollaborators,
+                    x.EditList,
+                    x.DeleteList,
+                    x.MoveItem,
+                    x.RemoveItem
                 })
                 .ToListAsync();
 
             // Get the list info
             var lists = await context.Lists
                 .AsNoTracking()
-                .Where(x => listIds.Select(z => z.ListId).ToList().Contains(x.Id))
+                .Where(x => listCollaborators.Select(z => z.ListId).ToList().Contains(x.Id))
                 .Select(x => new
                 {
                     x.Id,
@@ -73,7 +79,7 @@ namespace Website.Repositories
 
 
             // Returns all of the customer's lists
-            return listIds.Join(lists, x => x.ListId, x => x.Id, (x, y) => new
+            return listCollaborators.Join(lists, x => x.ListId, x => x.Id, (x, y) => new
             {
                 y.Id,
                 y.Name,
@@ -83,7 +89,14 @@ namespace Website.Repositories
                 y.CollaborateId,
                 ProfilePic = y.Owner.ProfilePic,
                 x.IsOwner,
-                y.CollaboratorCount
+                y.CollaboratorCount,
+                x.AddToList,
+                x.ShareList,
+                x.InviteCollaborators,
+                x.EditList,
+                x.DeleteList,
+                x.MoveItem,
+                x.RemoveItem
             })
                 .OrderByDescending(x => x.IsOwner)
                 .Select(x => new ListViewModel
@@ -99,13 +112,13 @@ namespace Website.Repositories
                     CollaboratorCount = x.CollaboratorCount,
                     ListPermissions = new ListPermissions
                     {
-                        AddToList = false,
-                        ShareList = false,
-                        InviteCollaborators = false,
-                        EditList = false,
-                        DeleteList = false,
-                        MoveItem = false,
-                        RemoveItem = false
+                        AddToList = x.AddToList,
+                        ShareList = x.ShareList,
+                        EditList = x.EditList,
+                        InviteCollaborators = x.InviteCollaborators,
+                        DeleteList = x.DeleteList,
+                        MoveItem = x.MoveItem,
+                        RemoveItem = x.RemoveItem
                     }
                 }).ToList();
         }
@@ -135,7 +148,7 @@ namespace Website.Repositories
                     //MinPrice = x.Product.MinPrice,
                     //MaxPrice = x.Product.MaxPrice,
                     DateAdded = x.DateAdded.ToString("MMMM dd, yyyy"),
-                    Collaborator = customerId != null ? new CollaboratorViewModel
+                    Collaborator = new CollaboratorViewModel
                     {
                         Id = x.CollaboratorId,
                         Name = x.Collaborator.CustomerId == customerId ? "you" : x.Collaborator.Customer.FirstName,
@@ -144,7 +157,7 @@ namespace Website.Repositories
                             Url = x.Collaborator.Customer.Image,
                             Name = x.Collaborator.Customer.FirstName + " " + x.Collaborator.Customer.LastName
                         }
-                    } : null,
+                    },
                     Hoplink = x.Product.Hoplink + (customerId != null ? (x.Product.Hoplink.Contains('?') ? "&" : "?") + "tid=" + x.Product.UrlId + "_" + customerId : ""),
                     Image = new ImageViewModel
                     {

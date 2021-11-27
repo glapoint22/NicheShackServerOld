@@ -393,6 +393,10 @@ namespace DataAccess.Models
                     x.IsOwner
                 })
                 .IsClustered(false);
+
+                entity.Property(e => e.AddToList).HasDefaultValue(true);
+                entity.Property(e => e.ShareList).HasDefaultValue(true);
+                entity.Property(e => e.EditList).HasDefaultValue(true);
             });
 
 
