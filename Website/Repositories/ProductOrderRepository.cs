@@ -43,18 +43,18 @@ namespace Website.Repositories
                     Discount = x.Discount,
                     Tax = x.Tax,
                     Total = x.Total,
-                    ProductUrlId = x.Product.UrlId,
                     Hoplink = x.Product.Hoplink + (x.Product.Hoplink.Contains('?') ? "&" : "?") + "tid=" + x.Product.UrlId + "_" + customerId,
-                    UrlName = x.Product.UrlName,
+                    ProductId = x.ProductId,
                     Products = x.OrderProducts
                         .Where(y => y.OrderId == x.Id)
-                        .OrderByDescending(y => y.LineItemType)
+                        .OrderByDescending(y => y.LineItemType == "ORIGINAL")
                         .Select(y => new OrderProductInfoViewModel
                         {
                             Name = y.Name,
                             Quantity = y.Quantity > 1 ? y.Quantity : 0,
                             Price = y.Price,
-                            Image = y.LineItemType == "ORIGINAL" ? new ImageViewModel { 
+                            Image = y.LineItemType == "ORIGINAL" ? new ImageViewModel
+                            {
                                 Name = y.ProductOrder.Product.Media.Name,
                                 Url = y.ProductOrder.Product.Media.Url
                             } : null,
@@ -110,15 +110,15 @@ namespace Website.Repositories
             // Returns filter options that specify a time frame (ex. Last 30 days)
             List<KeyValuePair<string, string>> filterOptions = new List<KeyValuePair<string, string>>
             {
-                new KeyValuePair<string, string>("last-30", "Last 30 days"),
-                new KeyValuePair<string, string>("6-months", "Past 6 months"),
+                new KeyValuePair<string, string>("Last 30 days", "last-30"),
+                new KeyValuePair<string, string>("Past 6 months", "6-months"),
             };
 
             // Get years when products were bought from this customer
             List<KeyValuePair<string, string>> yearOptions = await context.ProductOrders
                 .AsNoTracking()
                 .Where(x => x.CustomerId == customerId)
-                .Select(x => new KeyValuePair<string, string>("year-" + x.Date.Year.ToString(), x.Date.Year.ToString()))
+                .Select(x => new KeyValuePair<string, string>(x.Date.Year.ToString(), "year-" + x.Date.Year.ToString()))
                 .Distinct()
                 .ToListAsync();
 

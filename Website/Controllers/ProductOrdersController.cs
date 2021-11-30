@@ -31,26 +31,45 @@ namespace Website.Controllers
 
 
 
+
+
+        // ..................................................................................Get Filters.....................................................................
+        [HttpGet]
+        [Authorize(Policy = "Account Policy")]
+        [Route("Filters")]
+        public async Task<ActionResult> GetFilters()
+        {
+            var filters = await unitOfWork.ProductOrders.GetOrderFilters(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
+            return Ok(filters
+                .Select(x => new
+                {
+                    key = x.Key,
+                    value = x.Value
+                }).ToList());
+        }
+
+
+
         // ..................................................................................Get Orders.....................................................................
         [HttpGet]
         [Authorize(Policy = "Account Policy")]
-        public async Task<ActionResult> GetOrders(string filter = "last-30", string search = "")
+        public async Task<ActionResult> GetOrders(string filter = "last-30", string orderSearch = "")
         {
             // Get the customer id from the claims
             string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
             // If there are search words
-            if (search != string.Empty)
+            if (orderSearch != string.Empty && orderSearch != null)
             {
                 // This will search for orders with an order id
-                var orders = await unitOfWork.ProductOrders.GetOrders(customerId, filter, search);
+                var orders = await unitOfWork.ProductOrders.GetOrders(customerId, filter, orderSearch);
                 if (orders.Count() > 0)
                 {
                     // Return an order with the given order id
                     return Ok(new
                     {
-                        orders,
-                        displayType = "order"
+                        orders
                     });
                 }
                 else
@@ -58,8 +77,7 @@ namespace Website.Controllers
                     // Search for products in orders
                     return Ok(new
                     {
-                        products = await unitOfWork.ProductOrders.GetOrderProducts(customerId, search),
-                        displayType = "product"
+                        products = await unitOfWork.ProductOrders.GetOrderProducts(customerId, orderSearch)
                     });
                 }
             }
@@ -70,9 +88,7 @@ namespace Website.Controllers
             // Return orders based on a time frame
             return Ok(new
             {
-                orders = await unitOfWork.ProductOrders.GetOrders(customerId, filter),
-                filters = await unitOfWork.ProductOrders.GetOrderFilters(customerId),
-                displayType = "order"
+                orders = await unitOfWork.ProductOrders.GetOrders(customerId, filter)
             });
         }
 
