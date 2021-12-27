@@ -42,7 +42,7 @@ namespace Services.Classes
             .Select(x => new Image
             {
                 Name = x.Name,
-                Url = x.Url
+                Url = x.Image
             })
             .SingleOrDefaultAsync();
 

@@ -760,7 +760,7 @@ namespace Website.Controllers
                 .Select(x => new ProductData
                 {
                     Name = x.Name,
-                    Image = x.Media.Url,
+                    Image = x.Media.Image,
                     Url = host + "/" + x.UrlName + "/" + x.UrlId
 
                 }).SingleAsync();

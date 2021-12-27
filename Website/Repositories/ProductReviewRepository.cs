@@ -6,6 +6,7 @@ using DataAccess.Models;
 using DataAccess.Repositories;
 using DataAccess.Classes;
 using Website.ViewModels;
+using System;
 
 namespace Website.Repositories
 {
@@ -22,21 +23,48 @@ namespace Website.Repositories
 
 
         // ..................................................................................Get Reviews.....................................................................
-        public async Task<IEnumerable<ProductReviewViewModel>> GetReviews(string productId, string sortBy, int page)
+        public async Task<IEnumerable<ProductReviewViewModel>> GetReviews(string productId, string sortBy, int page, string filterBy)
         {
-            ProductReviewViewModel productReviewDTO = new ProductReviewViewModel(sortBy);
+            ProductReviewViewModel productReview = new ProductReviewViewModel(sortBy, filterBy);
 
             return await context.ProductReviews
                 .AsNoTracking()
-                .OrderBy(productReviewDTO)
+                .OrderBy(productReview)
                 .ThenByDescending(x => x.Date)
                 .Where(x => x.Product.UrlId == productId && !x.Deleted)
+                .Where(productReview)
                 .Select<ProductReview, ProductReviewViewModel>()
-                .Skip((page - 1) * productReviewDTO.GetReviewsPerPage())
-                .Take(productReviewDTO.GetReviewsPerPage())
+                .Skip((page - 1) * productReview.GetReviewsPerPage())
+                .Take(productReview.GetReviewsPerPage())
                 .ToListAsync();
         }
 
+
+
+
+        // ..................................................................................Get Page Count.....................................................................
+        public async Task<double> GetTotalReviews(string productId, string filterBy)
+        {
+            double totalReviews = 0;
+            ProductReviewViewModel productReview = new ProductReviewViewModel(null, filterBy);
+
+            if (filterBy != null)
+            {
+                totalReviews = await context.ProductReviews
+                .AsNoTracking()
+                .Where(x => x.Product.UrlId == productId && !x.Deleted)
+                .Where(productReview)
+                .CountAsync();
+            }
+            else
+            {
+                totalReviews = await context.ProductReviews
+                    .AsNoTracking()
+                    .CountAsync(x => x.Product.UrlId == productId);
+            }
+
+            return totalReviews;
+        }
 
 
 

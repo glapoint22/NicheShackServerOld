@@ -33,6 +33,7 @@ namespace Website.Repositories
         IRepository<PageReferenceItem> PageReferenceItems { get; }
         IRepository<ProductPrice> ProductPrices { get; }
         IRepository<ProductAdditionalInfo> AdditionalInfo { get; }
+        IRepository<Subproduct> Subproducts { get; }
 
 
         Task<int> Save();

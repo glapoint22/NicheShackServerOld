@@ -78,7 +78,7 @@ namespace Manager.Repositories
                         Name = x.Vendor.Name
                     },
                     Rating = x.Rating,
-                    IsMultiPrice = x.IsMultiPrice,
+                    //IsMultiPrice = x.IsMultiPrice,
                     TotalReviews = x.TotalReviews,
                     Hoplink = x.Hoplink,
                     Description = x.Description,
@@ -86,7 +86,7 @@ namespace Manager.Repositories
                     {
                         Id = x.Media.Id,
                         Name = x.Media.Name,
-                        Url = x.Media.Url
+                        Url = x.Media.Image
                     }
                 }).SingleOrDefaultAsync();
 
@@ -102,7 +102,7 @@ namespace Manager.Repositories
                      {
                          Id = x.Media.Id,
                          Name = x.Media.Name,
-                         Url = x.Media.Url
+                         Url = x.Media.Image
                      },
                      Header = x.Header,
                      Quantity = x.Quantity,
@@ -164,8 +164,8 @@ namespace Manager.Repositories
                     ItemId = y.Id,
                     Id = y.Media.Id,
                     Name = y.Media.Name,
-                    Url = y.Media.Url,
-                    Thumbnail = y.Media.Thumbnail,
+                    Url = y.Media.Image,
+                    Thumbnail = y.Media.Video,
                     Type = y.Media.Type
                 })
                 .ToListAsync();

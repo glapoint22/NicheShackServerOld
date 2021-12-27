@@ -29,8 +29,8 @@ namespace Manager.ViewModels
                 {
                     Id = m.Media.Id,
                     Name = m.Media.Name,
-                    Url = m.Media.Url,
-                    Thumbnail = m.Media.Thumbnail,
+                    Url = m.Media.Image,
+                    Thumbnail = m.Media.Video,
                     Type = m.Media.Type
                 }),
                 Type = x.Type

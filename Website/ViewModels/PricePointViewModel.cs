@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace Website.ViewModels
 {
-    public class ProductPriceViewModel
+    public class PricePointViewModel
     {
-        public int Id { get; set; }
         public ImageViewModel Image { get; set; }
         public string Header { get; set; }
         public string Quantity { get; set; }

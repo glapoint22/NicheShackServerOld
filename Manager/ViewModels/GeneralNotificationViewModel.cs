@@ -24,7 +24,7 @@ namespace Manager.ViewModels
                 Notes = notificationViewModel.Notes,
                 ProductId = x.Product.Id,
                 ProductName = x.Product.Name,
-                ProductThumbnail = x.Product.Media.Url,
+                ProductThumbnail = x.Product.Media.Image,
                 VendorId = x.Product.VendorId,
                 Hoplink = x.Product.Hoplink,
                 Type = x.Type

@@ -294,7 +294,7 @@ namespace Manager.Controllers
                 icon = new
                 {
                     name = x.Media.Name,
-                    url = x.Media.Url
+                    url = x.Media.Image
                 }
             }));
         }
@@ -315,7 +315,7 @@ namespace Manager.Controllers
                 icon = new
                 {
                     name = x.Media.Name,
-                    url = x.Media.Url
+                    url = x.Media.Image
                 }
             }));
         }
@@ -380,7 +380,7 @@ namespace Manager.Controllers
             {
                 Id = x.Id,
                 Name = x.Name,
-                Url = x.Url
+                Url = x.Image
             }));
         }
     }

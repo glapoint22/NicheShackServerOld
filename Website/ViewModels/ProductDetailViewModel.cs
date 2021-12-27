@@ -9,17 +9,23 @@ namespace Website.ViewModels
     public class ProductDetailViewModel : IQueryableSelect<Product, ProductDetailViewModel>
     {
         public int Id { get; set; }
+        public int NicheId { get; set; }
         public string UrlId { get; set; }
         public string Name { get; set; }
         public string UrlName { get; set; }
         public double Rating { get; set; }
         public int TotalReviews { get; set; }
-        //public double MinPrice { get; set; }
-        //public double MaxPrice { get; set; }
-
-        public IEnumerable<ProductPriceViewModel> Price { get; set; }
+        public double MinPrice { get; set; }
+        public double MaxPrice { get; set; }
+        public IEnumerable<MediaViewModel> Media { get; set; }
+        public IEnumerable<SubproductViewModel> Components { get; set; }
+        public IEnumerable<SubproductViewModel> Bonuses { get; set; }
+        public IEnumerable<PricePointViewModel> PricePoints { get; set; }
         public IEnumerable<AdditionalInfoViewModel> AdditionalInfo { get; set; }
-        public bool IsMultiPrice { get; set; }
+        public ProductGroupViewModel RelatedProducts { get; set; }
+
+
+        //public bool IsMultiPrice { get; set; }
 
         public string Description { get; set; }
         public string Hoplink { get; set; }
@@ -44,7 +50,7 @@ namespace Website.ViewModels
                 UrlName = x.UrlName,
                 Rating = x.Rating,
                 TotalReviews = x.TotalReviews,
-                IsMultiPrice = x.IsMultiPrice,
+                //IsMultiPrice = x.IsMultiPrice,
                 Hoplink = x.Hoplink,
                 Description = x.Description,
                 OneStar = x.OneStar,

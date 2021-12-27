@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Services;
 using Services.Classes;
-using Services.Interfaces;
 using Website.Repositories;
 using Website.ViewModels;
 
@@ -19,81 +18,38 @@ namespace Website.Controllers
     {
         private readonly IUnitOfWork unitOfWork;
         private readonly SearchSuggestionsService searchSuggestionsService;
-        private readonly IPageService pageService;
+        private readonly QueryService queryService;
 
-        public ProductsController(IUnitOfWork unitOfWork, SearchSuggestionsService searchSuggestionsService, IPageService pageService)
+        public ProductsController(IUnitOfWork unitOfWork, SearchSuggestionsService searchSuggestionsService, QueryService queryService)
         {
             this.unitOfWork = unitOfWork;
             this.searchSuggestionsService = searchSuggestionsService;
-            this.pageService = pageService;
+            this.queryService = queryService;
         }
 
 
-
         // ..................................................................................Get Product.....................................................................
-        [Route("Product")]
         [HttpGet]
-        public async Task<ActionResult> Get(string id)
+        public async Task<ActionResult> GetProduct(string id)
         {
-
-            var product = await unitOfWork.Products.Get(x => x.UrlId == id, x => new ProductDetailViewModel
+            ProductDetailViewModel product = await unitOfWork.Products.Get(x => x.UrlId == id, x => new ProductDetailViewModel
             {
                 Id = x.Id,
-                UrlId = x.UrlId,
                 Name = x.Name,
+                UrlName = x.UrlName,
+                UrlId = x.UrlId,
                 Rating = x.Rating,
                 TotalReviews = x.TotalReviews,
+                MinPrice = x.MinPrice,
+                MaxPrice = x.MaxPrice,
                 OneStar = x.OneStar,
                 TwoStars = x.TwoStars,
                 ThreeStars = x.ThreeStars,
                 FourStars = x.FourStars,
-                FiveStars = x.FiveStars
+                FiveStars = x.FiveStars,
+                Description = x.Description,
+                NicheId = x.NicheId
             });
-
-            var mediaId = await unitOfWork.ProductMedia.Get(x => x.ProductId == product.Id, x => x.MediaId);
-
-            product.Image = await unitOfWork.Media.Get(x => x.Id == mediaId, x => new ImageViewModel
-            {
-                Name = x.Name,
-                Url = x.Url
-            });
-
-
-
-
-
-            return Ok(product);
-        }
-
-
-
-        // ..................................................................................Get Media.....................................................................
-        public async Task<IEnumerable<ProductMediaViewModel>> GetMedia(int id)
-        {
-            return await unitOfWork.ProductMedia.GetCollection(x => x.ProductId == id, x => new ProductMediaViewModel
-            {
-                name = x.Media.Name,
-                url = x.Media.Url,
-                thumbnail = x.Media.Thumbnail,
-                type = x.Media.Type
-            });
-        }
-
-
-
-
-
-
-
-        // ..................................................................................Get Product Detail.....................................................................
-        [Route("ProductDetail")]
-        [HttpGet]
-        public async Task<ActionResult> GetProductDetail(string id)
-        {
-            // Get the product based on the id
-            ProductDetailViewModel product = await unitOfWork.Products.Get<ProductDetailViewModel>(x => x.UrlId == id);
-
-
 
 
 
@@ -134,37 +90,57 @@ namespace Website.Controllers
                 });
 
 
-                // Set the query params
-                QueryParams queryParams = new QueryParams();
-                queryParams.Cookies = Request.Cookies.ToList();
-                queryParams.ProductId = product.Id;
+                
 
 
-                // Set the page stuff
-                string pageContent = null;
-                int pageId = await unitOfWork.PageReferenceItems.Get(x => x.ItemId == product.Id, x => x.PageId);
 
-                if (pageId > 0)
+                // Subproducts
+                var subproducts = await unitOfWork.Subproducts.GetCollection(x => x.ProductId == product.Id, x => new
                 {
-                    pageContent = await unitOfWork.Pages.Get(x => x.Id == pageId && x.DisplayType == (int)PageDisplayType.Product, x => x.Content);
-                }
-
-                if (pageContent == null)
-                {
-                    pageContent = await unitOfWork.Pages.Get(x => x.DisplayType == (int)PageDisplayType.DefaultProduct, x => x.Content);
-                }
-
-
-
-                // Price
-                product.Price = await unitOfWork.ProductPrices.GetCollection(x => x.ProductId == product.Id, x => new ProductPriceViewModel
-                {
-                    Id = x.Id,
+                    Name = x.Name,
+                    Description = x.Description,
                     Image = new ImageViewModel
                     {
-                        Id = x.Media.Id,
                         Name = x.Media.Name,
-                        Url = x.Media.Url
+                        Url = x.Media.Image
+                    },
+                    Value = x.Value,
+                    Type = x.Type
+                });
+
+
+                if(subproducts.Count() > 0)
+                {
+                    product.Components = subproducts
+                    .Where(x => x.Type == 0)
+                    .Select(x => new SubproductViewModel
+                    {
+                        Name = x.Name,
+                        Description = x.Description,
+                        Image = x.Image,
+                        Value = x.Value
+                    });
+
+                    product.Bonuses = subproducts
+                        .Where(x => x.Type == 1)
+                        .Select(x => new SubproductViewModel
+                        {
+                            Name = x.Name,
+                            Description = x.Description,
+                            Image = x.Image,
+                            Value = x.Value
+                        });
+                }
+                
+
+
+                // Price Points
+                product.PricePoints = await unitOfWork.ProductPrices.GetCollection(x => x.ProductId == product.Id, x => new PricePointViewModel
+                {
+                    Image = new ImageViewModel
+                    {
+                        Name = x.Media.Name,
+                        Url = x.Media.Image
                     },
                     Header = x.Header,
                     Quantity = x.Quantity,
@@ -192,7 +168,7 @@ namespace Website.Controllers
 
 
 
-
+                // Additional Info
                 product.AdditionalInfo = await unitOfWork.AdditionalInfo.GetCollection(x => x.ProductId == product.Id, z => new AdditionalInfoViewModel
                 {
                     Id = z.Id,
@@ -209,40 +185,39 @@ namespace Website.Controllers
                 });
 
 
-                var productData = new
-                {
-                    productInfo = new
-                    {
-                        product,
-                        media = await GetMedia(product.Id)
-                    },
-                    //content = await unitOfWork.ProductContent.GetCollection(x => x.ProductId == product.Id, x => new
-                    //{
-                    //    Icon = new
-                    //    {
-                    //        x.Media.Name,
-                    //        x.Media.Url
-                    //    },
-                    //    x.Name,
-                    //    PriceIndices = x.PriceIndices
-                    //    .OrderBy(y => y.Index)
-                    //    .Select(y => y.Index)
-                    //    .ToList()
-                    //}),
-                    pageContent = await pageService.GePage(pageContent, queryParams),
-                    //pricePoints = await unitOfWork.PricePoints.GetCollection(x => x.Index, x => x.ProductId == product.Id, y => new
-                    //{
-                    //    y.TextBefore,
-                    //    y.WholeNumber,
-                    //    y.Decimal,
-                    //    y.TextAfter
-                    //})
-                };
 
-                return Ok(productData);
+
+                // Media
+                product.Media = await unitOfWork.ProductMedia.GetCollection(x => x.ProductId == product.Id, x => new MediaViewModel
+                {
+                    Name = x.Media.Name,
+                    Video = x.Media.Video,
+                    Image = x.Media.Image,
+                    Type = x.Media.Type
+                });
+
+
+
+                // Related Products
+                QueryParams queryParams = new QueryParams();
+                Query query = new Query();
+                query.IntValue = 2;
+                query.QueryType = QueryType.Auto;
+                queryParams.Queries = new List<Query> { query };
+                queryParams.ProductId = product.Id;
+                queryParams.Limit = 24;
+                queryParams.UsesFilters = false;
+                string nicheName = await unitOfWork.Niches.Get(x => x.Id == product.NicheId, x => x.Name);
+
+                product.RelatedProducts = new ProductGroupViewModel();
+                product.RelatedProducts.Caption = "More related " + nicheName + " products"; ;
+                product.RelatedProducts.Products = await queryService.GetProductGroup(queryParams);
+
+
+                return Ok(product);
             }
 
-            return NotFound();
+            return Ok();
         }
 
 

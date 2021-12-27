@@ -35,9 +35,17 @@ namespace Website.Controllers
 
         // ..................................................................................Get Reviews.....................................................................
         [HttpGet]
-        public async Task<ActionResult> GetReviews(string productId, int page, string sortBy = "")
+        public async Task<ActionResult> GetReviews(string productId, int page, string sortBy, string filterBy)
         {
-            return Ok(await unitOfWork.ProductReviews.GetReviews(productId, sortBy, page));
+
+            double totalReviews = await unitOfWork.ProductReviews.GetTotalReviews(productId, filterBy);
+
+            return Ok(new
+            {
+                reviews = await unitOfWork.ProductReviews.GetReviews(productId, sortBy, page, filterBy),
+                totalReviews,
+                pageCount = Math.Max(1, Math.Ceiling((double)(totalReviews / 10f)))
+            });
         }
 
 
@@ -94,7 +102,7 @@ namespace Website.Controllers
                 image = new
                 {
                     name = x.Media.Name,
-                    url = x.Media.Url
+                    url = x.Media.Image
                 }
             });
 
@@ -222,7 +230,7 @@ namespace Website.Controllers
                 .Select(x => new ProductData
                 {
                     Name = x.Name,
-                    Image = x.Media.Url,
+                    Image = x.Media.Image,
                     Url = emailSetupParams.Host + "/" + x.UrlName + "/" + x.UrlId
                 }).SingleAsync();
 
@@ -275,7 +283,7 @@ namespace Website.Controllers
             return await context.Media
                 .AsNoTracking()
                 .Where(x => x.Name == imageName)
-                .Select(x => x.Url)
+                .Select(x => x.Image)
                 .SingleAsync();
 
         }

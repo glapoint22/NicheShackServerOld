@@ -606,7 +606,7 @@ namespace Manager.Controllers
         {
             Product product = await unitOfWork.Products.Get(x => x.Id == productItem.ProductId);
 
-            product.IsMultiPrice = productItem.IsMultiPrice;
+            //product.IsMultiPrice = productItem.IsMultiPrice;
 
             // Update and save
             unitOfWork.Products.Update(product);

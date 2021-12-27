@@ -63,7 +63,7 @@ namespace Manager.Controllers
             Media media = new Media
             {
                 Name = "",
-                Url = imageUrl,
+                Image = imageUrl,
                 Type = type
             };
 
@@ -75,7 +75,7 @@ namespace Manager.Controllers
             return Ok(new
             {
                 id = media.Id,
-                url = media.Url
+                url = media.Image
             });
         }
 
@@ -118,11 +118,11 @@ namespace Manager.Controllers
             // Delete the old image
             string wwwroot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
             string imagesFolder = Path.Combine(wwwroot, "images");
-            string filePath = Path.Combine(imagesFolder, media.Url);
+            string filePath = Path.Combine(imagesFolder, media.Image);
             System.IO.File.Delete(filePath);
 
             // Update the url
-            media.Url = imageUrl;
+            media.Image = imageUrl;
 
             // Update and save
             unitOfWork.Media.Update(media);
@@ -185,8 +185,8 @@ namespace Manager.Controllers
             Media media = new Media
             {
                 Name = "",
-                Url = video.Url,
-                Thumbnail = video.Thumbnail,
+                Image = video.Image,
+                Video = video.Video,
                 Type = (int)MediaType.Video
             };
 
@@ -197,8 +197,8 @@ namespace Manager.Controllers
             return Ok(new
             {
                 id = media.Id,
-                url = media.Url,
-                thumbnail = media.Thumbnail
+                url = media.Image,
+                thumbnail = media.Video
             });
         }
 
@@ -217,15 +217,15 @@ namespace Manager.Controllers
             // Delete the old thumbnail
             string wwwroot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
             string imagesFolder = Path.Combine(wwwroot, "images");
-            System.IO.File.Delete(Path.Combine(imagesFolder, media.Thumbnail));
+            System.IO.File.Delete(Path.Combine(imagesFolder, media.Video));
 
 
             // Get the updated video
             Media updatedVideo = await GetVideo(video.Name);
 
             // Update the new properties
-            media.Url = updatedVideo.Url;
-            media.Thumbnail = updatedVideo.Thumbnail;
+            media.Image = updatedVideo.Image;
+            media.Video = updatedVideo.Video;
 
 
             // Update & save
@@ -234,8 +234,8 @@ namespace Manager.Controllers
 
             return Ok(new
             {
-                url = media.Url,
-                thumbnail = media.Thumbnail
+                url = media.Image,
+                thumbnail = media.Video
             });
         }
 
@@ -325,8 +325,8 @@ namespace Manager.Controllers
 
             Media media = new Media
             {
-                Url = videoUrl,
-                Thumbnail = thumbnail,
+                Image = videoUrl,
+                Video = thumbnail,
                 Type = (int)MediaType.Video
             };
 

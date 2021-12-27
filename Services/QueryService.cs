@@ -106,14 +106,14 @@ namespace Services
                 urlName = x.UrlName,
                 rating = x.Rating,
                 totalReviews = x.TotalReviews,
-                //minPrice = x.MinPrice,
-                //maxPrice = x.MaxPrice,
+                minPrice = x.MinPrice,
+                maxPrice = x.MaxPrice,
                 nicheId = x.NicheId,
                 date = x.Date,
                 image = new Image
                 {
                     Name = x.Media.Name,
-                    Url = x.Media.Url
+                    Url = x.Media.Image
                 },
                 mediaCount = x.ProductMedia.Count()
             });
@@ -165,8 +165,8 @@ namespace Services
                 UrlName = product.urlName,
                 NicheId = product.nicheId,
                 TotalReviews = product.totalReviews,
-                //MinPrice = product.minPrice,
-                //MaxPrice = product.maxPrice,
+                MinPrice = product.minPrice,
+                MaxPrice = product.maxPrice,
                 Image = product.image,
                 Rating = product.rating,
                 Date = product.date,
@@ -386,11 +386,11 @@ namespace Services
                 queryParams.PriceFilter = null;
 
                 // Query products without the price filter
-                //var prods = await GetProducts(queryParams, x => new
-                //{
-                //    x.MinPrice,
-                //    x.MaxPrice
-                //});
+                var prods = await GetProducts(queryParams, x => new
+                {
+                    x.MinPrice,
+                    x.MaxPrice
+                });
 
                 // Get the selected price filter options
                 var selectedPriceFilterOptions = priceFilter.Options
@@ -406,21 +406,21 @@ namespace Services
 
 
                 // Get the price filter options based on the queried products
-                //priceFilterOptions =
-                //(from pr in priceRanges
-                // from p in prods
-                // orderby pr.Id
-                // where ((p.MinPrice >= pr.Min && p.MinPrice < pr.Max) || selectedPriceFilterOptions.Contains(new
-                // {
-                //     min = pr.Min,
-                //     max = pr.Max
-                // }))
-                // select new PriceFilterOption
-                // {
-                //     Label = pr.Label,
-                //     Min = pr.Min,
-                //     Max = pr.Max
-                // }).ToList();
+                priceFilterOptions =
+                (from pr in priceRanges
+                 from p in prods
+                 orderby pr.Id
+                 where ((p.MinPrice >= pr.Min && p.MinPrice < pr.Max) || selectedPriceFilterOptions.Contains(new
+                 {
+                     min = pr.Min,
+                     max = pr.Max
+                 }))
+                 select new PriceFilterOption
+                 {
+                     Label = pr.Label,
+                     Min = pr.Min,
+                     Max = pr.Max
+                 }).ToList();
 
 
                 queryParams.PriceFilter = priceFilter;

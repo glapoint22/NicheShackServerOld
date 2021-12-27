@@ -97,6 +97,8 @@ namespace DataAccess.Models
 
 
         public virtual DbSet<Subgroup> Subgroups { get; set; }
+
+        public virtual DbSet<Subproduct> Subproducts { get; set; }
         public virtual DbSet<SubgroupProduct> SubgroupProducts { get; set; }
 
         public virtual DbSet<Vendor> Vendors { get; set; }
@@ -570,7 +572,7 @@ namespace DataAccess.Models
                 })
                 .IsClustered(false);
 
-                entity.Property(e => e.IsMultiPrice).HasDefaultValue(false);
+                //entity.Property(e => e.IsMultiPrice).HasDefaultValue(false);
             });
 
 
@@ -659,6 +661,13 @@ namespace DataAccess.Models
                 })
                 .IsClustered(false);
             });
+
+
+
+
+
+
+            
 
 
 
@@ -801,6 +810,23 @@ namespace DataAccess.Models
                 entity
                 .HasIndex(x => x.SubgroupId)
                 .IncludeProperties(x => x.ProductId)
+                .IsClustered(false);
+            });
+
+
+            // Subproducts
+            modelBuilder.Entity<Subproduct>(entity =>
+            {
+                entity
+                .HasIndex(x => x.ProductId)
+                .IncludeProperties(x => new
+                {
+                    x.ImageId,
+                    x.Name,
+                    x.Description,
+                    x.Value,
+                    x.Type
+                })
                 .IsClustered(false);
             });
         }

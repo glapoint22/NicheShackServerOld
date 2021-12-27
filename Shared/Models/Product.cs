@@ -36,7 +36,11 @@ namespace DataAccess.Models
         public int FourStars { get; set; }
         public int FiveStars { get; set; }
         public DateTime Date { get; set; }
-        public bool IsMultiPrice { get; set; }
+        //public bool IsMultiPrice { get; set; }
+        public double MinPrice { get; set; }
+        public double MaxPrice { get; set; }
+
+
         public virtual Niche Niche { get; set; }
         public virtual Media Media { get; set; }
         public virtual  Vendor Vendor { get; set; }
@@ -52,6 +56,7 @@ namespace DataAccess.Models
         public virtual ICollection<SubgroupProduct> SubgroupProducts { get; set; }
         public virtual ICollection<KeywordGroup_Belonging_To_Product> KeywordGroups_Belonging_To_Product { get; set; }
         public virtual ICollection<ProductAdditionalInfo> ProductAdditionalInfo { get; set; }
+        public virtual ICollection<Subproduct> Subproducts { get; set; }
 
 
 
@@ -70,6 +75,7 @@ namespace DataAccess.Models
             SubgroupProducts = new HashSet<SubgroupProduct>();
             KeywordGroups_Belonging_To_Product = new HashSet<KeywordGroup_Belonging_To_Product>();
             ProductAdditionalInfo = new HashSet<ProductAdditionalInfo>();
+            Subproducts = new HashSet<Subproduct>();
         }
     }
 }

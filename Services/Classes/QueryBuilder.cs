@@ -278,11 +278,11 @@ namespace Services.Classes
                 }
 
                 // Loop through the price ranges and add them to the query
-                //foreach (string priceRange in priceRanges)
-                //{
-                //    var priceRangeArray = priceRange.Split('-').Select(x => double.Parse(x)).OrderBy(x => x).ToArray();
-                //    priceRangeQueries.Add(x => x.MinPrice >= priceRangeArray[0] && x.MinPrice <= priceRangeArray[1]);
-                //}
+                foreach (string priceRange in priceRanges)
+                {
+                    var priceRangeArray = priceRange.Split('-').Select(x => double.Parse(x)).OrderBy(x => x).ToArray();
+                    priceRangeQueries.Add(x => x.MinPrice >= priceRangeArray[0] && x.MinPrice <= priceRangeArray[1]);
+                }
 
                 source = source.WhereAny(priceRangeQueries.ToArray());
                 hasWhere = true;

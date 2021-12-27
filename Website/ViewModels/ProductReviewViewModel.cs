@@ -5,15 +5,16 @@ using DataAccess.Models;
 
 namespace Website.ViewModels
 {
-    public class ProductReviewViewModel : IQueryableSelect<ProductReview, ProductReviewViewModel>, IQueryableOrderBy<ProductReview>
+    public class ProductReviewViewModel : IQueryableSelect<ProductReview, ProductReviewViewModel>, IQueryableOrderBy<ProductReview>, IWhere<ProductReview>
     {
         private readonly string orderBy;
+        private readonly string filterBy;
 
         public int Id { get; set; }
         public string Title { get; set; }
         public double Rating { get; set; }
         public string Username { get; set; }
-        public string UserImage { get; set; }
+        public ImageViewModel ProfileImage { get; set; }
         public string Date { get; set; }
         public bool IsVerified { get; set; }
         public string Text { get; set; }
@@ -26,9 +27,10 @@ namespace Website.ViewModels
         // Constructors
         public ProductReviewViewModel() { }
 
-        public ProductReviewViewModel(string orderBy)
+        public ProductReviewViewModel(string orderBy, string filterBy)
         {
             this.orderBy = orderBy;
+            this.filterBy = filterBy;
         }
 
 
@@ -68,7 +70,11 @@ namespace Website.ViewModels
                 ProductId = x.ProductId,
                 Rating = x.Rating,
                 Username = x.Customer.ReviewName,
-                UserImage = x.Customer.Image,
+                ProfileImage = new ImageViewModel
+                {
+                    Name = x.Customer.ReviewName,
+                    Url = x.Customer.Image
+                },
                 Date = x.Date.ToString("MMMM dd, yyyy"),
                 IsVerified = x.Product.ProductOrders.Count(z => z.CustomerId == x.CustomerId && z.ProductId == x.ProductId) > 0,
                 Text = x.Text,
@@ -88,15 +94,15 @@ namespace Website.ViewModels
 
             switch (orderBy)
             {
-                case "low-high-rating":
+                case "low-to-high":
                     orderResult = source.OrderBy(x => x.Rating);
                     break;
 
-                case "new-old":
+                case "newest-to-oldest":
                     orderResult = source.OrderByDescending(x => x.Date);
                     break;
 
-                case "old-new":
+                case "oldest-to-newest":
                     orderResult = source.OrderBy(x => x.Date);
                     break;
 
@@ -111,6 +117,43 @@ namespace Website.ViewModels
             }
 
             return orderResult;
+        }
+
+
+
+
+        // ..................................................................................Set Where.....................................................................
+        public IQueryable<ProductReview> SetWhere(IQueryable<ProductReview> source)
+        {
+            switch (filterBy)
+            {
+                case "five-stars":
+                    source = source.Where(x => x.Rating == 5);
+                    break;
+                case "four-stars":
+                    source = source.Where(x => x.Rating == 4);
+                    break;
+
+                case "three-stars":
+                    source = source.Where(x => x.Rating == 3);
+                    break;
+
+
+                case "two-stars":
+                    source = source.Where(x => x.Rating == 2);
+                    break;
+
+
+                case "one-star":
+                    source = source.Where(x => x.Rating == 1);
+                    break;
+
+                default:
+                    source = source.Where(x => x.Rating > 0);
+                    break;
+            }
+
+            return source;
         }
     }
 }

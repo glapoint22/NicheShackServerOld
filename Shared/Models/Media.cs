@@ -12,16 +12,19 @@ namespace DataAccess.Models
         public string Name { get; set; }
         [Required]
         [MaxLength(256)]
-        public string Url { get; set; }
+        public string Image { get; set; }
         [MaxLength(256)]
-        public string Thumbnail { get; set; }
+        public string Video { get; set; }
         [Required]
         public int Type { get; set; }
+
+
         public virtual ICollection<Product> Products { get; set; }
         public virtual ICollection<ProductMedia> ProductMedia { get; set; }
         public virtual ICollection<ProductPrice> ProductPrices { get; set; }
         public virtual ICollection<Category> Categtories { get; set; }
         public virtual ICollection<Niche> Niches { get; set; }
+        public virtual ICollection<Subproduct> Subproducts { get; set; }
 
 
         public Media()
@@ -31,6 +34,7 @@ namespace DataAccess.Models
             ProductPrices = new HashSet<ProductPrice>();
             Categtories = new HashSet<Category>();
             Niches = new HashSet<Niche>();
+            Subproducts = new HashSet<Subproduct>();
         }
     }
 }

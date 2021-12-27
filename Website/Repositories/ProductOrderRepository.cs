@@ -56,7 +56,7 @@ namespace Website.Repositories
                             Image = y.LineItemType == "ORIGINAL" ? new ImageViewModel
                             {
                                 Name = y.ProductOrder.Product.Media.Name,
-                                Url = y.ProductOrder.Product.Media.Url
+                                Url = y.ProductOrder.Product.Media.Image
                             } : null,
                             RebillFrequency = y.RebillFrequency,
                             RebillAmount = y.RebillAmount,
@@ -92,7 +92,7 @@ namespace Website.Repositories
                     Image = x.LineItemType == "ORIGINAL" ? new ImageViewModel
                     {
                         Name = x.ProductOrder.Product.Media.Name,
-                        Url = x.ProductOrder.Product.Media.Url
+                        Url = x.ProductOrder.Product.Media.Image
                     } : new ImageViewModel { },
                     Hoplink = x.ProductOrder.Product.Hoplink + (x.ProductOrder.Product.Hoplink.Contains('?') ? "&" : "?") + "tid=" + x.ProductOrder.Product.UrlId + "_" + customerId,
                     OrderNumber = x.OrderId,

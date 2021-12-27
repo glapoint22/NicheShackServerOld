@@ -144,9 +144,8 @@ namespace Website.Repositories
                     Title = x.Product.Name,
                     Rating = x.Product.Rating,
                     TotalReviews = x.Product.TotalReviews,
-                    Prices = x.Product.ProductPrices.Select(z => z.Price).ToList(),
-                    //MinPrice = x.Product.MinPrice,
-                    //MaxPrice = x.Product.MaxPrice,
+                    MinPrice = x.Product.MinPrice,
+                    MaxPrice = x.Product.MaxPrice,
                     DateAdded = x.DateAdded.ToString("MMMM dd, yyyy"),
                     Collaborator = new CollaboratorViewModel
                     {
@@ -162,7 +161,7 @@ namespace Website.Repositories
                     Image = new ImageViewModel
                     {
                         Name = x.Product.Media.Name,
-                        Url = x.Product.Media.Url
+                        Url = x.Product.Media.Image
                     },
                     UrlTitle = x.Product.UrlName
                 })
@@ -175,8 +174,8 @@ namespace Website.Repositories
                 Title = x.Title,
                 Rating = x.Rating,
                 TotalReviews = x.TotalReviews,
-                MinPrice = 22.22,//x.Prices.Min(),
-                MaxPrice = 0,//x.Prices.Max(),
+                MinPrice = x.MinPrice,
+                MaxPrice = x.MaxPrice,
                 DateAdded = x.DateAdded,
                 Collaborator = x.Collaborator,
                 Hoplink = x.Hoplink,
