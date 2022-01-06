@@ -33,7 +33,7 @@ namespace Manager.Controllers
         [HttpGet]
         public async Task<ActionResult> Get(int type)
         {
-            return Ok(await unitOfWork.Media.GetCollection<MediaViewModel>(x => x.Type == type));
+            return Ok(await unitOfWork.Media.GetCollection<MediaViewModel>(x => x.MediaType == type));
         }
 
 
@@ -64,7 +64,7 @@ namespace Manager.Controllers
             {
                 Name = "",
                 Image = imageUrl,
-                Type = type
+                MediaType = type
             };
 
 
@@ -186,8 +186,8 @@ namespace Manager.Controllers
             {
                 Name = "",
                 Image = video.Image,
-                Video = video.Video,
-                Type = (int)MediaType.Video
+                VideoId = video.VideoId,
+                MediaType = (int)MediaType.Video
             };
 
             unitOfWork.Media.Add(media);
@@ -198,7 +198,7 @@ namespace Manager.Controllers
             {
                 id = media.Id,
                 url = media.Image,
-                thumbnail = media.Video
+                thumbnail = media.VideoId
             });
         }
 
@@ -217,7 +217,7 @@ namespace Manager.Controllers
             // Delete the old thumbnail
             string wwwroot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
             string imagesFolder = Path.Combine(wwwroot, "images");
-            System.IO.File.Delete(Path.Combine(imagesFolder, media.Video));
+            System.IO.File.Delete(Path.Combine(imagesFolder, media.VideoId));
 
 
             // Get the updated video
@@ -225,7 +225,7 @@ namespace Manager.Controllers
 
             // Update the new properties
             media.Image = updatedVideo.Image;
-            media.Video = updatedVideo.Video;
+            media.VideoId = updatedVideo.VideoId;
 
 
             // Update & save
@@ -235,7 +235,7 @@ namespace Manager.Controllers
             return Ok(new
             {
                 url = media.Image,
-                thumbnail = media.Video
+                thumbnail = media.VideoId
             });
         }
 
@@ -326,8 +326,8 @@ namespace Manager.Controllers
             Media media = new Media
             {
                 Image = videoUrl,
-                Video = thumbnail,
-                Type = (int)MediaType.Video
+                VideoId = thumbnail,
+                MediaType = (int)MediaType.Video
             };
 
 
@@ -379,7 +379,7 @@ namespace Manager.Controllers
         [Route("Search")]
         public async Task<ActionResult> Search(int type, string searchWords)
         {
-            return Ok(await unitOfWork.Media.GetCollection<MediaViewModel>(x => x.Type == type, searchWords));
+            return Ok(await unitOfWork.Media.GetCollection<MediaViewModel>(x => x.MediaType == type, searchWords));
         }
 
     }

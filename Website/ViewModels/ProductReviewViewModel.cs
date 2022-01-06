@@ -13,7 +13,7 @@ namespace Website.ViewModels
         public int Id { get; set; }
         public string Title { get; set; }
         public double Rating { get; set; }
-        public string Username { get; set; }
+        public string UserName { get; set; }
         public ImageViewModel ProfileImage { get; set; }
         public string Date { get; set; }
         public bool IsVerified { get; set; }
@@ -69,10 +69,10 @@ namespace Website.ViewModels
                 Title = x.Title,
                 ProductId = x.ProductId,
                 Rating = x.Rating,
-                Username = x.Customer.ReviewName,
+                UserName = x.Customer.FirstName + " " + x.Customer.LastName,
                 ProfileImage = new ImageViewModel
                 {
-                    Name = x.Customer.ReviewName,
+                    Name = x.Customer.FirstName + " " + x.Customer.LastName,
                     Url = x.Customer.Image
                 },
                 Date = x.Date.ToString("MMMM dd, yyyy"),

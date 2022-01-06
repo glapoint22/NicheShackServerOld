@@ -185,15 +185,17 @@ namespace Website.Controllers
                 });
 
 
-
+                
 
                 // Media
                 product.Media = await unitOfWork.ProductMedia.GetCollection(x => x.ProductId == product.Id, x => new MediaViewModel
                 {
                     Name = x.Media.Name,
-                    Video = x.Media.Video,
+                    VideoId = x.Media.VideoId,
+                    VideoType = x.Media.VideoType,
                     Image = x.Media.Image,
-                    Type = x.Media.Type
+                    Type = x.Media.MediaType,
+                    Thumbnail = x.Media.Thumbnail
                 });
 
 
@@ -210,7 +212,7 @@ namespace Website.Controllers
                 string nicheName = await unitOfWork.Niches.Get(x => x.Id == product.NicheId, x => x.Name);
 
                 product.RelatedProducts = new ProductGroupViewModel();
-                product.RelatedProducts.Caption = "More related " + nicheName + " products"; ;
+                product.RelatedProducts.Caption = "More " + nicheName + " products"; ;
                 product.RelatedProducts.Products = await queryService.GetProductGroup(queryParams);
 
 

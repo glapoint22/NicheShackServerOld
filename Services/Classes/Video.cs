@@ -18,7 +18,7 @@ namespace Services.Classes
             .Where(x => x.Id == Id)
             .Select(x => new Video
             {
-                Thumbnail = x.Video,
+                Thumbnail = x.VideoId,
                 Url = x.Image
             })
             .SingleOrDefaultAsync();

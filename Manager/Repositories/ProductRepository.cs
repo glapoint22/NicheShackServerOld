@@ -165,8 +165,8 @@ namespace Manager.Repositories
                     Id = y.Media.Id,
                     Name = y.Media.Name,
                     Url = y.Media.Image,
-                    Thumbnail = y.Media.Video,
-                    Type = y.Media.Type
+                    Thumbnail = y.Media.VideoId,
+                    Type = y.Media.MediaType
                 })
                 .ToListAsync();
 
