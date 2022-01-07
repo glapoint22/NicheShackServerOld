@@ -92,6 +92,26 @@ namespace Website.Controllers
 
 
 
+        // ..................................................................................Get Dropdown Lists......................................................................
+        [HttpGet]
+        [Route("DropdownLists")]
+        [Authorize(Policy = "Account Policy")]
+        public async Task<ActionResult> GetDropdownLists()
+        {
+            // Get the customer Id from the access token
+            string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+            var lists = await unitOfWork.Collaborators.GetCollection(x => x.CustomerId == customerId && x.AddToList == true, x => new
+            {
+                key = x.List.Name,
+                value = x.ListId
+            });
+
+
+            return Ok(lists);
+        }
+
+
 
 
 

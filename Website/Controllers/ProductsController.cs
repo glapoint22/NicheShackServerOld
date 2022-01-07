@@ -48,7 +48,8 @@ namespace Website.Controllers
                 FourStars = x.FourStars,
                 FiveStars = x.FiveStars,
                 Description = x.Description,
-                NicheId = x.NicheId
+                NicheId = x.NicheId,
+                Hoplink = x.Hoplink
             });
 
 
@@ -90,7 +91,7 @@ namespace Website.Controllers
                 });
 
 
-                
+
 
 
 
@@ -109,7 +110,7 @@ namespace Website.Controllers
                 });
 
 
-                if(subproducts.Count() > 0)
+                if (subproducts.Count() > 0)
                 {
                     product.Components = subproducts
                     .Where(x => x.Type == 0)
@@ -131,7 +132,7 @@ namespace Website.Controllers
                             Value = x.Value
                         });
                 }
-                
+
 
 
                 // Price Points
@@ -185,7 +186,7 @@ namespace Website.Controllers
                 });
 
 
-                
+
 
                 // Media
                 product.Media = await unitOfWork.ProductMedia.GetCollection(x => x.ProductId == product.Id, x => new MediaViewModel
@@ -200,6 +201,27 @@ namespace Website.Controllers
 
 
 
+                // Breadcrumb
+                UrlItemViewModel niche = await unitOfWork.Niches.Get(x => x.Id == product.NicheId, x => new UrlItemViewModel
+                {
+                    Id = x.CategoryId,
+                    UrlId = x.UrlId,
+                    Name = x.Name,
+                    UrlName = x.UrlName
+                });
+
+
+                UrlItemViewModel category = await unitOfWork.Categories.Get(x => x.Id == niche.Id, x => new UrlItemViewModel
+                {
+                    UrlId = x.UrlId,
+                    Name = x.Name,
+                    UrlName = x.UrlName
+                });
+
+
+                product.Breadcrumb = new List<UrlItemViewModel> { category, niche };
+
+
                 // Related Products
                 QueryParams queryParams = new QueryParams();
                 Query query = new Query();
@@ -209,11 +231,15 @@ namespace Website.Controllers
                 queryParams.ProductId = product.Id;
                 queryParams.Limit = 24;
                 queryParams.UsesFilters = false;
-                string nicheName = await unitOfWork.Niches.Get(x => x.Id == product.NicheId, x => x.Name);
+                string nicheName = niche.Name;
 
                 product.RelatedProducts = new ProductGroupViewModel();
                 product.RelatedProducts.Caption = "More " + nicheName + " products"; ;
                 product.RelatedProducts.Products = await queryService.GetProductGroup(queryParams);
+
+
+
+
 
 
                 return Ok(product);

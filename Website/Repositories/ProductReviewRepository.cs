@@ -77,7 +77,7 @@ namespace Website.Repositories
                 .OrderBy(x => x.Rating)
                 .ThenByDescending(x => x.Likes)
                 .ThenByDescending(x => x.Date)
-                .Where(x => x.Product.UrlId == productId && x.Likes > 0 && !x.Deleted)
+                .Where(x => x.Product.UrlId == productId && x.Likes > 0 && x.Rating <= 3 && !x.Deleted)
                 .Select<ProductReview, ProductReviewViewModel>()
                 .FirstOrDefaultAsync();
         }
@@ -94,7 +94,7 @@ namespace Website.Repositories
                 .OrderByDescending(x => x.Rating)
                 .ThenByDescending(x => x.Likes)
                 .ThenByDescending(x => x.Date)
-                .Where(x => x.Product.UrlId == productId && x.Likes > 0 && !x.Deleted)
+                .Where(x => x.Product.UrlId == productId && x.Likes > 0 && x.Rating > 3 && !x.Deleted)
                 .Select<ProductReview, ProductReviewViewModel>()
                 .FirstOrDefaultAsync();
         }
