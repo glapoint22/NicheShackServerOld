@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using DataAccess.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Services;
@@ -19,12 +20,14 @@ namespace Website.Controllers
         private readonly IUnitOfWork unitOfWork;
         private readonly SearchSuggestionsService searchSuggestionsService;
         private readonly QueryService queryService;
+        private readonly NicheShackContext context;
 
-        public ProductsController(IUnitOfWork unitOfWork, SearchSuggestionsService searchSuggestionsService, QueryService queryService)
+        public ProductsController(IUnitOfWork unitOfWork, SearchSuggestionsService searchSuggestionsService, QueryService queryService, NicheShackContext context)
         {
             this.unitOfWork = unitOfWork;
             this.searchSuggestionsService = searchSuggestionsService;
             this.queryService = queryService;
+            this.context = context;
         }
 
 
@@ -223,23 +226,24 @@ namespace Website.Controllers
 
 
                 // Related Products
+                ProductGroupWidget productGroupWidget = new ProductGroupWidget();
+                productGroupWidget.Queries = new List<Query>
+                {
+                    new Query
+                    {
+                        IntValue = 2,
+                        QueryType = QueryType.Auto
+                    }
+                };
+
                 QueryParams queryParams = new QueryParams();
-                Query query = new Query();
-                query.IntValue = 2;
-                query.QueryType = QueryType.Auto;
-                queryParams.Queries = new List<Query> { query };
                 queryParams.ProductId = product.Id;
-                queryParams.Limit = 24;
-                queryParams.UsesFilters = false;
-                string nicheName = niche.Name;
+
+                await productGroupWidget.SetData(context, queryParams);
 
                 product.RelatedProducts = new ProductGroupViewModel();
-                product.RelatedProducts.Caption = "More " + nicheName + " products"; ;
-                product.RelatedProducts.Products = await queryService.GetProductGroup(queryParams);
-
-
-
-
+                product.RelatedProducts.Caption = "More " + niche.Name + " products";
+                product.RelatedProducts.Products = productGroupWidget.Products;
 
 
                 return Ok(product);

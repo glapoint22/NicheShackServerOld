@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
 
 namespace Services.Classes
 {
@@ -411,17 +410,16 @@ namespace Services.Classes
 
 
         // ..............................................................................Get Browse Sort Options.................................................................
-        public List<SortOption> GetBrowseSortOptions()
-        {
-            return new List<SortOption>
-            {
-                new SortOption{Key = "Best Sellers", Value ="best-sellers" },
-                new SortOption{Key = "Price: Low to High", Value ="price-asc" },
-                new SortOption{Key = "Price: High to Low", Value = "price-desc" },
-                new SortOption{Key = "Highest Rating", Value = "rating" },
-                new SortOption{Key = "Newest", Value = "newest" }
-            };
-        }
+        //public List<SortOption> GetBrowseSortOptions()
+        //{
+        //    return new List<SortOption>
+        //    {
+        //        new SortOption{Key = "Price: Low to High", Value ="price-asc" },
+        //        new SortOption{Key = "Price: High to Low", Value = "price-desc" },
+        //        new SortOption{Key = "Highest Rating", Value = "rating" },
+        //        new SortOption{Key = "Newest", Value = "newest" }
+        //    };
+        //}
 
 
 
@@ -429,18 +427,18 @@ namespace Services.Classes
 
 
 
-        // ..............................................................................Get Search Sort Options.................................................................
-        public List<SortOption> GetSearchSortOptions()
-        {
+        //// ..............................................................................Get Search Sort Options.................................................................
+        //public List<SortOption> GetSearchSortOptions()
+        //{
 
-            return new List<SortOption>
-            {
-                new SortOption { Key = "Best Match", Value = "best-match" },
-                new SortOption{Key = "Price: Low to High", Value ="price-asc" },
-                new SortOption{Key = "Price: High to Low", Value = "price-desc" },
-                new SortOption{Key = "Highest Rating", Value = "rating" },
-                new SortOption{Key = "Newest", Value = "newest" }
-            };
-        }
+        //    return new List<SortOption>
+        //    {
+        //        new SortOption { Key = "Best Match", Value = "best-match" },
+        //        new SortOption{Key = "Price: Low to High", Value ="price-asc" },
+        //        new SortOption{Key = "Price: High to Low", Value = "price-desc" },
+        //        new SortOption{Key = "Highest Rating", Value = "rating" },
+        //        new SortOption{Key = "Newest", Value = "newest" }
+        //    };
+        //}
     }
 }

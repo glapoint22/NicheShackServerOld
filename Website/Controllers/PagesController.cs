@@ -17,11 +17,13 @@ namespace Website.Controllers
     {
         private readonly IUnitOfWork unitOfWork;
         private readonly IPageService pageService;
+        private readonly NicheShackContext context;
 
-        public PagesController(IUnitOfWork unitOfWork, IPageService pageService)
+        public PagesController(IUnitOfWork unitOfWork, IPageService pageService, NicheShackContext context)
         {
             this.unitOfWork = unitOfWork;
             this.pageService = pageService;
+            this.context = context;
         }
 
 
@@ -45,7 +47,7 @@ namespace Website.Controllers
             string pageContent = null;
             int keywordId = await unitOfWork.Keywords.Get(x => x.Name == queryParams.Search, x => x.Id);
 
-            queryParams.Cookies = Request.Cookies.ToList();
+            
 
             if (keywordId > 0)
             {
@@ -75,6 +77,29 @@ namespace Website.Controllers
             pageContent = await unitOfWork.Pages.Get(x => x.DisplayType == (int)PageDisplayType.Grid, x => x.Content);
 
             return Ok(await pageService.GePage(pageContent, queryParams));
+
+
+
+            //int keywordId = await unitOfWork.Keywords.Get(x => x.Name == queryParams.Search, x => x.Id);
+
+
+            //if (keywordId > 0)
+            //{
+            //    unitOfWork.KeywordSearchVolumes.Add(new KeywordSearchVolume
+            //    {
+            //        KeywordId = keywordId,
+            //        Date = DateTime.Now
+            //    });
+
+
+            //    await unitOfWork.Save();
+            //}
+
+
+            //GridWidget gridWidget = new GridWidget();
+            //await gridWidget.SetData(context, queryParams);
+
+            //return Ok(gridWidget.GridData);
         }
 
 

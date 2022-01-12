@@ -41,14 +41,14 @@ namespace Services.Classes
                 Products = await queryService.GetProductGroup(queryParams);
 
                 // If query type is auto and it's for related products and product id is greater than zero, set the caption
-                if (queryParams.Queries != null && queryParams.Queries.Count(x => x.QueryType == QueryType.Auto && x.IntValue == 2) > 0 && queryParams.ProductId > 0)
+                if (queryParams.Queries != null && queryParams.Queries.Count(x => x.QueryType == QueryType.Auto && x.IntValue == 2) > 0 && queryParams.ProductId > 0 && Caption != null)
                 {
                     string nicheName = await context.Products
                     .AsNoTracking()
                     .Where(x => x.Id == queryParams.ProductId)
                     .Select(x => x.Niche.Name)
                     .SingleOrDefaultAsync();
-                    Caption.Text = "Check out other " + nicheName.ToLower() + " products";
+                    Caption.Text = "More " + nicheName + " products";
                 }
             }
         }

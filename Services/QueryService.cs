@@ -42,7 +42,6 @@ namespace Services
                 Filters = await GetProductFilters(products, queryParams),
                 ProductCountStart = ((queryParams.Page - 1) * queryParams.Limit) + 1,
                 ProductCountEnd = Math.Min(queryParams.Page * queryParams.Limit, totalProducts),
-                SortOptions = queryParams.Search != null && queryParams.Search != string.Empty ? queryBuilder.GetSearchSortOptions() : queryBuilder.GetBrowseSortOptions()
             };
         }
 
@@ -300,7 +299,7 @@ namespace Services
             // Assign the category filters
             if (categoryData.Count == 2)
             {
-                filters.CategoriesFilter = new CategoriesFilter
+                filters.NichesFilter = new CategoriesFilter
                 {
                     Visible = categoryData.Where(x => x.key).Select(x => x.categories
                         .Select(z => new CategoryFilter
@@ -308,7 +307,7 @@ namespace Services
                             UrlId = z.UrlId,
                             UrlName = z.UrlName,
                             Name = z.Name,
-                            Niches = new NichesFilter
+                            Subniches = new NichesFilter
                             {
                                 ShowHidden = false,
                                 Visible = z.Niches.Where(w => w.key).Select(n => n.niches.Select(a => new NicheFilter
@@ -339,7 +338,7 @@ namespace Services
             }
             else
             {
-                filters.CategoriesFilter = new CategoriesFilter
+                filters.NichesFilter = new CategoriesFilter
                 {
                     Visible = categoryData.Select(x => x.categories
                         .Select(z => new CategoryFilter
@@ -347,7 +346,7 @@ namespace Services
                             UrlId = z.UrlId,
                             UrlName = z.UrlName,
                             Name = z.Name,
-                            Niches = new NichesFilter
+                            Subniches = new NichesFilter
                             {
                                 ShowHidden = false,
                                 Visible = z.Niches.Where(w => w.key).Select(n => n.niches.Select(a => new NicheFilter

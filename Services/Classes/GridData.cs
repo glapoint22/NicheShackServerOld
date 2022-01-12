@@ -10,6 +10,5 @@ namespace Services.Classes
         public Filters Filters { get; set; }
         public double ProductCountStart { get; set; }
         public double ProductCountEnd { get; set; }
-        public List<SortOption> SortOptions { get; set; }
     }
 }
