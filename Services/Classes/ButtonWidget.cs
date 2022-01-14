@@ -15,6 +15,13 @@ namespace Services.Classes
         public Shadow Shadow { get; set; }
         public Padding Padding { get; set; }
         public Link Link { get; set; }
+        public string BackgroundHoverColor { get; set; }
+        public string BackgroundActiveColor { get; set; }
+        public string BorderHoverColor { get; set; }
+        public string BorderActiveColor { get; set; }
+        public string TextHoverColor { get; set; }
+        public string TextActiveColor { get; set; }
+
 
 
 
@@ -50,6 +57,29 @@ namespace Services.Classes
 
                 case "link":
                     Link = (Link)JsonSerializer.Deserialize(ref reader, typeof(Link), options);
+                    break;
+                case "backgroundHoverColor":
+                    BackgroundHoverColor = (string)JsonSerializer.Deserialize(ref reader, typeof(string), options);
+                    break;
+
+                case "backgroundActiveColor":
+                    BackgroundActiveColor = (string)JsonSerializer.Deserialize(ref reader, typeof(string), options);
+                    break;
+
+                case "borderHoverColor":
+                    BorderHoverColor = (string)JsonSerializer.Deserialize(ref reader, typeof(string), options);
+                    break;
+
+                case "borderActiveColor":
+                    BorderActiveColor = (string)JsonSerializer.Deserialize(ref reader, typeof(string), options);
+                    break;
+
+                case "textHoverColor":
+                    TextHoverColor = (string)JsonSerializer.Deserialize(ref reader, typeof(string), options);
+                    break;
+
+                case "textActiveColor":
+                    TextActiveColor = (string)JsonSerializer.Deserialize(ref reader, typeof(string), options);
                     break;
             }
         }
