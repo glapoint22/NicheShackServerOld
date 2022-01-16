@@ -462,13 +462,14 @@ namespace Website.Controllers
 
 
 
-        // ..................................................................................New Profile Picture.....................................................................
+        // ..................................................................................Change Profile Picture.....................................................................
         [HttpPost, DisableRequestSizeLimit]
-        [Route("NewProfilePicture")]
+        [Route("ChangeProfilePicture")]
         [Authorize(Policy = "Account Policy")]
         public async Task<ActionResult> NewImage()
         {
-            string imagesFolder = Path.Combine(Directory.GetCurrentDirectory(), "images");
+            string wwwroot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            string imagesFolder = Path.Combine(wwwroot, "images");
 
 
             //Get the form data
@@ -532,122 +533,130 @@ namespace Website.Controllers
             croppedBitmap.Save(newImage, ImageFormat.Png);
 
 
-            //Get the customer associated with this profile pic
-            string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
-            Customer customer = await unitOfWork.Customers.Get(x => x.Id == customerId);
 
+            // Get the customer from the database based on the customer id from the claims via the access token
+            Customer customer = await userManager.FindByIdAsync(User.FindFirst(ClaimTypes.NameIdentifier).Value);
 
-            //Update the customer's profile picture
-            customer.Image = imageName;
-            unitOfWork.Customers.Update(customer);
-
-            //Save
-            await unitOfWork.Save();
-
-
-            // Send an email
-            if (customer.EmailPrefProfilePicChange == true)
+            // If the customer is found, update his/her name
+            if (customer != null)
             {
-                emailService.AddToQueue(EmailType.ProfilePicChange, "Updated profile picture", new Recipient
+                //Update the customer's profile picture
+                customer.Image = imageName;
+
+                // Update the database
+                IdentityResult result = await userManager.UpdateAsync(customer);
+
+                if (result.Succeeded)
                 {
-                    FirstName = customer.FirstName,
-                    LastName = customer.LastName,
-                    Email = customer.Email
-                }, new EmailProperties { Host = GetHost() });
-            }
+                    // Send a confirmation email that the customer name has been changed
+                    if (customer.EmailPrefProfilePicChange == true)
+                    {
+                        emailService.AddToQueue(EmailType.ProfilePicChange, "Updated profile picture", new Recipient
+                        {
+                            FirstName = customer.FirstName,
+                            LastName = customer.LastName,
+                            Email = customer.Email
+                        }, new EmailProperties { Host = GetHost() });
+                    }
 
+                    UpdateCustomerCookie(customer);
 
-            return Ok(imageName);
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        // ..................................................................................Edit Profile Picture.....................................................................
-        [HttpPost]
-        [Route("EditProfilePicture")]
-        [Authorize(Policy = "Account Policy")]
-        public async Task<ActionResult> EditImage(ProfilePic profilePic)
-        {
-            string imagesFolder = Path.Combine(Directory.GetCurrentDirectory(), "images");
-            string tempImage = imagesFolder + "\\" + profilePic.Image;
-
-
-            //Scale
-            Bitmap scaledBitmap = new Bitmap(profilePic.Width, profilePic.Height);
-            Graphics graph = Graphics.FromImage(scaledBitmap);
-            using (Bitmap tempBitmap = new Bitmap(tempImage))
-            {
-                graph.DrawImage(tempBitmap, 0, 0, profilePic.Width, profilePic.Height);
-            }
-
-            // Delete the temp image
-            System.IO.File.Delete(tempImage);
-
-
-
-            //Crop
-            Bitmap croppedBitmap = new Bitmap(300, 300);
-            for (int i = 0; i < 300; i++)
-            {
-                for (int y = 0; y < 300; y++)
-                {
-                    Color pxlclr = scaledBitmap.GetPixel(profilePic.CropLeft + i, profilePic.CropTop + y);
-                    croppedBitmap.SetPixel(i, y, pxlclr);
+                    return Ok();
                 }
             }
 
 
-            //Create the new image
-            string imageName = Guid.NewGuid().ToString("N") + ".png";
-            string newImage = Path.Combine(imagesFolder, imageName);
-            croppedBitmap.Save(newImage, ImageFormat.Png);
-
-
-            //Get the customer associated with this profile pic
-            string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
-            Customer customer = await unitOfWork.Customers.Get(x => x.Id == customerId);
-
-
-            //Update the customer's profile picture
-            customer.Image = imageName;
-            unitOfWork.Customers.Update(customer);
-
-            //Save
-            await unitOfWork.Save();
-
-
-            // Send an email
-            if (customer.EmailPrefProfilePicChange == true)
-            {
-                emailService.AddToQueue(EmailType.ProfilePicChange, "Updated profile picture", new Recipient
-                {
-                    FirstName = customer.FirstName,
-                    LastName = customer.LastName,
-                    Email = customer.Email
-                }, new EmailProperties { Host = GetHost() });
-            }
-
-
-
-            return Ok(imageName);
+            return BadRequest();
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        //// ..................................................................................Edit Profile Picture.....................................................................
+        //[HttpPost]
+        //[Route("EditProfilePicture")]
+        //[Authorize(Policy = "Account Policy")]
+        //public async Task<ActionResult> EditImage(ProfilePic profilePic)
+        //{
+        //    string imagesFolder = Path.Combine(Directory.GetCurrentDirectory(), "images");
+        //    string tempImage = imagesFolder + "\\" + profilePic.Image;
+
+
+        //    //Scale
+        //    Bitmap scaledBitmap = new Bitmap(profilePic.Width, profilePic.Height);
+        //    Graphics graph = Graphics.FromImage(scaledBitmap);
+        //    using (Bitmap tempBitmap = new Bitmap(tempImage))
+        //    {
+        //        graph.DrawImage(tempBitmap, 0, 0, profilePic.Width, profilePic.Height);
+        //    }
+
+        //    // Delete the temp image
+        //    System.IO.File.Delete(tempImage);
+
+
+
+        //    //Crop
+        //    Bitmap croppedBitmap = new Bitmap(300, 300);
+        //    for (int i = 0; i < 300; i++)
+        //    {
+        //        for (int y = 0; y < 300; y++)
+        //        {
+        //            Color pxlclr = scaledBitmap.GetPixel(profilePic.CropLeft + i, profilePic.CropTop + y);
+        //            croppedBitmap.SetPixel(i, y, pxlclr);
+        //        }
+        //    }
+
+
+        //    //Create the new image
+        //    string imageName = Guid.NewGuid().ToString("N") + ".png";
+        //    string newImage = Path.Combine(imagesFolder, imageName);
+        //    croppedBitmap.Save(newImage, ImageFormat.Png);
+
+
+        //    //Get the customer associated with this profile pic
+        //    string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+        //    Customer customer = await unitOfWork.Customers.Get(x => x.Id == customerId);
+
+
+        //    //Update the customer's profile picture
+        //    customer.Image = imageName;
+        //    unitOfWork.Customers.Update(customer);
+
+        //    //Save
+        //    await unitOfWork.Save();
+
+
+        //    // Send an email
+        //    if (customer.EmailPrefProfilePicChange == true)
+        //    {
+        //        emailService.AddToQueue(EmailType.ProfilePicChange, "Updated profile picture", new Recipient
+        //        {
+        //            FirstName = customer.FirstName,
+        //            LastName = customer.LastName,
+        //            Email = customer.Email
+        //        }, new EmailProperties { Host = GetHost() });
+        //    }
+
+
+
+        //    return Ok(imageName);
+        //}
 
 
 
