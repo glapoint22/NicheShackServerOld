@@ -23,12 +23,12 @@ namespace Website.Controllers
 
 
         // ..................................................................................Get.....................................................................
-        [HttpPost]
-        public async Task<ActionResult> Get(QueryParams queryParams)
+        [HttpGet]
+        public async Task<ActionResult> Get()
         {
             string pageContent = await unitOfWork.Pages.Get(x => x.DisplayType == (int)PageDisplayType.Home, x => x.Content);
+            QueryParams queryParams = new QueryParams();
 
-            
             queryParams.Cookies = Request.Cookies.ToList();
 
 

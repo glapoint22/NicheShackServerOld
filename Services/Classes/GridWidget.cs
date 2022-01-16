@@ -29,7 +29,7 @@ namespace Services.Classes
         {
             if (Queries != null) queryParams.Queries = Queries;
 
-            if (queryParams.Queries != null || queryParams.Search != null)
+            if (queryParams.Queries != null || queryParams.Search != null || queryParams.CategoryId != null || queryParams.NicheId != null)
             {
                 queryParams.Limit = 40;
                 queryParams.UsesFilters = true;
