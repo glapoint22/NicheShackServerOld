@@ -11,5 +11,10 @@
         public double MinPrice { get; set; }
         public double MaxPrice { get; set; }
         public Image Image { get; set; }
+        public int OneStar { get; set; }
+        public int TwoStars { get; set; }
+        public int ThreeStars { get; set; }
+        public int FourStars { get; set; }
+        public int FiveStars { get; set; }
     }
 }

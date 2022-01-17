@@ -114,7 +114,12 @@ namespace Services
                     Name = x.Media.Name,
                     Url = x.Media.Image
                 },
-                mediaCount = x.ProductMedia.Count()
+                mediaCount = x.ProductMedia.Count(),
+                OneStar = x.OneStar,
+                TwoStars = x.TwoStars,
+                ThreeStars = x.ThreeStars,
+                FourStars = x.FourStars,
+                FiveStars = x.FiveStars
             });
 
 
@@ -169,7 +174,12 @@ namespace Services
                 Image = product.image,
                 Rating = product.rating,
                 Date = product.date,
-                Weight = (product.rating * 0.8) + (productSalesCount.count * 0.15) + (product.mediaCount * .05)
+                Weight = (product.rating * 0.8) + (productSalesCount.count * 0.15) + (product.mediaCount * .05),
+                OneStar = product.OneStar,
+                TwoStars = product.TwoStars,
+                ThreeStars = product.ThreeStars,
+                FourStars = product.FourStars,
+                FiveStars = product.FiveStars
             }).ToList();
         }
 
