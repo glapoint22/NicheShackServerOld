@@ -17,6 +17,7 @@
         AddedListItem,
         ListNameChange,
         DeletedList,
-        Review
+        Review,
+        DeleteAccount
     }
 }
