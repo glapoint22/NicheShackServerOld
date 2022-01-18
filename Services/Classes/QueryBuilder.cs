@@ -359,7 +359,12 @@ namespace Services.Classes
                 TotalReviews = x.TotalReviews,
                 MinPrice = x.MinPrice,
                 MaxPrice = x.MaxPrice,
-                Image = x.Image
+                Image = x.Image,
+                OneStar = x.OneStar,
+                TwoStars = x.TwoStars,
+                ThreeStars = x.ThreeStars,
+                FourStars = x.FourStars,
+                FiveStars = x.FiveStars
             });
         }
 

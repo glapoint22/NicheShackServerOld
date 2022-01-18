@@ -136,22 +136,8 @@ namespace Website.Controllers
                 List<Claim> claims = GetClaims(customer, signIn.IsPersistent);
 
                 var tokenData = await GenerateTokenData(customer, claims);
-                var customerData = customer.FirstName + "," + customer.LastName + "," + customer.Email + "," + customer.Image;
 
-                CookieOptions cookieOptions = new CookieOptions();
-
-                if (signIn.IsPersistent)
-                {
-                    cookieOptions = new CookieOptions
-                    {
-                        Expires = DateTimeOffset.UtcNow.AddDays(Convert.ToInt32(configuration["TokenValidation:RefreshExpiresInDays"]))
-                    };
-                }
-
-                Response.Cookies.Append("access", tokenData.AccessToken, cookieOptions);
-                Response.Cookies.Append("refresh", tokenData.RefreshToken, cookieOptions);
-                Response.Cookies.Append("customer", customerData, cookieOptions);
-
+                SetCookies(tokenData, customer, signIn.IsPersistent);
 
                 return Ok();
             }
@@ -163,7 +149,29 @@ namespace Website.Controllers
 
 
 
+        private void SetCookies(TokenData tokenData, Customer customer, bool isPersistent)
+        {
+            CookieOptions cookieOptions = new CookieOptions();
 
+            if (isPersistent)
+            {
+                cookieOptions = new CookieOptions
+                {
+                    Expires = DateTimeOffset.UtcNow.AddDays(Convert.ToInt32(configuration["TokenValidation:RefreshExpiresInDays"]))
+                };
+            }
+
+            Response.Cookies.Append("access", tokenData.AccessToken, cookieOptions);
+            Response.Cookies.Append("refresh", tokenData.RefreshToken, cookieOptions);
+            Response.Cookies.Append("customer", GetCustomerData(customer), cookieOptions);
+        }
+
+
+
+        private string GetCustomerData(Customer customer)
+        {
+            return customer.FirstName + "," + customer.LastName + "," + customer.Email + "," + customer.Image;
+        }
 
 
 
@@ -180,7 +188,7 @@ namespace Website.Controllers
 
 
 
-            if(isPersistent)
+            if (isPersistent)
             {
                 claims.Add(new Claim(ClaimTypes.Expiration, DateTimeOffset.UtcNow.AddDays(Convert.ToInt32(configuration["TokenValidation:RefreshExpiresInDays"])).ToString()));
             }
@@ -318,7 +326,7 @@ namespace Website.Controllers
 
                     UpdateCustomerCookie(customer);
 
-                    
+
 
                     return Ok();
                 }
@@ -348,9 +356,8 @@ namespace Website.Controllers
                 };
             }
 
-            string customerData = customer.FirstName + "," + customer.LastName + "," + customer.Email + "," + customer.Image;
 
-            Response.Cookies.Append("customer", customerData, cookieOptions);
+            Response.Cookies.Append("customer", GetCustomerData(customer), cookieOptions);
         }
 
 
@@ -588,75 +595,7 @@ namespace Website.Controllers
 
 
 
-        //// ..................................................................................Edit Profile Picture.....................................................................
-        //[HttpPost]
-        //[Route("EditProfilePicture")]
-        //[Authorize(Policy = "Account Policy")]
-        //public async Task<ActionResult> EditImage(ProfilePic profilePic)
-        //{
-        //    string imagesFolder = Path.Combine(Directory.GetCurrentDirectory(), "images");
-        //    string tempImage = imagesFolder + "\\" + profilePic.Image;
 
-
-        //    //Scale
-        //    Bitmap scaledBitmap = new Bitmap(profilePic.Width, profilePic.Height);
-        //    Graphics graph = Graphics.FromImage(scaledBitmap);
-        //    using (Bitmap tempBitmap = new Bitmap(tempImage))
-        //    {
-        //        graph.DrawImage(tempBitmap, 0, 0, profilePic.Width, profilePic.Height);
-        //    }
-
-        //    // Delete the temp image
-        //    System.IO.File.Delete(tempImage);
-
-
-
-        //    //Crop
-        //    Bitmap croppedBitmap = new Bitmap(300, 300);
-        //    for (int i = 0; i < 300; i++)
-        //    {
-        //        for (int y = 0; y < 300; y++)
-        //        {
-        //            Color pxlclr = scaledBitmap.GetPixel(profilePic.CropLeft + i, profilePic.CropTop + y);
-        //            croppedBitmap.SetPixel(i, y, pxlclr);
-        //        }
-        //    }
-
-
-        //    //Create the new image
-        //    string imageName = Guid.NewGuid().ToString("N") + ".png";
-        //    string newImage = Path.Combine(imagesFolder, imageName);
-        //    croppedBitmap.Save(newImage, ImageFormat.Png);
-
-
-        //    //Get the customer associated with this profile pic
-        //    string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
-        //    Customer customer = await unitOfWork.Customers.Get(x => x.Id == customerId);
-
-
-        //    //Update the customer's profile picture
-        //    customer.Image = imageName;
-        //    unitOfWork.Customers.Update(customer);
-
-        //    //Save
-        //    await unitOfWork.Save();
-
-
-        //    // Send an email
-        //    if (customer.EmailPrefProfilePicChange == true)
-        //    {
-        //        emailService.AddToQueue(EmailType.ProfilePicChange, "Updated profile picture", new Recipient
-        //        {
-        //            FirstName = customer.FirstName,
-        //            LastName = customer.LastName,
-        //            Email = customer.Email
-        //        }, new EmailProperties { Host = GetHost() });
-        //    }
-
-
-
-        //    return Ok(imageName);
-        //}
 
 
 
@@ -672,32 +611,34 @@ namespace Website.Controllers
         public async Task<ActionResult> Refresh()
         {
             string accessToken = GetAccessTokenFromHeader();
-            string refresh = Request.Cookies["refresh"];
+            string oldToken = Request.Cookies["refresh"];
 
             if (accessToken != null)
             {
                 ClaimsPrincipal principal = GetPrincipalFromToken(accessToken);
 
 
-                if (principal != null && refresh != null)
+                if (principal != null && oldToken != null)
                 {
                     string customerId = principal.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier).Value;
 
                     if (customerId != null)
                     {
-                        RefreshToken refreshToken = await unitOfWork.RefreshTokens.Get(x => x.Id == refresh && x.CustomerId == customerId);
+                        RefreshToken refreshToken = await unitOfWork.RefreshTokens.Get(x => x.Id == oldToken && x.CustomerId == customerId);
                         if (refreshToken != null)
                         {
-                            // Remove the refresh token from the database
-                            unitOfWork.RefreshTokens.Remove(refreshToken);
-                            await unitOfWork.Save();
-
                             if (DateTime.Compare(DateTime.UtcNow, refreshToken.Expiration) < 0)
                             {
                                 Customer customer = await userManager.FindByIdAsync(customerId);
 
                                 // Generate a new token and refresh token
-                                return Ok(await GenerateTokenData(customer, principal.Claims));
+                                TokenData tokenData = await GenerateTokenData(customer, principal.Claims);
+
+                                SetCookies(tokenData, customer, User.HasClaim(x => x.Type == ClaimTypes.Expiration));
+                                return Ok(new
+                                {
+                                    value = tokenData.RefreshToken
+                                });
                             }
                         }
                     }
@@ -710,6 +651,32 @@ namespace Website.Controllers
 
 
 
+        [HttpDelete]
+        [Route("Refresh")]
+        [Authorize(Policy = "Account Policy")]
+        public async Task<ActionResult> DeleteRefreshToken(string newRefreshToken)
+        {
+            Customer customer = await userManager.FindByIdAsync(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
+            if(customer != null)
+            {
+                // Get all refresh tokens from this customer except the new refresh token
+                IEnumerable<RefreshToken> tokens = await unitOfWork.RefreshTokens.GetCollection(x => x.CustomerId == customer.Id && x.Id != HttpUtility.UrlDecode(newRefreshToken));
+
+                // Delete the tokens
+                if(tokens != null && tokens.Count() > 0)
+                {
+                    foreach(RefreshToken refreshToken in tokens)
+                    {
+                        // Remove the refresh token from the database
+                        unitOfWork.RefreshTokens.Remove(refreshToken);
+                        await unitOfWork.Save();
+                    }
+                }
+            }
+            
+            return Ok();
+        }
 
 
 
