@@ -39,7 +39,7 @@ namespace Website.Controllers
         // ..................................................................................Get List......................................................................
         [HttpGet]
         [Route("List")]
-        public async Task<ActionResult> GetList(string listId)
+        public async Task<ActionResult> GetList(string listId, string sort)
         {
             var listName = await unitOfWork.Lists.Get(x => x.Id == listId, x => x.Name);
 
@@ -50,7 +50,7 @@ namespace Website.Controllers
                 id = listId,
                 name = listName,
                 products = await unitOfWork.Lists.GetListProducts(await unitOfWork.Collaborators
-                    .GetCollection(x => x.ListId == listId, x => x.Id), null, null)
+                    .GetCollection(x => x.ListId == listId, x => x.Id), null, sort)
             });
         }
 
