@@ -33,6 +33,7 @@ namespace Website.Repositories
         public IRepository<ProductPrice> ProductPrices { get; }
         public IRepository<ProductAdditionalInfo> AdditionalInfo { get; }
         public IRepository<Subproduct> Subproducts { get; }
+        public IRepository<OneTimePassword> OneTimePasswords { get; }
 
 
         // Declare the Nicheshack context
@@ -68,6 +69,7 @@ namespace Website.Repositories
             ProductPrices = new Repository<ProductPrice>(context);
             AdditionalInfo = new Repository<ProductAdditionalInfo>(context);
             Subproducts = new Repository<Subproduct>(context);
+            OneTimePasswords = new Repository<OneTimePassword>(context);
         }
 
 

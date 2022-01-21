@@ -20,5 +20,12 @@
             MAES,
             TEST
         }
+
+
+        public enum OtpType
+        {
+            EmailChange,
+            AccountDeletion
+        }
     }
 }

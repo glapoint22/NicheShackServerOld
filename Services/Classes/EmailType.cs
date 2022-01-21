@@ -10,6 +10,7 @@
         PasswordChange,
         ProfilePicChange,
         VerifyEmail,
+        VerifyAccountDeletion,
         NewCollaborator,
         RemovedCollaborator,
         RemovedListItem,

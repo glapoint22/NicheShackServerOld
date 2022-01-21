@@ -34,6 +34,7 @@ namespace Website.Repositories
         IRepository<ProductPrice> ProductPrices { get; }
         IRepository<ProductAdditionalInfo> AdditionalInfo { get; }
         IRepository<Subproduct> Subproducts { get; }
+        IRepository<OneTimePassword> OneTimePasswords { get; }
 
 
         Task<int> Save();

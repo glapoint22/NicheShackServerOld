@@ -25,6 +25,8 @@ using Services.Classes;
 using System.Web;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using static Website.Classes.Enums;
+using System.Drawing.Drawing2D;
 
 namespace Website.Controllers
 {
@@ -131,7 +133,7 @@ namespace Website.Controllers
             }
 
             // If the customer is in the database and the password is valid, create claims for the access token
-            if (customer != null && await userManager.CheckPasswordAsync(customer, signIn.Password))
+            if (customer != null && await userManager.CheckPasswordAsync(customer, signIn.Password) && customer.Active)
             {
                 List<Claim> claims = GetClaims(customer, signIn.IsPersistent);
 
@@ -362,69 +364,6 @@ namespace Website.Controllers
 
 
 
-        // ..................................................................................Update Email.....................................................................
-        [HttpPut]
-        [Route("UpdateEmail")]
-        [Authorize(Policy = "Account Policy")]
-        public async Task<ActionResult> UpdateEmail(UpdatedEmail updatedEmail)
-        {
-            // Get the customer from the database based on the customer id from the claims via the access token
-            Customer customer = await userManager.FindByIdAsync(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-
-
-            // If the customer is found...
-            if (customer != null)
-            {
-                if (!await userManager.CheckPasswordAsync(customer, updatedEmail.Password))
-                {
-                    return Conflict("Your password and email do not match.");
-                }
-
-                string previousEmail = customer.Email;
-
-                // Update the new email in the database
-                IdentityResult result = await userManager.ChangeEmailAsync(customer, updatedEmail.Email, updatedEmail.Token);
-
-
-                // If the update was successful, return ok
-                if (result.Succeeded)
-                {
-                    // Send a confirmation email that the customer email has been changed
-                    if (customer.EmailPrefEmailChange == true)
-                    {
-                        emailService.AddToQueue(EmailType.EmailChange, "Email change confirmation", new Recipient
-                        {
-                            FirstName = customer.FirstName,
-                            LastName = customer.LastName,
-                            Email = updatedEmail.Email
-                        }, new EmailProperties
-                        {
-                            Host = GetHost(),
-                            Var1 = previousEmail,
-                            Var2 = updatedEmail.Email
-                        });
-                    }
-
-
-                    UpdateCustomerCookie(customer);
-                    return Ok();
-                }
-                else
-                {
-                    return Conflict("An error occured due to an invalid email address or invalid token.");
-                }
-
-            }
-
-            return BadRequest();
-        }
-
-
-
-
-
-
-
 
         // ..................................................................................Update Password.....................................................................
         [HttpPut]
@@ -481,18 +420,35 @@ namespace Website.Controllers
 
             //Get the form data
             IFormFile imageFile = Request.Form.Files["newImage"];
-            Request.Form.TryGetValue("width", out StringValues width);
-            Request.Form.TryGetValue("height", out StringValues height);
-            Request.Form.TryGetValue("cropTop", out StringValues cropTop);
-            Request.Form.TryGetValue("cropLeft", out StringValues cropLeft);
+            Request.Form.TryGetValue("percentTop", out StringValues percentTop);
+            Request.Form.TryGetValue("percentLeft", out StringValues percentLeft);
+            Request.Form.TryGetValue("percentRight", out StringValues percentRight);
+            Request.Form.TryGetValue("percentBottom", out StringValues percentBottom);
             Request.Form.TryGetValue("currentImage", out StringValues currentImage);
 
+
+            double left;
+            double right;
+            double top;
+            double bottom;
+
+            using (var image = System.Drawing.Image.FromStream(imageFile.OpenReadStream()))
+            {
+                left = Convert.ToDouble(percentLeft) * image.Width;
+                right = Convert.ToDouble(percentRight) * image.Width;
+                top = Convert.ToDouble(percentTop) * image.Height;
+                bottom = Convert.ToDouble(percentBottom) * image.Height;
+            }
+
+
+            
 
             //Convert from image file to bitmap
             Bitmap tempBitmap;
             using (var memoryStream = new MemoryStream())
             {
                 await imageFile.CopyToAsync(memoryStream);
+     
                 using (var tempImage = System.Drawing.Image.FromStream(memoryStream))
                 {
                     tempBitmap = new Bitmap(tempImage);
@@ -500,18 +456,39 @@ namespace Website.Controllers
             }
 
 
-            //Convert from string to int
-            int profilePicWidth = Convert.ToInt32(width);
-            int profilePicHeight = Convert.ToInt32(height);
-            int profilePicCropTop = Convert.ToInt32(cropTop);
-            int profilePicCropLeft = Convert.ToInt32(cropLeft);
+            int size = (int)(right - left);
+
+            //Crop
+            Bitmap croppedBitmap = new Bitmap(size, size);
+            for (int i = 0; i < size; i++)
+            {
+                for (int y = 0; y < size; y++)
+                {
+                    Color pxlclr = tempBitmap.GetPixel((int)left + i, (int)top + y);
+                    croppedBitmap.SetPixel(i, y, pxlclr);
+                }
+            }
+
+
+            
 
 
 
             //Scale
-            Bitmap scaledBitmap = new Bitmap(profilePicWidth, profilePicHeight);
+            Bitmap scaledBitmap = new Bitmap(70, 70);
             Graphics graph = Graphics.FromImage(scaledBitmap);
-            graph.DrawImage(tempBitmap, 0, 0, profilePicWidth, profilePicHeight);
+            graph.InterpolationMode = InterpolationMode.High;
+            graph.DrawImage(croppedBitmap, 0, 0, 70, 70);
+
+
+
+            //Create the new image
+            string imageName = Guid.NewGuid().ToString("N") + ".png";
+            string newImage = Path.Combine(imagesFolder, imageName);
+            scaledBitmap.Save(newImage, ImageFormat.Png);
+
+
+
 
 
             //If the customer currently has an image assigned to their profile
@@ -522,22 +499,7 @@ namespace Website.Controllers
             }
 
 
-            //Crop
-            Bitmap croppedBitmap = new Bitmap(300, 300);
-            for (int i = 0; i < 300; i++)
-            {
-                for (int y = 0; y < 300; y++)
-                {
-                    Color pxlclr = scaledBitmap.GetPixel(profilePicCropLeft + i, profilePicCropTop + y);
-                    croppedBitmap.SetPixel(i, y, pxlclr);
-                }
-            }
 
-
-            //Create the new image
-            string imageName = Guid.NewGuid().ToString("N") + ".png";
-            string newImage = Path.Combine(imagesFolder, imageName);
-            croppedBitmap.Save(newImage, ImageFormat.Png);
 
 
 
@@ -585,6 +547,150 @@ namespace Website.Controllers
 
 
 
+
+
+
+
+
+        private static System.Drawing.Image resizeImage(System.Drawing.Image imgToResize, Size size)
+        {
+            //Get the image current width  
+            int sourceWidth = imgToResize.Width;
+            //Get the image current height  
+            int sourceHeight = imgToResize.Height;
+            float nPercent = 0;
+            float nPercentW = 0;
+            float nPercentH = 0;
+            //Calulate  width with new desired size  
+            nPercentW = ((float)size.Width / (float)sourceWidth);
+            //Calculate height with new desired size  
+            nPercentH = ((float)size.Height / (float)sourceHeight);
+            if (nPercentH < nPercentW)
+                nPercent = nPercentH;
+            else
+                nPercent = nPercentW;
+            //New Width  
+            int destWidth = (int)(sourceWidth * nPercent);
+            //New Height  
+            int destHeight = (int)(sourceHeight * nPercent);
+            Bitmap b = new Bitmap(destWidth, destHeight);
+            Graphics g = Graphics.FromImage((System.Drawing.Image)b);
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            // Draw image with new width and height  
+            g.DrawImage(imgToResize, 0, 0, destWidth, destHeight);
+            g.Dispose();
+            return (System.Drawing.Image)b;
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // ............................................................................Create Delete Account OTP.................................................................
+        [HttpPost]
+        [Route("CreateDeleteAccountOTP")]
+        [Authorize(Policy = "Account Policy")]
+        public async Task<ActionResult> CreateDeleteAccountOTP()
+        {
+            string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            Customer customer = await userManager.FindByIdAsync(customerId);
+            string password = Guid.NewGuid().ToString("N").Substring(0, 10);
+
+            OneTimePassword otp = new OneTimePassword
+            {
+                CustomerId = customerId,
+                Password = password,
+                Type = (int)OtpType.AccountDeletion
+            };
+
+            unitOfWork.OneTimePasswords.Add(otp);
+            await unitOfWork.Save();
+
+            emailService.AddToQueue(EmailType.VerifyEmail, "Verify Account Deletion", new Recipient
+            {
+                FirstName = customer.FirstName,
+                LastName = customer.LastName,
+                Email = customer.Email
+            }, new EmailProperties
+            {
+                Host = GetHost(),
+                Var1 = password
+            });
+            return Ok();
+        }
+
+
+
+        // ..................................................................................Delete Account.....................................................................
+        [HttpPut]
+        [Route("DeleteAccount")]
+        [Authorize(Policy = "Account Policy")]
+        public async Task<ActionResult> DeleteAccount(OTP otp)
+        {
+            // Get the customer from the database based on the customer id from the claims via the access token
+            Customer customer = await userManager.FindByIdAsync(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
+            // Grab all the one-time passwords for the customer who is deleting their account
+            // (typically there should only be ONE one-time password record, but it is possible that there could be more than one)
+            IEnumerable<OneTimePassword> oneTimePasswords = await unitOfWork.OneTimePasswords.GetCollection(x => x.CustomerId == customer.Id && x.Type == (int)OtpType.AccountDeletion);
+
+            // Check to see if the one-time password the customer entered on the form matches any of the one-time passwords in the list
+            OneTimePassword oneTimePassword = oneTimePasswords.FirstOrDefault(x => x.Password == otp.OneTimePassword);
+
+
+            // If the customer is found...
+            if (customer != null)
+            {
+                // If either the password or the one-time password doesn't pass
+                if (!await userManager.CheckPasswordAsync(customer, otp.Password) || oneTimePassword == null)
+                {
+                    // Fail
+                    return Ok(new { failure = true });
+                }
+
+                // Delete customer's account
+                customer.Active = false;
+                unitOfWork.Customers.Update(customer);
+
+                // Remove all one-time passwords
+                unitOfWork.OneTimePasswords.RemoveRange(oneTimePasswords);
+                await unitOfWork.Save();
+
+
+                // Send a confirmation email that the customer account has been deleted
+                emailService.AddToQueue(EmailType.DeleteAccount, "Delete account confirmation", new Recipient
+                {
+                    FirstName = customer.FirstName,
+                    LastName = customer.LastName,
+                    Email = customer.Email
+                }, new EmailProperties
+                { Host = GetHost() });
+
+
+                return Ok(new { failure = false });
+            }
+            return BadRequest();
+        }
 
 
 
@@ -658,15 +764,15 @@ namespace Website.Controllers
         {
             Customer customer = await userManager.FindByIdAsync(User.FindFirst(ClaimTypes.NameIdentifier).Value);
 
-            if(customer != null)
+            if (customer != null)
             {
                 // Get all refresh tokens from this customer except the new refresh token
                 IEnumerable<RefreshToken> tokens = await unitOfWork.RefreshTokens.GetCollection(x => x.CustomerId == customer.Id && x.Id != HttpUtility.UrlDecode(newRefreshToken));
 
                 // Delete the tokens
-                if(tokens != null && tokens.Count() > 0)
+                if (tokens != null && tokens.Count() > 0)
                 {
-                    foreach(RefreshToken refreshToken in tokens)
+                    foreach (RefreshToken refreshToken in tokens)
                     {
                         // Remove the refresh token from the database
                         unitOfWork.RefreshTokens.Remove(refreshToken);
@@ -674,7 +780,7 @@ namespace Website.Controllers
                     }
                 }
             }
-            
+
             return Ok();
         }
 
@@ -799,11 +905,11 @@ namespace Website.Controllers
 
 
 
-        // ..................................................................................New Email.....................................................................
+        // ..............................................................................Create Change Email OTP.....................................................................
         [HttpGet]
-        [Route("NewEmail")]
+        [Route("CreateChangeEmailOTP")]
         [Authorize(Policy = "Account Policy")]
-        public async Task<ActionResult> NewEmail(string email)
+        public async Task<ActionResult> CreateChangeEmailOTP(string email)
         {
             string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
             Customer customer = await userManager.FindByIdAsync(customerId);
@@ -815,8 +921,18 @@ namespace Website.Controllers
 
                 if (result != null) return Ok(true);
 
-                string token = await userManager.GenerateChangeEmailTokenAsync(customer, email);
-                string host = GetHost();
+
+                string password = Guid.NewGuid().ToString("N").Substring(0, 10);
+
+                OneTimePassword otp = new OneTimePassword
+                {
+                    CustomerId = customerId,
+                    Password = password,
+                    Type = (int)OtpType.EmailChange
+                };
+
+                unitOfWork.OneTimePasswords.Add(otp);
+                await unitOfWork.Save();
 
 
                 emailService.AddToQueue(EmailType.VerifyEmail, "Verify Email", new Recipient
@@ -826,19 +942,80 @@ namespace Website.Controllers
                     Email = email
                 }, new EmailProperties
                 {
-                    Host = host,
-                    Var1 = token
+                    Host = GetHost(),
+                    Var1 = password
                 });
-
                 return Ok();
             }
-
-
             return BadRequest();
         }
 
 
 
+
+
+        // ..................................................................................Change Email.....................................................................
+        [HttpPut]
+        [Route("ChangeEmail")]
+        [Authorize(Policy = "Account Policy")]
+        public async Task<ActionResult> ChangeEmail(EmailOTP otp)
+        {
+            // Get the customer from the database based on the customer id from the claims via the access token
+            Customer customer = await userManager.FindByIdAsync(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
+            // Grab all the one-time passwords for the customer who is changing their email
+            // (typically there should only be ONE one-time password record, but it is possible that there could be more than one)
+            IEnumerable<OneTimePassword> oneTimePasswords = await unitOfWork.OneTimePasswords.GetCollection(x => x.CustomerId == customer.Id && x.Type == (int)OtpType.EmailChange);
+
+            // Check to see if the one-time password the customer entered on the form matches any of the one-time passwords in the list
+            OneTimePassword oneTimePassword = oneTimePasswords.FirstOrDefault(x => x.Password == otp.OneTimePassword);
+
+
+            // If the customer is found...
+            if (customer != null)
+            {
+                // If either the password or the one-time password doesn't pass
+                if (!await userManager.CheckPasswordAsync(customer, otp.Password) || oneTimePassword == null)
+                {
+                    // Fail
+                    return Ok(new { failure = true });
+                }
+
+
+                string previousEmail = customer.Email;
+
+                // Change the customer's email
+                customer.Email = otp.Email;
+                unitOfWork.Customers.Update(customer);
+
+                // Remove all one-time passwords
+                unitOfWork.OneTimePasswords.RemoveRange(oneTimePasswords);
+                await unitOfWork.Save();
+
+
+                UpdateCustomerCookie(customer);
+
+
+                // Send a confirmation email that the customer email has been changed
+                if (customer.EmailPrefEmailChange == true)
+                {
+                    emailService.AddToQueue(EmailType.EmailChange, "Email change confirmation", new Recipient
+                    {
+                        FirstName = customer.FirstName,
+                        LastName = customer.LastName,
+                        Email = otp.Email
+                    }, new EmailProperties
+                    {
+                        Host = GetHost(),
+                        Var1 = previousEmail,
+                        Var2 = otp.Email
+                    });
+                }
+
+                return Ok(new { failure = false });
+            }
+            return BadRequest();
+        }
 
 
 

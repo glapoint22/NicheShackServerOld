@@ -29,6 +29,11 @@ namespace DataAccess.Models
         public bool? EmailPrefListNameChange { get; set; }
         public bool? EmailPrefDeletedList { get; set; }
         public bool? EmailPrefReview { get; set; }
+
+        public bool Active { get; set; }
+
+
+        public virtual ICollection<OneTimePassword> OneTimePassword { get; set; }
         public virtual ICollection<ListCollaborator> ListCollaborators { get; set; }
         public virtual ICollection<RefreshToken> RefreshTokens { get; set; }
         public virtual ICollection<ProductOrder> ProductOrders { get; set; }
@@ -38,6 +43,7 @@ namespace DataAccess.Models
 
         public Customer()
         {
+            OneTimePassword = new HashSet<OneTimePassword>();
             ListCollaborators = new HashSet<ListCollaborator>();
             RefreshTokens = new HashSet<RefreshToken>();
             ProductOrders = new HashSet<ProductOrder>();

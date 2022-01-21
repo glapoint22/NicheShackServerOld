@@ -61,6 +61,9 @@ namespace DataAccess.Models
         public virtual DbSet<OrderProduct> OrderProducts { get; set; }
 
 
+        public virtual DbSet<OneTimePassword> OneTimePasswords { get; set; }
+
+
         public virtual DbSet<Page> Pages { get; set; }
 
 
@@ -248,6 +251,8 @@ namespace DataAccess.Models
                     x.EmailPrefReview
                 })
                 .IsClustered(false);
+
+                entity.Property(e => e.Active).HasDefaultValue(true);
             });
 
 

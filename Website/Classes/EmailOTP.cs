@@ -2,12 +2,9 @@
 
 namespace Website.Classes
 {
-    public struct UpdatedEmail
+    public class EmailOTP : OTP
     {
         [EmailAddress]
         public string Email { get; set; }
-        [Password]
-        public string Password { get; set; }
-        public string Token { get; set; }
     }
 }

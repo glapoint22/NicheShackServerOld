@@ -41,6 +41,8 @@
     <Compile Remove="Migrations\20211121225830_Collaborators.Designer.cs" />
     <Compile Remove="Migrations\20211121230319_Collaborators.cs" />
     <Compile Remove="Migrations\20211121230319_Collaborators.Designer.cs" />
+    <Compile Remove="Migrations\20220118192303_OneTimePassword.cs" />
+    <Compile Remove="Migrations\20220118192303_OneTimePassword.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>
