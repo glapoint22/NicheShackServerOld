@@ -132,16 +132,16 @@ namespace Website.Repositories
         public async Task<IEnumerable<ListProductViewModel>> GetListProducts(IEnumerable<int> collaboratorIds, string customerId, string sort)
         {
             // Gets products based on collaborators from a list.
-            var products = await context.ListProducts
+            return await context.ListProducts
                 .AsNoTracking()
                 .OrderBy(new ListProductViewModel(sort))
                 .Where(x => collaboratorIds
                     .Contains(x.CollaboratorId))
-                .Select(x => new
+                .Select(x => new ListProductViewModel
                 {
                     Id = x.Product.Id,
                     UrlId = x.Product.UrlId,
-                    Title = x.Product.Name,
+                    Name = x.Product.Name,
                     Rating = x.Product.Rating,
                     TotalReviews = x.Product.TotalReviews,
                     MinPrice = x.Product.MinPrice,
@@ -163,25 +163,14 @@ namespace Website.Repositories
                         Name = x.Product.Media.Name,
                         Url = x.Product.Media.Image
                     },
-                    UrlTitle = x.Product.UrlName
+                    UrlName = x.Product.UrlName,
+                    OneStar = x.Product.OneStar,
+                    TwoStars = x.Product.TwoStars,
+                    ThreeStars = x.Product.ThreeStars,
+                    FourStars = x.Product.FourStars,
+                    FiveStars = x.Product.FiveStars
                 })
                 .ToListAsync();
-
-            return products.Select(x => new ListProductViewModel
-            {
-                Id = x.Id,
-                UrlId = x.UrlId,
-                Title = x.Title,
-                Rating = x.Rating,
-                TotalReviews = x.TotalReviews,
-                MinPrice = x.MinPrice,
-                MaxPrice = x.MaxPrice,
-                DateAdded = x.DateAdded,
-                Collaborator = x.Collaborator,
-                Hoplink = x.Hoplink,
-                Image = x.Image,
-                UrlTitle = x.UrlTitle
-            }).ToList();
         }
     }
 }

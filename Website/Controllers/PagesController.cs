@@ -63,18 +63,20 @@ namespace Website.Controllers
                 if (pageId > 0)
                 {
                     pageContent = await unitOfWork.Pages.Get(x => x.Id == pageId && x.DisplayType == (int)PageDisplayType.Search, x => x.Content);
-
-                    if (pageContent != null)
-                    {
-                        return Ok(await pageService.GePage(pageContent, queryParams));
-                    }
                 }
             }
 
+            if (pageContent == null)
+            {
+                pageContent = await unitOfWork.Pages.Get(x => x.DisplayType == (int)PageDisplayType.Grid, x => x.Content);
+            }
 
-            pageContent = await unitOfWork.Pages.Get(x => x.DisplayType == (int)PageDisplayType.Grid, x => x.Content);
 
-            return Ok(await pageService.GePage(pageContent, queryParams));
+
+            return Ok(new
+            {
+                Page = await pageService.GePage(pageContent, queryParams)
+            });
         }
 
 
@@ -92,7 +94,7 @@ namespace Website.Controllers
             string pageContent = null;
             int id;
 
-            if(queryParams.CategoryId != null)
+            if (queryParams.CategoryId != null)
             {
                 id = await unitOfWork.Categories.Get(x => x.UrlId == queryParams.CategoryId, x => x.Id);
             }
@@ -110,29 +112,32 @@ namespace Website.Controllers
             {
                 pageContent = await unitOfWork.Pages.Get(x => x.Id == pageId && x.DisplayType == (int)PageDisplayType.Browse, x => x.Content);
 
-                if (pageContent != null)
-                {
-
-                    return Ok(await pageService.GePage(pageContent, queryParams));
-                }
             }
 
-            pageContent = await unitOfWork.Pages.Get(x => x.DisplayType == (int)PageDisplayType.Grid, x => x.Content);
+            if (pageContent == null)
+            {
+                pageContent = await unitOfWork.Pages.Get(x => x.DisplayType == (int)PageDisplayType.Grid, x => x.Content);
+            }
 
-
-            return Ok(await pageService.GePage(pageContent, queryParams));
+            return Ok(new
+            {
+                Page = await pageService.GePage(pageContent, queryParams)
+            });
         }
 
 
 
-        [Route("Params")]
+        [Route("GridData")]
         [HttpPost]
-        public async Task<ActionResult> Params(QueryParams queryParams)
+        public async Task<ActionResult> GridData(QueryParams queryParams)
         {
             GridWidget gridWidget = new GridWidget();
             await gridWidget.SetData(context, queryParams);
 
-            return Ok(gridWidget.GridData);
+            return Ok(new
+            {
+                GridData = gridWidget.GridData
+            });
         }
     }
 }
