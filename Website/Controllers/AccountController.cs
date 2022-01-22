@@ -185,15 +185,10 @@ namespace Website.Controllers
                     new Claim("acc", "customer"),
                     new Claim(ClaimTypes.NameIdentifier, customer.Id),
                     new Claim(JwtRegisteredClaimNames.Iss, configuration["TokenValidation:Site"]),
-                    new Claim(JwtRegisteredClaimNames.Aud, configuration["TokenValidation:Site"])
+                    new Claim(JwtRegisteredClaimNames.Aud, configuration["TokenValidation:Site"]),
+                    new Claim(ClaimTypes.IsPersistent, isPersistent.ToString())
                 };
 
-
-
-            if (isPersistent)
-            {
-                claims.Add(new Claim(ClaimTypes.Expiration, DateTimeOffset.UtcNow.AddDays(Convert.ToInt32(configuration["TokenValidation:RefreshExpiresInDays"])).ToString()));
-            }
 
             return claims;
         }
@@ -441,14 +436,14 @@ namespace Website.Controllers
             }
 
 
-            
+
 
             //Convert from image file to bitmap
             Bitmap tempBitmap;
             using (var memoryStream = new MemoryStream())
             {
                 await imageFile.CopyToAsync(memoryStream);
-     
+
                 using (var tempImage = System.Drawing.Image.FromStream(memoryStream))
                 {
                     tempBitmap = new Bitmap(tempImage);
@@ -470,7 +465,7 @@ namespace Website.Controllers
             }
 
 
-            
+
 
 
 
@@ -717,40 +712,39 @@ namespace Website.Controllers
         public async Task<ActionResult> Refresh()
         {
             string accessToken = GetAccessTokenFromHeader();
-            string oldToken = Request.Cookies["refresh"];
+            string refreshTokenCookie = Request.Cookies["refresh"];
 
             if (accessToken != null)
             {
                 ClaimsPrincipal principal = GetPrincipalFromToken(accessToken);
 
 
-                if (principal != null && oldToken != null)
+                if (principal != null && refreshTokenCookie != null)
                 {
                     string customerId = principal.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier).Value;
 
                     if (customerId != null)
                     {
-                        RefreshToken refreshToken = await unitOfWork.RefreshTokens.Get(x => x.Id == oldToken && x.CustomerId == customerId);
-                        if (refreshToken != null)
+                        RefreshToken refreshToken = await unitOfWork.RefreshTokens.Get(x => x.Id == refreshTokenCookie && x.CustomerId == customerId);
+
+                        if (refreshToken != null && DateTime.Compare(DateTime.UtcNow, refreshToken.Expiration) < 0)
                         {
-                            if (DateTime.Compare(DateTime.UtcNow, refreshToken.Expiration) < 0)
+                            Customer customer = await userManager.FindByIdAsync(customerId);
+
+                            // Generate a new token and refresh token
+                            TokenData tokenData = await GenerateTokenData(customer, principal.Claims);
+
+
+                            SetCookies(tokenData, customer, bool.Parse(principal.FindFirstValue(ClaimTypes.IsPersistent)));
+
+                            return Ok(new
                             {
-                                Customer customer = await userManager.FindByIdAsync(customerId);
-
-                                // Generate a new token and refresh token
-                                TokenData tokenData = await GenerateTokenData(customer, principal.Claims);
-
-                                SetCookies(tokenData, customer, User.HasClaim(x => x.Type == ClaimTypes.Expiration));
-                                return Ok(new
-                                {
-                                    value = tokenData.RefreshToken
-                                });
-                            }
+                                value = tokenData.RefreshToken
+                            });
                         }
                     }
                 }
             }
-
 
             return Ok();
         }
@@ -776,8 +770,9 @@ namespace Website.Controllers
                     {
                         // Remove the refresh token from the database
                         unitOfWork.RefreshTokens.Remove(refreshToken);
-                        await unitOfWork.Save();
                     }
+
+                    await unitOfWork.Save();
                 }
             }
 
