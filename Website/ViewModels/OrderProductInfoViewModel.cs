@@ -9,5 +9,7 @@
         public string RebillFrequency { get; set; }
         public double RebillAmount { get; set; }
         public int PaymentsRemaining { get; set; }
+        public string UrlId { get; set; }
+        public string UrlName { get; set; }
     }
 }

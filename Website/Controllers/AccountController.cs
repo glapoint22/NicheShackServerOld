@@ -73,7 +73,7 @@ namespace Website.Controllers
                 List newList = new List
                 {
                     Id = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper(),
-                    Name = "My List",
+                    Name = customer.FirstName + "'s List",
                     Description = string.Empty,
                     CollaborateId = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper()
                 };
@@ -102,17 +102,9 @@ namespace Website.Controllers
                 // The new customer was successfully added to the database
                 return Ok();
             }
-            else
-            {
-                string error = string.Empty;
 
-                if (result.Errors.Count(x => x.Code == "DuplicateEmail") == 1)
-                {
-                    error = "The email address, \"" + account.Email.ToLower() + ",\" already exists with another Niche Shack account. Please use another email address.";
-                }
 
-                return Conflict(error);
-            }
+            return Ok(new { failure = true });
         }
 
 
@@ -129,7 +121,7 @@ namespace Website.Controllers
 
             if (customer != null && !customer.EmailConfirmed)
             {
-                return Unauthorized("This account has not been activated. To activate your account, click on the \"Activate Account\" button in the email that was sent to " + customer.Email + ". ");
+                return Ok(new { notActivated = true });
             }
 
             // If the customer is in the database and the password is valid, create claims for the access token
@@ -144,7 +136,7 @@ namespace Website.Controllers
                 return Ok();
             }
 
-            return Conflict("Your password and email do not match. Please try again.");
+            return Ok(new { noMatch = true });
         }
 
 
@@ -272,7 +264,6 @@ namespace Website.Controllers
 
             }
 
-
             return BadRequest();
         }
 
@@ -396,7 +387,7 @@ namespace Website.Controllers
                 }
             }
 
-            return BadRequest();
+            return Ok(true);
         }
 
 
@@ -547,35 +538,35 @@ namespace Website.Controllers
 
 
 
-        private static System.Drawing.Image resizeImage(System.Drawing.Image imgToResize, Size size)
-        {
-            //Get the image current width  
-            int sourceWidth = imgToResize.Width;
-            //Get the image current height  
-            int sourceHeight = imgToResize.Height;
-            float nPercent = 0;
-            float nPercentW = 0;
-            float nPercentH = 0;
-            //Calulate  width with new desired size  
-            nPercentW = ((float)size.Width / (float)sourceWidth);
-            //Calculate height with new desired size  
-            nPercentH = ((float)size.Height / (float)sourceHeight);
-            if (nPercentH < nPercentW)
-                nPercent = nPercentH;
-            else
-                nPercent = nPercentW;
-            //New Width  
-            int destWidth = (int)(sourceWidth * nPercent);
-            //New Height  
-            int destHeight = (int)(sourceHeight * nPercent);
-            Bitmap b = new Bitmap(destWidth, destHeight);
-            Graphics g = Graphics.FromImage((System.Drawing.Image)b);
-            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-            // Draw image with new width and height  
-            g.DrawImage(imgToResize, 0, 0, destWidth, destHeight);
-            g.Dispose();
-            return (System.Drawing.Image)b;
-        }
+        //private static System.Drawing.Image resizeImage(System.Drawing.Image imgToResize, Size size)
+        //{
+        //    //Get the image current width  
+        //    int sourceWidth = imgToResize.Width;
+        //    //Get the image current height  
+        //    int sourceHeight = imgToResize.Height;
+        //    float nPercent = 0;
+        //    float nPercentW = 0;
+        //    float nPercentH = 0;
+        //    //Calulate  width with new desired size  
+        //    nPercentW = ((float)size.Width / (float)sourceWidth);
+        //    //Calculate height with new desired size  
+        //    nPercentH = ((float)size.Height / (float)sourceHeight);
+        //    if (nPercentH < nPercentW)
+        //        nPercent = nPercentH;
+        //    else
+        //        nPercent = nPercentW;
+        //    //New Width  
+        //    int destWidth = (int)(sourceWidth * nPercent);
+        //    //New Height  
+        //    int destHeight = (int)(sourceHeight * nPercent);
+        //    Bitmap b = new Bitmap(destWidth, destHeight);
+        //    Graphics g = Graphics.FromImage((System.Drawing.Image)b);
+        //    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+        //    // Draw image with new width and height  
+        //    g.DrawImage(imgToResize, 0, 0, destWidth, destHeight);
+        //    g.Dispose();
+        //    return (System.Drawing.Image)b;
+        //}
 
 
 
@@ -663,14 +654,6 @@ namespace Website.Controllers
                     return Ok(new { failure = true });
                 }
 
-                // Delete customer's account
-                customer.Active = false;
-                unitOfWork.Customers.Update(customer);
-
-                // Remove all one-time passwords
-                unitOfWork.OneTimePasswords.RemoveRange(oneTimePasswords);
-                await unitOfWork.Save();
-
 
                 // Send a confirmation email that the customer account has been deleted
                 emailService.AddToQueue(EmailType.DeleteAccount, "Delete account confirmation", new Recipient
@@ -680,6 +663,18 @@ namespace Website.Controllers
                     Email = customer.Email
                 }, new EmailProperties
                 { Host = GetHost() });
+
+                // Grab all the lists from this customer
+                IEnumerable<List> lists = await unitOfWork.Collaborators.GetCollection(x => x.CustomerId == customer.Id && x.IsOwner, x => x.List);
+
+                // Remove the lists
+                unitOfWork.Lists.RemoveRange(lists);
+
+                // Remove the customer
+                unitOfWork.Customers.Remove(customer);
+
+
+                await unitOfWork.Save();
 
 
                 return Ok(new { failure = false });
@@ -886,10 +881,12 @@ namespace Website.Controllers
             if (customer != null)
             {
                 await SendResetPasswordEmail(customer);
+
+                return Ok();
             }
 
 
-            return Ok();
+            return Ok(true);
         }
 
 
@@ -979,8 +976,10 @@ namespace Website.Controllers
 
                 string previousEmail = customer.Email;
 
+
                 // Change the customer's email
                 customer.Email = otp.Email;
+                customer.NormalizedEmail = otp.Email.ToUpper();
                 unitOfWork.Customers.Update(customer);
 
                 // Remove all one-time passwords

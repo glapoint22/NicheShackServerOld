@@ -60,7 +60,9 @@ namespace Website.Repositories
                             } : null,
                             RebillFrequency = y.RebillFrequency,
                             RebillAmount = y.RebillAmount,
-                            PaymentsRemaining = y.PaymentsRemaining
+                            PaymentsRemaining = y.PaymentsRemaining,
+                            UrlId = y.ProductOrder.Product.UrlId,
+                            UrlName = y.ProductOrder.Product.UrlName
                         })
                 })
                 .ToListAsync();
@@ -96,7 +98,7 @@ namespace Website.Repositories
                     } : new ImageViewModel { },
                     Hoplink = x.ProductOrder.Product.Hoplink + (x.ProductOrder.Product.Hoplink.Contains('?') ? "&" : "?") + "tid=" + x.ProductOrder.Product.UrlId + "_" + customerId,
                     OrderNumber = x.OrderId,
-                    ProductUrlId = x.ProductOrder.Product.UrlId,
+                    UrlId = x.ProductOrder.Product.UrlId,
                     UrlName = x.ProductOrder.Product.UrlName
                 })
                 .ToListAsync();
