@@ -11,9 +11,6 @@ using Services;
 using Services.Classes;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
-using Microsoft.EntityFrameworkCore;
-using DataAccess.Classes;
-using System.Linq;
 
 namespace Website.Controllers
 {
@@ -185,7 +182,7 @@ namespace Website.Controllers
 
 
             // Setup the email
-            emailService.SetupEmail(SetupEmail, new EmailSetupParams
+            await SetupEmail(new EmailSetupParams
             {
                 CustomerId = customerId,
                 ProductId = product.Id,
@@ -206,44 +203,36 @@ namespace Website.Controllers
 
 
         // .........................................................................Setup Email.....................................................................
-        private async Task SetupEmail(NicheShackContext context, object state)
+        private async Task SetupEmail(EmailSetupParams emailSetupParams)
         {
-            EmailSetupParams emailSetupParams = (EmailSetupParams)state;
 
-            Recipient recipient = await context.Customers
-                .AsNoTracking()
-                .Where(x => x.Id == emailSetupParams.CustomerId && x.EmailPrefReview == true)
-                .Select(x => new Recipient
-                {
-                    FirstName = x.FirstName,
-                    LastName = x.LastName,
-                    Email = x.Email
-                })
-                .SingleOrDefaultAsync();
+            Recipient recipient = await unitOfWork.Customers.Get(x => x.Id == emailSetupParams.CustomerId && x.EmailPrefReview == true, x => new Recipient
+            {
+                FirstName = x.FirstName,
+                LastName = x.LastName,
+                Email = x.Email
+            });
+
+
 
             if (recipient == null) return;
 
 
-            ProductData product = await context.Products
-                .AsNoTracking()
-                .Where(x => x.Id == emailSetupParams.ProductId)
-                .Select(x => new ProductData
-                {
-                    Name = x.Name,
-                    Image = x.Media.Image,
-                    Url = emailSetupParams.Host + "/" + x.UrlName + "/" + x.UrlId
-                }).SingleAsync();
+            ProductData product = await unitOfWork.Products.Get(x => x.Id == emailSetupParams.ProductId, x => new ProductData
+            {
+                Name = x.Name,
+                Image = x.Media.Image,
+                Url = emailSetupParams.Host + "/" + x.UrlName + "/" + x.UrlId
+            });
 
 
 
 
-
-
-            emailService.AddToQueue(EmailType.Review, "Thank you for reviewing " + product.Name + " on Niche Shack", recipient, new EmailProperties
+            await emailService.SendEmail(EmailType.Review, "Thank you for reviewing " + product.Name + " on Niche Shack", recipient, new EmailProperties
             {
                 Host = emailSetupParams.Host,
                 Product = product,
-                Stars = await GetStarsImage(emailSetupParams.ProductRating, context),
+                Stars = await GetStarsImage(emailSetupParams.ProductRating),
                 Var1 = emailSetupParams.Title,
                 Var2 = emailSetupParams.Text
             });
@@ -252,7 +241,7 @@ namespace Website.Controllers
 
 
 
-        private async Task<string> GetStarsImage(int rating, NicheShackContext context)
+        private async Task<string> GetStarsImage(int rating)
         {
             string imageName = null;
 
@@ -280,11 +269,7 @@ namespace Website.Controllers
             }
 
 
-            return await context.Media
-                .AsNoTracking()
-                .Where(x => x.Name == imageName)
-                .Select(x => x.Image)
-                .SingleAsync();
+            return await unitOfWork.Media.Get(x => x.Name == imageName, x => x.Image);
 
         }
 

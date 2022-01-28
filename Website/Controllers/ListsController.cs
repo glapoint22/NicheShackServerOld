@@ -8,14 +8,12 @@ using Microsoft.AspNetCore.Mvc;
 using Website.Classes;
 using DataAccess.Models;
 using Website.Repositories;
-using Website.ViewModels;
 using DataAccess.ViewModels;
 using Services;
 using Services.Classes;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 
 namespace Website.Controllers
 {
@@ -68,10 +66,10 @@ namespace Website.Controllers
             string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
 
-            return Ok(await unitOfWork.Collaborators.Get(x => x.CustomerId == customerId && x.IsOwner, x => new
+            return Ok(new
             {
-                id = x.ListId
-            }));
+                id = await unitOfWork.Lists.FirstList(customerId)
+            });
         }
 
 
@@ -270,7 +268,7 @@ namespace Website.Controllers
                 // Setup the email
                 if (previousName != list.Name)
                 {
-                    emailService.SetupEmail(SetupChangedListName, new EmailSetupParams
+                    await SetupChangedListName(new EmailSetupParams
                     {
                         Host = GetHost(),
                         CustomerId = User.FindFirst(ClaimTypes.NameIdentifier).Value,
@@ -278,9 +276,9 @@ namespace Website.Controllers
                         Var1 = previousName,
                         Var2 = list.Name
                     });
+
+
                 }
-
-
 
 
                 return Ok(new
@@ -302,20 +300,17 @@ namespace Website.Controllers
 
 
         // .........................................................................Setup Changed List Name.....................................................................
-        private async Task SetupChangedListName(NicheShackContext context, object state)
+        private async Task SetupChangedListName(EmailSetupParams emailSetupParams)
         {
-            EmailSetupParams emailSetupParams = (EmailSetupParams)state;
-
-            List<string> recipientIds = await GetRecipientIds(context, EmailType.ListNameChange, emailSetupParams.ListId1, emailSetupParams.CustomerId);
-            EmailParams emailParams = await GetEmailParams(context, emailSetupParams.CustomerId, emailSetupParams.ListId1, emailSetupParams.Host, recipientIds);
+            List<string> recipientIds = await unitOfWork.Lists.GetRecipientIds(EmailType.ListNameChange, emailSetupParams.ListId1, emailSetupParams.CustomerId);
+            EmailParams emailParams = await unitOfWork.Lists.GetEmailParams(emailSetupParams.CustomerId, emailSetupParams.ListId1, emailSetupParams.Host, recipientIds);
 
             if (emailParams == null) return;
 
 
-            // Add email to queue
-            emailService.AddToQueue(EmailType.ListNameChange, "List name changed", emailParams.Recipients, new EmailProperties
+            // Send email
+            await emailService.SendEmail(EmailType.ListNameChange, "List name changed", emailParams.Recipients, new EmailProperties
             {
-                Host = emailSetupParams.Host,
                 Var1 = emailSetupParams.Var1,
                 Var2 = emailSetupParams.Var2,
                 Person = emailParams.Collaborator
@@ -366,10 +361,9 @@ namespace Website.Controllers
 
 
 
-                    // Add email to queue
-                    emailService.AddToQueue(EmailType.DeletedList, "List has been deleted", recipients.Where(x => x.CustomerId != customerId).ToList(), new EmailProperties
+                    // Send Email
+                    await emailService.SendEmail(EmailType.DeletedList, "List has been deleted", recipients.Where(x => x.CustomerId != customerId).ToList(), new EmailProperties
                     {
-                        Host = GetHost(),
                         Person = recipients.Where(x => x.CustomerId == customerId).Select(x => new Person
                         {
                             FirstName = x.FirstName,
@@ -415,9 +409,8 @@ namespace Website.Controllers
                     collaborator.IsRemoved = true;
 
                     // Setup the email
-                    emailService.SetupEmail(SetupRemovedCollaborator, new EmailSetupParams
+                    await SetupRemovedCollaborator(new EmailSetupParams
                     {
-                        Host = GetHost(),
                         CollaboratorId = collaborator.Id,
                         ListId1 = listId
                     });
@@ -452,51 +445,37 @@ namespace Website.Controllers
 
 
         // .........................................................................Setup Removed Collaborator.....................................................................
-        private async Task SetupRemovedCollaborator(NicheShackContext context, object state)
+        private async Task SetupRemovedCollaborator(EmailSetupParams emailSetupParams)
         {
-            EmailSetupParams emailSetupParams = (EmailSetupParams)state;
-
             // Get the customer id
-            string customerId = await context.ListCollaborators
-                .AsNoTracking()
-                .Where(x => x.Id == emailSetupParams.CollaboratorId && x.Customer.EmailPrefRemovedCollaborator == true)
-                .Select(x => x.CustomerId)
-                .SingleOrDefaultAsync();
-
+            string customerId = await unitOfWork.Collaborators.Get(x => x.Id == emailSetupParams.CollaboratorId && x.Customer.EmailPrefRemovedCollaborator == true, x => x.CustomerId);
 
             if (customerId == null) return;
 
 
             // Get the recipient
-            var recipient = await context.Customers
-                .AsNoTracking()
-                .Where(x => x.Id == customerId)
-                .Select(x => new
-                {
-                    firstName = x.FirstName,
-                    lastName = x.LastName,
-                    email = x.Email
-                }).SingleAsync();
+            var recipient = await unitOfWork.Customers.Get(x => x.Id == customerId, x => new
+            {
+                firstName = x.FirstName,
+                lastName = x.LastName,
+                email = x.Email
+            });
 
 
 
             // Get the list
-            string list = await context.Lists
-                .AsNoTracking()
-                .Where(x => x.Id == emailSetupParams.ListId1)
-                .Select(x => x.Name).SingleAsync();
+            string list = await unitOfWork.Lists.Get(x => x.Id == emailSetupParams.ListId1, x => x.Name);
 
 
 
-            // Add email to queue
-            emailService.AddToQueue(EmailType.RemovedCollaborator, "Removed from list", new Recipient
+            // Send email
+            await emailService.SendEmail(EmailType.RemovedCollaborator, "Removed from list", new Recipient
             {
                 Email = recipient.email,
                 FirstName = recipient.firstName,
                 LastName = recipient.lastName
             }, new EmailProperties
             {
-                Host = emailSetupParams.Host,
                 Var1 = list
             });
         }
@@ -581,7 +560,7 @@ namespace Website.Controllers
 
 
             // Setup the email
-            emailService.SetupEmail(SetupAddedListItemEmail, new EmailSetupParams
+            await SetupAddedListItemEmail(new EmailSetupParams
             {
                 ListId1 = newListProduct.ListId,
                 CustomerId = customerId,
@@ -625,7 +604,7 @@ namespace Website.Controllers
 
 
             // Setup the email
-            emailService.SetupEmail(SetupRemovedListItemEmail, new EmailSetupParams
+            await SetupRemovedListItemEmail(new EmailSetupParams
             {
                 ListId1 = listId,
                 CustomerId = User.FindFirst(ClaimTypes.NameIdentifier).Value,
@@ -637,6 +616,20 @@ namespace Website.Controllers
         }
 
 
+
+
+        // .........................................................................Setup Removed List Item Email.....................................................................
+        private async Task SetupRemovedListItemEmail(EmailSetupParams emailSetupParams)
+        {
+            List<string> recipientIds = await unitOfWork.Lists.GetRecipientIds(EmailType.RemovedListItem, emailSetupParams.ListId1, emailSetupParams.CustomerId);
+            EmailParams emailParams = await unitOfWork.Lists.GetEmailParams(emailSetupParams.CustomerId, emailSetupParams.ListId1, emailSetupParams.Host, recipientIds, emailSetupParams.ProductId);
+
+            if (emailParams == null) return;
+
+
+            // Send emails
+            await SendRemovedListItemEmails(emailParams);
+        }
 
 
 
@@ -683,7 +676,7 @@ namespace Website.Controllers
 
 
             // Setup the email
-            emailService.SetupEmail(SetupMovedListItemEmail, new EmailSetupParams
+            await SetupMovedListItemEmail(new EmailSetupParams
             {
                 ListId1 = movedListProduct.FromListId,
                 ListId2 = movedListProduct.ToListId,
@@ -701,182 +694,68 @@ namespace Website.Controllers
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        // .........................................................................Get Email Params.....................................................................
-        private async Task<EmailParams> GetEmailParams(NicheShackContext context, string customerId, string listId, string host, List<string> recipientIds, int? productId = null)
+        // .........................................................................Send Moved List Item Email.....................................................................
+        private async Task SetupMovedListItemEmail(EmailSetupParams emailSetupParams)
         {
-            List<Recipient> recipients = await context.Customers
-                .AsNoTracking()
-                .Where(x => recipientIds.Contains(x.Id))
-                .Select(x => new Recipient
-                {
-                    CustomerId = x.Id,
-                    Email = x.Email,
-                    FirstName = x.FirstName,
-                    LastName = x.LastName
-                }).ToListAsync();
+            IEnumerable<string> fromListCustomerIds = await unitOfWork.Collaborators.GetCollection(x => x.ListId == emailSetupParams.ListId1 && !x.IsRemoved && x.CustomerId != emailSetupParams.CustomerId && x.Customer.EmailPrefMovedListItem == true, x => x.CustomerId);
 
 
+            List<string> bothListRecipientIds = await unitOfWork.Collaborators.GetCollection(x => x.ListId == emailSetupParams.ListId2 && !x.IsRemoved && x.CustomerId != emailSetupParams.CustomerId && fromListCustomerIds.Contains(x.CustomerId) && x.Customer.EmailPrefMovedListItem == true, x => x.CustomerId) as List<string>;
 
 
-
-
-
-
-            // Get the customer that did the action
-            CustomerData collaborator = await context.Customers
-                .AsNoTracking()
-                .Where(x => x.Id == customerId)
-                .Select(x => new CustomerData
-                {
-                    FirstName = x.FirstName,
-                    LastName = x.LastName
-                }).SingleAsync();
-
-
-
-
-
-
-
-
-            // Get the list
-            ListViewModel list = await context.Lists
-                .AsNoTracking()
-                .Where(x => x.Id == listId)
-                .Select(x => new ListViewModel
-                {
-                    Id = x.Id,
-                    Name = x.Name
-                }).SingleAsync();
-
-
-
-
-
-
-
-            // Get the product
-            ProductData product = null;
-            if (productId != null)
+            if (bothListRecipientIds.Count() > 0)
             {
-                product = await context.Products
-                .AsNoTracking()
-                .Where(x => x.Id == productId)
-                .Select(x => new ProductData
-                {
-                    Name = x.Name,
-                    Image = x.Media.Image,
-                    Url = host + "/" + x.UrlName + "/" + x.UrlId
+                EmailParams bothListEmailParams = await unitOfWork.Lists.GetEmailParams(emailSetupParams.CustomerId, emailSetupParams.ListId2, emailSetupParams.Host, bothListRecipientIds, emailSetupParams.ProductId);
 
-                }).SingleAsync();
+
+
+                string fromListName = await unitOfWork.Lists.Get(x => x.Id == emailSetupParams.ListId1, x => x.Name);
+
+
+
+                await emailService.SendEmail(EmailType.MovedListItem, "An item has been moved to another list", bothListEmailParams.Recipients, new EmailProperties
+                {
+                    Host = bothListEmailParams.Host,
+                    Product = bothListEmailParams.Product,
+                    Link = bothListEmailParams.Host + "/account/lists/" + bothListEmailParams.List.Id,
+                    Person = bothListEmailParams.Collaborator,
+                    Var1 = fromListName,
+                    Var2 = bothListEmailParams.List.Name
+                });
+            }
+
+
+            List<string> fromListRecipientIds = await unitOfWork.Lists.GetRecipientIds(EmailType.RemovedListItem, emailSetupParams.ListId1, emailSetupParams.CustomerId);
+            fromListRecipientIds = fromListRecipientIds.Where(x => !bothListRecipientIds.Contains(x)).ToList();
+
+            if (fromListRecipientIds.Count > 0)
+            {
+                EmailParams fromListEmailParams = await unitOfWork.Lists.GetEmailParams(emailSetupParams.CustomerId, emailSetupParams.ListId1, emailSetupParams.Host, fromListRecipientIds, emailSetupParams.ProductId);
+                await SendRemovedListItemEmails(fromListEmailParams);
             }
 
 
 
 
 
+            List<string> toListRecipientIds = await unitOfWork.Lists.GetRecipientIds(EmailType.AddedListItem, emailSetupParams.ListId2, emailSetupParams.CustomerId);
+            toListRecipientIds = toListRecipientIds.Where(x => !bothListRecipientIds.Contains(x)).ToList();
 
-
-            return new EmailParams
+            if (toListRecipientIds.Count > 0)
             {
-                Collaborator = collaborator,
-                List = list,
-                Product = product,
-                Recipients = recipients,
-                Host = host
-            };
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-        // .........................................................................Get Recipient Ids.....................................................................
-        private async Task<List<string>> GetRecipientIds(NicheShackContext context, EmailType emailType, string listId, string customerId)
-        {
-            Expression<Func<ListCollaborator, bool>> predicate = null;
-
-            switch (emailType)
-            {
-                case EmailType.NewCollaborator:
-                    predicate = x => x.Customer.EmailPrefNewCollaborator == true;
-                    break;
-                case EmailType.RemovedListItem:
-                    predicate = x => x.Customer.EmailPrefRemovedListItem == true;
-                    break;
-                case EmailType.AddedListItem:
-                    predicate = x => x.Customer.EmailPrefAddedListItem == true;
-                    break;
-                case EmailType.ListNameChange:
-                    predicate = x => x.Customer.EmailPrefListNameChange == true;
-                    break;
+                EmailParams toListEmailParams = await unitOfWork.Lists.GetEmailParams(emailSetupParams.CustomerId, emailSetupParams.ListId2, emailSetupParams.Host, toListRecipientIds, emailSetupParams.ProductId);
+                await SendAddedListItemEmails(toListEmailParams);
             }
-
-            return await context.ListCollaborators
-                .AsNoTracking()
-                .Where(x => x.ListId == listId && x.CustomerId != customerId && !x.IsRemoved)
-                .Where(predicate)
-                .Select(x => x.CustomerId)
-                .ToListAsync();
         }
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-        // .........................................................................Setup Removed List Item Email.....................................................................
-        private async Task SetupRemovedListItemEmail(NicheShackContext context, object state)
+        // .........................................................................Send Removed List Item Emails.....................................................................
+        private async Task SendRemovedListItemEmails(EmailParams emailParams)
         {
-            EmailSetupParams emailSetupParams = (EmailSetupParams)state;
-
-            List<string> recipientIds = await GetRecipientIds(context, EmailType.RemovedListItem, emailSetupParams.ListId1, emailSetupParams.CustomerId);
-            EmailParams emailParams = await GetEmailParams(context, emailSetupParams.CustomerId, emailSetupParams.ListId1, emailSetupParams.Host, recipientIds, emailSetupParams.ProductId);
-
-            if (emailParams == null) return;
-
-
-            // Add emails to the queue
-            SubmitRemovedListItemEmailsToQueue(emailParams);
-        }
-
-
-
-
-        // .........................................................................Submit Removed List Item Emails To Queue.....................................................................
-        private void SubmitRemovedListItemEmailsToQueue(EmailParams emailParams)
-        {
-            emailService.AddToQueue(EmailType.RemovedListItem, "An item has been removed from your list", emailParams.Recipients, new EmailProperties
+            await emailService.SendEmail(EmailType.RemovedListItem, "Item removed from list", emailParams.Recipients, new EmailProperties
             {
                 Host = emailParams.Host,
                 Product = emailParams.Product,
@@ -890,18 +769,16 @@ namespace Website.Controllers
 
 
         // .........................................................................Setup Added List Item Email.....................................................................
-        private async Task SetupAddedListItemEmail(NicheShackContext context, object state)
+        private async Task SetupAddedListItemEmail(EmailSetupParams emailSetupParams)
         {
-            EmailSetupParams emailSetupParams = (EmailSetupParams)state;
-
-            List<string> recipientIds = await GetRecipientIds(context, EmailType.AddedListItem, emailSetupParams.ListId1, emailSetupParams.CustomerId);
-            EmailParams emailParams = await GetEmailParams(context, emailSetupParams.CustomerId, emailSetupParams.ListId1, emailSetupParams.Host, recipientIds, emailSetupParams.ProductId);
+            List<string> recipientIds = await unitOfWork.Lists.GetRecipientIds(EmailType.AddedListItem, emailSetupParams.ListId1, emailSetupParams.CustomerId);
+            EmailParams emailParams = await unitOfWork.Lists.GetEmailParams(emailSetupParams.CustomerId, emailSetupParams.ListId1, emailSetupParams.Host, recipientIds, emailSetupParams.ProductId);
 
             if (emailParams == null) return;
 
 
-            // Add emails to the queue
-            SubmitAddedListItemEmailsToQueue(emailParams);
+            // Send emails
+            await SendAddedListItemEmails(emailParams);
         }
 
 
@@ -910,10 +787,10 @@ namespace Website.Controllers
 
 
 
-        // .........................................................................Submit Added List Item Emails To Queue.....................................................................
-        private void SubmitAddedListItemEmailsToQueue(EmailParams emailParams)
+        // .........................................................................Send Added List Item Emails.....................................................................
+        private async Task SendAddedListItemEmails(EmailParams emailParams)
         {
-            emailService.AddToQueue(EmailType.AddedListItem, "An item has been added to your list", emailParams.Recipients, new EmailProperties
+            await emailService.SendEmail(EmailType.AddedListItem, "Item added to list", emailParams.Recipients, new EmailProperties
             {
                 Host = emailParams.Host,
                 Product = emailParams.Product,
@@ -928,75 +805,6 @@ namespace Website.Controllers
 
 
 
-
-
-
-
-
-
-
-        // .........................................................................Send Moved List Item Email.....................................................................
-        private async Task SetupMovedListItemEmail(NicheShackContext context, object state)
-        {
-            EmailSetupParams emailSetupParams = (EmailSetupParams)state;
-
-
-            List<string> fromListCustomerIds = await context.ListCollaborators
-                .AsNoTracking()
-                .Where(x => x.ListId == emailSetupParams.ListId1 && !x.IsRemoved && x.CustomerId != emailSetupParams.CustomerId && x.Customer.EmailPrefMovedListItem == true)
-                .Select(x => x.CustomerId)
-                .ToListAsync();
-
-            List<string> bothListRecipientIds = await context.ListCollaborators
-                .AsNoTracking()
-                .Where(x => x.ListId == emailSetupParams.ListId2 && !x.IsRemoved && x.CustomerId != emailSetupParams.CustomerId && fromListCustomerIds.Contains(x.CustomerId) && x.Customer.EmailPrefMovedListItem == true)
-                .Select(x => x.CustomerId)
-                .ToListAsync();
-
-            if (bothListRecipientIds.Count > 0)
-            {
-                EmailParams bothListEmailParams = await GetEmailParams(context, emailSetupParams.CustomerId, emailSetupParams.ListId2, emailSetupParams.Host, bothListRecipientIds, emailSetupParams.ProductId);
-
-                string fromListName = await context.Lists
-                    .AsNoTracking()
-                    .Where(x => x.Id == emailSetupParams.ListId1)
-                    .Select(x => x.Name)
-                    .SingleAsync();
-
-                emailService.AddToQueue(EmailType.MovedListItem, "An item has been moved to another list", bothListEmailParams.Recipients, new EmailProperties
-                {
-                    Host = bothListEmailParams.Host,
-                    Product = bothListEmailParams.Product,
-                    Link = bothListEmailParams.Host + "/account/lists/" + bothListEmailParams.List.Id,
-                    Person = bothListEmailParams.Collaborator,
-                    Var1 = fromListName,
-                    Var2 = bothListEmailParams.List.Name
-                });
-            }
-
-
-            List<string> fromListRecipientIds = await GetRecipientIds(context, EmailType.RemovedListItem, emailSetupParams.ListId1, emailSetupParams.CustomerId);
-            fromListRecipientIds = fromListRecipientIds.Where(x => !bothListRecipientIds.Contains(x)).ToList();
-
-            if (fromListRecipientIds.Count > 0)
-            {
-                EmailParams fromListEmailParams = await GetEmailParams(context, emailSetupParams.CustomerId, emailSetupParams.ListId1, emailSetupParams.Host, fromListRecipientIds, emailSetupParams.ProductId);
-                SubmitRemovedListItemEmailsToQueue(fromListEmailParams);
-            }
-
-
-
-
-
-            List<string> toListRecipientIds = await GetRecipientIds(context, EmailType.AddedListItem, emailSetupParams.ListId2, emailSetupParams.CustomerId);
-            toListRecipientIds = toListRecipientIds.Where(x => !bothListRecipientIds.Contains(x)).ToList();
-
-            if (toListRecipientIds.Count > 0)
-            {
-                EmailParams toListEmailParams = await GetEmailParams(context, emailSetupParams.CustomerId, emailSetupParams.ListId2, emailSetupParams.Host, toListRecipientIds, emailSetupParams.ProductId);
-                SubmitAddedListItemEmailsToQueue(toListEmailParams);
-            }
-        }
 
 
 
@@ -1094,7 +902,7 @@ namespace Website.Controllers
 
 
             // Setup the email
-            emailService.SetupEmail(SetupAddedCollaboratorEmail, new EmailSetupParams
+            await SetupAddedCollaboratorEmail(new EmailSetupParams
             {
                 ListId1 = list.id,
                 Host = GetHost(),
@@ -1119,19 +927,18 @@ namespace Website.Controllers
 
 
         // .........................................................................Setup Added Collaborator Email.....................................................................
-        private async Task SetupAddedCollaboratorEmail(NicheShackContext context, object state)
+        private async Task SetupAddedCollaboratorEmail(EmailSetupParams emailSetupParams)
         {
-            EmailSetupParams emailSetupParams = (EmailSetupParams)state;
 
-            List<string> recipientIds = await GetRecipientIds(context, EmailType.NewCollaborator, emailSetupParams.ListId1, emailSetupParams.CustomerId);
-            EmailParams emailParams = await GetEmailParams(context, emailSetupParams.CustomerId, emailSetupParams.ListId1, emailSetupParams.Host, recipientIds);
+
+            List<string> recipientIds = await unitOfWork.Lists.GetRecipientIds(EmailType.NewCollaborator, emailSetupParams.ListId1, emailSetupParams.CustomerId);
+            EmailParams emailParams = await unitOfWork.Lists.GetEmailParams(emailSetupParams.CustomerId, emailSetupParams.ListId1, emailSetupParams.Host, recipientIds);
 
             if (emailParams == null) return;
 
 
-            emailService.AddToQueue(EmailType.NewCollaborator, "A new Collaborator has joined your list", emailParams.Recipients, new EmailProperties
+            await emailService.SendEmail(EmailType.NewCollaborator, "A new Collaborator has joined your list", emailParams.Recipients, new EmailProperties
             {
-                Host = emailParams.Host,
                 Link = emailParams.Host + "/account/lists/" + emailParams.List.Id,
                 Person = emailParams.Collaborator,
                 Var1 = emailParams.List.Name
@@ -1155,18 +962,5 @@ namespace Website.Controllers
 
             return HttpContext.Request.Scheme + "://" + HttpContext.Request.Host.Value;
         }
-    }
-
-
-
-
-
-    class EmailParams
-    {
-        public Person Collaborator { get; set; }
-        public ListViewModel List { get; set; }
-        public ProductData Product { get; set; }
-        public IEnumerable<Recipient> Recipients { get; set; }
-        public string Host { get; set; }
     }
 }

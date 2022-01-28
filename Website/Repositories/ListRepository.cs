@@ -8,6 +8,8 @@ using DataAccess.Models;
 using DataAccess.Repositories;
 using DataAccess.Classes;
 using Website.ViewModels;
+using Services.Classes;
+using System.Linq.Expressions;
 
 namespace Website.Repositories
 {
@@ -171,6 +173,148 @@ namespace Website.Repositories
                     FiveStars = x.Product.FiveStars
                 })
                 .ToListAsync();
+        }
+
+
+
+
+
+
+        // ................................................................................Get Recipient Ids.....................................................................
+        public async Task<List<string>> GetRecipientIds(EmailType emailType, string listId, string customerId)
+        {
+            Expression<Func<ListCollaborator, bool>> predicate = null;
+
+            switch (emailType)
+            {
+                case EmailType.NewCollaborator:
+                    predicate = x => x.Customer.EmailPrefNewCollaborator == true;
+                    break;
+                case EmailType.RemovedListItem:
+                    predicate = x => x.Customer.EmailPrefRemovedListItem == true;
+                    break;
+                case EmailType.AddedListItem:
+                    predicate = x => x.Customer.EmailPrefAddedListItem == true;
+                    break;
+                case EmailType.ListNameChange:
+                    predicate = x => x.Customer.EmailPrefListNameChange == true;
+                    break;
+            }
+
+            return await context.ListCollaborators
+                .AsNoTracking()
+                .Where(x => x.ListId == listId && x.CustomerId != customerId && !x.IsRemoved)
+                .Where(predicate)
+                .Select(x => x.CustomerId)
+                .ToListAsync();
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // ................................................................................Get Email Params.....................................................................
+        public async Task<EmailParams> GetEmailParams(string customerId, string listId, string host, List<string> recipientIds, int? productId = null)
+        {
+            List<Recipient> recipients = await context.Customers
+                .AsNoTracking()
+                .Where(x => recipientIds.Contains(x.Id))
+                .Select(x => new Recipient
+                {
+                    CustomerId = x.Id,
+                    Email = x.Email,
+                    FirstName = x.FirstName,
+                    LastName = x.LastName
+                }).ToListAsync();
+
+
+
+
+
+
+
+
+            // Get the customer that did the action
+            CustomerData collaborator = await context.Customers
+                .AsNoTracking()
+                .Where(x => x.Id == customerId)
+                .Select(x => new CustomerData
+                {
+                    FirstName = x.FirstName,
+                    LastName = x.LastName
+                }).SingleAsync();
+
+
+
+
+
+
+
+
+            // Get the list
+            ListViewModel list = await context.Lists
+                .AsNoTracking()
+                .Where(x => x.Id == listId)
+                .Select(x => new ListViewModel
+                {
+                    Id = x.Id,
+                    Name = x.Name
+                }).SingleAsync();
+
+
+
+
+
+
+
+            // Get the product
+            ProductData product = null;
+            if (productId != null)
+            {
+                product = await context.Products
+                .AsNoTracking()
+                .Where(x => x.Id == productId)
+                .Select(x => new ProductData
+                {
+                    Name = x.Name,
+                    Image = x.Media.Image,
+                    Url = host + "/" + x.UrlName + "/" + x.UrlId
+
+                }).SingleAsync();
+            }
+
+
+
+
+
+
+
+            return new EmailParams
+            {
+                Collaborator = collaborator,
+                List = list,
+                Product = product,
+                Recipients = recipients,
+                Host = host
+            };
+        }
+
+        public async Task<string> FirstList(string customerId)
+        {
+            return await context.ListCollaborators
+                .AsNoTracking()
+                .OrderByDescending(x => x.IsOwner)
+                .Where(x => x.CustomerId == customerId)
+                .Select(x => x.ListId)
+                .FirstOrDefaultAsync();
         }
     }
 }

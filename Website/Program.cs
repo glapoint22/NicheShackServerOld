@@ -26,7 +26,6 @@ namespace Website
                 })
             .ConfigureServices(services =>
             {
-                services.AddHostedService<EmailWorkerService>();
                 services.AddHostedService<SearchSuggestionsWorkerService>();
             });
     }

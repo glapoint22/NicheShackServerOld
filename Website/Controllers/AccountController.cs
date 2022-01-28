@@ -193,43 +193,29 @@ namespace Website.Controllers
         [Route("ActivateAccount")]
         public async Task<ActionResult> ActivateAccount(ActivateAccount activateAccount)
         {
-            if (activateAccount.Email == null || activateAccount.Token == null)
+            if (activateAccount.Email != null && activateAccount.Token != null)
             {
-                return Ok();
-            }
+                Customer customer = await userManager.FindByEmailAsync(activateAccount.Email);
 
-
-            Customer customer = await userManager.FindByEmailAsync(activateAccount.Email);
-
-            if (customer == null)
-            {
-                return Ok();
-            }
-
-
-            if (customer.EmailConfirmed) return Ok();
-
-            var result = await userManager.ConfirmEmailAsync(customer, activateAccount.Token);
-
-            if (result.Succeeded)
-            {
-                List<Claim> claims = GetClaims(customer, true);
-
-                return Ok(new
+                if (customer != null)
                 {
-                    tokenData = await GenerateTokenData(customer, claims),
-                    customer = new CustomerData
+                    var result = await userManager.ConfirmEmailAsync(customer, activateAccount.Token);
+
+                    if (result.Succeeded)
                     {
-                        FirstName = customer.FirstName,
-                        LastName = customer.LastName,
-                        Email = customer.Email,
-                        Image = customer.Image
+                        List<Claim> claims = GetClaims(customer, true);
+
+                        var tokenData = await GenerateTokenData(customer, claims);
+
+                        SetCookies(tokenData, customer, true);
+
+                        return Ok();
                     }
-                });
+                }
             }
 
 
-            return Ok();
+            return BadRequest();
         }
 
 
@@ -291,6 +277,9 @@ namespace Website.Controllers
             // If the customer is found, update his/her name
             if (customer != null)
             {
+                string originalFirstName = customer.FirstName;
+                string originalLastName = customer.LastName;
+
                 customer.FirstName = updatedCustomerName.FirstName;
                 customer.LastName = updatedCustomerName.LastName;
 
@@ -302,12 +291,19 @@ namespace Website.Controllers
                     // Send a confirmation email that the customer name has been changed
                     if (customer.EmailPrefNameChange == true)
                     {
-                        emailService.AddToQueue(EmailType.NameChange, "Name change confirmation", new Recipient
+                        await emailService.SendEmail(EmailType.NameChange, "Name change confirmation", new Recipient
                         {
                             FirstName = customer.FirstName,
                             LastName = customer.LastName,
                             Email = customer.Email
-                        }, new EmailProperties { Host = GetHost() });
+                        }, new EmailProperties
+                        {
+                            Person = new Person
+                            {
+                                FirstName = originalFirstName,
+                                LastName = originalLastName
+                            }
+                        });
                     }
 
 
@@ -374,12 +370,12 @@ namespace Website.Controllers
                     // Send a confirmation email that the customer's password has been changed
                     if (customer.EmailPrefPasswordChange == true)
                     {
-                        emailService.AddToQueue(EmailType.PasswordChange, "Password change confirmation", new Recipient
+                        await emailService.SendEmail(EmailType.PasswordChange, "Password change confirmation", new Recipient
                         {
                             FirstName = customer.FirstName,
                             LastName = customer.LastName,
                             Email = customer.Email
-                        }, new EmailProperties { Host = GetHost() });
+                        });
                     }
 
 
@@ -506,12 +502,12 @@ namespace Website.Controllers
                     // Send a confirmation email that the customer name has been changed
                     if (customer.EmailPrefProfilePicChange == true)
                     {
-                        emailService.AddToQueue(EmailType.ProfilePicChange, "Updated profile picture", new Recipient
+                        await emailService.SendEmail(EmailType.ProfilePicChange, "Updated profile picture", new Recipient
                         {
                             FirstName = customer.FirstName,
                             LastName = customer.LastName,
                             Email = customer.Email
-                        }, new EmailProperties { Host = GetHost() });
+                        });
                     }
 
                     UpdateCustomerCookie(customer);
@@ -600,7 +596,7 @@ namespace Website.Controllers
         {
             string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
             Customer customer = await userManager.FindByIdAsync(customerId);
-            string password = Guid.NewGuid().ToString("N").Substring(0, 10);
+            string password = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper();
 
             OneTimePassword otp = new OneTimePassword
             {
@@ -612,14 +608,13 @@ namespace Website.Controllers
             unitOfWork.OneTimePasswords.Add(otp);
             await unitOfWork.Save();
 
-            emailService.AddToQueue(EmailType.VerifyEmail, "Verify Account Deletion", new Recipient
+            await emailService.SendEmail(EmailType.DeleteAccountOneTimePassword, "One-Time Password", new Recipient
             {
                 FirstName = customer.FirstName,
                 LastName = customer.LastName,
                 Email = customer.Email
             }, new EmailProperties
             {
-                Host = GetHost(),
                 Var1 = password
             });
             return Ok();
@@ -656,13 +651,12 @@ namespace Website.Controllers
 
 
                 // Send a confirmation email that the customer account has been deleted
-                emailService.AddToQueue(EmailType.DeleteAccount, "Delete account confirmation", new Recipient
+                await emailService.SendEmail(EmailType.DeleteAccount, "Delete account confirmation", new Recipient
                 {
                     FirstName = customer.FirstName,
                     LastName = customer.LastName,
                     Email = customer.Email
-                }, new EmailProperties
-                { Host = GetHost() });
+                });
 
                 // Grab all the lists from this customer
                 IEnumerable<List> lists = await unitOfWork.Collaborators.GetCollection(x => x.CustomerId == customer.Id && x.IsOwner, x => x.List);
@@ -914,7 +908,7 @@ namespace Website.Controllers
                 if (result != null) return Ok(true);
 
 
-                string password = Guid.NewGuid().ToString("N").Substring(0, 10);
+                string password = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper();
 
                 OneTimePassword otp = new OneTimePassword
                 {
@@ -927,14 +921,13 @@ namespace Website.Controllers
                 await unitOfWork.Save();
 
 
-                emailService.AddToQueue(EmailType.VerifyEmail, "Verify Email", new Recipient
+                await emailService.SendEmail(EmailType.EmailOneTimePassword, "One-Time Password", new Recipient
                 {
                     FirstName = customer.FirstName,
                     LastName = customer.LastName,
                     Email = email
                 }, new EmailProperties
                 {
-                    Host = GetHost(),
                     Var1 = password
                 });
                 return Ok();
@@ -993,14 +986,13 @@ namespace Website.Controllers
                 // Send a confirmation email that the customer email has been changed
                 if (customer.EmailPrefEmailChange == true)
                 {
-                    emailService.AddToQueue(EmailType.EmailChange, "Email change confirmation", new Recipient
+                    await emailService.SendEmail(EmailType.EmailChange, "Email change confirmation", new Recipient
                     {
                         FirstName = customer.FirstName,
                         LastName = customer.LastName,
                         Email = otp.Email
                     }, new EmailProperties
                     {
-                        Host = GetHost(),
                         Var1 = previousEmail,
                         Var2 = otp.Email
                     });
@@ -1021,14 +1013,13 @@ namespace Website.Controllers
             string token = await userManager.GenerateEmailConfirmationTokenAsync(customer);
             string host = GetHost();
 
-            emailService.AddToQueue(EmailType.AccountActivation, "Activate your new Niche Shack account", new Recipient
+            await emailService.SendEmail(EmailType.AccountActivation, "Activate your new Niche Shack account", new Recipient
             {
                 FirstName = customer.FirstName,
                 LastName = customer.LastName,
                 Email = customer.Email
             }, new EmailProperties
             {
-                Host = host,
                 Link = host + "/activate-account?email=" + HttpUtility.UrlEncode(customer.Email) + "&token=" + HttpUtility.UrlEncode(token)
             });
         }
@@ -1044,14 +1035,13 @@ namespace Website.Controllers
             string token = await userManager.GeneratePasswordResetTokenAsync(customer);
             string host = GetHost();
 
-            emailService.AddToQueue(EmailType.ResetPassword, "Reset Password", new Recipient
+            await emailService.SendEmail(EmailType.ResetPassword, "Reset Password", new Recipient
             {
                 FirstName = customer.FirstName,
                 LastName = customer.LastName,
                 Email = customer.Email
             }, new EmailProperties
             {
-                Host = host,
                 Link = host + "/reset-password?email=" + HttpUtility.UrlEncode(customer.Email) + "&token=" + HttpUtility.UrlEncode(token)
             });
         }

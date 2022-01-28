@@ -9,8 +9,7 @@
         EmailChange,
         PasswordChange,
         ProfilePicChange,
-        VerifyEmail,
-        VerifyAccountDeletion,
+        EmailOneTimePassword,
         NewCollaborator,
         RemovedCollaborator,
         RemovedListItem,
@@ -19,6 +18,7 @@
         ListNameChange,
         DeletedList,
         Review,
-        DeleteAccount
+        DeleteAccount,
+        DeleteAccountOneTimePassword
     }
 }

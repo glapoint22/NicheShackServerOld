@@ -1,6 +1,6 @@
 ﻿namespace Services.Classes
 {
-    public struct EmailProperties
+    public class EmailProperties
     {
         public Recipient Recipient { get; set; }
         public string Host { get; set; }

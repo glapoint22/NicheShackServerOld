@@ -81,7 +81,7 @@ namespace Website
 
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
-            services.AddSingleton<EmailService>();
+            services.AddScoped<EmailService>();
             services.AddSingleton<SearchSuggestionsService>();
             services.AddScoped<QueryService>();
             services.AddScoped<IPageService, PageService>();
