@@ -32,6 +32,7 @@ namespace Website.Repositories
             // Get the list ids
             var listCollaborators = await context.ListCollaborators
                 .AsNoTracking()
+                .OrderByDescending(x => x.IsOwner)
                 .Where(x => x.CustomerId == customerId && !x.IsRemoved)
                 .Select(x => new
                 {
@@ -307,14 +308,27 @@ namespace Website.Repositories
             };
         }
 
+
+
+
+
+
+
+
+
+
+
+        // ................................................................................First List.....................................................................
         public async Task<string> FirstList(string customerId)
         {
-            return await context.ListCollaborators
+            var lists = await context.ListCollaborators
                 .AsNoTracking()
                 .OrderByDescending(x => x.IsOwner)
-                .Where(x => x.CustomerId == customerId)
+                .Where(x => x.CustomerId == customerId && !x.IsRemoved)
                 .Select(x => x.ListId)
-                .FirstOrDefaultAsync();
+                .ToListAsync();
+
+            return lists.FirstOrDefault();
         }
     }
 }
