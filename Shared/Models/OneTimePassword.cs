@@ -14,6 +14,10 @@ namespace DataAccess.Models
         [MaxLength(10)]
         public string Password { get; set; }
         public int Type { get; set; }
+        [Required]
+        public string Token { get; set; }
+        public DateTime Expires { get; set; }
+
 
 
         public virtual Customer Customer { get; set; }

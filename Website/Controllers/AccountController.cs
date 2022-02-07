@@ -23,8 +23,6 @@ using System.Drawing.Imaging;
 using Services;
 using Services.Classes;
 using System.Web;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
 using static Website.Classes.Enums;
 using System.Drawing.Drawing2D;
 
@@ -38,24 +36,139 @@ namespace Website.Controllers
         private readonly IConfiguration configuration;
         private readonly IUnitOfWork unitOfWork;
         private readonly EmailService emailService;
-        private readonly IWebHostEnvironment env;
 
-        public AccountController(UserManager<Customer> userManager, IConfiguration configuration, IUnitOfWork unitOfWork, EmailService emailService, IWebHostEnvironment env)
+        public AccountController(UserManager<Customer> userManager, IConfiguration configuration, IUnitOfWork unitOfWork, EmailService emailService)
         {
             this.userManager = userManager;
             this.configuration = configuration;
             this.unitOfWork = unitOfWork;
             this.emailService = emailService;
-            this.env = env;
+        }
+
+
+        private string CreatePassword()
+        {
+            return Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper();
+        }
+
+        [HttpGet]
+        [Route("ValidateEmail")]
+        public async Task<ActionResult> ValidateEmail(string email)
+        {
+            Customer customer = await userManager.FindByEmailAsync(email);
+
+            if (customer != null) return Ok(new { duplicateEmail = true });
+
+            return Ok();
+        }
+
+
+
+        [HttpGet]
+        [Route("CheckEmail")]
+        public async Task<ActionResult> CheckEmail(string email)
+        {
+            if (await unitOfWork.Customers.Any(x => x.Email == email))
+            {
+                return Ok();
+            }
+
+            return Ok(new { noEmail = true });
+        }
+
+
+
+        [HttpGet]
+        [Route("ValidatePassword")]
+        [Authorize(Policy = "Account Policy")]
+        public async Task<ActionResult> ValidatePassword(string password)
+        {
+            Customer customer = await userManager.FindByIdAsync(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
+            if (customer != null && password != null)
+            {
+
+                if (await userManager.CheckPasswordAsync(customer, password))
+                {
+                    return Ok();
+                }
+
+                return Ok(new { incorrectPassword = true });
+            }
+
+            return BadRequest();
+        }
+
+
+        [HttpGet]
+        [Route("ValidateDeleteAccountOneTimePassword")]
+        [Authorize(Policy = "Account Policy")]
+        public async Task<ActionResult> ValidateDeleteAccountOneTimePassword(string oneTimePassword)
+        {
+            Customer customer = await userManager.FindByIdAsync(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
+            if (customer != null && oneTimePassword != null)
+            {
+                if (await GetOneTimePassword(OtpType.DeleteAccount, customer.Id, oneTimePassword) != null)
+                {
+                    return Ok();
+                }
+
+                return Ok(new { incorrectOneTimePassword = true });
+            }
+
+            return BadRequest();
         }
 
 
 
 
-        // ..................................................................................Register.....................................................................
+
+        [HttpGet]
+        [Route("ValidateEmailChangeOneTimePassword")]
+        [Authorize(Policy = "Account Policy")]
+        public async Task<ActionResult> ValidateEmailChangeOneTimePassword(string oneTimePassword)
+        {
+            Customer customer = await userManager.FindByIdAsync(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
+            if (customer != null && oneTimePassword != null)
+            {
+                if (await GetOneTimePassword(OtpType.EmailChange, customer.Id, oneTimePassword) != null)
+                {
+                    return Ok();
+                }
+
+                return Ok(new { incorrectOneTimePassword = true });
+            }
+
+            return BadRequest();
+        }
+
+
+
+
         [HttpPost]
-        [Route("Register")]
-        public async Task<ActionResult> Register(Account account)
+        [Route("ValidateEmailPassword")]
+        public async Task<ActionResult> ValidateEmailPassword(LogIn logIn)
+        {
+            // Get the customer from the database based on the email address
+            Customer customer = await userManager.FindByEmailAsync(logIn.Email);
+
+
+            // If the customer is in the database and the password is valid
+            if (customer != null && await userManager.CheckPasswordAsync(customer, logIn.Password))
+            {
+                return Ok();
+            }
+
+            return Ok(new { notEmailPasswordMatch = true });
+        }
+
+
+        // ..................................................................................Sign Up.....................................................................
+        [HttpPost]
+        [Route("SignUp")]
+        public async Task<ActionResult> SignUp(Account account)
         {
             Customer customer = account.CreateCustomer();
 
@@ -65,38 +178,13 @@ namespace Website.Controllers
 
             if (result.Succeeded)
             {
+                string oneTimePassword = await SetOneTimePassword(OtpType.ActivateAccount, customer.Id, async () => await userManager.GenerateEmailConfirmationTokenAsync(customer));
+
                 // Send an email to activate the account
-                await SendAccountActivationEmail(customer);
+                await SendAccountActivationEmail(customer, oneTimePassword);
 
-
-                // Create the new list and add it to the database
-                List newList = new List
-                {
-                    Id = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper(),
-                    Name = customer.FirstName + "'s List",
-                    Description = string.Empty,
-                    CollaborateId = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper()
-                };
-
-
-                unitOfWork.Lists.Add(newList);
-
-
-
-                // Set the owner as the first collaborator of the list
-                ListCollaborator collaborator = new ListCollaborator
-                {
-                    CustomerId = customer.Id,
-                    ListId = newList.Id,
-                    IsOwner = true
-                };
-
-                unitOfWork.Collaborators.Add(collaborator);
-
-
-                // Save all updates to the database
-                await unitOfWork.Save();
-
+                // Create the first list
+                await CreateList(customer);
 
 
                 // The new customer was successfully added to the database
@@ -104,46 +192,176 @@ namespace Website.Controllers
             }
 
 
-            return Ok(new { failure = true });
+            return BadRequest();
         }
 
 
 
 
 
-        // ..................................................................................Sign In.....................................................................
-        [HttpPost]
-        [Route("SignIn")]
-        public async Task<ActionResult> SignIn(SignIn signIn)
+        // ..................................................................................Resend Account Activation Email.....................................................................
+        [HttpGet]
+        [Route("ResendAccountActivationEmail")]
+        public async Task<ActionResult> ResendAccountActivationEmail(string email)
         {
             // Get the customer from the database based on the email address
-            Customer customer = await userManager.FindByEmailAsync(signIn.Email);
+            Customer customer = await userManager.FindByEmailAsync(email);
 
-            if (customer != null && !customer.EmailConfirmed)
+
+            if (customer != null)
             {
-                return Ok(new { notActivated = true });
+                string oneTimePassword = await SetOneTimePassword(OtpType.ActivateAccount, customer.Id, async () => await userManager.GenerateEmailConfirmationTokenAsync(customer));
+
+                await SendAccountActivationEmail(customer, oneTimePassword);
             }
 
-            // If the customer is in the database and the password is valid, create claims for the access token
-            if (customer != null && await userManager.CheckPasswordAsync(customer, signIn.Password) && customer.Active)
-            {
-                List<Claim> claims = GetClaims(customer, signIn.IsPersistent);
-
-                var tokenData = await GenerateTokenData(customer, claims);
-
-                SetCookies(tokenData, customer, signIn.IsPersistent);
-
-                return Ok();
-            }
-
-            return Ok(new { noMatch = true });
+            return Ok();
         }
 
 
 
 
 
-        private void SetCookies(TokenData tokenData, Customer customer, bool isPersistent)
+
+        private async Task SendAccountActivationEmail(Customer customer, string oneTimePassword)
+        {
+            await emailService.SendEmail(EmailType.AccountActivation, "Activate your Niche Shack account", new Recipient
+            {
+                FirstName = customer.FirstName,
+                LastName = customer.LastName,
+                Email = customer.Email
+            }, new EmailProperties
+            {
+                Var1 = oneTimePassword
+            });
+        }
+
+
+        // ..................................................................................Create List.....................................................................
+        private async Task CreateList(Customer customer)
+        {
+            List newList = new List
+            {
+                Id = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper(),
+                Name = customer.FirstName + "'s List",
+                Description = string.Empty,
+                CollaborateId = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper()
+            };
+
+
+            unitOfWork.Lists.Add(newList);
+
+
+
+            // Set the owner as the first collaborator of the list
+            ListCollaborator collaborator = new ListCollaborator
+            {
+                CustomerId = customer.Id,
+                ListId = newList.Id,
+                IsOwner = true
+            };
+
+            unitOfWork.Collaborators.Add(collaborator);
+
+
+            // Save all updates to the database
+            await unitOfWork.Save();
+        }
+
+
+
+        // ..................................................................................Log In.....................................................................
+        [HttpPost]
+        [Route("LogIn")]
+        public async Task<ActionResult> LogIn(LogIn logIn)
+        {
+            // Get the customer from the database based on the email address
+            Customer customer = await userManager.FindByEmailAsync(logIn.Email);
+
+
+            if (customer != null)
+            {
+                if (!customer.EmailConfirmed)
+                {
+                    return Ok(new { notActivated = true });
+                }
+
+                if (await userManager.CheckPasswordAsync(customer, logIn.Password) && customer.Active)
+                {
+                    await SetLogIn(customer, logIn.IsPersistent);
+
+                    return Ok();
+                }
+            }
+
+            return BadRequest();
+        }
+
+
+
+
+        // ..................................................................................External Login.....................................................................
+        [HttpPost]
+        [Route("ExternalLogin")]
+        public async Task<IActionResult> ExternalLogin(SocialUser socialUser)
+        {
+            Customer customer = await userManager.FindByEmailAsync(socialUser.Email);
+
+            if (customer == null)
+            {
+                var account = new Account
+                {
+                    FirstName = socialUser.FirstName,
+                    LastName = socialUser.LastName,
+                    Email = socialUser.Email
+                };
+
+                customer = account.CreateCustomer();
+
+                IdentityResult result = await userManager.CreateAsync(customer);
+
+                if (result.Succeeded)
+                {
+                    customer.EmailConfirmed = true;
+
+                    await unitOfWork.Save();
+
+                    // Create the first list
+                    await CreateList(customer);
+                }
+            }
+
+            string provider = socialUser.Provider.Substring(0, 1) + socialUser.Provider.Substring(1).ToLower();
+
+            ExternalLogin externalLogin = new ExternalLogin(provider, await userManager.HasPasswordAsync(customer));
+
+            await SetLogIn(customer, true, externalLogin);
+
+            return Ok();
+        }
+
+
+
+        // ..................................................................................Set LogIn.....................................................................
+        private async Task SetLogIn(Customer customer, bool isPersistent, ExternalLogin externalLogin = null)
+        {
+            List<Claim> claims = GetClaims(customer, isPersistent, externalLogin);
+
+            var tokenData = await GenerateTokenData(customer, claims);
+
+            SetCookies(tokenData, customer, isPersistent, externalLogin);
+        }
+
+
+
+
+
+
+
+
+
+        // ..................................................................................Set Cookies.....................................................................
+        private void SetCookies(TokenData tokenData, Customer customer, bool isPersistent, ExternalLogin externalLogin)
         {
             CookieOptions cookieOptions = new CookieOptions();
 
@@ -157,20 +375,23 @@ namespace Website.Controllers
 
             Response.Cookies.Append("access", tokenData.AccessToken, cookieOptions);
             Response.Cookies.Append("refresh", tokenData.RefreshToken, cookieOptions);
-            Response.Cookies.Append("customer", GetCustomerData(customer), cookieOptions);
+            Response.Cookies.Append("customer", GetCustomerData(customer, externalLogin), cookieOptions);
         }
 
 
 
-        private string GetCustomerData(Customer customer)
+
+
+        // ..................................................................................Get Customer Data.....................................................................
+        private string GetCustomerData(Customer customer, ExternalLogin externalLogin)
         {
-            return customer.FirstName + "," + customer.LastName + "," + customer.Email + "," + customer.Image;
+            return customer.FirstName + "," + customer.LastName + "," + customer.Email + "," + customer.Image + (externalLogin != null && externalLogin.Provider != null ? "," + externalLogin.Provider : "") + (externalLogin != null && externalLogin.HasPassword ? "," + externalLogin.HasPassword : "");
         }
 
 
 
         // ..................................................................................Get Claims.....................................................................
-        private List<Claim> GetClaims(Customer customer, bool isPersistent)
+        private List<Claim> GetClaims(Customer customer, bool isPersistent, ExternalLogin externalLogin)
         {
             List<Claim> claims = new List<Claim>()
                 {
@@ -181,8 +402,112 @@ namespace Website.Controllers
                     new Claim(ClaimTypes.IsPersistent, isPersistent.ToString())
                 };
 
+            if (externalLogin != null)
+            {
+                claims.Add(new Claim("externalLoginProvider", externalLogin.Provider));
+                claims.Add(new Claim("hasPassword", externalLogin.HasPassword.ToString()));
+            }
+
 
             return claims;
+        }
+
+
+
+        private async Task<OneTimePassword> GetOneTimePassword(OtpType otpType, string customerId, string password = null)
+        {
+            OneTimePassword oneTimePassword;
+
+            if (password != null)
+            {
+                oneTimePassword = await unitOfWork.OneTimePasswords.Get(x => x.Password == password && x.Type == (int)otpType && x.CustomerId == customerId);
+            }
+            else
+            {
+                oneTimePassword = await unitOfWork.OneTimePasswords.Get(x => x.Type == (int)otpType && x.CustomerId == customerId);
+            }
+
+
+            if (oneTimePassword == null) return null;
+
+            // The one time password has expired
+            if (DateTime.Compare(DateTime.Now, oneTimePassword.Expires) > 0)
+            {
+                unitOfWork.OneTimePasswords.Remove(oneTimePassword);
+                await unitOfWork.Save();
+
+                return null;
+            }
+
+            return oneTimePassword;
+        }
+
+
+
+        private async Task<string> GetOneTimePasswordToken(string password, OtpType otpType, string customerId)
+        {
+            OneTimePassword oneTimePassword = await GetOneTimePassword(otpType, customerId, password);
+
+            if (oneTimePassword == null) return null;
+
+            string token = oneTimePassword.Token;
+
+            unitOfWork.OneTimePasswords.Remove(oneTimePassword);
+
+            await unitOfWork.Save();
+
+            return token;
+        }
+
+
+        private async Task<string> SetOneTimePassword(OtpType otpType, string customerId, Func<Task<string>> GenerateToken)
+        {
+            OneTimePassword oneTimePassword = await GetOneTimePassword(otpType, customerId);
+
+            if (oneTimePassword == null)
+            {
+                string password = CreatePassword();
+
+                oneTimePassword = new OneTimePassword
+                {
+                    CustomerId = customerId,
+                    Password = password,
+                    Type = (int)otpType,
+                    Token = await GenerateToken(),
+                    Expires = DateTime.Now.AddHours(Convert.ToInt32(configuration["OneTimePasswords:ExpiresInHours"]))
+                };
+
+                unitOfWork.OneTimePasswords.Add(oneTimePassword);
+                await unitOfWork.Save();
+            }
+
+            return oneTimePassword.Password;
+        }
+
+
+
+
+
+
+        [HttpPost]
+        [Route("ValidateActivateAccountOneTimePassword")]
+        public async Task<ActionResult> ValidateActivateAccountOneTimePassword(EmailOTP emailOTP)
+        {
+            Customer customer = await userManager.FindByEmailAsync(emailOTP.Email);
+
+            if (customer != null && emailOTP.OneTimePassword != null)
+            {
+                if (await GetOneTimePassword(OtpType.ActivateAccount, customer.Id, emailOTP.OneTimePassword) != null)
+                {
+                    return Ok();
+                }
+
+                return Ok(new { incorrectOneTimePassword = true });
+            }
+
+            return BadRequest();
+
+
         }
 
 
@@ -193,21 +518,21 @@ namespace Website.Controllers
         [Route("ActivateAccount")]
         public async Task<ActionResult> ActivateAccount(ActivateAccount activateAccount)
         {
-            if (activateAccount.Email != null && activateAccount.Token != null)
+            if (activateAccount.Email != null && activateAccount.OneTimePassword != null)
             {
                 Customer customer = await userManager.FindByEmailAsync(activateAccount.Email);
 
                 if (customer != null)
                 {
-                    var result = await userManager.ConfirmEmailAsync(customer, activateAccount.Token);
+                    string token = await GetOneTimePasswordToken(activateAccount.OneTimePassword, OtpType.ActivateAccount, customer.Id);
 
-                    if (result.Succeeded)
+
+                    if (token != null)
                     {
-                        List<Claim> claims = GetClaims(customer, true);
+                        // Confirm the email
+                        await userManager.ConfirmEmailAsync(customer, token);
 
-                        var tokenData = await GenerateTokenData(customer, claims);
-
-                        SetCookies(tokenData, customer, true);
+                        await SetLogIn(customer, true);
 
                         return Ok();
                     }
@@ -227,31 +552,7 @@ namespace Website.Controllers
 
 
 
-        // ..................................................................................Reset Password.....................................................................
-        [HttpPost]
-        [Route("ResetPassword")]
-        public async Task<ActionResult> ResetPassword(ResetPassword resetPassword)
-        {
-            if (resetPassword.Email != null && resetPassword.Token != null)
-            {
-                Customer customer = await userManager.FindByEmailAsync(resetPassword.Email);
 
-
-                if (customer != null)
-                {
-                    var result = await userManager.ResetPasswordAsync(customer, resetPassword.Token, resetPassword.Password);
-
-
-                    if (result.Succeeded)
-                    {
-                        return Ok();
-                    }
-                }
-
-            }
-
-            return BadRequest();
-        }
 
 
 
@@ -324,7 +625,7 @@ namespace Website.Controllers
 
 
 
-
+        // ..................................................................................Update Customer Cookie.....................................................................
         void UpdateCustomerCookie(Customer customer)
         {
             Claim expiration = User.FindFirst(ClaimTypes.Expiration);
@@ -340,8 +641,9 @@ namespace Website.Controllers
                 };
             }
 
+            ExternalLogin externalLogin = new ExternalLogin(User.FindFirstValue("externalLoginProvider"), User.FindFirstValue("hasPassword") == "True");
 
-            Response.Cookies.Append("customer", GetCustomerData(customer), cookieOptions);
+            Response.Cookies.Append("customer", GetCustomerData(customer, externalLogin), cookieOptions);
         }
 
 
@@ -378,12 +680,11 @@ namespace Website.Controllers
                         });
                     }
 
-
                     return Ok();
                 }
             }
 
-            return Ok(true);
+            return BadRequest();
         }
 
 
@@ -530,64 +831,6 @@ namespace Website.Controllers
 
 
 
-
-
-
-
-        //private static System.Drawing.Image resizeImage(System.Drawing.Image imgToResize, Size size)
-        //{
-        //    //Get the image current width  
-        //    int sourceWidth = imgToResize.Width;
-        //    //Get the image current height  
-        //    int sourceHeight = imgToResize.Height;
-        //    float nPercent = 0;
-        //    float nPercentW = 0;
-        //    float nPercentH = 0;
-        //    //Calulate  width with new desired size  
-        //    nPercentW = ((float)size.Width / (float)sourceWidth);
-        //    //Calculate height with new desired size  
-        //    nPercentH = ((float)size.Height / (float)sourceHeight);
-        //    if (nPercentH < nPercentW)
-        //        nPercent = nPercentH;
-        //    else
-        //        nPercent = nPercentW;
-        //    //New Width  
-        //    int destWidth = (int)(sourceWidth * nPercent);
-        //    //New Height  
-        //    int destHeight = (int)(sourceHeight * nPercent);
-        //    Bitmap b = new Bitmap(destWidth, destHeight);
-        //    Graphics g = Graphics.FromImage((System.Drawing.Image)b);
-        //    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-        //    // Draw image with new width and height  
-        //    g.DrawImage(imgToResize, 0, 0, destWidth, destHeight);
-        //    g.Dispose();
-        //    return (System.Drawing.Image)b;
-        //}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         // ............................................................................Create Delete Account OTP.................................................................
         [HttpPost]
         [Route("CreateDeleteAccountOTP")]
@@ -596,19 +839,12 @@ namespace Website.Controllers
         {
             string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
             Customer customer = await userManager.FindByIdAsync(customerId);
-            string password = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper();
 
-            OneTimePassword otp = new OneTimePassword
-            {
-                CustomerId = customerId,
-                Password = password,
-                Type = (int)OtpType.AccountDeletion
-            };
 
-            unitOfWork.OneTimePasswords.Add(otp);
-            await unitOfWork.Save();
+            string password = await SetOneTimePassword(OtpType.DeleteAccount, customerId, async () => await userManager.GenerateUserTokenAsync(customer, TokenOptions.DefaultProvider, "Delete Account"));
 
-            await emailService.SendEmail(EmailType.DeleteAccountOneTimePassword, "One-Time Password", new Recipient
+
+            await emailService.SendEmail(EmailType.DeleteAccountOneTimePassword, "Delete Account", new Recipient
             {
                 FirstName = customer.FirstName,
                 LastName = customer.LastName,
@@ -631,47 +867,37 @@ namespace Website.Controllers
             // Get the customer from the database based on the customer id from the claims via the access token
             Customer customer = await userManager.FindByIdAsync(User.FindFirst(ClaimTypes.NameIdentifier).Value);
 
-            // Grab all the one-time passwords for the customer who is deleting their account
-            // (typically there should only be ONE one-time password record, but it is possible that there could be more than one)
-            IEnumerable<OneTimePassword> oneTimePasswords = await unitOfWork.OneTimePasswords.GetCollection(x => x.CustomerId == customer.Id && x.Type == (int)OtpType.AccountDeletion);
-
-            // Check to see if the one-time password the customer entered on the form matches any of the one-time passwords in the list
-            OneTimePassword oneTimePassword = oneTimePasswords.FirstOrDefault(x => x.Password == otp.OneTimePassword);
-
 
             // If the customer is found...
             if (customer != null)
             {
-                // If either the password or the one-time password doesn't pass
-                if (!await userManager.CheckPasswordAsync(customer, otp.Password) || oneTimePassword == null)
+                string token = await GetOneTimePasswordToken(otp.OneTimePassword, OtpType.DeleteAccount, customer.Id);
+
+                if (await userManager.VerifyUserTokenAsync(customer, TokenOptions.DefaultProvider, "Delete Account", token) && await userManager.CheckPasswordAsync(customer, otp.Password))
                 {
-                    // Fail
-                    return Ok(new { failure = true });
+                    // Send a confirmation email that the customer account has been deleted
+                    await emailService.SendEmail(EmailType.DeleteAccount, "Delete account confirmation", new Recipient
+                    {
+                        FirstName = customer.FirstName,
+                        LastName = customer.LastName,
+                        Email = customer.Email
+                    });
+
+
+                    // Grab all the lists from this customer
+                    IEnumerable<List> lists = await unitOfWork.Collaborators.GetCollection(x => x.CustomerId == customer.Id && x.IsOwner, x => x.List);
+
+                    // Remove the lists
+                    unitOfWork.Lists.RemoveRange(lists);
+
+                    // Remove the customer
+                    unitOfWork.Customers.Remove(customer);
+
+
+                    await unitOfWork.Save();
+
+                    return Ok();
                 }
-
-
-                // Send a confirmation email that the customer account has been deleted
-                await emailService.SendEmail(EmailType.DeleteAccount, "Delete account confirmation", new Recipient
-                {
-                    FirstName = customer.FirstName,
-                    LastName = customer.LastName,
-                    Email = customer.Email
-                });
-
-                // Grab all the lists from this customer
-                IEnumerable<List> lists = await unitOfWork.Collaborators.GetCollection(x => x.CustomerId == customer.Id && x.IsOwner, x => x.List);
-
-                // Remove the lists
-                unitOfWork.Lists.RemoveRange(lists);
-
-                // Remove the customer
-                unitOfWork.Customers.Remove(customer);
-
-
-                await unitOfWork.Save();
-
-
-                return Ok(new { failure = false });
             }
             return BadRequest();
         }
@@ -679,8 +905,29 @@ namespace Website.Controllers
 
 
 
+        [HttpGet]
+        [Route("AddPassword")]
+        [Authorize(Policy = "Account Policy")]
+        public async Task<ActionResult> AddPassword(string password)
+        {
+            // Get the customer from the database based on the customer id from the claims via the access token
+            Customer customer = await userManager.FindByIdAsync(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
+            if (customer != null && password != null)
+            {
+                IdentityResult result = await userManager.AddPasswordAsync(customer, password);
 
 
+                if (result.Succeeded)
+                {
+                    ExternalLogin externalLogin = new ExternalLogin(User.FindFirstValue("externalLoginProvider"), true);
+                    await SetLogIn(customer, bool.Parse(User.FindFirstValue(ClaimTypes.IsPersistent)), externalLogin);
+                    return Ok();
+                }
+            }
+
+            return BadRequest();
+        }
 
 
 
@@ -724,7 +971,9 @@ namespace Website.Controllers
                             TokenData tokenData = await GenerateTokenData(customer, principal.Claims);
 
 
-                            SetCookies(tokenData, customer, bool.Parse(principal.FindFirstValue(ClaimTypes.IsPersistent)));
+                            ExternalLogin externalLogin = new ExternalLogin(principal.FindFirstValue("externalLoginProvider"), principal.FindFirstValue("hasPassword") == "True");
+
+                            SetCookies(tokenData, customer, bool.Parse(principal.FindFirstValue(ClaimTypes.IsPersistent)), externalLogin);
 
                             return Ok(new
                             {
@@ -841,47 +1090,8 @@ namespace Website.Controllers
 
 
 
-        // ..................................................................................Resend Account Activation Email.....................................................................
-        [HttpGet]
-        [Route("ResendAccountActivationEmail")]
-        public async Task<ActionResult> ResendAccountActivationEmail(string email)
-        {
-            // Get the customer from the database based on the email address
-            Customer customer = await userManager.FindByEmailAsync(email);
-
-            if (customer != null)
-            {
-                await SendAccountActivationEmail(customer);
-            }
 
 
-            return Ok();
-        }
-
-
-
-
-
-
-
-        // ..................................................................................Forget Password.....................................................................
-        [HttpGet]
-        [Route("ForgetPassword")]
-        public async Task<ActionResult> ForgetPassword(string email)
-        {
-            // Get the customer from the database based on the email address
-            Customer customer = await userManager.FindByEmailAsync(email);
-
-            if (customer != null)
-            {
-                await SendResetPasswordEmail(customer);
-
-                return Ok();
-            }
-
-
-            return Ok(true);
-        }
 
 
 
@@ -905,23 +1115,12 @@ namespace Website.Controllers
             {
                 var result = await userManager.FindByEmailAsync(email);
 
-                if (result != null) return Ok(true);
+                if (result != null) return Ok(new { duplicateEmail = true });
+
+                string password = await SetOneTimePassword(OtpType.EmailChange, customerId, async () => await userManager.GenerateChangeEmailTokenAsync(customer, email));
 
 
-                string password = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper();
-
-                OneTimePassword otp = new OneTimePassword
-                {
-                    CustomerId = customerId,
-                    Password = password,
-                    Type = (int)OtpType.EmailChange
-                };
-
-                unitOfWork.OneTimePasswords.Add(otp);
-                await unitOfWork.Save();
-
-
-                await emailService.SendEmail(EmailType.EmailOneTimePassword, "One-Time Password", new Recipient
+                await emailService.SendEmail(EmailType.EmailOneTimePassword, "Change Email", new Recipient
                 {
                     FirstName = customer.FirstName,
                     LastName = customer.LastName,
@@ -930,6 +1129,9 @@ namespace Website.Controllers
                 {
                     Var1 = password
                 });
+
+
+
                 return Ok();
             }
             return BadRequest();
@@ -948,58 +1150,49 @@ namespace Website.Controllers
             // Get the customer from the database based on the customer id from the claims via the access token
             Customer customer = await userManager.FindByIdAsync(User.FindFirst(ClaimTypes.NameIdentifier).Value);
 
-            // Grab all the one-time passwords for the customer who is changing their email
-            // (typically there should only be ONE one-time password record, but it is possible that there could be more than one)
-            IEnumerable<OneTimePassword> oneTimePasswords = await unitOfWork.OneTimePasswords.GetCollection(x => x.CustomerId == customer.Id && x.Type == (int)OtpType.EmailChange);
-
-            // Check to see if the one-time password the customer entered on the form matches any of the one-time passwords in the list
-            OneTimePassword oneTimePassword = oneTimePasswords.FirstOrDefault(x => x.Password == otp.OneTimePassword);
-
 
             // If the customer is found...
             if (customer != null)
             {
-                // If either the password or the one-time password doesn't pass
-                if (!await userManager.CheckPasswordAsync(customer, otp.Password) || oneTimePassword == null)
+                if (await userManager.CheckPasswordAsync(customer, otp.Password))
                 {
-                    // Fail
-                    return Ok(new { failure = true });
+                    string token = await GetOneTimePasswordToken(otp.OneTimePassword, OtpType.EmailChange, customer.Id);
+
+                    if (token != null)
+                    {
+                        // Change the customer's email
+                        IdentityResult result = await userManager.ChangeEmailAsync(customer, otp.Email, token);
+
+
+                        if (result.Succeeded)
+                        {
+                            string previousEmail = customer.Email;
+
+                            UpdateCustomerCookie(customer);
+
+
+                            // Send a confirmation email that the customer email has been changed
+                            if (customer.EmailPrefEmailChange == true)
+                            {
+                                await emailService.SendEmail(EmailType.EmailChange, "Email change confirmation", new Recipient
+                                {
+                                    FirstName = customer.FirstName,
+                                    LastName = customer.LastName,
+                                    Email = otp.Email
+                                }, new EmailProperties
+                                {
+                                    Var1 = previousEmail,
+                                    Var2 = otp.Email
+                                });
+                            }
+
+                            return Ok();
+                        }
+                    }
                 }
 
-
-                string previousEmail = customer.Email;
-
-
-                // Change the customer's email
-                customer.Email = otp.Email;
-                customer.NormalizedEmail = otp.Email.ToUpper();
-                unitOfWork.Customers.Update(customer);
-
-                // Remove all one-time passwords
-                unitOfWork.OneTimePasswords.RemoveRange(oneTimePasswords);
-                await unitOfWork.Save();
-
-
-                UpdateCustomerCookie(customer);
-
-
-                // Send a confirmation email that the customer email has been changed
-                if (customer.EmailPrefEmailChange == true)
-                {
-                    await emailService.SendEmail(EmailType.EmailChange, "Email change confirmation", new Recipient
-                    {
-                        FirstName = customer.FirstName,
-                        LastName = customer.LastName,
-                        Email = otp.Email
-                    }, new EmailProperties
-                    {
-                        Var1 = previousEmail,
-                        Var2 = otp.Email
-                    });
-                }
-
-                return Ok(new { failure = false });
             }
+
             return BadRequest();
         }
 
@@ -1007,21 +1200,36 @@ namespace Website.Controllers
 
 
 
-        // ..................................................................................Send Account Activation Email.....................................................................
-        private async Task SendAccountActivationEmail(Customer customer)
-        {
-            string token = await userManager.GenerateEmailConfirmationTokenAsync(customer);
-            string host = GetHost();
 
-            await emailService.SendEmail(EmailType.AccountActivation, "Activate your new Niche Shack account", new Recipient
+
+
+        // ..................................................................................Forgot Password.....................................................................
+        [HttpGet]
+        [Route("ForgotPassword")]
+        public async Task<ActionResult> ForgotPassword(string email)
+        {
+            // Get the customer from the database based on the email address
+            Customer customer = await userManager.FindByEmailAsync(email);
+
+            if (customer != null)
             {
-                FirstName = customer.FirstName,
-                LastName = customer.LastName,
-                Email = customer.Email
-            }, new EmailProperties
-            {
-                Link = host + "/activate-account?email=" + HttpUtility.UrlEncode(customer.Email) + "&token=" + HttpUtility.UrlEncode(token)
-            });
+                string oneTimePassword = await SetOneTimePassword(OtpType.ResetPassword, customer.Id, async () => await userManager.GeneratePasswordResetTokenAsync(customer));
+
+                await emailService.SendEmail(EmailType.ResetPassword, "Forgot Password", new Recipient
+                {
+                    FirstName = customer.FirstName,
+                    LastName = customer.LastName,
+                    Email = customer.Email
+                }, new EmailProperties
+                {
+                    Var1 = oneTimePassword
+                });
+
+                return Ok();
+            }
+
+
+            return BadRequest();
         }
 
 
@@ -1029,24 +1237,57 @@ namespace Website.Controllers
 
 
 
-        // ..................................................................................Send Reset Password Email.....................................................................
-        private async Task SendResetPasswordEmail(Customer customer)
-        {
-            string token = await userManager.GeneratePasswordResetTokenAsync(customer);
-            string host = GetHost();
 
-            await emailService.SendEmail(EmailType.ResetPassword, "Reset Password", new Recipient
+        // ..................................................................................Validate Reset Password OTP.....................................................................
+        [HttpPost]
+        [Route("ValidateResetPasswordOTP")]
+        public async Task<ActionResult> ValidateResetPasswordOTP(EmailOTP otp)
+        {
+            // Get the customer from the database based on the email address
+            Customer customer = await userManager.FindByEmailAsync(otp.Email);
+
+
+            if (customer != null && otp.OneTimePassword != null)
             {
-                FirstName = customer.FirstName,
-                LastName = customer.LastName,
-                Email = customer.Email
-            }, new EmailProperties
-            {
-                Link = host + "/reset-password?email=" + HttpUtility.UrlEncode(customer.Email) + "&token=" + HttpUtility.UrlEncode(token)
-            });
+                if (await GetOneTimePassword(OtpType.ResetPassword, customer.Id, otp.OneTimePassword) != null)
+                {
+                    return Ok();
+                }
+
+                return Ok(new { incorrectOneTimePassword = true });
+            }
+
+            return BadRequest();
         }
 
 
+
+        // ..................................................................................Reset Password.....................................................................
+        [HttpPost]
+        [Route("ResetPassword")]
+        public async Task<ActionResult> ResetPassword(ResetPassword resetPassword)
+        {
+            if (resetPassword.Email != null && resetPassword.Password != null)
+            {
+                Customer customer = await userManager.FindByEmailAsync(resetPassword.Email);
+
+                string token = await GetOneTimePasswordToken(resetPassword.OneTimePassword, OtpType.ResetPassword, customer.Id);
+
+                if (customer != null)
+                {
+                    var result = await userManager.ResetPasswordAsync(customer, token, resetPassword.Password);
+
+
+                    if (result.Succeeded)
+                    {
+                        return Ok();
+                    }
+                }
+
+            }
+
+            return BadRequest();
+        }
 
 
         // ..................................................................................Generate Token Data.....................................................................
@@ -1175,21 +1416,6 @@ namespace Website.Controllers
 
             Match result = Regex.Match(value, @"(?:Bearer\s)(.+)");
             return result.Groups[1].Value;
-        }
-
-
-
-
-
-        // ..................................................................................Get Host.....................................................................
-        private string GetHost()
-        {
-            if (env.IsDevelopment())
-            {
-                return "http://localhost:4200";
-            }
-
-            return HttpContext.Request.Scheme + "://" + HttpContext.Request.Host.Value;
         }
     }
 }

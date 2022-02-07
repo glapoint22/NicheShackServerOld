@@ -24,8 +24,10 @@
 
         public enum OtpType
         {
+            ActivateAccount,
             EmailChange,
-            AccountDeletion
+            DeleteAccount,
+            ResetPassword
         }
     }
 }

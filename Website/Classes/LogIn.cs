@@ -1,6 +1,6 @@
 ﻿namespace Website.Classes
 {
-    public class SignIn
+    public class LogIn
     {
         public string Email { get; set; }
         public string Password { get; set; }

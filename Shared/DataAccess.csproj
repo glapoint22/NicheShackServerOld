@@ -43,6 +43,8 @@
     <Compile Remove="Migrations\20211121230319_Collaborators.Designer.cs" />
     <Compile Remove="Migrations\20220118192303_OneTimePassword.cs" />
     <Compile Remove="Migrations\20220118192303_OneTimePassword.Designer.cs" />
+    <Compile Remove="Migrations\20220206222827_UpdateOTP.cs" />
+    <Compile Remove="Migrations\20220206222827_UpdateOTP.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>
