@@ -147,22 +147,7 @@ namespace Website.Controllers
 
 
 
-        [HttpPost]
-        [Route("ValidateEmailPassword")]
-        public async Task<ActionResult> ValidateEmailPassword(LogIn logIn)
-        {
-            // Get the customer from the database based on the email address
-            Customer customer = await userManager.FindByEmailAsync(logIn.Email);
-
-
-            // If the customer is in the database and the password is valid
-            if (customer != null && await userManager.CheckPasswordAsync(customer, logIn.Password))
-            {
-                return Ok();
-            }
-
-            return Ok(new { notEmailPasswordMatch = true });
-        }
+        
 
 
         // ..................................................................................Sign Up.....................................................................
@@ -279,22 +264,21 @@ namespace Website.Controllers
             Customer customer = await userManager.FindByEmailAsync(logIn.Email);
 
 
-            if (customer != null)
+            if (customer == null || await userManager.CheckPasswordAsync(customer, logIn.Password) == false)
             {
-                if (!customer.EmailConfirmed)
-                {
-                    return Ok(new { notActivated = true });
-                }
-
-                if (await userManager.CheckPasswordAsync(customer, logIn.Password) && customer.Active)
-                {
-                    await SetLogIn(customer, logIn.IsPersistent);
-
-                    return Ok();
-                }
+                return Ok(new { notEmailPasswordMatch = true });
             }
 
-            return BadRequest();
+
+            if (!customer.EmailConfirmed)
+            {
+                return Ok(new { notActivated = true });
+            }
+
+
+            await SetLogIn(customer, logIn.IsPersistent);
+
+            return Ok();
         }
 
 
