@@ -54,7 +54,15 @@ namespace Services
         // ..................................................................................Get Product Group.....................................................................
         public async Task<List<QueriedProduct>> GetProductGroup(QueryParams queryParams)
         {
+            // If we are querying for browse products and we have no browse cookie, return no products
+            if (queryParams.Queries.Any(x => x.IntValue == 1 && x.QueryType == QueryType.Auto) && !queryParams.Cookies.Any(x => x.Key == "browse"))
+            {
+                return new List<QueriedProduct>();
+            }
+
             await queryParams.Init(context);
+
+            
 
             List<QueryResult> products = await QueryProducts(queryParams);
             QueryBuilder queryBuilder = new QueryBuilder(queryParams);

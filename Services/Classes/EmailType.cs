@@ -19,6 +19,7 @@
         DeletedList,
         Review,
         DeleteAccount,
-        DeleteAccountOneTimePassword
+        DeleteAccountOneTimePassword,
+        WelcomeToNicheShack
     }
 }

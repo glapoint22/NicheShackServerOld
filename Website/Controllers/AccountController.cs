@@ -518,6 +518,13 @@ namespace Website.Controllers
 
                         await SetLogIn(customer, true);
 
+                        await emailService.SendEmail(EmailType.WelcomeToNicheShack, "Welcome to Niche Shack", new Recipient
+                        {
+                            FirstName = customer.FirstName,
+                            LastName = customer.LastName,
+                            Email = customer.Email
+                        });
+
                         return Ok();
                     }
                 }

@@ -27,12 +27,11 @@ namespace Website.Repositories
 
 
         // ................................................................................Get Lists.....................................................................
-        public async Task<IEnumerable<ListViewModel>> GetLists(string customerId)
+        public async Task<IEnumerable<ListViewModel>> GetLists(string customerId, string firstList)
         {
             // Get the list ids
             var listCollaborators = await context.ListCollaborators
                 .AsNoTracking()
-                .OrderByDescending(x => x.IsOwner)
                 .Where(x => x.CustomerId == customerId && !x.IsRemoved)
                 .Select(x => new
                 {
@@ -44,7 +43,8 @@ namespace Website.Repositories
                     x.EditList,
                     x.DeleteList,
                     x.MoveItem,
-                    x.RemoveItem
+                    x.RemoveItem,
+                    isFirstList = x.ListId == firstList ? 0 : 1
                 })
                 .ToListAsync();
 
@@ -99,9 +99,11 @@ namespace Website.Repositories
                 x.EditList,
                 x.DeleteList,
                 x.MoveItem,
-                x.RemoveItem
+                x.RemoveItem,
+                x.isFirstList
             })
                 .OrderByDescending(x => x.IsOwner)
+                .ThenBy(x => x.isFirstList)
                 .Select(x => new ListViewModel
                 {
                     Id = x.Id,
@@ -321,14 +323,12 @@ namespace Website.Repositories
         // ................................................................................First List.....................................................................
         public async Task<string> FirstList(string customerId)
         {
-            var lists = await context.ListCollaborators
+            return await context.ListCollaborators
                 .AsNoTracking()
                 .OrderByDescending(x => x.IsOwner)
                 .Where(x => x.CustomerId == customerId && !x.IsRemoved)
                 .Select(x => x.ListId)
-                .ToListAsync();
-
-            return lists.FirstOrDefault();
+                .FirstOrDefaultAsync();
         }
     }
 }

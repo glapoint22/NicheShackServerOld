@@ -77,13 +77,13 @@ namespace Website.Controllers
         // ..................................................................................Get Lists......................................................................
         [HttpGet]
         [Authorize(Policy = "Account Policy")]
-        public async Task<ActionResult> GetLists()
+        public async Task<ActionResult> GetLists(string firstList)
         {
             // Get the customer Id from the access token
             string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
 
-            return Ok(await unitOfWork.Lists.GetLists(customerId));
+            return Ok(await unitOfWork.Lists.GetLists(customerId,  firstList));
         }
 
 
