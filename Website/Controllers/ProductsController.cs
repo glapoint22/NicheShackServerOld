@@ -52,7 +52,12 @@ namespace Website.Controllers
                 FiveStars = x.FiveStars,
                 Description = x.Description,
                 NicheId = x.NicheId,
-                Hoplink = x.Hoplink
+                Hoplink = x.Hoplink,
+                Image = new ImageViewModel
+                {
+                    Name = x.Media.Name,
+                    Url = x.Media.Image
+                }
             });
 
 
