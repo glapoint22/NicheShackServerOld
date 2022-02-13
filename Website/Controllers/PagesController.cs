@@ -75,7 +75,7 @@ namespace Website.Controllers
 
             return Ok(new
             {
-                Page = await pageService.GePage(pageContent, queryParams)
+                pageContent = await pageService.GePage(pageContent, queryParams)
             });
         }
 
@@ -121,7 +121,7 @@ namespace Website.Controllers
 
             return Ok(new
             {
-                Page = await pageService.GePage(pageContent, queryParams)
+                pageContent = await pageService.GePage(pageContent, queryParams)
             });
         }
 
