@@ -87,6 +87,24 @@ namespace Manager.Controllers
 
 
 
+        [Route("Move")]
+        [HttpPut]
+        public async Task<ActionResult> MoveNiche(MoveItemViewModel moveItem)
+        {
+            Niche nicheToBeMoved = await unitOfWork.Niches.Get(moveItem.MoveItemId);
+
+            nicheToBeMoved.CategoryId = moveItem.ParentItemId;
+
+            // Update and save
+            unitOfWork.Niches.Update(nicheToBeMoved);
+            await unitOfWork.Save();
+
+
+            return Ok();
+        }
+
+
+
 
 
         [HttpDelete]

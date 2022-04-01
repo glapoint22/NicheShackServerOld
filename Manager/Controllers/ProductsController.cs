@@ -10,6 +10,7 @@ using Manager.Classes;
 using System;
 using Services.Classes;
 using Services;
+using Manager.ViewModels;
 
 namespace Manager.Controllers
 {
@@ -134,39 +135,66 @@ namespace Manager.Controllers
             });
 
 
-            Keyword keyword = new Keyword
+            int keywordId;
+            Keyword keyword = await unitOfWork.Keywords.Get(x => x.Name == product.Name.ToLower());
+
+            // If a keyword does NOT already contain a name that matches the name of this new product
+            if (keyword == null)
             {
-                Name = product.Name.ToLower()
-            };
+                // Then create a new keyword that has the same name as this new product
+                Keyword newKeyword = new Keyword
+                {
+                    Name = product.Name.ToLower()
+                };
+                unitOfWork.Keywords.Add(newKeyword);
+                await unitOfWork.Save();
+                keywordId = newKeyword.Id;
 
-            unitOfWork.Keywords.Add(keyword);
-
-
-            await unitOfWork.Save();
+            // If a keyword already exists that contains the same name as this new product
+            }else
+            {
+                // Just use the id of that keyword
+                keywordId = keyword.Id;
+            }
 
 
 
             unitOfWork.Keywords_In_KeywordGroup.Add(new Keyword_In_KeywordGroup
             {
                 KeywordGroupId = keywordGroup.Id,
-                KeywordId = keyword.Id
+                KeywordId = keywordId
             });
 
 
             unitOfWork.ProductKeywords.Add(new ProductKeyword
             {
                 ProductId = newProduct.Id,
-                KeywordId = keyword.Id
+                KeywordId = keywordId
             });
 
 
             await unitOfWork.Save();
 
-
             return Ok(newProduct.Id);
         }
 
 
+
+        [Route("Move")]
+        [HttpPut]
+        public async Task<ActionResult> MoveProduct(MoveItemViewModel moveItem)
+        {
+            Product productToBeMoved = await unitOfWork.Products.Get(moveItem.MoveItemId);
+
+            productToBeMoved.NicheId = moveItem.ParentItemId;
+
+            // Update and save
+            unitOfWork.Products.Update(productToBeMoved);
+            await unitOfWork.Save();
+
+
+            return Ok();
+        }
 
 
 
