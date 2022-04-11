@@ -47,6 +47,16 @@ namespace Manager.Controllers
 
 
 
+        [Route("ParentCategory")]
+        [HttpGet]
+        public async Task<ActionResult> GetParentCategoryOfNiche(int nicheId)
+        {
+            var name = await unitOfWork.Niches.Get(x => x.Id == nicheId, x => x.Category.Name);
+            return Ok(new {name});
+        }
+
+
+
 
 
         [HttpPut]
@@ -91,9 +101,9 @@ namespace Manager.Controllers
         [HttpPut]
         public async Task<ActionResult> MoveNiche(MoveItemViewModel moveItem)
         {
-            Niche nicheToBeMoved = await unitOfWork.Niches.Get(moveItem.MoveItemId);
+            Niche nicheToBeMoved = await unitOfWork.Niches.Get(moveItem.ItemToBeMovedId);
 
-            nicheToBeMoved.CategoryId = moveItem.ParentItemId;
+            nicheToBeMoved.CategoryId = moveItem.DestinationItemId;
 
             // Update and save
             unitOfWork.Niches.Update(nicheToBeMoved);

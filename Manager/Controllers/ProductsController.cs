@@ -43,6 +43,16 @@ namespace Manager.Controllers
 
 
 
+        [Route("ParentNiche")]
+        [HttpGet]
+        public async Task<ActionResult> GetParentNicheOfProduct(int productId)
+        {
+            var name = await unitOfWork.Products.Get(x => x.Id == productId, x => x.Niche.Name);
+            return Ok(new { name });
+        }
+
+
+
         [HttpGet]
         [Route("QueryBuilder")]
         public async Task<ActionResult> GetQueryBuilderProducts()
@@ -184,9 +194,9 @@ namespace Manager.Controllers
         [HttpPut]
         public async Task<ActionResult> MoveProduct(MoveItemViewModel moveItem)
         {
-            Product productToBeMoved = await unitOfWork.Products.Get(moveItem.MoveItemId);
+            Product productToBeMoved = await unitOfWork.Products.Get(moveItem.ItemToBeMovedId);
 
-            productToBeMoved.NicheId = moveItem.ParentItemId;
+            productToBeMoved.NicheId = moveItem.DestinationItemId;
 
             // Update and save
             unitOfWork.Products.Update(productToBeMoved);
