@@ -51,8 +51,8 @@ namespace Manager.Controllers
         [HttpGet]
         public async Task<ActionResult> GetParentCategoryOfNiche(int nicheId)
         {
-            var name = await unitOfWork.Niches.Get(x => x.Id == nicheId, x => x.Category.Name);
-            return Ok(new {name});
+            var parentCategory = await unitOfWork.Niches.Get(x => x.Id == nicheId, x => x.Category);
+            return Ok(new {id = parentCategory.Id, name = parentCategory.Name});
         }
 
 

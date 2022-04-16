@@ -47,8 +47,8 @@ namespace Manager.Controllers
         [HttpGet]
         public async Task<ActionResult> GetParentNicheOfProduct(int productId)
         {
-            var name = await unitOfWork.Products.Get(x => x.Id == productId, x => x.Niche.Name);
-            return Ok(new { name });
+            var parentNiche = await unitOfWork.Products.Get(x => x.Id == productId, x => x.Niche);
+            return Ok(new { id = parentNiche.Id, name = parentNiche.Name });
         }
 
 
