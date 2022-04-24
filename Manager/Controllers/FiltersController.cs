@@ -150,6 +150,17 @@ namespace Manager.Controllers
         }
 
 
+        [Route("CheckDuplicate")]
+        [HttpGet]
+        public async Task<ActionResult> CheckDuplicateFilterOption(int filterOptionId, string filterOptionName)
+        {
+            var parentFilterId = await unitOfWork.FilterOptions.Get(x => x.Id == filterOptionId, x => x.Filter.Id);
+            var filterOption = await unitOfWork.FilterOptions.Get(x => x.Name == filterOptionName && x.Filter.Id == parentFilterId);
+
+            return Ok(filterOption);
+        }
+
+
 
         [HttpGet]
         [Route("Search")]
