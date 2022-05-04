@@ -31,6 +31,16 @@ namespace Manager.Controllers
 
 
 
+        [Route("Parent")]
+        [HttpGet]
+        public async Task<ActionResult> GetFilterOptionParent(int childId)
+        {
+            var parentId = await unitOfWork.FilterOptions.Get(x => x.Id == childId, x => x.FilterId);
+            var parent = await unitOfWork.Filters.Get(x => x.Id == parentId);
+            return Ok(new { id = parentId, name = parent.Name });
+        }
+
+
 
         [HttpPut]
         public async Task<ActionResult> UpdateFilterName(ItemViewModel updatedFilter)
@@ -144,20 +154,20 @@ namespace Manager.Controllers
 
         [Route("Options")]
         [HttpGet]
-        public async Task<ActionResult> GetOptions(int filterId)
+        public async Task<ActionResult> GetOptions(int parentId)
         {
-            return Ok(await unitOfWork.FilterOptions.GetCollection<ItemViewModel<FilterOption>>(x => x.FilterId == filterId));
+            return Ok(await unitOfWork.FilterOptions.GetCollection<ItemViewModel<FilterOption>>(x => x.FilterId == parentId));
         }
 
 
         [Route("CheckDuplicate")]
         [HttpGet]
-        public async Task<ActionResult> CheckDuplicateFilterOption(int filterOptionId, string filterOptionName)
+        public async Task<ActionResult> CheckDuplicateFilterOption(int childId, string childName)
         {
-            var parentFilterId = await unitOfWork.FilterOptions.Get(x => x.Id == filterOptionId, x => x.Filter.Id);
-            var filterOption = await unitOfWork.FilterOptions.Get(x => x.Name == filterOptionName && x.Filter.Id == parentFilterId);
+            var parentFilterId = await unitOfWork.FilterOptions.Get(x => x.Id == childId, x => x.Filter.Id);
+            var filterOption = await unitOfWork.FilterOptions.Get(x => x.Name == childName && x.Filter.Id == parentFilterId);
 
-            return Ok(filterOption);
+            return Ok(filterOption != null ? new { id = childId, name = childName, parentId = parentFilterId } : null);
         }
 
 

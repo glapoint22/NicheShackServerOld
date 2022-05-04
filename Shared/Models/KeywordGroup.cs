@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using DataAccess.Interfaces;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace DataAccess.Models
 {
-    public class KeywordGroup
+    public class KeywordGroup : IItem
     {
         public int Id { get; set; }
 

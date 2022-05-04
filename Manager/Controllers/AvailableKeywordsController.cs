@@ -32,22 +32,31 @@ namespace Manager.Controllers
                     name = x.Name
                 })
                 .OrderBy(x => x.name));
-
-
         }
 
 
 
 
         [HttpGet]
-        public async Task<ActionResult> GetKeywords(int groupId)
+        public async Task<ActionResult> GetKeywords(int parentId)
         {
-            var keywords = await unitOfWork.Keywords_In_KeywordGroup.GetCollection(x => x.KeywordGroupId == groupId, x => new
+            var keywords = await unitOfWork.Keywords_In_KeywordGroup.GetCollection(x => x.KeywordGroupId == parentId, x => new
             {
                 id = x.Keyword.Id,
                 name = x.Keyword.Name
             });
             return Ok(keywords.OrderBy(x => x.name));
+        }
+
+
+
+        [Route("Parent")]
+        [HttpGet]
+        public async Task<ActionResult> GetKeywordParent(int childId)
+        {
+            var parentId = await unitOfWork.Keywords_In_KeywordGroup.Get(x => x.KeywordId == childId, x => x.KeywordGroupId);
+            var parent = await unitOfWork.KeywordGroups.Get(x => x.Id == parentId);
+            return Ok(new { id = parentId, name = parent.Name });
         }
 
 
@@ -220,6 +229,37 @@ namespace Manager.Controllers
             await unitOfWork.Save();
 
             return Ok();
+        }
+
+
+
+        [HttpGet]
+        [Route("Groups/Search")]
+        public async Task<ActionResult> SearchKeywordGroup(string searchWords)
+        {
+            return Ok(await unitOfWork.KeywordGroups.GetCollection<ItemViewModel<KeywordGroup>>(x => !x.ForProduct, searchWords));
+        }
+
+            
+        [HttpGet]
+        [Route("Search")]
+        public async Task<ActionResult> SearchKeywords(string searchWords)
+        {
+            return Ok(await unitOfWork.Keywords.GetCollection<ItemViewModel<Keyword>>(searchWords));
+        }
+
+
+
+        [Route("CheckDuplicate")]
+        [HttpGet]
+        public async Task<ActionResult> CheckDuplicateKeyword(int childId, string childName)
+        {
+            var keywordGroupId = await unitOfWork.Keywords_In_KeywordGroup.Get(x => x.KeywordId == childId, x => x.KeywordGroupId);
+            var keywords = await unitOfWork.Keywords_In_KeywordGroup.GetCollection(x => x.KeywordGroupId == keywordGroupId, x => x.Keyword.Name);
+            var duplicateFound = keywords.Any(x => x.ToUpper() == childName.ToUpper());
+
+
+            return Ok(!duplicateFound ? null : new { id = childId, name = childName, parentId = keywordGroupId });
         }
     }
 }

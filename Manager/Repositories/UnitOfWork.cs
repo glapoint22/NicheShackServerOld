@@ -32,7 +32,7 @@ namespace Manager.Repositories
         public IRepository<ProductReview> ProductReviews { get; }
         public IRepository<PageReferenceItem> PageReferenceItems { get; }
         public IRepository<ProductPrice> ProductPrices { get; }
-        public IRepository<KeywordGroup> KeywordGroups { get; }
+        public ISearchableRepository<KeywordGroup> KeywordGroups { get; }
         public IRepository<KeywordGroup_Belonging_To_Product> KeywordGroups_Belonging_To_Product { get; }
         public IRepository<Keyword_In_KeywordGroup> Keywords_In_KeywordGroup { get; }
 
@@ -41,6 +41,7 @@ namespace Manager.Repositories
         public IProductRepository Products { get; }
         public IAdditionalInfoRepository<ProductAdditionalInfo> ProductAdditionalInfo { get; }
         public IAdditionalInfoRepository<ProductPriceAdditionalInfo> ProductPriceAdditionalInfo { get; }
+        public IAvailableKeywordsRepository AvailableKeywords { get; }
 
 
 
@@ -71,7 +72,7 @@ namespace Manager.Repositories
             ProductReviews = new Repository<ProductReview>(context);
             PageReferenceItems = new Repository<PageReferenceItem>(context);
             ProductPrices = new Repository<ProductPrice>(context);
-            KeywordGroups = new Repository<KeywordGroup>(context);
+            KeywordGroups = new SearchableRepository<KeywordGroup>(context);
             KeywordGroups_Belonging_To_Product = new Repository<KeywordGroup_Belonging_To_Product>(context);
             Keywords_In_KeywordGroup = new Repository<Keyword_In_KeywordGroup>(context);
 
@@ -79,7 +80,7 @@ namespace Manager.Repositories
             Products = new ProductRepository(context);
             ProductAdditionalInfo = new AdditionalInfoRepository<ProductAdditionalInfo>(context);
             ProductPriceAdditionalInfo = new AdditionalInfoRepository<ProductPriceAdditionalInfo>(context);
-
+            AvailableKeywords = new AvailableKeywordsRepository(context);
         }
 
 
