@@ -24,11 +24,11 @@ namespace Manager.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult> GetNiches(int categoryId)
+        public async Task<ActionResult> GetNiches(int parentId)
         {
-            if (categoryId > 0)
+            if (parentId > 0)
             {
-                return Ok(await unitOfWork.Niches.GetCollection<ItemViewModel<Niche>>(x => x.CategoryId == categoryId));
+                return Ok(await unitOfWork.Niches.GetCollection<ItemViewModel<Niche>>(x => x.CategoryId == parentId));
             }
             else
             {
@@ -47,11 +47,11 @@ namespace Manager.Controllers
 
 
 
-        [Route("ParentCategory")]
+        [Route("Parent")]
         [HttpGet]
-        public async Task<ActionResult> GetParentCategoryOfNiche(int nicheId)
+        public async Task<ActionResult> GetNicheParent(int childId)
         {
-            var parentCategory = await unitOfWork.Niches.Get(x => x.Id == nicheId, x => x.Category);
+            var parentCategory = await unitOfWork.Niches.Get(x => x.Id == childId, x => x.Category);
             return Ok(new {id = parentCategory.Id, name = parentCategory.Name});
         }
 
@@ -410,6 +410,18 @@ namespace Manager.Controllers
                 Name = x.Name,
                 Url = x.Image
             }));
+        }
+
+
+
+        [Route("CheckDuplicate")]
+        [HttpGet]
+        public async Task<ActionResult> CheckDuplicateNiche(int childId, string childName)
+        {
+            var parentCategoryId = await unitOfWork.Niches.Get(x => x.Id == childId, x => x.CategoryId);
+            var niche = await unitOfWork.Niches.Get(x => x.Name == childName && x.CategoryId == parentCategoryId);
+
+            return Ok(niche != null ? new { id = childId, name = childName, parentId = parentCategoryId } : null);
         }
     }
 }

@@ -28,11 +28,11 @@ namespace Manager.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult> GetProducts(int nicheId)
+        public async Task<ActionResult> GetProducts(int parentId)
         {
-            if (nicheId > 0)
+            if (parentId > 0)
             {
-                return Ok(await unitOfWork.Products.GetCollection<ItemViewModel<Product>>(x => x.NicheId == nicheId));
+                return Ok(await unitOfWork.Products.GetCollection<ItemViewModel<Product>>(x => x.NicheId == parentId));
             }
             else
             {
@@ -43,9 +43,9 @@ namespace Manager.Controllers
 
 
 
-        [Route("ParentNiche")]
+        [Route("Parent")]
         [HttpGet]
-        public async Task<ActionResult> GetParentNicheOfProduct(int productId)
+        public async Task<ActionResult> GetProductParent(int productId)
         {
             var parentNiche = await unitOfWork.Products.Get(x => x.Id == productId, x => x.Niche);
             return Ok(new { id = parentNiche.Id, name = parentNiche.Name });

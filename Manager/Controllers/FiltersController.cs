@@ -31,7 +31,7 @@ namespace Manager.Controllers
 
 
 
-        [Route("Parent")]
+        [Route("Options/Parent")]
         [HttpGet]
         public async Task<ActionResult> GetFilterOptionParent(int childId)
         {
