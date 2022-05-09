@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DataAccess.Models;
 using DataAccess.ViewModels;
+using Manager.Classes;
 using Manager.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -172,20 +173,25 @@ namespace Manager.Controllers
 
 
 
+
+
         [HttpGet]
         [Route("Search")]
         public async Task<ActionResult> SearchFilters(string searchWords)
         {
-            return Ok(await unitOfWork.Filters.GetCollection<ItemViewModel<Filter>>(searchWords));
+            var filters = await unitOfWork.Filters.GetCollection(searchWords, x => new SearchItem { Id = x.Id, Name = x.Name, Type = "Filter" });
+            var filterOptions = await unitOfWork.FilterOptions.GetCollection(searchWords, x => new SearchItem { Id = x.Id, Name = x.Name, Type = "Option" });
+            var searchResults = filters.Concat(filterOptions).OrderBy(x => x.Name).ToList();
+            return Ok(searchResults);
         }
 
 
 
-        [HttpGet]
-        [Route("Options/Search")]
-        public async Task<ActionResult> SearchFilterOptions(string searchWords)
-        {
-            return Ok(await unitOfWork.FilterOptions.GetCollection<ItemViewModel<FilterOption>>(searchWords));
-        }
+        //[HttpGet]
+        //[Route("Options/Search")]
+        //public async Task<ActionResult> SearchFilterOptions(string searchWords)
+        //{
+        //    return Ok(await unitOfWork.FilterOptions.GetCollection<ItemViewModel<FilterOption>>(searchWords));
+        //}
     }
 }

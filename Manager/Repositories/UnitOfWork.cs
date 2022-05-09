@@ -41,7 +41,6 @@ namespace Manager.Repositories
         public IProductRepository Products { get; }
         public IAdditionalInfoRepository<ProductAdditionalInfo> ProductAdditionalInfo { get; }
         public IAdditionalInfoRepository<ProductPriceAdditionalInfo> ProductPriceAdditionalInfo { get; }
-        public IAvailableKeywordsRepository AvailableKeywords { get; }
 
 
 
@@ -80,7 +79,6 @@ namespace Manager.Repositories
             Products = new ProductRepository(context);
             ProductAdditionalInfo = new AdditionalInfoRepository<ProductAdditionalInfo>(context);
             ProductPriceAdditionalInfo = new AdditionalInfoRepository<ProductPriceAdditionalInfo>(context);
-            AvailableKeywords = new AvailableKeywordsRepository(context);
         }
 
 

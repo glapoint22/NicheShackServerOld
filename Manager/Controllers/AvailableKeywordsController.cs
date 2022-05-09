@@ -1,5 +1,6 @@
 ﻿using DataAccess.Models;
 using DataAccess.ViewModels;
+using Manager.Classes;
 using Manager.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -237,16 +238,19 @@ namespace Manager.Controllers
         [Route("Groups/Search")]
         public async Task<ActionResult> SearchKeywordGroup(string searchWords)
         {
-            return Ok(await unitOfWork.KeywordGroups.GetCollection<ItemViewModel<KeywordGroup>>(x => !x.ForProduct, searchWords));
+            var keywordGroups = await unitOfWork.KeywordGroups.GetCollection(x => !x.ForProduct, searchWords, x => new SearchItem { Id = x.Id, Name = x.Name, Type = "Group" });
+            var keywords = await unitOfWork.Keywords.GetCollection(searchWords, x => new SearchItem { Id = x.Id, Name = x.Name, Type = "Keyword" });
+            var searchResults = keywordGroups.Concat(keywords).OrderBy(x => x.Name).ToList();
+            return Ok(searchResults);
         }
 
             
-        [HttpGet]
-        [Route("Search")]
-        public async Task<ActionResult> SearchKeywords(string searchWords)
-        {
-            return Ok(await unitOfWork.Keywords.GetCollection<ItemViewModel<Keyword>>(searchWords));
-        }
+        //[HttpGet]
+        //[Route("Search")]
+        //public async Task<ActionResult> SearchKeywords(string searchWords)
+        //{
+        //    return Ok(await unitOfWork.Keywords.GetCollection<ItemViewModel<Keyword>>(searchWords));
+        //}
 
 
 

@@ -45,7 +45,6 @@ namespace Manager.Repositories
         IProductRepository Products { get; }
         IAdditionalInfoRepository<ProductAdditionalInfo> ProductAdditionalInfo { get;}
         IAdditionalInfoRepository<ProductPriceAdditionalInfo> ProductPriceAdditionalInfo { get; }
-        IAvailableKeywordsRepository AvailableKeywords { get; }
 
 
 

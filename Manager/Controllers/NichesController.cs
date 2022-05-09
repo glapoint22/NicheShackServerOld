@@ -354,12 +354,12 @@ namespace Manager.Controllers
 
 
 
-        [HttpGet]
-        [Route("Search")]
-        public async Task<ActionResult> Search(string searchWords)
-        {
-            return Ok(await unitOfWork.Niches.GetCollection<ItemViewModel<Niche>>(searchWords));
-        }
+        //[HttpGet]
+        //[Route("Search")]
+        //public async Task<ActionResult> Search(string searchWords)
+        //{
+        //    return Ok(await unitOfWork.Niches.GetCollection<ItemViewModel<Niche>>(searchWords));
+        //}
 
 
 

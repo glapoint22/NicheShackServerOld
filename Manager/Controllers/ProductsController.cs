@@ -491,26 +491,26 @@ namespace Manager.Controllers
 
 
 
-        public async Task<ActionResult> SearchProducts(string searchWords)
-        {
-            return Ok(await unitOfWork.Products.GetCollection<ItemViewModel<Product>>(searchWords));
-        }
+        //public async Task<ActionResult> SearchProducts(string searchWords)
+        //{
+        //    return Ok(await unitOfWork.Products.GetCollection<ItemViewModel<Product>>(searchWords));
+        //}
 
 
 
-        [HttpGet]
-        [Route("Search")]
-        public async Task<ActionResult> Search(string searchWords)
-        {
-            return await SearchProducts(searchWords);
-        }
+        //[HttpGet]
+        //[Route("Search")]
+        //public async Task<ActionResult> Search(string searchWords)
+        //{
+        //    return await SearchProducts(searchWords);
+        //}
 
 
         [HttpGet]
         [Route("QueryBuilder/Search")]
         public async Task<ActionResult> SearchQueryBuilderProducts(string searchWords)
         {
-            return await SearchProducts(searchWords);
+            return Ok(await unitOfWork.Products.GetCollection<ItemViewModel<Product>>(searchWords));
         }
 
 

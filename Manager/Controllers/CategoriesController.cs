@@ -159,7 +159,11 @@ namespace Manager.Controllers
         [Route("Search")]
         public async Task<ActionResult> Search(string searchWords)
         {
-            return Ok(await unitOfWork.Categories.GetCollection<ItemViewModel<Category>>(searchWords));
+            var niches = await unitOfWork.Categories.GetCollection(searchWords, x => new SearchItem { Id = x.Id, Name = x.Name, Type = "Niche" });
+            var subNiches = await unitOfWork.Niches.GetCollection(searchWords, x => new SearchItem { Id = x.Id, Name = x.Name, Type = "Sub Niche" });
+            var products = await unitOfWork.Products.GetCollection(searchWords, x => new SearchItem { Id = x.Id, Name = x.Name, Type = "Product" });
+            var searchResults = niches.Concat(subNiches).Concat(products).OrderBy(x => x.Name).ToList();
+            return Ok(searchResults);
         }
     }
 }

@@ -73,5 +73,24 @@ namespace DataAccess.Repositories
                 .Select<T, TOut>()
                 .ToListAsync();
         }
+
+
+
+
+        public async Task<IEnumerable<TOut>> GetCollection<TOut>(Expression<Func<T, bool>> predicate, string searchWords, Expression<Func<T, TOut>> select) where TOut : class, new()
+        {
+            string[] searchWordsArray = searchWords.Split(' ').ToArray();
+
+            return await context.Set<T>()
+                .AsNoTracking()
+                .OrderBy(x => x.Name.ToLower().StartsWith(searchWords.ToLower()) ? (x.Name.ToLower() == searchWords.ToLower() ? 0 : 1) :
+                    EF.Functions.Like(x.Name, "% " + searchWords + " %")
+                    ? 2 : 3)
+                .Where(predicate)
+                .WhereAny(searchWordsArray.Select(w => (Expression<Func<T, bool>>)(x =>
+                    EF.Functions.Like(x.Name, "%" + w + "%"))).ToArray())
+                .Select(select)
+                .ToListAsync();
+        }
     }
 }
