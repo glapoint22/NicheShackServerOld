@@ -86,7 +86,7 @@ namespace Manager.Repositories
                     {
                         Id = x.Media.Id,
                         Name = x.Media.Name,
-                        Url = x.Media.Image
+                        Image = x.Media.Image
                     }
                 }).SingleOrDefaultAsync();
 
@@ -102,7 +102,7 @@ namespace Manager.Repositories
                      {
                          Id = x.Media.Id,
                          Name = x.Media.Name,
-                         Url = x.Media.Image
+                         Image = x.Media.Image
                      },
                      Header = x.Header,
                      Quantity = x.Quantity,
@@ -164,7 +164,7 @@ namespace Manager.Repositories
                     ItemId = y.Id,
                     Id = y.Media.Id,
                     Name = y.Media.Name,
-                    Url = y.Media.Image,
+                    Image = y.Media.Image,
                     Thumbnail = y.Media.VideoId,
                     Type = y.Media.MediaType
                 })

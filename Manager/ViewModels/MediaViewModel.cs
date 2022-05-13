@@ -16,9 +16,9 @@ namespace Manager.ViewModels
             {
                 Id = x.Id,
                 Name = x.Name,
-                Url = x.Image,
+                Image = x.Image,
                 Thumbnail = x.VideoId,
-                Type = x.MediaType
+                //Type = x.MediaType
             });
         }
     }

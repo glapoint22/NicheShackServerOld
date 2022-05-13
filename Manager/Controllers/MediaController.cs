@@ -54,6 +54,10 @@ namespace Manager.Controllers
             Request.Form.TryGetValue("type", out typeValue);
             int type = Convert.ToInt32(typeValue);
 
+            StringValues imageName;
+
+            Request.Form.TryGetValue("name", out imageName);
+
 
             // Copy the image to the images folder
             string imageUrl = await CopyImage(imageFile);
@@ -62,7 +66,7 @@ namespace Manager.Controllers
             // Add the new image to the database
             Media media = new Media
             {
-                Name = "",
+                Name = imageName,
                 Image = imageUrl,
                 MediaType = type
             };
@@ -75,7 +79,8 @@ namespace Manager.Controllers
             return Ok(new
             {
                 id = media.Id,
-                url = media.Image
+                url = media.Image,
+                name = media.Name
             });
         }
 
