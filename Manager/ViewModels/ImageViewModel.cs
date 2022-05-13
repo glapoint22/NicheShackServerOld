@@ -4,6 +4,6 @@ namespace Manager.ViewModels
 {
     public class ImageViewModel : ItemViewModel
     {
-        public string Url { get; set; }
+        public string Image { get; set; }
     }
 }
