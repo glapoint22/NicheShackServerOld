@@ -43,13 +43,15 @@ namespace Manager.Controllers
 
 
         [HttpGet]
-        public async Task<ActionResult> GetKeywords(int groupId, int productId)
+        public async Task<ActionResult> GetKeywords(int parentId, int productId)
         {
-            var keywords = await unitOfWork.Keywords_In_KeywordGroup.GetCollection(x => x.KeywordGroupId == groupId, x => new
+            var keywords = await unitOfWork.Keywords_In_KeywordGroup.GetCollection(x => x.KeywordGroupId == parentId, x => new
             {
                 id = x.Keyword.Id,
                 name = x.Keyword.Name,
-                Checked = x.Keyword.ProductKeywords.Any(z => z.ProductId == productId && z.KeywordId == x.Keyword.Id)
+                isChecked = x.Keyword.ProductKeywords.Any(z => z.ProductId == productId && z.KeywordId == x.Keyword.Id),
+                forProduct = x.KeywordGroup.ForProduct
+
             });
             return Ok(keywords.OrderBy(x => x.name));
         }
@@ -63,7 +65,7 @@ namespace Manager.Controllers
         public async Task<ActionResult> UpdateKeyword(UpdatedProductItem updatedProductItem)
         {
 
-            if (updatedProductItem.Checked)
+            if (updatedProductItem.IsChecked)
             {
                 unitOfWork.ProductKeywords.Add(
                     new ProductKeyword

@@ -4,6 +4,6 @@
     {
         public int ProductId { get; set; }
         public int Id { get; set; }
-        public bool Checked { get; set; }
+        public bool IsChecked { get; set; }
     }
 }
