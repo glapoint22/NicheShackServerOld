@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+﻿using System.Text.RegularExpressions;
 
 namespace Manager.Classes
 {
@@ -11,15 +7,16 @@ namespace Manager.Classes
         public enum MediaType
         {
             Image,
-            BackgroundImage,
-            BannerImage,
-            CategoryImage,
-            NicheImage,
-            ProductImage,
-            ProductMediaImage,
-            ProductPriceImage,
-            Video,
-            Search
+            Video
+        }
+
+
+
+        public enum VideoType
+        {
+            YouTube,
+            Vimeo,
+            Wistia
         }
 
 
