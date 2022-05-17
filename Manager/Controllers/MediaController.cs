@@ -121,14 +121,14 @@ namespace Manager.Controllers
             System.IO.File.Delete(filePath);
 
             // Update the url
-            media.Image = imageUrl;
+            media.Thumbnail = media.Image = imageUrl;
 
             // Update and save
             unitOfWork.Media.Update(media);
             await unitOfWork.Save();
 
 
-            return Ok(imageUrl);
+            return Ok(new { src = imageUrl });
         }
 
 
