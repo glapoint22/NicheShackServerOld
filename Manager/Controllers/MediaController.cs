@@ -73,8 +73,7 @@ namespace Manager.Controllers
                 id = media.Id,
                 Image = media.Image,
                 name = media.Name,
-                thumbnail = media.Thumbnail,
-                mediaType = media.MediaType
+                thumbnail = media.Thumbnail
             });
         }
 
@@ -175,18 +174,18 @@ namespace Manager.Controllers
 
         [HttpPost]
         [Route("Video")]
-        public async Task<ActionResult> NewVideo(MediaViewModel media)
+        public async Task<ActionResult> NewVideo(MediaViewModel video)
         {
-            var thumbnail = await GetVideoThumbnail(media);
+            var thumbnail = await GetVideoThumbnail(video);
 
             if (thumbnail == null) return Ok();
 
             Media newVideo = new Media
             {
-                Name = media.Name,
-                VideoId = media.VideoId,
-                MediaType = media.Type,
-                VideoType = media.VideoType,
+                Name = video.Name,
+                VideoId = video.VideoId,
+                MediaType = (int)MediaType.Video,
+                VideoType = video.VideoType,
                 Thumbnail = thumbnail,
                 Image = ""
             };
@@ -198,10 +197,7 @@ namespace Manager.Controllers
 
             return Ok(new
             {
-                name = newVideo.Name,
-                videoId = newVideo.VideoId,
-                mediaType = newVideo.MediaType,
-                videoType = newVideo.VideoType,
+                id = newVideo.Id,
                 thumbnail = newVideo.Thumbnail
             });
         }
@@ -212,38 +208,36 @@ namespace Manager.Controllers
 
 
         [HttpPut]
-        [Route("Video")]
-        public async Task<ActionResult> UpdateVideo(ItemViewModel video)
+        [Route("UpdateVideo")]
+        public async Task<ActionResult> UpdateVideo(MediaViewModel video)
         {
+            // Get the updated video
+            var thumbnail = await GetVideoThumbnail(video);
+
+            if (thumbnail == null) return Ok();
+
             // Get the current video
-            //Media media = await unitOfWork.Media.Get(video.Id);
+            Media media = await unitOfWork.Media.Get(video.Id);
 
-            //// Delete the old thumbnail
-            //string wwwroot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-            //string imagesFolder = Path.Combine(wwwroot, "images");
-            //System.IO.File.Delete(Path.Combine(imagesFolder, media.VideoId));
-
-
-            //// Get the updated video
-            //Media updatedVideo = await SetVideo(video.Name);
-
-            //// Update the new properties
-            //media.Image = updatedVideo.Image;
-            //media.VideoId = updatedVideo.VideoId;
+            // Delete the old thumbnail
+            string wwwroot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            string imagesFolder = Path.Combine(wwwroot, "images");
+            System.IO.File.Delete(Path.Combine(imagesFolder, media.Thumbnail));
 
 
-            //// Update & save
-            //unitOfWork.Media.Update(media);
-            //await unitOfWork.Save();
-
-            //return Ok(new
-            //{
-            //    url = media.Image,
-            //    thumbnail = media.VideoId
-            //});
+            // Update the new properties
+            media.Thumbnail = thumbnail;
+            media.VideoId = video.VideoId;
 
 
-            return Ok();
+            // Update & save
+            unitOfWork.Media.Update(media);
+            await unitOfWork.Save();
+
+            return Ok(new
+            {
+                thumbnail = media.Thumbnail
+            });
         }
 
 
@@ -359,8 +353,18 @@ namespace Manager.Controllers
         public async Task<ActionResult> DeleteMedia(int id)
         {
             Media media = await unitOfWork.Media.Get(id);
-            unitOfWork.Media.Remove(media);
 
+
+            // Delete thumbnail and image
+            string wwwroot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            string imagesFolder = Path.Combine(wwwroot, "images");
+
+            if (media.Thumbnail != null && media.Thumbnail != string.Empty) System.IO.File.Delete(Path.Combine(imagesFolder, media.Thumbnail));
+            if (media.Image != null && media.Image != string.Empty) System.IO.File.Delete(Path.Combine(imagesFolder, media.Image));
+
+
+
+            unitOfWork.Media.Remove(media);
             await unitOfWork.Save();
 
             return Ok();
