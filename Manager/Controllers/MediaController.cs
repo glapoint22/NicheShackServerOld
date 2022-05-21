@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text.Json;
@@ -8,7 +7,6 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DataAccess.Models;
 using DataAccess.ViewModels;
-using Manager.Classes;
 using Manager.Repositories;
 using Manager.ViewModels;
 using Microsoft.AspNetCore.Http;
@@ -44,18 +42,11 @@ namespace Manager.Controllers
         [Route("Image")]
         public async Task<ActionResult> NewImage()
         {
-            StringValues typeValue;
-
             // Get the new image
             IFormFile imageFile = Request.Form.Files["image"];
 
-
-            // Get the media type
-            Request.Form.TryGetValue("type", out typeValue);
-            int type = Convert.ToInt32(typeValue);
-
+            // Get the image name
             StringValues imageName;
-
             Request.Form.TryGetValue("name", out imageName);
 
 
@@ -68,7 +59,8 @@ namespace Manager.Controllers
             {
                 Name = imageName,
                 Image = imageUrl,
-                MediaType = type
+                MediaType = (int)MediaType.Image,
+                Thumbnail = imageUrl
             };
 
 
@@ -79,8 +71,9 @@ namespace Manager.Controllers
             return Ok(new
             {
                 id = media.Id,
-                url = media.Image,
-                name = media.Name
+                Image = media.Image,
+                name = media.Name,
+                thumbnail = media.Thumbnail
             });
         }
 
@@ -127,14 +120,14 @@ namespace Manager.Controllers
             System.IO.File.Delete(filePath);
 
             // Update the url
-            media.Image = imageUrl;
+            media.Thumbnail = media.Image = imageUrl;
 
             // Update and save
             unitOfWork.Media.Update(media);
             await unitOfWork.Save();
 
 
-            return Ok(imageUrl);
+            return Ok(new { src = imageUrl });
         }
 
 
@@ -181,29 +174,31 @@ namespace Manager.Controllers
 
         [HttpPost]
         [Route("Video")]
-        public async Task<ActionResult> NewVideo(ItemViewModel videoLink)
+        public async Task<ActionResult> NewVideo(MediaViewModel video)
         {
+            var thumbnail = await GetVideoThumbnail(video);
 
-            Media video = await GetVideo(videoLink.Name);
+            if (thumbnail == null) return Ok();
 
-            // Add the new video to the database
-            Media media = new Media
+            Media newVideo = new Media
             {
-                Name = "",
-                Image = video.Image,
+                Name = video.Name,
                 VideoId = video.VideoId,
-                MediaType = (int)MediaType.Video
+                MediaType = (int)MediaType.Video,
+                VideoType = video.VideoType,
+                Thumbnail = thumbnail,
+                Image = ""
             };
 
-            unitOfWork.Media.Add(media);
-
+            // Add the new video
+            unitOfWork.Media.Add(newVideo);
             await unitOfWork.Save();
+
 
             return Ok(new
             {
-                id = media.Id,
-                url = media.Image,
-                thumbnail = media.VideoId
+                id = newVideo.Id,
+                thumbnail = newVideo.Thumbnail
             });
         }
 
@@ -213,24 +208,26 @@ namespace Manager.Controllers
 
 
         [HttpPut]
-        [Route("Video")]
-        public async Task<ActionResult> UpdateVideo(ItemViewModel video)
+        [Route("UpdateVideo")]
+        public async Task<ActionResult> UpdateVideo(MediaViewModel video)
         {
+            // Get the updated video
+            var thumbnail = await GetVideoThumbnail(video);
+
+            if (thumbnail == null) return Ok();
+
             // Get the current video
             Media media = await unitOfWork.Media.Get(video.Id);
 
             // Delete the old thumbnail
             string wwwroot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
             string imagesFolder = Path.Combine(wwwroot, "images");
-            System.IO.File.Delete(Path.Combine(imagesFolder, media.VideoId));
+            System.IO.File.Delete(Path.Combine(imagesFolder, media.Thumbnail));
 
-
-            // Get the updated video
-            Media updatedVideo = await GetVideo(video.Name);
 
             // Update the new properties
-            media.Image = updatedVideo.Image;
-            media.VideoId = updatedVideo.VideoId;
+            media.Thumbnail = thumbnail;
+            media.VideoId = video.VideoId;
 
 
             // Update & save
@@ -239,8 +236,7 @@ namespace Manager.Controllers
 
             return Ok(new
             {
-                url = media.Image,
-                thumbnail = media.VideoId
+                thumbnail = media.Thumbnail
             });
         }
 
@@ -248,95 +244,85 @@ namespace Manager.Controllers
 
 
 
-        private async Task<Media> GetVideo(string videoLink)
+        private async Task<string> GetVideoThumbnail(MediaViewModel media)
         {
             // Create a new unique name for the thumbnail
-            string thumbnail = Guid.NewGuid().ToString("N") + ".jpg";
-            string thumbnailUrl;
-            string videoUrl;
+            string thumbnailName = Guid.NewGuid().ToString("N") + ".jpg";
+            string thumbnailUrl = string.Empty;
 
-
-            // Is this youtube or vimeo 
-            Regex youtubeRegex = new Regex("youtube");
-            Match youtubeMatch = youtubeRegex.Match(videoLink);
-
-
-
-            if (youtubeMatch.Success)
+            // YouTube
+            if (media.VideoType == (int)VideoType.YouTube)
             {
-                // Get youtube video Id
-                Regex youtubeIdRegex = new Regex(@"(?:https?:\/\/)?(?:(?:(?:www\.?)?youtube\.com(?:\/(?:(?:watch\?.*?(?:v=([^&\s]+)).*)|(?:v\/(.*))|(?:embed\/(.+))))?)|(?:youtu\.be\/(.*)?))");
-                Match youtubeIdMatch = youtubeIdRegex.Match(videoLink);
+                // Get the youtube thumbnail
+                thumbnailUrl = "https://img.youtube.com/vi/" + media.VideoId + "/mqdefault.jpg";
 
-
-                string videoId = null;
-
-                for (int i = 1; i < youtubeIdMatch.Groups.Count; i++)
+                using (HttpClient httpClient = new HttpClient())
                 {
-                    if (youtubeIdMatch.Groups[i].Value != string.Empty)
+                    HttpResponseMessage response = await httpClient.GetAsync(thumbnailUrl);
+
+                    if (response.StatusCode == HttpStatusCode.NotFound)
                     {
-                        videoId = youtubeIdMatch.Groups[i].Value;
-                        break;
+                        thumbnailUrl = string.Empty;
                     }
                 }
 
-
-
-                // Get youtube thumbnail url
-                thumbnailUrl = "https://img.youtube.com/vi/" + videoId + "/mqdefault.jpg";
-
-
-                // Get youtube url
-                videoUrl = "https://www.youtube.com/embed/" + videoId;
             }
-            else
+
+
+            // Vimeo
+            else if (media.VideoType == (int)VideoType.Vimeo)
             {
-
-                // Get vimeo video id
-                Regex vimeoIdRegex = new Regex(@"(?:(?:https?:)?\/\/(?:[\w]+\.)*vimeo\.com(?:[\/\w:]*(?:\/videos)?)?\/([0-9]+)[^\s]*)");
-                Match vimeoIdMatch = vimeoIdRegex.Match(videoLink);
-
-
-                string videoId = vimeoIdMatch.Groups[1].Value;
-
                 // Get vimeo thumbnail
                 using (HttpClient httpClient = new HttpClient())
                 {
-                    HttpResponseMessage response = await httpClient.GetAsync("https://vimeo.com/api/oembed.json?url=https://vimeo.com/" + videoId);
-                    var result = await response.Content.ReadAsStringAsync();
-                    var json = JsonSerializer.Deserialize<Vimeo>(result);
-                    thumbnailUrl = json.thumbnail_url;
+                    HttpResponseMessage response = await httpClient.GetAsync("https://vimeo.com/api/oembed.json?url=https://vimeo.com/" + media.VideoId);
+
+                    if (response.StatusCode != HttpStatusCode.NotFound)
+                    {
+                        var result = await response.Content.ReadAsStringAsync();
+                        var json = JsonSerializer.Deserialize<Vimeo>(result);
+                        thumbnailUrl = json.thumbnail_url;
+                    }
+                }
+            }
+
+
+            // Wistia
+            else if (media.VideoType == (int)VideoType.Wistia)
+            {
+                // Get the Wistia thumbnail
+                using (HttpClient httpClient = new HttpClient())
+                {
+                    HttpResponseMessage response = await httpClient.GetAsync("http://fast.wistia.net/oembed?url=http://home.wistia.com/medias/" + media.VideoId);
+
+                    if (response.StatusCode != HttpStatusCode.NotFound)
+                    {
+                        var result = await response.Content.ReadAsStringAsync();
+                        var json = JsonSerializer.Deserialize<Wistia>(result);
+                        thumbnailUrl = json.thumbnail_url;
+                    }
+
+                }
+            }
+
+
+            if (thumbnailUrl != string.Empty)
+            {
+                // Download the thumbnail to the images folder
+                using (WebClient client = new WebClient())
+                {
+
+                    string wwwroot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+                    string imagesFolder = Path.Combine(wwwroot, "images");
+                    string filePath = Path.Combine(imagesFolder, thumbnailName);
+
+                    client.DownloadFileAsync(new Uri(thumbnailUrl), filePath);
                 }
 
-
-
-                // Get vimeo url
-                videoUrl = "https://player.vimeo.com/video/" + videoId;
+                return thumbnailName;
             }
 
-
-
-            // Download the thumbnail to the images folder
-            using (WebClient client = new WebClient())
-            {
-
-                string wwwroot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-                string imagesFolder = Path.Combine(wwwroot, "images");
-                string filePath = Path.Combine(imagesFolder, thumbnail);
-
-                client.DownloadFileAsync(new Uri(thumbnailUrl), filePath);
-            }
-
-
-            Media media = new Media
-            {
-                Image = videoUrl,
-                VideoId = thumbnail,
-                MediaType = (int)MediaType.Video
-            };
-
-
-            return media;
+            return null;
         }
 
 
@@ -367,8 +353,18 @@ namespace Manager.Controllers
         public async Task<ActionResult> DeleteMedia(int id)
         {
             Media media = await unitOfWork.Media.Get(id);
-            unitOfWork.Media.Remove(media);
 
+
+            // Delete thumbnail and image
+            string wwwroot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            string imagesFolder = Path.Combine(wwwroot, "images");
+
+            if (media.Thumbnail != null && media.Thumbnail != string.Empty) System.IO.File.Delete(Path.Combine(imagesFolder, media.Thumbnail));
+            if (media.Image != null && media.Image != string.Empty) System.IO.File.Delete(Path.Combine(imagesFolder, media.Image));
+
+
+
+            unitOfWork.Media.Remove(media);
             await unitOfWork.Save();
 
             return Ok();
@@ -412,5 +408,23 @@ namespace Manager.Controllers
         public string upload_date { get; set; }
         public int video_id { get; set; }
         public string uri { get; set; }
+    }
+
+
+
+    class Wistia
+    {
+        public string Version { get; set; }
+        public string type { get; set; }
+        public string html { get; set; }
+        public int width { get; set; }
+        public int height { get; set; }
+        public string provider_name { get; set; }
+        public string provider_url { get; set; }
+        public string title { get; set; }
+        public string thumbnail_url { get; set; }
+        public int thumbnail_width { get; set; }
+        public int thumbnail_height { get; set; }
+        public float duration { get; set; }
     }
 }

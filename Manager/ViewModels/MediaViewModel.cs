@@ -8,6 +8,8 @@ namespace Manager.ViewModels
     {
         public string Thumbnail { get; set; }
         public int Type { get; set; }
+        public string VideoId { get; set; }
+        public int VideoType { get; set; }
 
 
         public IQueryable<MediaViewModel> Select(IQueryable<Media> source)
@@ -17,8 +19,9 @@ namespace Manager.ViewModels
                 Id = x.Id,
                 Name = x.Name,
                 Image = x.Image,
-                Thumbnail = x.VideoId,
-                //Type = x.MediaType
+                Thumbnail = x.Thumbnail,
+                VideoId = x.VideoId,
+                VideoType = x.VideoType
             });
         }
     }
