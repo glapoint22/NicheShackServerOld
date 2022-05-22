@@ -23,14 +23,18 @@ namespace Manager.Controllers
 
         [HttpGet]
         [Route("Groups")]
-        public async Task<ActionResult> GetKeywordGroups()
+        public async Task<ActionResult> GetKeywordGroups(int productId)
         {
+
+            IEnumerable<int> keywordGroupIds = await unitOfWork.KeywordGroups_Belonging_To_Product.GetCollection(x => x.ProductId == productId, x => x.KeywordGroupId);
+
             IEnumerable<KeywordGroup> keywordGroups = await unitOfWork.KeywordGroups.GetCollection(x => !x.ForProduct);
             return Ok(keywordGroups
                 .Select(x => new
                 {
                     id = x.Id,
-                    name = x.Name
+                    name = x.Name,
+                    forProduct = keywordGroupIds.Contains(x.Id)
                 })
                 .OrderBy(x => x.name));
         }
@@ -236,23 +240,16 @@ namespace Manager.Controllers
 
         [HttpGet]
         [Route("Groups/Search")]
-        public async Task<ActionResult> SearchKeywordGroup(string searchWords)
+        public async Task<ActionResult> SearchKeywordGroup(int productId, string searchWords)
         {
-            var keywordGroups = await unitOfWork.KeywordGroups.GetCollection(x => !x.ForProduct, searchWords, x => new SearchItem { Id = x.Id, Name = x.Name, Type = "Group" });
-            var keywords = await unitOfWork.Keywords.GetCollection(searchWords, x => new SearchItem { Id = x.Id, Name = x.Name, Type = "Keyword" });
+            var keywordGroupIds = await unitOfWork.KeywordGroups_Belonging_To_Product.GetCollection(x => x.ProductId == productId, x => x.KeywordGroupId);
+            var keywordGroups = await unitOfWork.KeywordGroups.GetCollection(x => !x.ForProduct, searchWords, x => new KeywordSearchItem { Id = x.Id, Name = x.Name, Type = "Group", ForProduct = keywordGroupIds.Contains(x.Id) });
+            var keywords = await unitOfWork.Keywords.GetCollection(searchWords, x => new KeywordSearchItem { Id = x.Id, Name = x.Name, Type = "Keyword", ForProduct = x.Keywords_In_KeywordGroup.Any(y => y.KeywordId == x.Id && keywordGroupIds.Contains(y.KeywordGroupId)) });
             var searchResults = keywordGroups.Concat(keywords).OrderBy(x => x.Name).ToList();
             return Ok(searchResults);
         }
 
             
-        //[HttpGet]
-        //[Route("Search")]
-        //public async Task<ActionResult> SearchKeywords(string searchWords)
-        //{
-        //    return Ok(await unitOfWork.Keywords.GetCollection<ItemViewModel<Keyword>>(searchWords));
-        //}
-
-
 
         [Route("CheckDuplicate")]
         [HttpGet]

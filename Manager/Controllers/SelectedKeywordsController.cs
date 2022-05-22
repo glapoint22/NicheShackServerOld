@@ -333,9 +333,9 @@ namespace Manager.Controllers
         {
             IEnumerable<int> keywordGroupIds = await unitOfWork.KeywordGroups_Belonging_To_Product.GetCollection(x => x.ProductId == productId, x => x.KeywordGroupId);
             IEnumerable<int> keywordIds = await unitOfWork.Keywords_In_KeywordGroup.GetCollection(x => keywordGroupIds.Contains(x.KeywordGroupId), x => x.Keyword.Id);
-            IEnumerable<SearchSelectedKeywordItem> keywordGroups = await unitOfWork.KeywordGroups.GetCollection(x => keywordGroupIds.Contains(x.Id), searchWords, x => new SearchSelectedKeywordItem { Id = x.Id, Name = x.Name, Type = "Group", ForProduct = x.ForProduct });
-            IEnumerable<SearchSelectedKeywordItem> keywords = await unitOfWork.Keywords.GetCollection(x => keywordIds.Contains(x.Id), searchWords, x => new SearchSelectedKeywordItem { Id = x.Id, Name = x.Name, Type = "Keyword", ForProduct = x.Keywords_In_KeywordGroup.Select(y => y.KeywordGroup.ForProduct).FirstOrDefault(), IsChecked = x.ProductKeywords.Any(y => y.ProductId == productId && y.KeywordId == x.Id) });
-            List<SearchSelectedKeywordItem> searchResults = keywordGroups.Concat(keywords).OrderBy(x => x.Name).ToList();
+            IEnumerable<KeywordSearchItem> keywordGroups = await unitOfWork.KeywordGroups.GetCollection(x => keywordGroupIds.Contains(x.Id), searchWords, x => new KeywordSearchItem { Id = x.Id, Name = x.Name, Type = "Group", ForProduct = x.ForProduct });
+            IEnumerable<KeywordSearchItem> keywords = await unitOfWork.Keywords.GetCollection(x => keywordIds.Contains(x.Id), searchWords, x => new KeywordSearchItem { Id = x.Id, Name = x.Name, Type = "Keyword", ForProduct = x.Keywords_In_KeywordGroup.Select(y => y.KeywordGroup.ForProduct).FirstOrDefault(), IsChecked = x.ProductKeywords.Any(y => y.ProductId == productId && y.KeywordId == x.Id) });
+            List<KeywordSearchItem> searchResults = keywordGroups.Concat(keywords).OrderBy(x => x.Name).ToList();
 
             return Ok(searchResults);
         }
