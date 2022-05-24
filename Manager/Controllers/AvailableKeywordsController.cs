@@ -244,7 +244,8 @@ namespace Manager.Controllers
         {
             var keywordGroupIds = await unitOfWork.KeywordGroups_Belonging_To_Product.GetCollection(x => x.ProductId == productId, x => x.KeywordGroupId);
             var keywordGroups = await unitOfWork.KeywordGroups.GetCollection(x => !x.ForProduct, searchWords, x => new KeywordSearchItem { Id = x.Id, Name = x.Name, Type = "Group", ForProduct = keywordGroupIds.Contains(x.Id) });
-            var keywords = await unitOfWork.Keywords.GetCollection(searchWords, x => new KeywordSearchItem { Id = x.Id, Name = x.Name, Type = "Keyword", ForProduct = x.Keywords_In_KeywordGroup.Any(y => y.KeywordId == x.Id && keywordGroupIds.Contains(y.KeywordGroupId)) });
+            var customKeywordIds = await unitOfWork.Keywords_In_KeywordGroup.GetCollection(x => x.KeywordGroupId == x.KeywordGroup.Id && x.KeywordGroup.ForProduct, x => x.KeywordId);
+            var keywords = await unitOfWork.Keywords.GetCollection(x => !customKeywordIds.Contains(x.Id), searchWords, x => new KeywordSearchItem { Id = x.Id, Name = x.Name, Type = "Keyword", ForProduct = x.Keywords_In_KeywordGroup.Any(y => y.KeywordId == x.Id && keywordGroupIds.Contains(y.KeywordGroupId)) });
             var searchResults = keywordGroups.Concat(keywords).OrderBy(x => x.Name).ToList();
             return Ok(searchResults);
         }
