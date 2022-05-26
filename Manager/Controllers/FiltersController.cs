@@ -161,7 +161,7 @@ namespace Manager.Controllers
         }
 
 
-        [Route("CheckDuplicate")]
+        [Route("Options/CheckDuplicate")]
         [HttpGet]
         public async Task<ActionResult> CheckDuplicateFilterOption(int childId, string childName)
         {
@@ -184,14 +184,5 @@ namespace Manager.Controllers
             var searchResults = filters.Concat(filterOptions).OrderBy(x => x.Name).ToList();
             return Ok(searchResults);
         }
-
-
-
-        //[HttpGet]
-        //[Route("Options/Search")]
-        //public async Task<ActionResult> SearchFilterOptions(string searchWords)
-        //{
-        //    return Ok(await unitOfWork.FilterOptions.GetCollection<ItemViewModel<FilterOption>>(searchWords));
-        //}
     }
 }

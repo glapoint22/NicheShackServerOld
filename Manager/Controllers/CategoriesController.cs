@@ -165,5 +165,17 @@ namespace Manager.Controllers
             var searchResults = niches.Concat(subNiches).Concat(products).OrderBy(x => x.Name).ToList();
             return Ok(searchResults);
         }
+
+
+
+        [Route("Children")]
+        [HttpGet]
+        public async Task<ActionResult> GetChildren(int parentId)
+        {
+            var subNiches = await unitOfWork.Niches.GetCollection(x => x.CategoryId == parentId, x => new ItemViewModel { Id = x.Id, Name = x.Name });
+            var products = await unitOfWork.Products.GetCollection(x => subNiches.Select(y => y.Id).Contains(x.NicheId), x => new ItemViewModel { Id = x.Id, Name = x.Name });
+            var children = subNiches.Concat(products);
+            return Ok(children);
+        }
     }
 }

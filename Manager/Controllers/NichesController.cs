@@ -26,18 +26,12 @@ namespace Manager.Controllers
         [HttpGet]
         public async Task<ActionResult> GetNiches(int parentId)
         {
-            if (parentId > 0)
-            {
-                return Ok(await unitOfWork.Niches.GetCollection<ItemViewModel<Niche>>(x => x.CategoryId == parentId));
-            }
-            else
-            {
-                return Ok(await unitOfWork.Niches.GetCollection<ItemViewModel<Niche>>());
-            }
-
+            return Ok(await unitOfWork.Niches.GetCollection<ItemViewModel<Niche>>(x => x.CategoryId == parentId));
         }
 
 
+
+        
         [Route("All")]
         [HttpGet]
         public async Task<ActionResult> GetAllNiches()
@@ -354,17 +348,6 @@ namespace Manager.Controllers
 
 
 
-        //[HttpGet]
-        //[Route("Search")]
-        //public async Task<ActionResult> Search(string searchWords)
-        //{
-        //    return Ok(await unitOfWork.Niches.GetCollection<ItemViewModel<Niche>>(searchWords));
-        //}
-
-
-
-
-
 
         [Route("LeadPage")]
         [HttpDelete]
@@ -422,6 +405,16 @@ namespace Manager.Controllers
             var niche = await unitOfWork.Niches.Get(x => x.Name == childName && x.CategoryId == parentCategoryId);
 
             return Ok(niche != null ? new { id = childId, name = childName, parentId = parentCategoryId } : null);
+        }
+
+
+
+        [Route("Children")]
+        [HttpGet]
+        public async Task<ActionResult> GetChildren(int parentId)
+        {
+            var products = await unitOfWork.Products.GetCollection(x => x.NicheId == parentId, x => new ItemViewModel { Id = x.Id, Name = x.Name });
+            return Ok(products);
         }
     }
 }
