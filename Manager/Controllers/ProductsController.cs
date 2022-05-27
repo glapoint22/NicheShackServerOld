@@ -315,7 +315,7 @@ namespace Manager.Controllers
         public async Task<ActionResult> UpdateFilter(UpdatedProductItem updatedProductFilter)
         {
 
-            if (updatedProductFilter.IsChecked)
+            if (updatedProductFilter.Checked)
             {
                 unitOfWork.ProductFilters.Add(new ProductFilter { ProductId = updatedProductFilter.ProductId, FilterOptionId = updatedProductFilter.Id });
             }

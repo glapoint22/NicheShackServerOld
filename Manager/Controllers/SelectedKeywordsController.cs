@@ -49,7 +49,7 @@ namespace Manager.Controllers
             {
                 id = x.Keyword.Id,
                 name = x.Keyword.Name,
-                isChecked = x.Keyword.ProductKeywords.Any(z => z.ProductId == productId && z.KeywordId == x.Keyword.Id),
+                Checked = x.Keyword.ProductKeywords.Any(z => z.ProductId == productId && z.KeywordId == x.Keyword.Id),
                 forProduct = x.KeywordGroup.ForProduct
 
             });
@@ -65,7 +65,7 @@ namespace Manager.Controllers
         public async Task<ActionResult> UpdateKeyword(UpdatedProductItem updatedProductItem)
         {
 
-            if (updatedProductItem.IsChecked)
+            if (updatedProductItem.Checked)
             {
                 unitOfWork.ProductKeywords.Add(
                     new ProductKeyword
@@ -334,7 +334,7 @@ namespace Manager.Controllers
             IEnumerable<int> keywordGroupIds = await unitOfWork.KeywordGroups_Belonging_To_Product.GetCollection(x => x.ProductId == productId, x => x.KeywordGroupId);
             IEnumerable<int> keywordIds = await unitOfWork.Keywords_In_KeywordGroup.GetCollection(x => keywordGroupIds.Contains(x.KeywordGroupId), x => x.Keyword.Id);
             IEnumerable<KeywordSearchItem> keywordGroups = await unitOfWork.KeywordGroups.GetCollection(x => keywordGroupIds.Contains(x.Id), searchWords, x => new KeywordSearchItem { Id = x.Id, Name = x.Name, Type = "Group", ForProduct = x.ForProduct });
-            IEnumerable<KeywordSearchItem> keywords = await unitOfWork.Keywords.GetCollection(x => keywordIds.Contains(x.Id), searchWords, x => new KeywordSearchItem { Id = x.Id, Name = x.Name, Type = "Keyword", ForProduct = x.Keywords_In_KeywordGroup.Select(y => y.KeywordGroup.ForProduct).FirstOrDefault(), IsChecked = x.ProductKeywords.Any(y => y.ProductId == productId && y.KeywordId == x.Id) });
+            IEnumerable<KeywordSearchItem> keywords = await unitOfWork.Keywords.GetCollection(x => keywordIds.Contains(x.Id), searchWords, x => new KeywordSearchItem { Id = x.Id, Name = x.Name, Type = "Keyword", ForProduct = x.Keywords_In_KeywordGroup.Select(y => y.KeywordGroup.ForProduct).FirstOrDefault(), Checked = x.ProductKeywords.Any(y => y.ProductId == productId && y.KeywordId == x.Id) });
             List<KeywordSearchItem> searchResults = keywordGroups.Concat(keywords).OrderBy(x => x.Name).ToList();
 
             return Ok(searchResults);

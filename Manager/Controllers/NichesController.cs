@@ -26,7 +26,17 @@ namespace Manager.Controllers
         [HttpGet]
         public async Task<ActionResult> GetNiches(int parentId)
         {
-            return Ok(await unitOfWork.Niches.GetCollection<ItemViewModel<Niche>>(x => x.CategoryId == parentId));
+            //return Ok(await unitOfWork.Niches.GetCollection<ItemViewModel<Niche>>(x => x.CategoryId == parentId));
+
+
+            if (parentId > 0)
+            {
+                return Ok(await unitOfWork.Niches.GetCollection<ItemViewModel<Niche>>(x => x.CategoryId == parentId));
+            }
+            else
+            {
+                return Ok(await unitOfWork.Niches.GetCollection<ItemViewModel<Niche>>());
+            }
         }
 
 
