@@ -93,20 +93,32 @@ namespace Manager.Controllers
 
 
 
-
         [HttpDelete]
-        public async Task<ActionResult> DeleteSubgroups([FromQuery] int[] ids)
+        public async Task<ActionResult> DeleteSubgroup(int id)
         {
-            foreach (int id in ids)
-            {
-                Subgroup subgroup = await unitOfWork.Subgroups.Get(id);
-                unitOfWork.Subgroups.Remove(subgroup);
-            }
+            Subgroup subgroup = await unitOfWork.Subgroups.Get(id);
 
-
+            unitOfWork.Subgroups.Remove(subgroup);
             await unitOfWork.Save();
 
             return Ok();
         }
+
+
+
+        //[HttpDelete]
+        //public async Task<ActionResult> DeleteSubgroups([FromQuery] int[] ids)
+        //{
+        //    foreach (int id in ids)
+        //    {
+        //        Subgroup subgroup = await unitOfWork.Subgroups.Get(id);
+        //        unitOfWork.Subgroups.Remove(subgroup);
+        //    }
+
+
+        //    await unitOfWork.Save();
+
+        //    return Ok();
+        //}
     }
 }
