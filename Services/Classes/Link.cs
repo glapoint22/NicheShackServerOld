@@ -34,7 +34,7 @@ namespace Services.Classes
                     .Select(x => new
                     {
                         x.Name,
-                        x.DisplayType,
+                        x.PageType,
                         x.UrlName,
                         x.UrlId
                     })
@@ -43,7 +43,7 @@ namespace Services.Classes
                 if (page != null)
                 {
                     OptionValue = page.Name;
-                    Url = GetPageDisplay((PageDisplayType)page.DisplayType) + page.UrlName + "/" + page.UrlId;
+                    Url = GetPageDisplay((PageType)page.PageType) + page.UrlName + "/" + page.UrlId;
                 }
             }
             else if (SelectedOption == LinkOption.Product)
@@ -69,16 +69,16 @@ namespace Services.Classes
 
 
 
-        private string GetPageDisplay(PageDisplayType pageDisplayType)
+        private string GetPageDisplay(PageType pageDisplayType)
         {
             string value = "";
 
             switch (pageDisplayType)
             {
-                case PageDisplayType.Custom:
+                case PageType.Custom:
                     value = "cp/";
                     break;
-                case PageDisplayType.Browse:
+                case PageType.Browse:
                     value = "browse/";
                     break;
             }

@@ -62,13 +62,13 @@ namespace Website.Controllers
 
                 if (pageId > 0)
                 {
-                    pageContent = await unitOfWork.Pages.Get(x => x.Id == pageId && x.DisplayType == (int)PageDisplayType.Search, x => x.Content);
+                    pageContent = await unitOfWork.Pages.Get(x => x.Id == pageId && x.PageType == (int)PageType.Search, x => x.Content);
                 }
             }
 
             if (pageContent == null)
             {
-                pageContent = await unitOfWork.Pages.Get(x => x.DisplayType == (int)PageDisplayType.Grid, x => x.Content);
+                pageContent = await unitOfWork.Pages.Get(x => x.PageType == (int)PageType.Grid, x => x.Content);
             }
 
 
@@ -110,13 +110,13 @@ namespace Website.Controllers
 
             if (pageId > 0)
             {
-                pageContent = await unitOfWork.Pages.Get(x => x.Id == pageId && x.DisplayType == (int)PageDisplayType.Browse, x => x.Content);
+                pageContent = await unitOfWork.Pages.Get(x => x.Id == pageId && x.PageType == (int)PageType.Browse, x => x.Content);
 
             }
 
             if (pageContent == null)
             {
-                pageContent = await unitOfWork.Pages.Get(x => x.DisplayType == (int)PageDisplayType.Grid, x => x.Content);
+                pageContent = await unitOfWork.Pages.Get(x => x.PageType == (int)PageType.Grid, x => x.Content);
             }
 
             return Ok(new

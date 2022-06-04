@@ -26,7 +26,7 @@ namespace Website.Controllers
         [HttpGet]
         public async Task<ActionResult> Get()
         {
-            string pageContent = await unitOfWork.Pages.Get(x => x.DisplayType == (int)PageDisplayType.Home, x => x.Content);
+            string pageContent = await unitOfWork.Pages.Get(x => x.PageType == (int)PageType.Home, x => x.Content);
             QueryParams queryParams = new QueryParams();
 
             queryParams.Cookies = Request.Cookies.ToList();

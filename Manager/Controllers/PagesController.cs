@@ -1,17 +1,10 @@
-﻿using System;
-using System.Linq;
-using System.Text.Json;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using DataAccess.Models;
 using DataAccess.ViewModels;
 using Manager.Classes;
 using Manager.Repositories;
-using Manager.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using Services.Classes;
 using Services.Interfaces;
-using static Manager.Classes.Utility;
 
 namespace Manager.Controllers
 {
@@ -29,83 +22,67 @@ namespace Manager.Controllers
         }
 
 
-        [HttpGet]
-        public async Task<ActionResult> GetPages()
+        //[HttpGet]
+        //public async Task<ActionResult> GetPages()
+        //{
+        //    return Ok(await unitOfWork.Pages.GetCollection<ItemViewModel<DataAccess.Models.Page>>());
+        //}
+
+
+
+        //[HttpGet]
+        //[Route("Page")]
+        //public async Task<ActionResult> GetPage(int id)
+        //{
+        //    string pageContent = await unitOfWork.Pages.Get(x => x.Id == id, x => x.Content);
+
+        //    QueryParams queryParams = new QueryParams();
+        //    queryParams.Cookies = Request.Cookies.ToList();
+
+
+        //    return Ok(await pageService.GePage(pageContent, queryParams));
+        //}
+
+
+        //[HttpPut]
+        //[Route("Page")]
+        //public async Task<ActionResult> UpdatePage(UpdatedPage updatedPage)
+        //{
+        //    DataAccess.Models.Page page = await unitOfWork.Pages.Get(updatedPage.PageId);
+
+        //    page.Name = updatedPage.Name;
+        //    page.UrlName = GetUrlName(updatedPage.Name);
+        //    page.DisplayType = (int)updatedPage.DisplayType;
+        //    page.Content = updatedPage.Content;
+
+        //    // Update and save
+        //    unitOfWork.Pages.Update(page);
+        //    await unitOfWork.Save();
+
+
+        //    return Ok();
+        //}
+
+
+
+
+
+
+
+        [HttpPost]
+        public async Task<ActionResult> NewPage(NewPage newPage)
         {
-            return Ok(await unitOfWork.Pages.GetCollection<ItemViewModel<DataAccess.Models.Page>>());
-        }
-
-
-
-        [HttpGet]
-        [Route("Page")]
-        public async Task<ActionResult> GetPage(int id)
-        {
-            string pageContent = await unitOfWork.Pages.Get(x => x.Id == id, x => x.Content);
-
-            QueryParams queryParams = new QueryParams();
-            queryParams.Cookies = Request.Cookies.ToList();
-            
-
-            return Ok(await pageService.GePage(pageContent, queryParams));
-        }
-
-
-        [HttpPut]
-        [Route("Page")]
-        public async Task<ActionResult> UpdatePage(UpdatedPage updatedPage)
-        {
-            DataAccess.Models.Page page = await unitOfWork.Pages.Get(updatedPage.PageId);
-
-            page.Name = updatedPage.Name;
-            page.UrlName = GetUrlName(updatedPage.Name);
-            page.DisplayType = (int)updatedPage.DisplayType;
-            page.Content = updatedPage.Content;
-
-            // Update and save
-            unitOfWork.Pages.Update(page);
-            await unitOfWork.Save();
-
-
-            return Ok();
-        }
-
-
-
-
-
-
-
-        [Route("Create")]
-        [HttpGet]
-        public async Task<ActionResult> CreatePage()
-        {
-            string pageName = "New Page";
-
-
-            // Create the new page
-            DataAccess.Models.Page page = new DataAccess.Models.Page
+            Page page = new Page
             {
-                Name = pageName,
-                UrlId = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper(),
-                UrlName = GetUrlName(pageName),
-                Content = ""
+                Name = newPage.Name,
+                Content = newPage.Content,
+                PageType = newPage.PageType
             };
 
-            // Add and save
             unitOfWork.Pages.Add(page);
-            await unitOfWork.Save();
+            //await unitOfWork.Save();
 
-            // Update the content with the new Id and update
-            page.Content = "{\"id\":" + page.Id + ",\"name\":\"" + pageName + "\",\"background\":{\"color\":\"#00000000\"}}";
-            unitOfWork.Pages.Update(page);
-
-
-            await unitOfWork.Save();
-
-
-            // Return the new page content
-            return Ok(page.Content);
+            return Ok(page.Id);
         }
 
 
@@ -115,37 +92,37 @@ namespace Manager.Controllers
 
 
 
-        [Route("Duplicate")]
-        [HttpGet]
-        public async Task<ActionResult> DuplicatePage(int pageId)
-        {
-            // Get the page
-            DataAccess.Models.Page page = await unitOfWork.Pages.Get(pageId);
-            page.Id = 0;
-            page.Name = "New Page";
+        //[Route("Duplicate")]
+        //[HttpGet]
+        //public async Task<ActionResult> DuplicatePage(int pageId)
+        //{
+        //    // Get the page
+        //    DataAccess.Models.Page page = await unitOfWork.Pages.Get(pageId);
+        //    page.Id = 0;
+        //    page.Name = "New Page";
 
-            var pageContent = await pageService.GePage(page.Content, new QueryParams());
+        //    var pageContent = await pageService.GePage(page.Content, new QueryParams());
 
-            // Add the duplicated page and save
-            unitOfWork.Pages.Add(page);
-            await unitOfWork.Save();
-
-
-            // Update the content
-            page.Content = Regex.Replace(page.Content, "^{\"id\":" + pageId, "{\"id\":" + page.Id);
-            page.Content = Regex.Replace(page.Content, "\"referenceItems\":\\[[\\w\\d\\s\\W\\D\\S]*\\](?=,\"background\")", "\"referenceItems\": null");
-            page.Content = Regex.Replace(page.Content, "\"name\":\"" + pageContent.Name + "\"", "\"name\":\"" + page.Name + "\"");
-            pageContent.Name = page.Name;
-            pageContent.ReferenceItems = null;
-            pageContent.Id = page.Id;
-
-            unitOfWork.Pages.Update(page);
-            await unitOfWork.Save();
+        //    // Add the duplicated page and save
+        //    unitOfWork.Pages.Add(page);
+        //    await unitOfWork.Save();
 
 
-            // Return the page content
-            return Ok(pageContent);
-        }
+        //    // Update the content
+        //    page.Content = Regex.Replace(page.Content, "^{\"id\":" + pageId, "{\"id\":" + page.Id);
+        //    page.Content = Regex.Replace(page.Content, "\"referenceItems\":\\[[\\w\\d\\s\\W\\D\\S]*\\](?=,\"background\")", "\"referenceItems\": null");
+        //    page.Content = Regex.Replace(page.Content, "\"name\":\"" + pageContent.Name + "\"", "\"name\":\"" + page.Name + "\"");
+        //    pageContent.Name = page.Name;
+        //    pageContent.ReferenceItems = null;
+        //    pageContent.Id = page.Id;
+
+        //    unitOfWork.Pages.Update(page);
+        //    await unitOfWork.Save();
+
+
+        //    // Return the page content
+        //    return Ok(pageContent);
+        //}
 
 
 
@@ -178,84 +155,84 @@ namespace Manager.Controllers
 
 
 
-        [HttpGet]
-        [Route("Link")]
-        public async Task<ActionResult> Link(string searchWords)
-        {
-            var pages = await unitOfWork.Pages.GetCollection(searchWords, x => new
-            {
-                x.Id,
-                x.Name,
-                x.DisplayType,
-                x.UrlName,
-                x.UrlId
-            });
+        //[HttpGet]
+        //[Route("Link")]
+        //public async Task<ActionResult> Link(string searchWords)
+        //{
+        //    var pages = await unitOfWork.Pages.GetCollection(searchWords, x => new
+        //    {
+        //        x.Id,
+        //        x.Name,
+        //        x.DisplayType,
+        //        x.UrlName,
+        //        x.UrlId
+        //    });
 
 
 
-            return Ok(pages.Select(x => new
-            {
-                x.Id,
-                x.Name,
-                Link = GetPageDisplay((Services.Classes.PageDisplayType)x.DisplayType) + x.UrlName + "/" + x.UrlId
-            }).ToList());
-        }
+        //    return Ok(pages.Select(x => new
+        //    {
+        //        x.Id,
+        //        x.Name,
+        //        Link = GetPageDisplay((Services.Classes.PageDisplayType)x.DisplayType) + x.UrlName + "/" + x.UrlId
+        //    }).ToList());
+        //}
 
 
-        private string GetPageDisplay(Services.Classes.PageDisplayType pageDisplayType)
-        {
-            string value = "";
+        //private string GetPageDisplay(Services.Classes.PageDisplayType pageDisplayType)
+        //{
+        //    string value = "";
 
-            switch (pageDisplayType)
-            {
-                case Services.Classes.PageDisplayType.Custom:
-                    value = "cp/";
-                    break;
-                case Services.Classes.PageDisplayType.Browse:
-                    value = "browse/";
-                    break;
-            }
+        //    switch (pageDisplayType)
+        //    {
+        //        case Services.Classes.PageDisplayType.Custom:
+        //            value = "cp/";
+        //            break;
+        //        case Services.Classes.PageDisplayType.Browse:
+        //            value = "browse/";
+        //            break;
+        //    }
 
-            return value;
-        }
-
-
-
-
-        [HttpPost]
-        [Route("PageReferenceItem")]
-        public async Task<ActionResult> AddPageReferenceItem(PageReferenceItemViewModel newPageReferenceItem)
-        {
-            PageReferenceItem pageReferenceItem = new PageReferenceItem
-            {
-                PageId = newPageReferenceItem.PageId,
-                ItemId = newPageReferenceItem.DisplayId
-            };
-
-
-            // Add and save
-            unitOfWork.PageReferenceItems.Add(pageReferenceItem);
-            await unitOfWork.Save();
-
-            return Ok(pageReferenceItem.Id);
-        }
+        //    return value;
+        //}
 
 
 
 
+        //[HttpPost]
+        //[Route("PageReferenceItem")]
+        //public async Task<ActionResult> AddPageReferenceItem(PageReferenceItemViewModel newPageReferenceItem)
+        //{
+        //    PageReferenceItem pageReferenceItem = new PageReferenceItem
+        //    {
+        //        PageId = newPageReferenceItem.PageId,
+        //        ItemId = newPageReferenceItem.DisplayId
+        //    };
 
-        [HttpDelete]
-        [Route("PageReferenceItem")]
-        public async Task<ActionResult> DeletePageReferenceItem([FromQuery] int[] ids)
-        {
-            foreach (int id in ids)
-            {
-                PageReferenceItem pageReferenceItem = await unitOfWork.PageReferenceItems.Get(id);
-                unitOfWork.PageReferenceItems.Remove(pageReferenceItem);
-            }
 
-            await unitOfWork.Save();
-            return Ok();
-        }
+        //    // Add and save
+        //    unitOfWork.PageReferenceItems.Add(pageReferenceItem);
+        //    await unitOfWork.Save();
+
+        //    return Ok(pageReferenceItem.Id);
+        //}
+
+
+
+
+
+        //[HttpDelete]
+        //[Route("PageReferenceItem")]
+        //public async Task<ActionResult> DeletePageReferenceItem([FromQuery] int[] ids)
+        //{
+        //    foreach (int id in ids)
+        //    {
+        //        PageReferenceItem pageReferenceItem = await unitOfWork.PageReferenceItems.Get(id);
+        //        unitOfWork.PageReferenceItems.Remove(pageReferenceItem);
+        //    }
+
+        //    await unitOfWork.Save();
+        //    return Ok();
+        //}
     }
 }

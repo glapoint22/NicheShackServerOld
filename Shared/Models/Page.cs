@@ -12,18 +12,20 @@ namespace DataAccess.Models
         public string Name { get; set; }
 
 
-        [Required]
+        
         [MaxLength(10)]
         public string UrlId { get; set; }
-        [Required]
+
+
+        
         [MaxLength(256)]
         public string UrlName { get; set; }
 
 
-        [Required]
+        
         public string Content { get; set; }
 
-        public int DisplayType { get; set; }
+        public int PageType { get; set; }
 
 
         public virtual ICollection<PageReferenceItem> PageReferenceItems { get; set; }

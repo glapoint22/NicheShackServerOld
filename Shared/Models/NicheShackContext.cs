@@ -494,7 +494,7 @@ namespace DataAccess.Models
             modelBuilder.Entity<Page>(entity =>
             {
                 entity
-                .HasIndex(x => x.DisplayType)
+                .HasIndex(x => x.PageType)
                 .IncludeProperties(x => x.Content)
                 .IsClustered(false);
 

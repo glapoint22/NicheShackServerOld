@@ -9,7 +9,7 @@ namespace Manager.Classes
     {
         public int PageId { get; set; }
         public string Name { get; set; }
-        public PageDisplayType DisplayType { get; set; }
+        public PageType DisplayType { get; set; }
         public IEnumerable<ItemViewModel> DisplayItems { get; set; }
         public string Content { get; set; }
     }
