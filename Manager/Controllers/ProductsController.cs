@@ -250,21 +250,21 @@ namespace Manager.Controllers
 
 
 
-        [Route("Email")]
-        [HttpPut]
-        public async Task<ActionResult> UpdateProductEmail(UpdatedPage updatedPage)
-        {
-            ProductEmail productEmail = await unitOfWork.ProductEmails.Get(updatedPage.PageId);
+        //[Route("Email")]
+        //[HttpPut]
+        //public async Task<ActionResult> UpdateProductEmail(UpdatedPage updatedPage)
+        //{
+        //    ProductEmail productEmail = await unitOfWork.ProductEmails.Get(updatedPage.Id);
 
-            productEmail.Name = updatedPage.Name;
-            productEmail.Content = updatedPage.Content;
+        //    productEmail.Name = updatedPage.Name;
+        //    productEmail.Content = updatedPage.Content;
 
-            // Update and save
-            unitOfWork.ProductEmails.Update(productEmail);
-            await unitOfWork.Save();
+        //    // Update and save
+        //    unitOfWork.ProductEmails.Update(productEmail);
+        //    await unitOfWork.Save();
 
-            return Ok();
-        }
+        //    return Ok();
+        //}
 
 
 
