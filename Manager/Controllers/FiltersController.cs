@@ -153,12 +153,36 @@ namespace Manager.Controllers
 
 
 
-        [Route("Options")]
+        //[Route("Options")]
+        //[HttpGet]
+        //public async Task<ActionResult> GetOptions(int parentId)
+        //{
+        //    return Ok(await unitOfWork.FilterOptions.GetCollection<ItemViewModel<FilterOption>>(x => x.FilterId == parentId));
+        //}
+
+
+
         [HttpGet]
-        public async Task<ActionResult> GetOptions(int parentId)
+        [Route("Options")]
+        public async Task<ActionResult> GetFilters(int productId, int parentId)
         {
-            return Ok(await unitOfWork.FilterOptions.GetCollection<ItemViewModel<FilterOption>>(x => x.FilterId == parentId));
+            // When we have to get filter options for a product
+            if (productId != 0)
+            {
+                return Ok(await unitOfWork.Products.GetProductFilters(productId, parentId));
+            }
+
+            // When we have to get filter options for the filters form
+            else
+            {
+                return Ok(await unitOfWork.FilterOptions.GetCollection<ItemViewModel<FilterOption>>(x => x.FilterId == parentId));
+            }
         }
+
+
+
+
+
 
 
         [Route("Options/CheckDuplicate")]

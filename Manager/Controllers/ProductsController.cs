@@ -430,13 +430,7 @@ namespace Manager.Controllers
         }
 
 
-        [Route("Subgroup")]
-        [HttpGet]
-        public async Task<ActionResult> GetSubgroups(int ProductId)
-        {
-            var subgroups = await unitOfWork.Subgroups.GetCollection(x => new { Id = x.Id, Name = x.Name, Checked = x.SubgroupProducts.Where(y => y.ProductId == ProductId).Select(y => y.SubgroupId).Contains(x.Id) });
-            return Ok(subgroups.OrderBy(x => x.Name));
-        }
+        
 
 
 
@@ -562,12 +556,12 @@ namespace Manager.Controllers
 
 
 
-        [HttpGet]
-        [Route("Filters")]
-        public async Task<ActionResult> GetFilters(int productId, int filterId)
-        {
-            return Ok(await unitOfWork.Products.GetProductFilters(productId, filterId));
-        }
+        //[HttpGet]
+        //[Route("Filters")]
+        //public async Task<ActionResult> GetFilters(int productId, int filterId)
+        //{
+        //    return Ok(await unitOfWork.Products.GetProductFilters(productId, filterId));
+        //}
 
 
         [HttpGet]
