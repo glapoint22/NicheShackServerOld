@@ -430,6 +430,13 @@ namespace Manager.Controllers
         }
 
 
+        [Route("Subgroup")]
+        [HttpGet]
+        public async Task<ActionResult> GetSubgroups(int ProductId)
+        {
+            var subgroups = await unitOfWork.Subgroups.GetCollection(x => new { Id = x.Id, Name = x.Name, Checked = x.SubgroupProducts.Where(y => y.ProductId == ProductId).Select(y => y.SubgroupId).Contains(x.Id) });
+            return Ok(subgroups.OrderBy(x => x.Name));
+        }
 
 
 
@@ -464,6 +471,29 @@ namespace Manager.Controllers
                 unitOfWork.SubgroupProducts.Remove(subgroup);
             }
 
+
+            await unitOfWork.Save();
+
+            return Ok();
+        }
+
+
+
+
+        [Route("Subgroup")]
+        [HttpPut]
+        public async Task<ActionResult> UpdateSubgroup(UpdatedProductItem updatedProductGroup)
+        {
+
+            if (updatedProductGroup.Checked)
+            {
+                unitOfWork.SubgroupProducts.Add(new SubgroupProduct { ProductId = updatedProductGroup.ProductId, SubgroupId = updatedProductGroup.Id });
+            }
+            else
+            {
+                SubgroupProduct subgroupProduct = await unitOfWork.SubgroupProducts.Get(x => x.ProductId == updatedProductGroup.ProductId && x.SubgroupId == updatedProductGroup.Id);
+                unitOfWork.SubgroupProducts.Remove(subgroupProduct);
+            }
 
             await unitOfWork.Save();
 

@@ -32,9 +32,9 @@ namespace Manager.Controllers
 
         [HttpGet]
         [Route("Search")]
-        public async Task<ActionResult> SearchSubgroups(string searchWords)
+        public async Task<ActionResult> SearchSubgroups(int productId, string searchWords)
         {
-            IEnumerable<ItemViewModel<Subgroup>> subgroups = await unitOfWork.Subgroups.GetCollection<ItemViewModel<Subgroup>>(searchWords);
+            var subgroups = await unitOfWork.Subgroups.GetCollection(searchWords, x => new { Id = x.Id, Name = x.Name, Checked = x.SubgroupProducts.Where(y => y.ProductId == productId).Select(y => y.SubgroupId).Contains(x.Id) });
 
             return Ok(subgroups.OrderBy(x => x.Name));
         }
