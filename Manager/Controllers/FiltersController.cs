@@ -201,10 +201,10 @@ namespace Manager.Controllers
 
         [HttpGet]
         [Route("Search")]
-        public async Task<ActionResult> SearchFilters(string searchWords)
+        public async Task<ActionResult> SearchFilters(int productId, string searchWords)
         {
-            var filters = await unitOfWork.Filters.GetCollection(searchWords, x => new SearchItem { Id = x.Id, Name = x.Name, Type = "Filter" });
-            var filterOptions = await unitOfWork.FilterOptions.GetCollection(searchWords, x => new SearchItem { Id = x.Id, Name = x.Name, Type = "Option" });
+            var filters = await unitOfWork.Filters.GetCollection(searchWords, x => new CheckboxSearchItem { Id = x.Id, Name = x.Name, Type = "Filter" });
+            var filterOptions = await unitOfWork.FilterOptions.GetCollection(searchWords, x => new CheckboxSearchItem { Id = x.Id, Name = x.Name, Type = "Option", Checked = x.ProductFilters.Select(y =>y.ProductId).Contains(productId) });
             var searchResults = filters.Concat(filterOptions).OrderBy(x => x.Name).ToList();
             return Ok(searchResults);
         }
