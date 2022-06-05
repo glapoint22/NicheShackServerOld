@@ -43,7 +43,7 @@ namespace Manager.Controllers
 
 
         [HttpGet]
-        public async Task<ActionResult> GetKeywords(int parentId, int productId)
+        public async Task<ActionResult> GetKeywords(int productId, int parentId)
         {
             var keywords = await unitOfWork.Keywords_In_KeywordGroup.GetCollection(x => x.KeywordGroupId == parentId, x => new
             {

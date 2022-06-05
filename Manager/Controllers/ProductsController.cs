@@ -430,6 +430,7 @@ namespace Manager.Controllers
         }
 
 
+        
 
 
 
@@ -464,6 +465,29 @@ namespace Manager.Controllers
                 unitOfWork.SubgroupProducts.Remove(subgroup);
             }
 
+
+            await unitOfWork.Save();
+
+            return Ok();
+        }
+
+
+
+
+        [Route("Subgroup")]
+        [HttpPut]
+        public async Task<ActionResult> UpdateSubgroup(UpdatedProductItem updatedProductGroup)
+        {
+
+            if (updatedProductGroup.Checked)
+            {
+                unitOfWork.SubgroupProducts.Add(new SubgroupProduct { ProductId = updatedProductGroup.ProductId, SubgroupId = updatedProductGroup.Id });
+            }
+            else
+            {
+                SubgroupProduct subgroupProduct = await unitOfWork.SubgroupProducts.Get(x => x.ProductId == updatedProductGroup.ProductId && x.SubgroupId == updatedProductGroup.Id);
+                unitOfWork.SubgroupProducts.Remove(subgroupProduct);
+            }
 
             await unitOfWork.Save();
 
@@ -532,12 +556,12 @@ namespace Manager.Controllers
 
 
 
-        [HttpGet]
-        [Route("Filters")]
-        public async Task<ActionResult> GetFilters(int productId, int filterId)
-        {
-            return Ok(await unitOfWork.Products.GetProductFilters(productId, filterId));
-        }
+        //[HttpGet]
+        //[Route("Filters")]
+        //public async Task<ActionResult> GetFilters(int productId, int filterId)
+        //{
+        //    return Ok(await unitOfWork.Products.GetProductFilters(productId, filterId));
+        //}
 
 
         [HttpGet]

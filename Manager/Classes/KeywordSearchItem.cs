@@ -1,8 +1,7 @@
 ﻿namespace Manager.Classes
 {
-    public class KeywordSearchItem : SearchItem
+    public class KeywordSearchItem : CheckboxSearchItem
     {
         public bool ForProduct { get; set; }
-        public bool Checked { get; set; }
     }
 }
