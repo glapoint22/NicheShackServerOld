@@ -166,17 +166,7 @@ namespace Manager.Controllers
         [Route("Options")]
         public async Task<ActionResult> GetFilters(int productId, int parentId)
         {
-            // When we have to get filter options for a product
-            if (productId != 0)
-            {
-                return Ok(await unitOfWork.Products.GetProductFilters(productId, parentId));
-            }
-
-            // When we have to get filter options for the filters form
-            else
-            {
-                return Ok(await unitOfWork.FilterOptions.GetCollection<ItemViewModel<FilterOption>>(x => x.FilterId == parentId));
-            }
+            return Ok(await unitOfWork.Products.GetProductFilters(productId, parentId));
         }
 
 
@@ -204,7 +194,7 @@ namespace Manager.Controllers
         public async Task<ActionResult> SearchFilters(int productId, string searchWords)
         {
             var filters = await unitOfWork.Filters.GetCollection(searchWords, x => new CheckboxSearchItem { Id = x.Id, Name = x.Name, Type = "Filter" });
-            var filterOptions = await unitOfWork.FilterOptions.GetCollection(searchWords, x => new CheckboxSearchItem { Id = x.Id, Name = x.Name, Type = "Option", Checked = x.ProductFilters.Select(y =>y.ProductId).Contains(productId) });
+            var filterOptions = await unitOfWork.FilterOptions.GetCollection(searchWords, x => new CheckboxSearchItem { Id = x.Id, Name = x.Name, Type = "Option", Checked = x.ProductFilters.Select(y => y.ProductId).Contains(productId) });
             var searchResults = filters.Concat(filterOptions).OrderBy(x => x.Name).ToList();
             return Ok(searchResults);
         }
