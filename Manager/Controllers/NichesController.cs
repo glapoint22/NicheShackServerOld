@@ -261,21 +261,21 @@ namespace Manager.Controllers
 
 
 
-        [Route("LeadPage")]
-        [HttpPut]
-        public async Task<ActionResult> UpdateLeadPage(UpdatedPage updatedPage)
-        {
-            LeadPage leadPage = await unitOfWork.LeadPages.Get(updatedPage.PageId);
+        //[Route("LeadPage")]
+        //[HttpPut]
+        //public async Task<ActionResult> UpdateLeadPage(UpdatedPage updatedPage)
+        //{
+        //    LeadPage leadPage = await unitOfWork.LeadPages.Get(updatedPage.Id);
 
-            leadPage.Name = updatedPage.Name;
-            leadPage.Content = updatedPage.Content;
+        //    leadPage.Name = updatedPage.Name;
+        //    leadPage.Content = updatedPage.Content;
 
-            // Update and save
-            unitOfWork.LeadPages.Update(leadPage);
-            await unitOfWork.Save();
+        //    // Update and save
+        //    unitOfWork.LeadPages.Update(leadPage);
+        //    await unitOfWork.Save();
 
-            return Ok();
-        }
+        //    return Ok();
+        //}
 
 
 
@@ -294,21 +294,21 @@ namespace Manager.Controllers
 
 
 
-        [Route("LeadPageEmail")]
-        [HttpPut]
-        public async Task<ActionResult> UpdateLeadPageEmail(UpdatedPage updatedPage)
-        {
-            LeadPageEmail leadPageEmail = await unitOfWork.LeadPageEmails.Get(updatedPage.PageId);
+        //[Route("LeadPageEmail")]
+        //[HttpPut]
+        //public async Task<ActionResult> UpdateLeadPageEmail(UpdatedPage updatedPage)
+        //{
+        //    LeadPageEmail leadPageEmail = await unitOfWork.LeadPageEmails.Get(updatedPage.Id);
 
-            leadPageEmail.Name = updatedPage.Name;
-            leadPageEmail.Content = updatedPage.Content;
+        //    leadPageEmail.Name = updatedPage.Name;
+        //    leadPageEmail.Content = updatedPage.Content;
 
-            // Update and save
-            unitOfWork.LeadPageEmails.Update(leadPageEmail);
-            await unitOfWork.Save();
+        //    // Update and save
+        //    unitOfWork.LeadPageEmails.Update(leadPageEmail);
+        //    await unitOfWork.Save();
 
-            return Ok();
-        }
+        //    return Ok();
+        //}
 
 
 

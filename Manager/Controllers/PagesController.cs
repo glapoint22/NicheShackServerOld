@@ -70,7 +70,7 @@ namespace Manager.Controllers
 
 
         [HttpPost]
-        public async Task<ActionResult> NewPage(NewPage newPage)
+        public async Task<ActionResult> NewPage(PageViewModel newPage)
         {
             Page page = new Page
             {
@@ -85,6 +85,26 @@ namespace Manager.Controllers
             return Ok(page.Id);
         }
 
+
+
+
+
+
+        [HttpPut]
+        public async Task<ActionResult> UpdatePage(PageViewModel updatedPage)
+        {
+            //Page page = await unitOfWork.Pages.Get(updatedPage.Id);
+
+            //page.Name = updatedPage.Name;
+            //page.Content = updatedPage.Content;
+            //page.PageType = updatedPage.PageType;
+
+
+            //unitOfWork.Pages.Update(page);
+            //await unitOfWork.Save();
+
+            return Ok();
+        }
 
 
 
