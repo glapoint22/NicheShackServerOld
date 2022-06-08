@@ -151,7 +151,7 @@ namespace Manager.Controllers
         [HttpDelete]
         public async Task<ActionResult> DeletePage(int pageId)
         {
-            DataAccess.Models.Page page = await unitOfWork.Pages.Get(pageId);
+            Page page = await unitOfWork.Pages.Get(pageId);
 
             unitOfWork.Pages.Remove(page);
             await unitOfWork.Save();
@@ -168,9 +168,23 @@ namespace Manager.Controllers
 
         [HttpGet]
         [Route("Search")]
-        public async Task<ActionResult> Search(string searchWords)
+        public async Task<ActionResult> Search(string searchTerm)
         {
-            return Ok(await unitOfWork.Pages.GetCollection<ItemViewModel<DataAccess.Models.Page>>(searchWords));
+            return Ok(await unitOfWork.Pages.GetCollection<ItemViewModel<Page>>(searchTerm));
+        }
+
+
+
+        [HttpGet]
+        [Route("Link")]
+        public async Task<ActionResult> Link(string searchTerm)
+        {
+            return Ok(await unitOfWork.Pages.GetCollection(searchTerm, x => new
+            {
+                Id = x.Id,
+                Name = x.Name,
+                Link = x.UrlName + "/" + x.UrlId
+            }));
         }
 
 

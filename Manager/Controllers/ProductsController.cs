@@ -160,8 +160,9 @@ namespace Manager.Controllers
                 await unitOfWork.Save();
                 keywordId = newKeyword.Id;
 
-            // If a keyword already exists that contains the same name as this new product
-            }else
+                // If a keyword already exists that contains the same name as this new product
+            }
+            else
             {
                 // Just use the id of that keyword
                 keywordId = keyword.Id;
@@ -430,7 +431,7 @@ namespace Manager.Controllers
         }
 
 
-        
+
 
 
 
@@ -542,9 +543,9 @@ namespace Manager.Controllers
 
         [HttpGet]
         [Route("Link")]
-        public async Task<ActionResult> Link(string searchWords)
+        public async Task<ActionResult> Link(string searchTerm)
         {
-            return Ok(await unitOfWork.Products.GetCollection(searchWords, x => new
+            return Ok(await unitOfWork.Products.GetCollection(searchTerm, x => new
             {
                 Id = x.Id,
                 Name = x.Name,
