@@ -8,9 +8,9 @@ namespace Services.Classes
         public string FontWeight { get; set; }
         public string FontStyle { get; set; }
         public string TextDecoration { get; set; }
-        public string Color { get; set; } = "#c8c8c8";
-        public string Font { get; set; } = "Arial, Helvetica, sans-serif";
-        public string FontSize { get; set; } = "14";
+        public string Color { get; set; }
+        public string Font { get; set; }
+        public string FontSize { get; set; }
 
 
 

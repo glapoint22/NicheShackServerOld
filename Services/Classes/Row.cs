@@ -7,16 +7,14 @@ namespace Services.Classes
 {
     public struct Row
     {
-        public string Name { get; set; }
         public float Top { get; set; }
         public Background Background { get; set; }
         public Border Border { get; set; }
         public Corners Corners { get; set; }
         public Shadow Shadow { get; set; }
         public Padding Padding { get; set; }
-        public string VerticalAlignment { get; set; }
+        public VerticalAlignment VerticalAlignment { get; set; }
         public List<Column> Columns { get; set; }
-        public List<Breakpoint> Breakpoints { get; set; }
 
 
 
@@ -41,21 +39,26 @@ namespace Services.Classes
             if (Shadow != null) Shadow.SetStyle(row);
             if (Padding != null) Padding.SetStyle(row);
 
-            string valign;
-            switch (VerticalAlignment)
+            string valign = "top";
+
+            if (VerticalAlignment != null && VerticalAlignment.Values.Count > 0)
             {
-                case "center":
-                    valign = "middle";
-                    break;
+                switch (VerticalAlignment.Values[0].VerticalAlignmentType)
+                {
+                    case 1:
+                        valign = "middle";
+                        break;
 
-                case "flex-end":
-                    valign = "bottom";
-                    break;
+                    case 2:
+                        valign = "bottom";
+                        break;
 
-                default:
-                    valign = "top";
-                    break;
+                    default:
+                        valign = "top";
+                        break;
+                }
             }
+
 
             row.SetAttributeValue("valign", valign);
 

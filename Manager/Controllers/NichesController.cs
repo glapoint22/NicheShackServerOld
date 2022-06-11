@@ -426,5 +426,15 @@ namespace Manager.Controllers
             var products = await unitOfWork.Products.GetCollection(x => x.NicheId == parentId, x => new ItemViewModel { Id = x.Id, Name = x.Name });
             return Ok(products);
         }
+
+
+
+
+        [HttpGet]
+        [Route("Search")]
+        public async Task<ActionResult> Search(string searchTerm)
+        {
+            return Ok(await unitOfWork.Niches.GetCollection<ItemViewModel<Niche>>(searchTerm));
+        }
     }
 }

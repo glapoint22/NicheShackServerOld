@@ -2,17 +2,11 @@
 
 namespace Services.Classes
 {
-    public class Page
+    public class PageContent
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
         public int Width { get; set; }
         public Background Background { get; set; }
         public IEnumerable<Row> Rows { get; set; }
-        public int Type { get; set; }
-        public int DisplayType { get; set; }
-        public IEnumerable<Item> ReferenceItems { get; set; }
-
 
 
         public Widget GetWidget(WidgetType widgetType, Widget widgetData)

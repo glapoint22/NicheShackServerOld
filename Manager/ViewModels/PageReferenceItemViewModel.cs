@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace Manager.ViewModels
+﻿namespace Manager.ViewModels
 {
     public class PageReferenceItemViewModel
     {
+        public int Id { get; set; }
         public int PageId { get; set; }
-        public int DisplayId { get; set; }
+        public int ItemId { get; set; }
     }
 }

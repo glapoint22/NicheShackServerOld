@@ -8,7 +8,7 @@ namespace Services.Classes
     {
         public string Color { get; set; }
         public BackgroundImage Image { get; set; }
-        public bool Enable { get; set; }
+        public bool Enabled { get; set; }
 
 
 

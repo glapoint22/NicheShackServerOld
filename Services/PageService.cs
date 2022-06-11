@@ -11,23 +11,23 @@ namespace Services
     public class PageService : IPageService
     {
         private readonly NicheShackContext context;
-        private Classes.Page page;
+        private PageContent page;
 
         public PageService(NicheShackContext context)
         {
             this.context = context;
         }
 
-        public async Task<Classes.Page> GePage(string pageContent, QueryParams queryParams)
+        public async Task<PageContent> GePage(string pageContent, QueryParams queryParams)
         {
             // Deserialize the content into a page
-            page = JsonSerializer.Deserialize<Classes.Page>(pageContent, new JsonSerializerOptions
+            page = JsonSerializer.Deserialize<PageContent>(pageContent, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });
 
             // If background has an image
-            if(page.Background.Image != null)
+            if (page.Background != null && page.Background.Image != null)
             {
                 await page.Background.Image.SetData(context);
             }

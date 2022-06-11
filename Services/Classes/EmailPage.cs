@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Services.Classes
 {
-    public class EmailPage : Page
+    public class EmailPage : PageContent
     {
         public async Task<string> CreateBody(NicheShackContext context)
         {

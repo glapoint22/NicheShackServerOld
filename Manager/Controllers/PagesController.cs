@@ -1,9 +1,12 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using DataAccess.Models;
 using DataAccess.ViewModels;
 using Manager.Classes;
 using Manager.Repositories;
+using Manager.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Services.Classes;
 using Services.Interfaces;
 
 namespace Manager.Controllers
@@ -22,46 +25,45 @@ namespace Manager.Controllers
         }
 
 
-        //[HttpGet]
-        //public async Task<ActionResult> GetPages()
-        //{
-        //    return Ok(await unitOfWork.Pages.GetCollection<ItemViewModel<DataAccess.Models.Page>>());
-        //}
+        
+
+
+        [HttpGet]
+        public async Task<ActionResult> GetPage(int id)
+        {
+            string pageContentString = await unitOfWork.Pages.Get(x => x.Id == id, x => x.Content);
+
+            QueryParams queryParams = new QueryParams();
+
+            PageContent pageContent = await pageService.GePage(pageContentString, queryParams);
 
 
 
-        //[HttpGet]
-        //[Route("Page")]
-        //public async Task<ActionResult> GetPage(int id)
-        //{
-        //    string pageContent = await unitOfWork.Pages.Get(x => x.Id == id, x => x.Content);
-
-        //    QueryParams queryParams = new QueryParams();
-        //    queryParams.Cookies = Request.Cookies.ToList();
+            PageData pageData = await unitOfWork.Pages.Get(x => x.Id == id, x => new PageData
+            {
+                Id = x.Id,
+                Name = x.Name,
+                PageType = x.PageType,
+            });
 
 
-        //    return Ok(await pageService.GePage(pageContent, queryParams));
-        //}
+            List<int> itemIds = (List<int>)await unitOfWork.PageReferenceItems.GetCollection(x => x.PageId == id, x => x.ItemId);
 
 
-        //[HttpPut]
-        //[Route("Page")]
-        //public async Task<ActionResult> UpdatePage(UpdatedPage updatedPage)
-        //{
-        //    DataAccess.Models.Page page = await unitOfWork.Pages.Get(updatedPage.PageId);
 
-        //    page.Name = updatedPage.Name;
-        //    page.UrlName = GetUrlName(updatedPage.Name);
-        //    page.DisplayType = (int)updatedPage.DisplayType;
-        //    page.Content = updatedPage.Content;
+            pageData.PageReferenceItems = await unitOfWork.Niches.GetCollection(x => itemIds.Contains(x.Id), x => new Item
+            {
+                Id = x.Id,
+                Name = x.Name
+            });
 
-        //    // Update and save
-        //    unitOfWork.Pages.Update(page);
-        //    await unitOfWork.Save();
+            pageData.Content = pageContent;
+
+            return Ok(pageData);
+        }
 
 
-        //    return Ok();
-        //}
+        
 
 
 
@@ -112,37 +114,7 @@ namespace Manager.Controllers
 
 
 
-        //[Route("Duplicate")]
-        //[HttpGet]
-        //public async Task<ActionResult> DuplicatePage(int pageId)
-        //{
-        //    // Get the page
-        //    DataAccess.Models.Page page = await unitOfWork.Pages.Get(pageId);
-        //    page.Id = 0;
-        //    page.Name = "New Page";
-
-        //    var pageContent = await pageService.GePage(page.Content, new QueryParams());
-
-        //    // Add the duplicated page and save
-        //    unitOfWork.Pages.Add(page);
-        //    await unitOfWork.Save();
-
-
-        //    // Update the content
-        //    page.Content = Regex.Replace(page.Content, "^{\"id\":" + pageId, "{\"id\":" + page.Id);
-        //    page.Content = Regex.Replace(page.Content, "\"referenceItems\":\\[[\\w\\d\\s\\W\\D\\S]*\\](?=,\"background\")", "\"referenceItems\": null");
-        //    page.Content = Regex.Replace(page.Content, "\"name\":\"" + pageContent.Name + "\"", "\"name\":\"" + page.Name + "\"");
-        //    pageContent.Name = page.Name;
-        //    pageContent.ReferenceItems = null;
-        //    pageContent.Id = page.Id;
-
-        //    unitOfWork.Pages.Update(page);
-        //    await unitOfWork.Save();
-
-
-        //    // Return the page content
-        //    return Ok(pageContent);
-        //}
+        
 
 
 
@@ -233,40 +205,37 @@ namespace Manager.Controllers
 
 
 
-        //[HttpPost]
-        //[Route("PageReferenceItem")]
-        //public async Task<ActionResult> AddPageReferenceItem(PageReferenceItemViewModel newPageReferenceItem)
-        //{
-        //    PageReferenceItem pageReferenceItem = new PageReferenceItem
-        //    {
-        //        PageId = newPageReferenceItem.PageId,
-        //        ItemId = newPageReferenceItem.DisplayId
-        //    };
+        [HttpPost]
+        [Route("PageReferenceItem")]
+        public async Task<ActionResult> AddPageReferenceItem(PageReferenceItemViewModel newPageReferenceItem)
+        {
+            PageReferenceItem pageReferenceItem = new PageReferenceItem
+            {
+                PageId = newPageReferenceItem.PageId,
+                ItemId = newPageReferenceItem.ItemId
+            };
 
 
-        //    // Add and save
-        //    unitOfWork.PageReferenceItems.Add(pageReferenceItem);
-        //    await unitOfWork.Save();
+            // Add and save
+            unitOfWork.PageReferenceItems.Add(pageReferenceItem);
+            await unitOfWork.Save();
 
-        //    return Ok(pageReferenceItem.Id);
-        //}
-
-
+            return Ok(pageReferenceItem.Id);
+        }
 
 
 
-        //[HttpDelete]
-        //[Route("PageReferenceItem")]
-        //public async Task<ActionResult> DeletePageReferenceItem([FromQuery] int[] ids)
-        //{
-        //    foreach (int id in ids)
-        //    {
-        //        PageReferenceItem pageReferenceItem = await unitOfWork.PageReferenceItems.Get(id);
-        //        unitOfWork.PageReferenceItems.Remove(pageReferenceItem);
-        //    }
 
-        //    await unitOfWork.Save();
-        //    return Ok();
-        //}
+
+        [HttpDelete]
+        [Route("PageReferenceItem")]
+        public async Task<ActionResult> DeletePageReferenceItem(int id)
+        {
+            PageReferenceItem pageReferenceItem = await unitOfWork.PageReferenceItems.Get(id);
+            unitOfWork.PageReferenceItems.Remove(pageReferenceItem);
+
+            await unitOfWork.Save();
+            return Ok();
+        }
     }
 }

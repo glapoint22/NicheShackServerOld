@@ -5,6 +5,6 @@ namespace Services.Interfaces
 {
     public interface IPageService
     {
-        Task<Page> GePage(string pageContent, QueryParams queryParams);
+        Task<PageContent> GePage(string pageContent, QueryParams queryParams);
     }
 }
