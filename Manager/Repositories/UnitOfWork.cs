@@ -35,6 +35,7 @@ namespace Manager.Repositories
         public ISearchableRepository<KeywordGroup> KeywordGroups { get; }
         public IRepository<KeywordGroup_Belonging_To_Product> KeywordGroups_Belonging_To_Product { get; }
         public IRepository<Keyword_In_KeywordGroup> Keywords_In_KeywordGroup { get; }
+        public IRepository<PageKeyword> PageKeywords { get; }
 
 
         // Custom Repositories
@@ -57,7 +58,7 @@ namespace Manager.Repositories
             LeadPageEmails = new Repository<LeadPageEmail>(context);
             ProductEmails = new Repository<ProductEmail>(context);
             Vendors = new SearchableRepository<Vendor>(context);
-            Pages = new SearchableRepository<Page> (context);
+            Pages = new SearchableRepository<Page>(context);
             Emails = new SearchableRepository<Email>(context);
             Media = new SearchableRepository<Media>(context);
             Keywords = new SearchableRepository<Keyword>(context);
@@ -74,6 +75,7 @@ namespace Manager.Repositories
             KeywordGroups = new SearchableRepository<KeywordGroup>(context);
             KeywordGroups_Belonging_To_Product = new Repository<KeywordGroup_Belonging_To_Product>(context);
             Keywords_In_KeywordGroup = new Repository<Keyword_In_KeywordGroup>(context);
+            PageKeywords = new Repository<PageKeyword>(context);
 
             // Custom Repositories
             Products = new ProductRepository(context);

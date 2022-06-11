@@ -6,6 +6,8 @@ namespace DataAccess.Models
     public class ProductKeyword
     {
         public int Id { get; set; }
+
+
         [ForeignKey("Product")]
         [Required]
         public int ProductId { get; set; }

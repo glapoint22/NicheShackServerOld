@@ -29,12 +29,14 @@ namespace DataAccess.Models
 
 
         public virtual ICollection<PageReferenceItem> PageReferenceItems { get; set; }
+        public virtual ICollection<PageKeyword> PageKeywords { get; set; }
 
 
 
         public Page()
         {
             PageReferenceItems = new HashSet<PageReferenceItem>();
+            PageKeywords = new HashSet<PageKeyword>();
         }
     }
 }

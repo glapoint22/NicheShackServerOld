@@ -67,6 +67,9 @@ namespace DataAccess.Models
         public virtual DbSet<Page> Pages { get; set; }
 
 
+        public virtual DbSet<PageKeyword> PageKeywords { get; set; }
+
+
         public virtual DbSet<PageReferenceItem> PageReferenceItems { get; set; }
 
 
@@ -309,11 +312,11 @@ namespace DataAccess.Models
 
 
             // Keywords_In_KeywordGroup
-            modelBuilder.Entity<Keyword_In_KeywordGroup>(entity =>
-            {
-                entity.HasKey(e => new { e.KeywordGroupId, e.KeywordId })
-                    .HasName("PK_Keywords_In_KeywordGroup");
-            });
+            //modelBuilder.Entity<Keyword_In_KeywordGroup>(entity =>
+            //{
+            //    entity.HasKey(e => new { e.KeywordGroupId, e.KeywordId })
+            //        .HasName("PK_Keywords_In_KeywordGroup");
+            //});
 
 
 

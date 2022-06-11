@@ -38,6 +38,7 @@ namespace Manager.Repositories
         ISearchableRepository<KeywordGroup> KeywordGroups { get; }
         IRepository<KeywordGroup_Belonging_To_Product> KeywordGroups_Belonging_To_Product { get; }
         IRepository<Keyword_In_KeywordGroup> Keywords_In_KeywordGroup { get; }
+        IRepository<PageKeyword> PageKeywords { get; }
 
 
 

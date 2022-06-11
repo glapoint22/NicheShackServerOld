@@ -2,11 +2,7 @@
 using DataAccess.ViewModels;
 using Manager.Repositories;
 using Manager.ViewModels;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Manager.Controllers
@@ -54,7 +50,14 @@ namespace Manager.Controllers
             };
 
 
-            var keywordIds = await unitOfWork.Keywords_In_KeywordGroup.GetCollection(x => x.KeywordGroupId == referenceItem.ItemId, x => x.KeywordId);
+            var pageKeywords = await unitOfWork.Keywords_In_KeywordGroup.GetCollection(x => x.KeywordGroupId == referenceItem.ItemId, x => new PageKeyword
+            {
+                PageId = referenceItem.PageId,
+                KeywordInKeywordGroupId = x.Id
+            });
+
+
+            unitOfWork.PageKeywords.AddRange(pageKeywords);
 
 
             // Add and save
@@ -75,7 +78,7 @@ namespace Manager.Controllers
             PageReferenceItem pageReferenceItem = await unitOfWork.PageReferenceItems.Get(id);
             unitOfWork.PageReferenceItems.Remove(pageReferenceItem);
 
-            var keywordIds = await unitOfWork.Keywords_In_KeywordGroup.GetCollection(x => x.KeywordGroupId == id, x => x.KeywordId);
+
 
             //await unitOfWork.Save();
             return Ok();
