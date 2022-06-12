@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using DataAccess.Models;
 using DataAccess.ViewModels;
@@ -26,27 +27,24 @@ namespace Manager.Controllers
 
 
 
-
+        // ************************************************************************************* PAGE ***********************************************************************
 
         [HttpGet]
         public async Task<ActionResult> GetPage(int id)
         {
+            // Get the page content
             string pageContentString = await unitOfWork.Pages.Get(x => x.Id == id, x => x.Content);
-
             PageContent pageContent = await pageService.GePage(pageContentString, new QueryParams());
 
 
-
+            // Get the page properties
             PageData pageData = await unitOfWork.Pages.Get(x => x.Id == id, x => new PageData
             {
                 Id = x.Id,
                 Name = x.Name,
                 PageType = x.PageType,
+                Content = pageContent
             });
-
-
-
-            pageData.Content = pageContent;
 
             return Ok(pageData);
         }
@@ -55,19 +53,7 @@ namespace Manager.Controllers
 
 
 
-        [HttpGet]
-        [Route("PageReferenceItem")]
-        public async Task<ActionResult> GetPageReferenceItems(int pageId)
-        {
-            List<int?> itemIds = (List<int?>)await unitOfWork.PageReferenceItems.GetCollection(x => x.PageId == pageId, x => x.NicheId);
-            var pageReferenceItems = await unitOfWork.Niches.GetCollection(x => itemIds.Contains(x.Id), x => new Item
-            {
-                Id = x.Id,
-                Name = x.Name
-            });
-
-            return Ok(pageReferenceItems);
-        }
+        
 
 
 
@@ -141,6 +127,12 @@ namespace Manager.Controllers
 
 
 
+        
+        
+        
+        
+        
+        
         [HttpGet]
         [Route("Link")]
         public async Task<ActionResult> Link(string searchTerm)
@@ -155,13 +147,30 @@ namespace Manager.Controllers
 
 
 
-        
+
+
+        // ************************************************************************** PAGE NICHES ***********************************************************************
+
+        [HttpGet]
+        [Route("Niche")]
+        public async Task<ActionResult> GetNiches(int pageId)
+        {
+            List<int?> itemIds = (List<int?>)await unitOfWork.PageReferenceItems.GetCollection(x => x.PageId == pageId, x => x.NicheId);
+            var pageReferenceItems = await unitOfWork.Niches.GetCollection(x => itemIds.Contains(x.Id), x => new Item
+            {
+                Id = x.Id,
+                Name = x.Name
+            });
+
+            return Ok(pageReferenceItems);
+        }
+
 
 
 
         [HttpPost]
-        [Route("PageReferenceItem")]
-        public async Task<ActionResult> AddPageReferenceItem(PageReferenceItemViewModel newPageReferenceItem)
+        [Route("Niche")]
+        public async Task<ActionResult> AddNiche(PageReferenceItemViewModel newPageReferenceItem)
         {
             PageReferenceItem pageReferenceItem = new PageReferenceItem
             {
@@ -174,7 +183,7 @@ namespace Manager.Controllers
             unitOfWork.PageReferenceItems.Add(pageReferenceItem);
             await unitOfWork.Save();
 
-            return Ok(pageReferenceItem.Id);
+            return Ok();
         }
 
 
@@ -182,12 +191,123 @@ namespace Manager.Controllers
 
 
         [HttpDelete]
-        [Route("PageReferenceItem")]
-        public async Task<ActionResult> DeletePageReferenceItem(int nicheId, int pageId)
+        [Route("Niche")]
+        public async Task<ActionResult> DeleteNiche(int nicheId, int pageId)
         {
             PageReferenceItem pageReferenceItem = await unitOfWork.PageReferenceItems.Get(x => x.NicheId == nicheId && x.PageId == pageId);
             unitOfWork.PageReferenceItems.Remove(pageReferenceItem);
             
+
+            await unitOfWork.Save();
+            return Ok();
+        }
+
+
+
+
+
+
+        // ************************************************************************** PAGE KEYWORDS ***********************************************************************
+
+        [HttpGet]
+        [Route("Keywords")]
+        public async Task<ActionResult> GetKeywords(int groupId, int pageId)
+        {
+            var keywords = await unitOfWork.Keywords_In_KeywordGroup.GetCollection(x => x.KeywordGroupId == groupId, x => new
+            {
+                Id = x.Keyword.Id,
+                Name = x.Keyword.Name,
+                Checked = x.PageKeywords.Any(z => z.PageId == pageId && z.KeywordInKeywordGroupId == x.Id)
+            });
+
+            return Ok(keywords);
+        }
+
+
+
+        [HttpPut]
+        [Route("Keywords")]
+        public async Task<ActionResult> UpdatePageKeyword(PageKeywordChecked pageKeywordChecked)
+        {
+            var keywordInKeywordGroupId = await unitOfWork.Keywords_In_KeywordGroup.Get(x => x.KeywordGroupId == pageKeywordChecked.GroupId && x.KeywordId == pageKeywordChecked.KeywordId, x => x.Id);
+
+            if (pageKeywordChecked.Checked)
+            {
+                unitOfWork.PageKeywords.Add(new PageKeyword { PageId = pageKeywordChecked.PageId, KeywordInKeywordGroupId = keywordInKeywordGroupId });
+            }
+            else
+            {
+                var pageKeyword = await unitOfWork.PageKeywords.Get(x => x.PageId == pageKeywordChecked.PageId && x.KeywordInKeywordGroupId == keywordInKeywordGroupId);
+                unitOfWork.PageKeywords.Remove(pageKeyword);
+            }
+
+            await unitOfWork.Save();
+
+            return Ok();
+        }
+
+
+
+
+        [HttpPost]
+        [Route("KeywordGroup")]
+        public async Task<ActionResult> AddPageReferenceItem(PageReferenceItemViewModel referenceItem)
+        {
+            PageReferenceItem pageReferenceItem = new PageReferenceItem
+            {
+                PageId = referenceItem.PageId,
+                KeywordGroupId = referenceItem.ItemId
+            };
+
+
+            var pageKeywords = await unitOfWork.Keywords_In_KeywordGroup.GetCollection(x => x.KeywordGroupId == referenceItem.ItemId, x => new PageKeyword
+            {
+                PageId = referenceItem.PageId,
+                KeywordInKeywordGroupId = x.Id
+            });
+
+
+            unitOfWork.PageKeywords.AddRange(pageKeywords);
+
+
+            // Add and save
+            unitOfWork.PageReferenceItems.Add(pageReferenceItem);
+            await unitOfWork.Save();
+
+            return Ok();
+        }
+
+
+
+
+        [HttpGet]
+        [Route("KeywordGroup")]
+        public async Task<ActionResult> GetPageReferenceItems(int pageId)
+        {
+            List<int?> itemIds = (List<int?>)await unitOfWork.PageReferenceItems.GetCollection(x => x.PageId == pageId, x => x.KeywordGroupId);
+            var pageReferenceItems = await unitOfWork.KeywordGroups.GetCollection(x => itemIds.Contains(x.Id), x => new Item
+            {
+                Id = x.Id,
+                Name = x.Name
+            });
+
+            return Ok(pageReferenceItems);
+        }
+
+
+
+
+        [HttpDelete]
+        [Route("KeywordGroup")]
+        public async Task<ActionResult> DeletePageReferenceItem(int groupId, int pageId)
+        {
+            PageReferenceItem pageReferenceItem = await unitOfWork.PageReferenceItems.Get(x => x.KeywordGroupId == groupId && x.PageId == pageId);
+            unitOfWork.PageReferenceItems.Remove(pageReferenceItem);
+
+            var keywordInKeywordGroupIds = await unitOfWork.Keywords_In_KeywordGroup.GetCollection(x => x.KeywordGroupId == groupId, x => x.Id);
+            var pageKeywords = await unitOfWork.PageKeywords.GetCollection(x => keywordInKeywordGroupIds.Contains(x.KeywordInKeywordGroupId) && x.PageId == pageId);
+
+            unitOfWork.PageKeywords.RemoveRange(pageKeywords);
 
             await unitOfWork.Save();
             return Ok();
