@@ -20,6 +20,15 @@ namespace Manager.Classes
         }
 
 
+        public enum PageType
+        {
+            Custom,
+            Home,
+            Browse,
+            Search,
+            Grid
+        }
+
 
 
         public enum NotificationType

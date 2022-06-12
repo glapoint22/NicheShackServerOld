@@ -28,11 +28,13 @@ namespace DataAccess.Models
         public virtual Media Media { get; set; }
         public virtual ICollection<Product> Products { get; set; }
         public virtual ICollection<LeadPage> LeadPages { get; set; }
+        public virtual ICollection<PageReferenceItem> PageReferenceItems { get; set; }
 
         public Niche()
         {
             Products = new HashSet<Product>();
             LeadPages = new HashSet<LeadPage>();
+            PageReferenceItems = new HashSet<PageReferenceItem>();
         }
     }
 }

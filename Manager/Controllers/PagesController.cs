@@ -25,7 +25,7 @@ namespace Manager.Controllers
         }
 
 
-        
+
 
 
         [HttpGet]
@@ -33,9 +33,7 @@ namespace Manager.Controllers
         {
             string pageContentString = await unitOfWork.Pages.Get(x => x.Id == id, x => x.Content);
 
-            QueryParams queryParams = new QueryParams();
-
-            PageContent pageContent = await pageService.GePage(pageContentString, queryParams);
+            PageContent pageContent = await pageService.GePage(pageContentString, new QueryParams());
 
 
 
@@ -47,15 +45,6 @@ namespace Manager.Controllers
             });
 
 
-            List<int> itemIds = (List<int>)await unitOfWork.PageReferenceItems.GetCollection(x => x.PageId == id, x => x.ItemId);
-
-
-
-            pageData.PageReferenceItems = await unitOfWork.Niches.GetCollection(x => itemIds.Contains(x.Id), x => new Item
-            {
-                Id = x.Id,
-                Name = x.Name
-            });
 
             pageData.Content = pageContent;
 
@@ -63,10 +52,22 @@ namespace Manager.Controllers
         }
 
 
-        
 
 
 
+        [HttpGet]
+        [Route("PageReferenceItem")]
+        public async Task<ActionResult> GetPageReferenceItems(int pageId)
+        {
+            List<int?> itemIds = (List<int?>)await unitOfWork.PageReferenceItems.GetCollection(x => x.PageId == pageId, x => x.NicheId);
+            var pageReferenceItems = await unitOfWork.Niches.GetCollection(x => itemIds.Contains(x.Id), x => new Item
+            {
+                Id = x.Id,
+                Name = x.Name
+            });
+
+            return Ok(pageReferenceItems);
+        }
 
 
 
@@ -82,7 +83,7 @@ namespace Manager.Controllers
             };
 
             unitOfWork.Pages.Add(page);
-            //await unitOfWork.Save();
+            await unitOfWork.Save();
 
             return Ok(page.Id);
         }
@@ -95,26 +96,19 @@ namespace Manager.Controllers
         [HttpPut]
         public async Task<ActionResult> UpdatePage(PageViewModel updatedPage)
         {
-            //Page page = await unitOfWork.Pages.Get(updatedPage.Id);
+            Page page = await unitOfWork.Pages.Get(updatedPage.Id);
 
-            //page.Name = updatedPage.Name;
-            //page.Content = updatedPage.Content;
-            //page.PageType = updatedPage.PageType;
+            page.Name = updatedPage.Name;
+            page.Content = updatedPage.Content;
+            page.PageType = updatedPage.PageType;
 
 
-            //unitOfWork.Pages.Update(page);
-            //await unitOfWork.Save();
+            unitOfWork.Pages.Update(page);
+            await unitOfWork.Save();
 
             return Ok();
         }
 
-
-
-
-
-
-
-        
 
 
 
@@ -161,47 +155,7 @@ namespace Manager.Controllers
 
 
 
-        //[HttpGet]
-        //[Route("Link")]
-        //public async Task<ActionResult> Link(string searchWords)
-        //{
-        //    var pages = await unitOfWork.Pages.GetCollection(searchWords, x => new
-        //    {
-        //        x.Id,
-        //        x.Name,
-        //        x.DisplayType,
-        //        x.UrlName,
-        //        x.UrlId
-        //    });
-
-
-
-        //    return Ok(pages.Select(x => new
-        //    {
-        //        x.Id,
-        //        x.Name,
-        //        Link = GetPageDisplay((Services.Classes.PageDisplayType)x.DisplayType) + x.UrlName + "/" + x.UrlId
-        //    }).ToList());
-        //}
-
-
-        //private string GetPageDisplay(Services.Classes.PageDisplayType pageDisplayType)
-        //{
-        //    string value = "";
-
-        //    switch (pageDisplayType)
-        //    {
-        //        case Services.Classes.PageDisplayType.Custom:
-        //            value = "cp/";
-        //            break;
-        //        case Services.Classes.PageDisplayType.Browse:
-        //            value = "browse/";
-        //            break;
-        //    }
-
-        //    return value;
-        //}
-
+        
 
 
 
@@ -212,7 +166,7 @@ namespace Manager.Controllers
             PageReferenceItem pageReferenceItem = new PageReferenceItem
             {
                 PageId = newPageReferenceItem.PageId,
-                ItemId = newPageReferenceItem.ItemId
+                NicheId = newPageReferenceItem.ItemId
             };
 
 
@@ -229,10 +183,11 @@ namespace Manager.Controllers
 
         [HttpDelete]
         [Route("PageReferenceItem")]
-        public async Task<ActionResult> DeletePageReferenceItem(int id)
+        public async Task<ActionResult> DeletePageReferenceItem(int nicheId, int pageId)
         {
-            PageReferenceItem pageReferenceItem = await unitOfWork.PageReferenceItems.Get(id);
+            PageReferenceItem pageReferenceItem = await unitOfWork.PageReferenceItems.Get(x => x.NicheId == nicheId && x.PageId == pageId);
             unitOfWork.PageReferenceItems.Remove(pageReferenceItem);
+            
 
             await unitOfWork.Save();
             return Ok();

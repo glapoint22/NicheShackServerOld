@@ -515,10 +515,14 @@ namespace DataAccess.Models
             // PageReferenceItems
             modelBuilder.Entity<PageReferenceItem>(entity =>
             {
-                entity
-                .HasIndex(x => x.ItemId)
-                .IncludeProperties(x => x.PageId)
-                .IsClustered(false);
+                entity.HasOne(x => x.Niche)
+                .WithMany(x => x.PageReferenceItems)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
+                entity.HasOne(x => x.KeywordGroup)
+                .WithMany(x => x.PageReferenceItems)
+                .OnDelete(DeleteBehavior.Cascade);
             });
 
 

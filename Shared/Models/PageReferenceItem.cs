@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataAccess.Models
 {
@@ -13,9 +10,16 @@ namespace DataAccess.Models
         public int PageId { get; set; }
 
 
-        public int ItemId { get; set; }
+        [ForeignKey("Niche")]
+        public int? NicheId { get; set; }
+
+
+        [ForeignKey("KeywordGroup")]
+        public int? KeywordGroupId { get; set; }
 
 
         public virtual Page Page { get; set; }
+        public virtual Niche Niche { get; set; }
+        public virtual KeywordGroup KeywordGroup { get; set; }
     }
 }

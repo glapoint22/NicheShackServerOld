@@ -58,12 +58,13 @@ namespace Website.Controllers
 
                 await unitOfWork.Save();
 
-                int pageId = await unitOfWork.PageReferenceItems.Get(x => x.ItemId == keywordId, x => x.PageId);
+                //********************************FIX*********************************
+                //int pageId = await unitOfWork.PageReferenceItems.Get(x => x.ItemId == keywordId, x => x.PageId);
 
-                if (pageId > 0)
-                {
-                    pageContent = await unitOfWork.Pages.Get(x => x.Id == pageId && x.PageType == (int)PageType.Search, x => x.Content);
-                }
+                //if (pageId > 0)
+                //{
+                //    pageContent = await unitOfWork.Pages.Get(x => x.Id == pageId && x.PageType == (int)PageType.Search, x => x.Content);
+                //}
             }
 
             if (pageContent == null)
@@ -106,7 +107,7 @@ namespace Website.Controllers
             if (id == 0) return Ok();
 
 
-            int pageId = await unitOfWork.PageReferenceItems.Get(x => x.ItemId == id, x => x.PageId);
+            int pageId = await unitOfWork.PageReferenceItems.Get(x => x.NicheId == id, x => x.PageId);
 
             if (pageId > 0)
             {

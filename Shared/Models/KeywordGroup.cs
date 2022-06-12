@@ -17,11 +17,13 @@ namespace DataAccess.Models
 
         public virtual ICollection<Keyword_In_KeywordGroup> Keywords_In_KeywordGroup { get; set; }
         public virtual ICollection<KeywordGroup_Belonging_To_Product> KeywordGroups_Belonging_To_Product { get; set; }
+        public virtual ICollection<PageReferenceItem> PageReferenceItems { get; set; }
 
         public KeywordGroup ()
         {
             Keywords_In_KeywordGroup = new HashSet<Keyword_In_KeywordGroup>();
             KeywordGroups_Belonging_To_Product = new HashSet<KeywordGroup_Belonging_To_Product>();
+            PageReferenceItems = new HashSet<PageReferenceItem>();
         }
     }
 }
