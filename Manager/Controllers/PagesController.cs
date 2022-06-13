@@ -32,9 +32,13 @@ namespace Manager.Controllers
         [HttpGet]
         public async Task<ActionResult> GetPage(int id)
         {
+            PageContent pageContent = null;
+
             // Get the page content
             string pageContentString = await unitOfWork.Pages.Get(x => x.Id == id, x => x.Content);
-            PageContent pageContent = await pageService.GePage(pageContentString, new QueryParams());
+
+            if (pageContentString != null)
+                pageContent = await pageService.GePage(pageContentString, new QueryParams());
 
 
             // Get the page properties
@@ -53,7 +57,7 @@ namespace Manager.Controllers
 
 
 
-        
+
 
 
 
@@ -115,6 +119,70 @@ namespace Manager.Controllers
 
 
 
+        [HttpPost]
+        [Route("Duplicate")]
+        public async Task<ActionResult> Duplicate(Item page)
+        {
+            // Copy the page properties
+            var currentPage = await unitOfWork.Pages.Get(page.Id);
+            var duplicatePage = new Page
+            {
+                Name = currentPage.Name + " Copy",
+                Content = currentPage.Content,
+                UrlId = currentPage.UrlId,
+                UrlName = currentPage.UrlName,
+                PageType = currentPage.PageType
+            };
+
+            unitOfWork.Pages.Add(duplicatePage);
+            await unitOfWork.Save();
+
+            // If page type is browse or search
+            if (duplicatePage.PageType == (int)PageType.Browse || duplicatePage.PageType == (int)PageType.Search)
+            {
+                // Get the page reference items
+                var pageItems = await unitOfWork.PageReferenceItems.GetCollection(x => x.PageId == page.Id);
+
+                if (pageItems.Count() > 0)
+                {
+                    pageItems.ToList().ForEach(x =>
+                    {
+                        x.Id = 0;
+                        x.PageId = duplicatePage.Id;
+                    });
+
+                    // Duplicate the page reference items
+                    unitOfWork.PageReferenceItems.AddRange(pageItems);
+
+                    // If page type is search
+                    if (duplicatePage.PageType == (int)PageType.Search)
+                    {
+                        // Get th page keywords
+                        var pageKeywords = await unitOfWork.PageKeywords.GetCollection(x => x.PageId == page.Id);
+
+                        if (pageKeywords.Count() > 0)
+                        {
+                            pageKeywords.ToList().ForEach(x =>
+                            {
+                                x.Id = 0;
+                                x.PageId = duplicatePage.Id;
+                            });
+
+                            // Duplicate the page keywords
+                            unitOfWork.PageKeywords.AddRange(pageKeywords);
+                        }
+                    }
+
+                    await unitOfWork.Save();
+                }
+
+            }
+
+
+            return Ok(duplicatePage.Id);
+        }
+
+
 
 
 
@@ -127,12 +195,12 @@ namespace Manager.Controllers
 
 
 
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
         [HttpGet]
         [Route("Link")]
         public async Task<ActionResult> Link(string searchTerm)
@@ -196,7 +264,7 @@ namespace Manager.Controllers
         {
             PageReferenceItem pageReferenceItem = await unitOfWork.PageReferenceItems.Get(x => x.NicheId == nicheId && x.PageId == pageId);
             unitOfWork.PageReferenceItems.Remove(pageReferenceItem);
-            
+
 
             await unitOfWork.Save();
             return Ok();
