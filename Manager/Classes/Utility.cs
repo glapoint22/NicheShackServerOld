@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Text.RegularExpressions;
 
 namespace Manager.Classes
 {
@@ -167,15 +168,15 @@ namespace Manager.Classes
 
         public static string GetUrlName(string name)
         {
-            return Regex.Replace(name, @"[^a-zA-Z0-9\-]", evaluator);
+            name = name.Replace("'", "");
+            name = Regex.Replace(name, @"^[\W]|[\W]$", "");
+            return Regex.Replace(name, @"[\W_]+", "-");
         }
 
 
-        private static string evaluator(Match match)
+        public static string GetUrlId()
         {
-            Match nextMatch = match.NextMatch();
-            if (nextMatch.Index == match.Index + 1) return "";
-            return "-";
+            return Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper();
         }
     }
 }

@@ -89,7 +89,7 @@ namespace Manager.Controllers
             {
                 CategoryId = niche.Id,
                 Name = niche.Name,
-                UrlId = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper(),
+                UrlId = Utility.GetUrlId(),
                 UrlName = Utility.GetUrlName(niche.Name)
             };
 

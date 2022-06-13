@@ -94,7 +94,7 @@ namespace Manager.Controllers
             Category newCategory = new Category
             {
                 Name = category.Name,
-                UrlId = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper(),
+                UrlId = Utility.GetUrlId(),
                 UrlName = Utility.GetUrlName(category.Name)
             };
 

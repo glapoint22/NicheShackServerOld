@@ -69,7 +69,9 @@ namespace Manager.Controllers
             {
                 Name = newPage.Name,
                 Content = newPage.Content,
-                PageType = newPage.PageType
+                PageType = newPage.PageType,
+                UrlId = Utility.GetUrlId(),
+                UrlName = Utility.GetUrlName(newPage.Name)
             };
 
             unitOfWork.Pages.Add(page);
@@ -91,6 +93,17 @@ namespace Manager.Controllers
             page.Name = updatedPage.Name;
             page.Content = updatedPage.Content;
             page.PageType = updatedPage.PageType;
+
+            if (page.PageType == (int)PageType.Custom)
+            {
+                page.UrlId = page.UrlId == null ? Utility.GetUrlId() : page.UrlId;
+                page.UrlName = Utility.GetUrlName(page.Name);
+            }
+            else
+            {
+                page.UrlId = null;
+                page.UrlName = null;
+            }
 
 
             unitOfWork.Pages.Update(page);

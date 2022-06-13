@@ -112,7 +112,7 @@ namespace Manager.Controllers
             {
                 NicheId = product.Id,
                 Name = product.Name,
-                UrlId = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper(),
+                UrlId = Utility.GetUrlId(),
                 UrlName = Utility.GetUrlName(product.Name)
             };
 
