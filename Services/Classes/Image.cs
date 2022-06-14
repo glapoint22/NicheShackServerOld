@@ -10,7 +10,7 @@ namespace Services.Classes
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public string Url { get; set; }
+        public string Src { get; set; }
 
         public async Task SetStyle(HtmlNode node, NicheShackContext context)
         {
@@ -20,15 +20,15 @@ namespace Services.Classes
             if (Name == "Product Placeholder")
             {
                 Name = "{productName}";
-                Url = "{productImage}";
+                Src = "{productImage}";
             }
             else if (Name == "Stars Placeholder")
             {
                 Name = "Product Rating";
-                Url = "{stars}";
+                Src = "{stars}";
             }
 
-            node.SetAttributeValue("src", "{host}/images/" + Url);
+            node.SetAttributeValue("src", "{host}/images/" + Src);
             node.SetAttributeValue("title", Name);
             node.SetAttributeValue("alt", Name);
         }
@@ -42,7 +42,7 @@ namespace Services.Classes
             .Select(x => new Image
             {
                 Name = x.Name,
-                Url = x.Image
+                Src = x.Image
             })
             .SingleOrDefaultAsync();
 
@@ -50,7 +50,7 @@ namespace Services.Classes
             if (image != null)
             {
                 Name = image.Name;
-                Url = image.Url;
+                Src = image.Src;
             }
         }
     }

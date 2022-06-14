@@ -28,8 +28,8 @@ namespace Services.Classes
             {
                 await Image.SetData(context);
 
-                node.SetAttributeValue("background", "{host}/images/" + Image.Url);
-                styles += "background-image: url({host}/images/" + Image.Url + ");";
+                node.SetAttributeValue("background", "{host}/images/" + Image.Src);
+                styles += "background-image: url({host}/images/" + Image.Src + ");";
                 Image.SetStyle(ref styles);
             }
 
