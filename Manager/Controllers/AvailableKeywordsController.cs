@@ -191,11 +191,25 @@ namespace Manager.Controllers
 
 
         [HttpDelete]
-        public async Task<ActionResult> DeleteKeyword(int id)
+        public async Task<ActionResult> DeleteKeyword(int id, int keywordGroupId)
         {
-            Keyword keyword = await unitOfWork.Keywords.Get(id);
+            var keywordCount = await unitOfWork.Keywords_In_KeywordGroup.GetCount(x => x.KeywordId == id);
 
-            unitOfWork.Keywords.Remove(keyword);
+            if(keywordCount > 1)
+            {
+               var keyword = await unitOfWork.Keywords_In_KeywordGroup.Get(x => x.KeywordId == id && x.KeywordGroupId == keywordGroupId);
+                unitOfWork.Keywords_In_KeywordGroup.Remove(keyword);
+            }
+            else
+            {
+                var keyword = await unitOfWork.Keywords.Get(id);
+                unitOfWork.Keywords.Remove(keyword);
+            }
+
+
+
+
+
             await unitOfWork.Save();
 
             return Ok();

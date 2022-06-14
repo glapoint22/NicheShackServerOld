@@ -273,9 +273,9 @@ namespace Manager.Controllers
 
         [HttpDelete]
         [Route("Niche")]
-        public async Task<ActionResult> DeleteNiche(int nicheId, int pageId)
+        public async Task<ActionResult> DeleteNiche(int id, int pageId)
         {
-            PageReferenceItem pageReferenceItem = await unitOfWork.PageReferenceItems.Get(x => x.NicheId == nicheId && x.PageId == pageId);
+            PageReferenceItem pageReferenceItem = await unitOfWork.PageReferenceItems.Get(x => x.NicheId == id && x.PageId == pageId);
             unitOfWork.PageReferenceItems.Remove(pageReferenceItem);
 
 
@@ -380,12 +380,12 @@ namespace Manager.Controllers
 
         [HttpDelete]
         [Route("KeywordGroup")]
-        public async Task<ActionResult> DeletePageReferenceItem(int groupId, int pageId)
+        public async Task<ActionResult> DeletePageReferenceItem(int id, int pageId)
         {
-            PageReferenceItem pageReferenceItem = await unitOfWork.PageReferenceItems.Get(x => x.KeywordGroupId == groupId && x.PageId == pageId);
+            PageReferenceItem pageReferenceItem = await unitOfWork.PageReferenceItems.Get(x => x.KeywordGroupId == id && x.PageId == pageId);
             unitOfWork.PageReferenceItems.Remove(pageReferenceItem);
 
-            var keywordInKeywordGroupIds = await unitOfWork.Keywords_In_KeywordGroup.GetCollection(x => x.KeywordGroupId == groupId, x => x.Id);
+            var keywordInKeywordGroupIds = await unitOfWork.Keywords_In_KeywordGroup.GetCollection(x => x.KeywordGroupId == id, x => x.Id);
             var pageKeywords = await unitOfWork.PageKeywords.GetCollection(x => keywordInKeywordGroupIds.Contains(x.KeywordInKeywordGroupId) && x.PageId == pageId);
 
             unitOfWork.PageKeywords.RemoveRange(pageKeywords);
