@@ -72,7 +72,7 @@ namespace Services.Classes
                 string bgColor = tableOptions.Background != null && tableOptions.Background.Color != null ? " bgcolor=\"" + tableOptions.Background.Color + "\"" : string.Empty;
 
                 // Image
-                string image = tableOptions.Background != null && tableOptions.Background.Image != null ? " background=\"{host}/images/" + tableOptions.Background.Image.Url + "\"" : string.Empty;
+                string image = tableOptions.Background != null && tableOptions.Background.Image != null ? " background=\"{host}/images/" + tableOptions.Background.Image.Src + "\"" : string.Empty;
 
                 string align = tableOptions.HorizontalAlignment != null ? "align=\"" + tableOptions.HorizontalAlignment + "\"" : string.Empty;
 
