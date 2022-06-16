@@ -9,8 +9,8 @@ namespace Services.Classes
         public string FontStyle { get; set; }
         public string TextDecoration { get; set; }
         public string Color { get; set; }
-        public string Font { get; set; }
-        public string FontSize { get; set; }
+        public KeyValue Font { get; set; }
+        public KeyValue FontSize { get; set; }
 
 
 
@@ -26,7 +26,7 @@ namespace Services.Classes
 
 
             // Font Weight
-            if(FontWeight != null)
+            if (FontWeight != null)
             {
                 styles += "font-weight: " + FontWeight + ";";
             }

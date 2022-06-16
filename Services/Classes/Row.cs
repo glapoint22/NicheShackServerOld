@@ -45,11 +45,11 @@ namespace Services.Classes
             {
                 switch (VerticalAlignment.Values[0].VerticalAlignmentType)
                 {
-                    case 1:
+                    case "vertical-align-middle":
                         valign = "middle";
                         break;
 
-                    case 2:
+                    case "vertical-align-bottom":
                         valign = "bottom";
                         break;
 

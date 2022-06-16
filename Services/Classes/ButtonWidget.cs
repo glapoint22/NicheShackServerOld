@@ -115,7 +115,7 @@ namespace Services.Classes
 
 
 
-            var fontSize = int.Parse(Caption.FontSize);
+            var fontSize = int.Parse(Caption.FontSize.Value);
             var padding = Math.Max(0, ((height - fontSize) / 2) - 1);
             var paddingTop = Padding != null && Padding.Top != null ? int.Parse(Padding.Top.Substring(0, Padding.Top.Length - 2)) : 0;
             var paddingBottom = Padding != null && Padding.Bottom != null ? int.Parse(Padding.Bottom.Substring(0, Padding.Bottom.Length - 2)) : 0;

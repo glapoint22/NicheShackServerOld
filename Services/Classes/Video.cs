@@ -8,8 +8,9 @@ namespace Services.Classes
     public class Video
     {
         public int Id { get; set; }
-        public string Url { get; set; }
+        public string Src { get; set; }
         public string Thumbnail { get; set; }
+        public string Name { get; set; }
 
         public async Task SetData(NicheShackContext context)
         {
@@ -18,8 +19,7 @@ namespace Services.Classes
             .Where(x => x.Id == Id)
             .Select(x => new Video
             {
-                Thumbnail = x.VideoId,
-                Url = x.Image
+                Thumbnail = x.Thumbnail
             })
             .SingleOrDefaultAsync();
 
@@ -28,7 +28,6 @@ namespace Services.Classes
             if (video != null)
             {
                 Thumbnail = video.Thumbnail;
-                Url = video.Url;
             }
         }
     }

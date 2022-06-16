@@ -2,7 +2,7 @@
 {
     public class VerticalAlignmentValue
     {
-        public int VerticalAlignmentType { get; set; }
+        public string VerticalAlignmentType { get; set; }
         public string Breakpoint { get; set; }
     }
 }
