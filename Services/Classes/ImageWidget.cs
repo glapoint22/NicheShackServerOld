@@ -92,7 +92,7 @@ namespace Services.Classes
         public override async Task SetData(NicheShackContext context, QueryParams queryParams)
         {
             await Image.SetData(context);
-            if (Link != null) await Link.SetData(context);
+            //if (Link != null) await Link.SetData(context);
         }
     }
 }

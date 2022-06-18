@@ -81,7 +81,7 @@ namespace Services.Classes
                 item.Icon = new Image();
                 item.Icon.Id = data.ImageId;
                 await item.Icon.SetData(context);
-                if (item.Link != null) await item.Link.SetData(context);
+                //if (item.Link != null) await item.Link.SetData(context);
             }
         }
     }

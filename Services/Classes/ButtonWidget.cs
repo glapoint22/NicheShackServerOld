@@ -116,16 +116,16 @@ namespace Services.Classes
 
 
             var fontSize = int.Parse(Caption.FontSize.Value);
-            var padding = Math.Max(0, ((height - fontSize) / 2) - 1);
-            var paddingTop = Padding != null && Padding.Top != null ? int.Parse(Padding.Top.Substring(0, Padding.Top.Length - 2)) : 0;
-            var paddingBottom = Padding != null && Padding.Bottom != null ? int.Parse(Padding.Bottom.Substring(0, Padding.Bottom.Length - 2)) : 0;
+            //var padding = Math.Max(0, ((height - fontSize) / 2) - 1);
+            //var paddingTop = Padding != null && Padding.Top != null ? int.Parse(Padding.Top.Substring(0, Padding.Top.Length - 2)) : 0;
+            //var paddingBottom = Padding != null && Padding.Bottom != null ? int.Parse(Padding.Bottom.Substring(0, Padding.Bottom.Length - 2)) : 0;
 
 
-            styles += "padding-top: " + (padding + paddingTop) + "px;";
-            styles += "padding-bottom: " + (padding + paddingBottom) + "px;";
+            //styles += "padding-top: " + (padding + paddingTop) + "px;";
+            //styles += "padding-bottom: " + (padding + paddingBottom) + "px;";
 
-            if (Padding != null && Padding.Right != null) styles += "padding-right: " + Padding.Right + "px;";
-            if (Padding != null && Padding.Left != null) styles += "padding-left: " + Padding.Left + "px;";
+            //if (Padding != null && Padding.Right != null) styles += "padding-right: " + Padding.Right + "px;";
+            //if (Padding != null && Padding.Left != null) styles += "padding-left: " + Padding.Left + "px;";
 
 
             anchorNode.SetAttributeValue("style", styles);
@@ -137,12 +137,12 @@ namespace Services.Classes
             if (Link != null) Link.SetStyle(anchorNode);
 
 
-            td.AppendChild(new HtmlDocument().CreateComment(Table.MicrosoftIf +
-                "<table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" align=\"center\" style=\"padding-top: " +
-                (padding + paddingTop) + "px;padding-bottom: " +
-                (padding + paddingBottom) +
-                "px;text-align: center;\"><tr><td>" +
-                Table.MicrosoftEndIf));
+            //td.AppendChild(new HtmlDocument().CreateComment(Table.MicrosoftIf +
+            //    "<table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" align=\"center\" style=\"padding-top: " +
+            //    (padding + paddingTop) + "px;padding-bottom: " +
+            //    (padding + paddingBottom) +
+            //    "px;text-align: center;\"><tr><td>" +
+            //    Table.MicrosoftEndIf));
 
 
 
@@ -160,7 +160,7 @@ namespace Services.Classes
                 await Background.Image.SetData(context);
             }
 
-            if (Link != null) await Link.SetData(context);
+            //if (Link != null) await Link.SetData(context);
 
         }
     }

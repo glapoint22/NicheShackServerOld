@@ -12,7 +12,7 @@ namespace Services.Classes
         public async Task SetData(NicheShackContext context)
         {
             await Image.SetData(context);
-            if (Link != null) await Link.SetData(context);
+            //if (Link != null) await Link.SetData(context);
         }
     }
 }

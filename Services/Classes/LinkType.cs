@@ -1,11 +1,10 @@
 ﻿namespace Services.Classes
 {
-    public enum LinkOption
+    public enum LinkType
     {
         None,
         Page,
         Product,
-        WebAddress,
-        OnClick
+        WebAddress
     }
 }

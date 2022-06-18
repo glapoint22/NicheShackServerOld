@@ -1,5 +1,6 @@
 ﻿using DataAccess.Models;
 using HtmlAgilityPack;
+using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -9,8 +10,7 @@ namespace Services.Classes
     {
         public Background Background { get; set; }
         public Padding Padding { get; set; }
-        public string HtmlContent { get; set; }
-
+        public List<TextBoxData> TextBoxData { get; set; }
 
 
         public async override Task<HtmlNode> Create(HtmlNode column, NicheShackContext context)
@@ -33,9 +33,6 @@ namespace Services.Classes
             if (Background != null) await Background.SetStyle(td, context);
             if (Padding != null) Padding.SetStyle(td);
 
-            // Assign the content
-            td.InnerHtml = HtmlContent;
-
             return textWidget;
         }
 
@@ -56,8 +53,8 @@ namespace Services.Classes
                     Padding = (Padding)JsonSerializer.Deserialize(ref reader, typeof(Padding), options);
                     break;
 
-                case "htmlContent":
-                    HtmlContent = (string)JsonSerializer.Deserialize(ref reader, typeof(string), options);
+                case "textBoxData":
+                    TextBoxData = (List<TextBoxData>)JsonSerializer.Deserialize(ref reader, typeof(List<TextBoxData>), options);
                     break;
             }
         }
