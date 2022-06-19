@@ -1,8 +1,6 @@
 ﻿using DataAccess.Models;
 using HtmlAgilityPack;
-using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -14,7 +12,6 @@ namespace Services.Classes
         public Border Border { get; set; }
         public Corners Corners { get; set; }
         public Shadow Shadow { get; set; }
-        public Padding Padding { get; set; }
         public IEnumerable<Row> Rows { get; set; }
 
 
@@ -39,7 +36,6 @@ namespace Services.Classes
             if (Border != null) Border.SetStyle(td);
             if (Corners != null) Corners.SetStyle(td);
             if (Shadow != null) Shadow.SetStyle(td);
-            if (Padding != null) Padding.SetStyle(td);
 
 
             HtmlNode container = Table.Create(td);
@@ -71,9 +67,6 @@ namespace Services.Classes
                     Shadow = (Shadow)JsonSerializer.Deserialize(ref reader, typeof(Shadow), options);
                     break;
 
-                case "padding":
-                    Padding = (Padding)JsonSerializer.Deserialize(ref reader, typeof(Padding), options);
-                    break;
 
                 case "rows":
                     Rows = (IEnumerable<Row>)JsonSerializer.Deserialize(ref reader, typeof(IEnumerable<Row>), options);

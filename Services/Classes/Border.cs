@@ -7,7 +7,7 @@ namespace Services.Classes
         public int Width { get; set; } = 1;
         public string Style { get; set; } = "solid";
         public string Color { get; set; } = "#bebebe";
-        public bool Enable { get; set; }
+        public bool Enabled { get; set; }
 
 
         public void SetStyle(HtmlNode node)
