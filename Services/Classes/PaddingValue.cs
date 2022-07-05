@@ -2,8 +2,8 @@
 {
     public class PaddingValue
     {
-        public string PaddingType { get; set; }
+        public int PaddingType { get; set; }
         public int Padding { get; set; }
-        public string Breakpoint { get; set; }
+        public int Breakpoint { get; set; }
     }
 }

@@ -5,7 +5,6 @@ namespace Services.Classes
 {
     public class Padding
     {
-        public bool Constrain { get; set; }
         public List<PaddingValue> Values { get; set; }
 
 
