@@ -3,6 +3,6 @@
     public class ColumnSpanValue
     {
         public int Span { get; set; }
-        public string Breakpoint { get; set; }
+        public int Breakpoint { get; set; }
     }
 }
