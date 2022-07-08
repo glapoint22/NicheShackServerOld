@@ -43,11 +43,11 @@ namespace Services.Classes
             {
                 switch (HorizontalAlignment.Values[0].HorizontalAlignmentType)
                 {
-                    case "horizontal-align-center":
+                    case 1:
                         align = "center";
                         break;
 
-                    case "horizontal-align-right":
+                    case 2:
                         align = "right";
                         break;
 
