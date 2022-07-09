@@ -218,11 +218,11 @@ namespace Manager.Controllers
         [Route("Link")]
         public async Task<ActionResult> Link(string searchTerm)
         {
-            return Ok(await unitOfWork.Pages.GetCollection(searchTerm, x => new
+            return Ok(await unitOfWork.Pages.GetCollection(x => x.PageType == (int)PageType.Custom, searchTerm, x => new LinkSearchItem
             {
                 Id = x.Id,
                 Name = x.Name,
-                Link = x.UrlName + "/" + x.UrlId
+                Link = "cp/" + x.UrlName + "/" + x.UrlId
             }));
         }
 

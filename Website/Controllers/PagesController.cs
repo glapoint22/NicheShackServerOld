@@ -28,7 +28,7 @@ namespace Website.Controllers
         [HttpPost]
         public async Task<ActionResult> GetPage(QueryParams queryParams)
         {
-            if (!await unitOfWork.Pages.Any(x => x.UrlId == queryParams.Id)) return NotFound();
+            if (!await unitOfWork.Pages.Any(x => x.UrlId == queryParams.Id)) return Ok();
 
             queryParams.Cookies = Request.Cookies.ToList();
 
