@@ -82,6 +82,8 @@ namespace Manager.Repositories
                     TotalReviews = x.TotalReviews,
                     Hoplink = x.Hoplink,
                     Description = x.Description,
+                    MinPrice = x.MinPrice,
+                    MaxPrice = x.MaxPrice,
                     Image = new ImageViewModel
                     {
                         Id = x.Media.Id,
@@ -92,42 +94,42 @@ namespace Manager.Repositories
 
 
             // Product Price
-            product.Price = await context.ProductPrices
-                 .AsNoTracking()
-                 .Where(x => x.ProductId == productId)
-                 .Select(x => new ProductPriceViewModel
-                 {
-                     Id = x.Id,
-                     Image = new ImageViewModel
-                     {
-                         Id = x.Media.Id,
-                         Name = x.Media.Name,
-                         Image = x.Media.Image
-                     },
-                     Header = x.Header,
-                     Quantity = x.Quantity,
-                     UnitPrice = x.UnitPrice,
-                     Unit = x.Unit,
-                     StrikethroughPrice = x.StrikethroughPrice,
-                     Price = x.Price,
-                     AdditionalInfo = context.ProductPriceAdditionalInfo
-                        .AsNoTracking()
-                        .Where(z => z.ProductPriceId == x.Id)
-                        .Select(z => new AdditionalInfoViewModel
-                        {
-                            Id = z.Id,
-                            IsRecurring = z.IsRecurring,
-                            ShippingType = z.ShippingType,
-                            RecurringPayment = new RecurringPayment
-                            {
-                                TrialPeriod = z.TrialPeriod,
-                                Price = z.Price,
-                                RebillFrequency = z.RebillFrequency,
-                                TimeFrameBetweenRebill = z.TimeFrameBetweenRebill,
-                                SubscriptionDuration = z.SubscriptionDuration
-                            }
-                        }).ToList()
-                 }).ToListAsync();
+            //product.Price = await context.ProductPrices
+            //     .AsNoTracking()
+            //     .Where(x => x.ProductId == productId)
+            //     .Select(x => new ProductPriceViewModel
+            //     {
+            //         Id = x.Id,
+            //         Image = new ImageViewModel
+            //         {
+            //             Id = x.Media.Id,
+            //             Name = x.Media.Name,
+            //             Image = x.Media.Image
+            //         },
+            //         Header = x.Header,
+            //         Quantity = x.Quantity,
+            //         UnitPrice = x.UnitPrice,
+            //         Unit = x.Unit,
+            //         StrikethroughPrice = x.StrikethroughPrice,
+            //         Price = x.Price,
+            //         AdditionalInfo = context.ProductPriceAdditionalInfo
+            //            .AsNoTracking()
+            //            .Where(z => z.ProductPriceId == x.Id)
+            //            .Select(z => new AdditionalInfoViewModel
+            //            {
+            //                Id = z.Id,
+            //                IsRecurring = z.IsRecurring,
+            //                ShippingType = z.ShippingType,
+            //                RecurringPayment = new RecurringPayment
+            //                {
+            //                    TrialPeriod = z.TrialPeriod,
+            //                    Price = z.Price,
+            //                    RebillFrequency = z.RebillFrequency,
+            //                    TimeFrameBetweenRebill = z.TimeFrameBetweenRebill,
+            //                    SubscriptionDuration = z.SubscriptionDuration
+            //                }
+            //            }).ToList()
+            //     }).ToListAsync();
 
 
             // Keywords
@@ -171,25 +173,46 @@ namespace Manager.Repositories
                 .ToListAsync();
 
 
-            // Additional Info
-            product.AdditionalInfo = await context.ProductAdditionalInfo
+            // Shipping
+            product.ShippingType = await context.ProductAdditionalInfo
                 .AsNoTracking()
-                .Where(x => x.ProductId == productId)
-                .Select(x => new AdditionalInfoViewModel
+                .Where(x => x.ProductId == productId && !x.IsRecurring)
+                .Select(x => x.ShippingType)
+                .SingleOrDefaultAsync();
+
+            // RecurringPayment
+            product.RecurringPayment = await context.ProductAdditionalInfo
+                .AsNoTracking()
+                .Where(x => x.ProductId == productId && x.IsRecurring)
+                .Select(x => new RecurringPayment
                 {
-                    Id = x.Id,
-                    IsRecurring = x.IsRecurring,
-                    ShippingType = x.ShippingType,
-                    RecurringPayment = new RecurringPayment
-                    {
-                        TrialPeriod = x.TrialPeriod,
-                        Price = x.Price,
-                        RebillFrequency = x.RebillFrequency,
-                        TimeFrameBetweenRebill = x.TimeFrameBetweenRebill,
-                        SubscriptionDuration = x.SubscriptionDuration
-                    }
+                    TrialPeriod = x.TrialPeriod,
+                    Price = x.Price,
+                    RebillFrequency = x.RebillFrequency,
+                    TimeFrameBetweenRebill = x.TimeFrameBetweenRebill,
+                    SubscriptionDuration = x.SubscriptionDuration
                 })
-                .ToListAsync();
+                .SingleOrDefaultAsync();
+
+            // Additional Info
+            //product.AdditionalInfo = await context.ProductAdditionalInfo
+            //    .AsNoTracking()
+            //    .Where(x => x.ProductId == productId)
+            //    .Select(x => new AdditionalInfoViewModel
+            //    {
+            //        Id = x.Id,
+            //        IsRecurring = x.IsRecurring,
+            //        ShippingType = x.ShippingType,
+            //        RecurringPayment = new RecurringPayment
+            //        {
+            //            TrialPeriod = x.TrialPeriod,
+            //            Price = x.Price,
+            //            RebillFrequency = x.RebillFrequency,
+            //            TimeFrameBetweenRebill = x.TimeFrameBetweenRebill,
+            //            SubscriptionDuration = x.SubscriptionDuration
+            //        }
+            //    })
+            //    .ToListAsync();
 
 
             return product;

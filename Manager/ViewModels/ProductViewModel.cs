@@ -14,12 +14,18 @@ namespace Manager.ViewModels
         public int TotalReviews { get; set; }
         public string Description { get; set; }
         public IEnumerable<ProductContentViewModel> Content { get; set; }
-        public IEnumerable<ProductPriceViewModel> Price { get; set; }
-        public bool IsMultiPrice { get; set; }
+        //public IEnumerable<ProductPriceViewModel> Price { get; set; }
+        //public bool IsMultiPrice { get; set; }
         public ImageViewModel Image { get; set; }
         public IEnumerable<ProductMediaViewModel> Media { get; set; }
         public IEnumerable<ItemViewModel> Keywords { get; set; }
         public IEnumerable<ItemViewModel> Subgroups { get; set; }
-        public IEnumerable<AdditionalInfoViewModel> AdditionalInfo { get; set; }
+        public int ShippingType { get; set; }
+        public double MinPrice { get; set; }
+        public double MaxPrice { get; set; }
+        public RecurringPayment RecurringPayment { get; set; }
+
+
+        //public IEnumerable<AdditionalInfoViewModel> AdditionalInfo { get; set; }
     }
 }
