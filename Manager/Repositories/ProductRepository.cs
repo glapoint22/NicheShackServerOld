@@ -93,43 +93,43 @@ namespace Manager.Repositories
                 }).SingleOrDefaultAsync();
 
 
-            // Product Price
-            //product.Price = await context.ProductPrices
-            //     .AsNoTracking()
-            //     .Where(x => x.ProductId == productId)
-            //     .Select(x => new ProductPriceViewModel
-            //     {
-            //         Id = x.Id,
-            //         Image = new ImageViewModel
-            //         {
-            //             Id = x.Media.Id,
-            //             Name = x.Media.Name,
-            //             Image = x.Media.Image
-            //         },
-            //         Header = x.Header,
-            //         Quantity = x.Quantity,
-            //         UnitPrice = x.UnitPrice,
-            //         Unit = x.Unit,
-            //         StrikethroughPrice = x.StrikethroughPrice,
-            //         Price = x.Price,
-            //         AdditionalInfo = context.ProductPriceAdditionalInfo
-            //            .AsNoTracking()
-            //            .Where(z => z.ProductPriceId == x.Id)
-            //            .Select(z => new AdditionalInfoViewModel
-            //            {
-            //                Id = z.Id,
-            //                IsRecurring = z.IsRecurring,
-            //                ShippingType = z.ShippingType,
-            //                RecurringPayment = new RecurringPayment
-            //                {
-            //                    TrialPeriod = z.TrialPeriod,
-            //                    Price = z.Price,
-            //                    RebillFrequency = z.RebillFrequency,
-            //                    TimeFrameBetweenRebill = z.TimeFrameBetweenRebill,
-            //                    SubscriptionDuration = z.SubscriptionDuration
-            //                }
-            //            }).ToList()
-            //     }).ToListAsync();
+            // Product Price Points
+            product.PricePoints = await context.ProductPrices
+                 .AsNoTracking()
+                 .Where(x => x.ProductId == productId)
+                 .Select(x => new PricePointViewModel
+                 {
+                     Id = x.Id,
+                     Image = new Image
+                     {
+                         Id = x.Media.Id,
+                         Name = x.Media.Name,
+                         Src = x.Media.Image
+                     },
+                     Header = x.Header,
+                     Quantity = x.Quantity,
+                     UnitPrice = x.UnitPrice,
+                     Unit = x.Unit,
+                     StrikethroughPrice = x.StrikethroughPrice,
+                     Price = x.Price,
+                     AdditionalInfo = context.ProductPriceAdditionalInfo
+                        .AsNoTracking()
+                        .Where(z => z.ProductPriceId == x.Id)
+                        .Select(z => new AdditionalInfoViewModel
+                        {
+                            Id = z.Id,
+                            IsRecurring = z.IsRecurring,
+                            ShippingType = z.ShippingType,
+                            RecurringPayment = new RecurringPayment
+                            {
+                                TrialPeriod = z.TrialPeriod,
+                                Price = z.Price,
+                                RebillFrequency = z.RebillFrequency,
+                                TimeFrameBetweenRebill = z.TimeFrameBetweenRebill,
+                                SubscriptionDuration = z.SubscriptionDuration
+                            }
+                        }).ToList()
+                 }).ToListAsync();
 
 
             // Keywords

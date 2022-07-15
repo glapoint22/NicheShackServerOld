@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Manager.Classes
 {
-    public class ProductPriceProperties
+    public class PricePointProperties
     {
         public int ProductId { get; set; }
         public int Id { get; set; }

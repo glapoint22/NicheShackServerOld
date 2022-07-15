@@ -3,10 +3,10 @@ using System.Collections.Generic;
 
 namespace Manager.ViewModels
 {
-    public struct ProductPriceViewModel
+    public struct PricePointViewModel
     {
         public int Id { get; set; }
-        public ImageViewModel Image { get; set; }
+        public Image Image { get; set; }
         public string Header { get; set; }
         public string Quantity { get; set; }
         public string UnitPrice { get; set; }
