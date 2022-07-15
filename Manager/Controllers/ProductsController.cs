@@ -500,11 +500,11 @@ namespace Manager.Controllers
 
         [Route("Description")]
         [HttpPut]
-        public async Task<ActionResult> UpdateDescription(ItemViewModel updatedProperty)
+        public async Task<ActionResult> UpdateDescription(ProductDescription productDescription)
         {
-            Product product = await unitOfWork.Products.Get(updatedProperty.Id);
+            Product product = await unitOfWork.Products.Get(productDescription.ProductId);
 
-            product.Description = updatedProperty.Name;
+            product.Description = productDescription.Description;
 
             // Update and save
             unitOfWork.Products.Update(product);
