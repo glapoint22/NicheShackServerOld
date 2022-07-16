@@ -1,5 +1,4 @@
 ﻿using DataAccess.ViewModels;
-using Services.Classes;
 using System.Collections.Generic;
 
 namespace Manager.ViewModels
@@ -19,12 +18,13 @@ namespace Manager.ViewModels
         public IEnumerable<ProductMediaViewModel> Media { get; set; }
         public IEnumerable<ItemViewModel> Keywords { get; set; }
         public IEnumerable<ItemViewModel> Subgroups { get; set; }
-        public int ShippingType { get; set; }
         public double MinPrice { get; set; }
         public double MaxPrice { get; set; }
-        public RecurringPayment RecurringPayment { get; set; }
-
-
-        //public IEnumerable<AdditionalInfoViewModel> AdditionalInfo { get; set; }
+        public int ShippingType { get; set; }
+        public int TrialPeriod { get; set; }
+        public double RecurringPrice { get; set; }
+        public int RebillFrequency { get; set; }
+        public int TimeFrameBetweenRebill { get; set; }
+        public int SubscriptionDuration { get; set; }
     }
 }

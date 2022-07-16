@@ -21,7 +21,7 @@ namespace Website.ViewModels
         public IEnumerable<SubproductViewModel> Components { get; set; }
         public IEnumerable<SubproductViewModel> Bonuses { get; set; }
         public IEnumerable<PricePointViewModel> PricePoints { get; set; }
-        public IEnumerable<AdditionalInfoViewModel> AdditionalInfo { get; set; }
+        //public IEnumerable<AdditionalInfoViewModel> AdditionalInfo { get; set; }
         public IEnumerable<UrlItemViewModel> Breadcrumb { get; set; }
 
         public ProductGroupViewModel RelatedProducts { get; set; }

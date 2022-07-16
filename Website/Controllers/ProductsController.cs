@@ -157,41 +157,41 @@ namespace Website.Controllers
                     Unit = x.Unit,
                     StrikethroughPrice = x.StrikethroughPrice,
                     Price = x.Price,
-                    AdditionalInfo = x.ProductPriceAdditionalInfo.Where(z => z.ProductPriceId == x.Id)
-                        .Select(z => new AdditionalInfoViewModel
-                        {
-                            Id = z.Id,
-                            IsRecurring = z.IsRecurring,
-                            ShippingType = z.ShippingType,
-                            RecurringPayment = new RecurringPayment
-                            {
-                                TrialPeriod = z.TrialPeriod,
-                                Price = z.Price,
-                                RebillFrequency = z.RebillFrequency,
-                                TimeFrameBetweenRebill = z.TimeFrameBetweenRebill,
-                                SubscriptionDuration = z.SubscriptionDuration
-                            }
-                        }).ToList()
+                    //AdditionalInfo = x.ProductPriceAdditionalInfo.Where(z => z.ProductPriceId == x.Id)
+                    //    .Select(z => new AdditionalInfoViewModel
+                    //    {
+                    //        Id = z.Id,
+                    //        IsRecurring = z.IsRecurring,
+                    //        ShippingType = z.ShippingType,
+                    //        RecurringPayment = new RecurringPayment
+                    //        {
+                    //            TrialPeriod = z.TrialPeriod,
+                    //            Price = z.Price,
+                    //            RebillFrequency = z.RebillFrequency,
+                    //            TimeFrameBetweenRebill = z.TimeFrameBetweenRebill,
+                    //            SubscriptionDuration = z.SubscriptionDuration
+                    //        }
+                    //    }).ToList()
                 });
 
 
 
 
                 // Additional Info
-                product.AdditionalInfo = await unitOfWork.AdditionalInfo.GetCollection(x => x.ProductId == product.Id, z => new AdditionalInfoViewModel
-                {
-                    Id = z.Id,
-                    IsRecurring = z.IsRecurring,
-                    ShippingType = z.ShippingType,
-                    RecurringPayment = new RecurringPayment
-                    {
-                        TrialPeriod = z.TrialPeriod,
-                        Price = z.Price,
-                        RebillFrequency = z.RebillFrequency,
-                        TimeFrameBetweenRebill = z.TimeFrameBetweenRebill,
-                        SubscriptionDuration = z.SubscriptionDuration
-                    }
-                });
+                //product.AdditionalInfo = await unitOfWork.AdditionalInfo.GetCollection(x => x.ProductId == product.Id, z => new AdditionalInfoViewModel
+                //{
+                //    Id = z.Id,
+                //    IsRecurring = z.IsRecurring,
+                //    ShippingType = z.ShippingType,
+                //    RecurringPayment = new RecurringPayment
+                //    {
+                //        TrialPeriod = z.TrialPeriod,
+                //        Price = z.Price,
+                //        RebillFrequency = z.RebillFrequency,
+                //        TimeFrameBetweenRebill = z.TimeFrameBetweenRebill,
+                //        SubscriptionDuration = z.SubscriptionDuration
+                //    }
+                //});
 
 
 

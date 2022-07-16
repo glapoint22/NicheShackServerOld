@@ -73,13 +73,10 @@ namespace DataAccess.Models
         public virtual DbSet<PageReferenceItem> PageReferenceItems { get; set; }
 
 
+        public virtual DbSet<PricePoint> PricePoints { get; set; }
 
         public virtual DbSet<PriceRange> PriceRanges { get; set; }
         public virtual DbSet<Product> Products { get; set; }
-
-
-        public virtual DbSet<ProductAdditionalInfo> ProductAdditionalInfo { get; set; }
-
 
         
 
@@ -93,14 +90,19 @@ namespace DataAccess.Models
         public virtual DbSet<ProductKeyword> ProductKeywords { get; set; }
         public virtual DbSet<ProductMedia> ProductMedia { get; set; }
         public virtual DbSet<ProductOrder> ProductOrders { get; set; }
-        public virtual DbSet<ProductPrice> ProductPrices { get; set; }
+        
 
 
-        public virtual DbSet<ProductPriceAdditionalInfo> ProductPriceAdditionalInfo { get; set; }
 
         public virtual DbSet<ProductReview> ProductReviews { get; set; }
+
+        
+
+
         public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
 
+
+        
 
         public virtual DbSet<Subgroup> Subgroups { get; set; }
 
@@ -529,6 +531,10 @@ namespace DataAccess.Models
 
 
 
+            
+
+
+
 
 
 
@@ -593,35 +599,35 @@ namespace DataAccess.Models
 
 
             // Product Additional Info
-            modelBuilder.Entity<ProductAdditionalInfo>(entity =>
-            {
-                entity.Property(e => e.IsRecurring).HasDefaultValue(false);
-                entity.Property(e => e.ShippingType).HasDefaultValue(0);
-                entity.Property(e => e.TrialPeriod).HasDefaultValue(0);
-                entity.Property(e => e.Price).HasDefaultValue(0.0);
-                entity.Property(e => e.RebillFrequency).HasDefaultValue(0);
-                entity.Property(e => e.SubscriptionDuration).HasDefaultValue(0);
+            //modelBuilder.Entity<ProductAdditionalInfo>(entity =>
+            //{
+            //    entity.Property(e => e.IsRecurring).HasDefaultValue(false);
+            //    entity.Property(e => e.ShippingType).HasDefaultValue(0);
+            //    entity.Property(e => e.TrialPeriod).HasDefaultValue(0);
+            //    entity.Property(e => e.Price).HasDefaultValue(0.0);
+            //    entity.Property(e => e.RebillFrequency).HasDefaultValue(0);
+            //    entity.Property(e => e.SubscriptionDuration).HasDefaultValue(0);
 
-                entity.HasOne(e => e.Product)
-                .WithMany(e => e.ProductAdditionalInfo)
-                .OnDelete(DeleteBehavior.Cascade);
+            //    entity.HasOne(e => e.Product)
+            //    .WithMany(e => e.ProductAdditionalInfo)
+            //    .OnDelete(DeleteBehavior.Cascade);
 
 
-                entity
-                .HasIndex(x => x.ProductId)
-                .IncludeProperties(x => new
-                {
-                    x.Id,
-                    x.IsRecurring,
-                    x.ShippingType,
-                    x.TrialPeriod,
-                    x.Price,
-                    x.RebillFrequency,
-                    x.TimeFrameBetweenRebill,
-                    x.SubscriptionDuration
-                })
-                .IsClustered(false);
-            });
+            //    entity
+            //    .HasIndex(x => x.ProductId)
+            //    .IncludeProperties(x => new
+            //    {
+            //        x.Id,
+            //        x.IsRecurring,
+            //        x.ShippingType,
+            //        x.TrialPeriod,
+            //        x.Price,
+            //        x.RebillFrequency,
+            //        x.TimeFrameBetweenRebill,
+            //        x.SubscriptionDuration
+            //    })
+            //    .IsClustered(false);
+            //});
 
 
 
@@ -730,15 +736,15 @@ namespace DataAccess.Models
 
 
 
-            // Product Prices
-            modelBuilder.Entity<ProductPrice>(entity =>
-            {
-                entity.HasKey(e => new { e.ProductId, e.Id })
-                    .HasName("PK_ProductPrices");
-                entity.Property(e => e.Id)
-                .ValueGeneratedOnAdd();
-                entity.Property(e => e.Price).HasDefaultValue(0.0);
-            });
+            // Price Points
+            //modelBuilder.Entity<PricePoint>(entity =>
+            //{
+            //    entity.HasKey(e => new { e.ProductId, e.Id })
+            //        .HasName("PK_ProductPrices");
+            //    entity.Property(e => e.Id)
+            //    .ValueGeneratedOnAdd();
+            //    //entity.Property(e => e.Price).HasDefaultValue(0.0);
+            //});
 
 
 
@@ -747,36 +753,36 @@ namespace DataAccess.Models
 
 
             // Product Price Additional Info
-            modelBuilder.Entity<ProductPriceAdditionalInfo>(entity =>
-            {
-                entity.Property(e => e.IsRecurring).HasDefaultValue(false);
-                entity.Property(e => e.ShippingType).HasDefaultValue(0);
-                entity.Property(e => e.TrialPeriod).HasDefaultValue(0);
-                entity.Property(e => e.Price).HasDefaultValue(0.0);
-                entity.Property(e => e.RebillFrequency).HasDefaultValue(0);
-                entity.Property(e => e.SubscriptionDuration).HasDefaultValue(0);
+            //modelBuilder.Entity<ProductPriceAdditionalInfo>(entity =>
+            //{
+            //    entity.Property(e => e.IsRecurring).HasDefaultValue(false);
+            //    entity.Property(e => e.ShippingType).HasDefaultValue(0);
+            //    entity.Property(e => e.TrialPeriod).HasDefaultValue(0);
+            //    entity.Property(e => e.Price).HasDefaultValue(0.0);
+            //    entity.Property(e => e.RebillFrequency).HasDefaultValue(0);
+            //    entity.Property(e => e.SubscriptionDuration).HasDefaultValue(0);
 
-                entity.HasOne(e => e.ProductPrice)
-                .WithMany(e => e.ProductPriceAdditionalInfo)
-                .HasForeignKey(e => new { e.ProductId, e.ProductPriceId })
-                .OnDelete(DeleteBehavior.Cascade);
+            //    entity.HasOne(e => e.ProductPrice)
+            //    .WithMany(e => e.ProductPriceAdditionalInfo)
+            //    .HasForeignKey(e => new { e.ProductId, e.ProductPriceId })
+            //    .OnDelete(DeleteBehavior.Cascade);
 
 
-                entity
-                .HasIndex(x => x.ProductPriceId)
-                .IncludeProperties(x => new
-                {
-                    x.Id,
-                    x.IsRecurring,
-                    x.ShippingType,
-                    x.TrialPeriod,
-                    x.Price,
-                    x.RebillFrequency,
-                    x.TimeFrameBetweenRebill,
-                    x.SubscriptionDuration
-                })
-                .IsClustered(false);
-            });
+            //    entity
+            //    .HasIndex(x => x.ProductPriceId)
+            //    .IncludeProperties(x => new
+            //    {
+            //        x.Id,
+            //        x.IsRecurring,
+            //        x.ShippingType,
+            //        x.TrialPeriod,
+            //        x.Price,
+            //        x.RebillFrequency,
+            //        x.TimeFrameBetweenRebill,
+            //        x.SubscriptionDuration
+            //    })
+            //    .IsClustered(false);
+            //});
 
 
 

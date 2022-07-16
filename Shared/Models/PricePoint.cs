@@ -1,16 +1,35 @@
-﻿using Services.Classes;
-using System.Collections.Generic;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Manager.ViewModels
+namespace DataAccess.Models
 {
-    public struct PricePointViewModel
+    public class PricePoint
     {
         public int Id { get; set; }
-        public Image Image { get; set; }
+
+        [ForeignKey("Product")]
+        [Required]
+        public int ProductId { get; set; }
+        
+        
+        [ForeignKey("Media")]
+        public int? ImageId { get; set; }
+
+
+        [MaxLength(50)]
         public string Header { get; set; }
+
+
+        [MaxLength(50)]
         public string Quantity { get; set; }
+
         public string UnitPrice { get; set; }
+
+
+        [MaxLength(25)]
         public string Unit { get; set; }
+
+
         public string StrikethroughPrice { get; set; }
         public string Price { get; set; }
         public int ShippingType { get; set; }
@@ -20,5 +39,9 @@ namespace Manager.ViewModels
         public int TimeFrameBetweenRebill { get; set; }
         public int SubscriptionDuration { get; set; }
 
+
+
+        public virtual Product Product { get; set; }
+        public virtual Media Media { get; set; }
     }
 }

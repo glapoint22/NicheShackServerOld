@@ -30,7 +30,7 @@ namespace DataAccess.Models
         public bool? EmailPrefDeletedList { get; set; }
         public bool? EmailPrefReview { get; set; }
 
-        public bool Active { get; set; }
+        public bool? Active { get; set; }
 
 
         public virtual ICollection<OneTimePassword> OneTimePassword { get; set; }

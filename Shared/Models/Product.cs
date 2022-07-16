@@ -36,9 +36,14 @@ namespace DataAccess.Models
         public int FourStars { get; set; }
         public int FiveStars { get; set; }
         public DateTime Date { get; set; }
-        //public bool IsMultiPrice { get; set; }
         public double MinPrice { get; set; }
         public double MaxPrice { get; set; }
+        public int ShippingType { get; set; }
+        public int TrialPeriod { get; set; }
+        public double RecurringPrice { get; set; }
+        public int RebillFrequency { get; set; }
+        public int TimeFrameBetweenRebill { get; set; }
+        public int SubscriptionDuration { get; set; }
 
 
         public virtual Niche Niche { get; set; }
@@ -46,7 +51,7 @@ namespace DataAccess.Models
         public virtual  Vendor Vendor { get; set; }
         public virtual ICollection<ProductFilter> ProductFilters { get; set; }
         public virtual ICollection<ProductMedia> ProductMedia { get; set; }
-        public virtual ICollection<ProductPrice> ProductPrices { get; set; }
+        public virtual ICollection<PricePoint> ProductPrices { get; set; }
         public virtual ICollection<ProductReview> ProductReviews { get; set; }
         public virtual ICollection<ListProduct> ListProducts { get; set; }
         public virtual ICollection<ProductOrder> ProductOrders { get; set; }
@@ -55,7 +60,6 @@ namespace DataAccess.Models
         public virtual ICollection<Notification> Notifications { get; set; }
         public virtual ICollection<SubgroupProduct> SubgroupProducts { get; set; }
         public virtual ICollection<KeywordGroup_Belonging_To_Product> KeywordGroups_Belonging_To_Product { get; set; }
-        public virtual ICollection<ProductAdditionalInfo> ProductAdditionalInfo { get; set; }
         public virtual ICollection<Subproduct> Subproducts { get; set; }
 
 
@@ -65,7 +69,7 @@ namespace DataAccess.Models
         {
             ProductFilters = new HashSet<ProductFilter>();
             ProductMedia = new HashSet<ProductMedia>();
-            ProductPrices = new HashSet<ProductPrice>();
+            ProductPrices = new HashSet<PricePoint>();
             ProductReviews = new HashSet<ProductReview>();
             ListProducts = new HashSet<ListProduct>();
             ProductOrders = new HashSet<ProductOrder>();
@@ -74,7 +78,6 @@ namespace DataAccess.Models
             Notifications = new HashSet<Notification>();
             SubgroupProducts = new HashSet<SubgroupProduct>();
             KeywordGroups_Belonging_To_Product = new HashSet<KeywordGroup_Belonging_To_Product>();
-            ProductAdditionalInfo = new HashSet<ProductAdditionalInfo>();
             Subproducts = new HashSet<Subproduct>();
         }
     }

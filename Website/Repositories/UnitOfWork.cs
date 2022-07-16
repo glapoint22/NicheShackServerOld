@@ -30,8 +30,8 @@ namespace Website.Repositories
         public IRepository<ProductFilter> ProductFilters { get; }
         public IRepository<Niche> Niches { get; }
         public IRepository<PageReferenceItem> PageReferenceItems { get; }
-        public IRepository<ProductPrice> ProductPrices { get; }
-        public IRepository<ProductAdditionalInfo> AdditionalInfo { get; }
+        public IRepository<PricePoint> ProductPrices { get; }
+        //public IRepository<ProductAdditionalInfo> AdditionalInfo { get; }
         public IRepository<Subproduct> Subproducts { get; }
         public IRepository<OneTimePassword> OneTimePasswords { get; }
 
@@ -66,8 +66,8 @@ namespace Website.Repositories
             ProductFilters = new Repository<ProductFilter>(context);
             Niches = new Repository<Niche>(context);
             PageReferenceItems = new Repository<PageReferenceItem>(context);
-            ProductPrices = new Repository<ProductPrice>(context);
-            AdditionalInfo = new Repository<ProductAdditionalInfo>(context);
+            ProductPrices = new Repository<PricePoint>(context);
+            //AdditionalInfo = new Repository<ProductAdditionalInfo>(context);
             Subproducts = new Repository<Subproduct>(context);
             OneTimePasswords = new Repository<OneTimePassword>(context);
         }

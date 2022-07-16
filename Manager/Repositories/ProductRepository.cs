@@ -78,12 +78,17 @@ namespace Manager.Repositories
                         Name = x.Vendor.Name
                     },
                     Rating = x.Rating,
-                    //IsMultiPrice = x.IsMultiPrice,
                     TotalReviews = x.TotalReviews,
                     Hoplink = x.Hoplink,
                     Description = x.Description,
                     MinPrice = x.MinPrice,
                     MaxPrice = x.MaxPrice,
+                    ShippingType = x.ShippingType,
+                    TrialPeriod = x.TrialPeriod,
+                    RecurringPrice = x.RecurringPrice,
+                    RebillFrequency = x.RebillFrequency,
+                    TimeFrameBetweenRebill = x.TimeFrameBetweenRebill,
+                    SubscriptionDuration = x.SubscriptionDuration,
                     Image = new ImageViewModel
                     {
                         Id = x.Media.Id,
@@ -94,7 +99,7 @@ namespace Manager.Repositories
 
 
             // Product Price Points
-            product.PricePoints = await context.ProductPrices
+            product.PricePoints = await context.PricePoints
                  .AsNoTracking()
                  .Where(x => x.ProductId == productId)
                  .Select(x => new PricePointViewModel
@@ -112,23 +117,12 @@ namespace Manager.Repositories
                      Unit = x.Unit,
                      StrikethroughPrice = x.StrikethroughPrice,
                      Price = x.Price,
-                     AdditionalInfo = context.ProductPriceAdditionalInfo
-                        .AsNoTracking()
-                        .Where(z => z.ProductPriceId == x.Id)
-                        .Select(z => new AdditionalInfoViewModel
-                        {
-                            Id = z.Id,
-                            IsRecurring = z.IsRecurring,
-                            ShippingType = z.ShippingType,
-                            RecurringPayment = new RecurringPayment
-                            {
-                                TrialPeriod = z.TrialPeriod,
-                                Price = z.Price,
-                                RebillFrequency = z.RebillFrequency,
-                                TimeFrameBetweenRebill = z.TimeFrameBetweenRebill,
-                                SubscriptionDuration = z.SubscriptionDuration
-                            }
-                        }).ToList()
+                     ShippingType = x.ShippingType,
+                     TrialPeriod = x.TrialPeriod,
+                     RecurringPrice = x.RecurringPrice,
+                     RebillFrequency = x.RebillFrequency,
+                     TimeFrameBetweenRebill = x.TimeFrameBetweenRebill,
+                     SubscriptionDuration = x.SubscriptionDuration
                  }).ToListAsync();
 
 
@@ -174,25 +168,25 @@ namespace Manager.Repositories
 
 
             // Shipping
-            product.ShippingType = await context.ProductAdditionalInfo
-                .AsNoTracking()
-                .Where(x => x.ProductId == productId && !x.IsRecurring)
-                .Select(x => x.ShippingType)
-                .SingleOrDefaultAsync();
+            //product.ShippingType = await context.ProductAdditionalInfo
+            //    .AsNoTracking()
+            //    .Where(x => x.ProductId == productId && !x.IsRecurring)
+            //    .Select(x => x.ShippingType)
+            //    .SingleOrDefaultAsync();
 
             // RecurringPayment
-            product.RecurringPayment = await context.ProductAdditionalInfo
-                .AsNoTracking()
-                .Where(x => x.ProductId == productId && x.IsRecurring)
-                .Select(x => new RecurringPayment
-                {
-                    TrialPeriod = x.TrialPeriod,
-                    Price = x.Price,
-                    RebillFrequency = x.RebillFrequency,
-                    TimeFrameBetweenRebill = x.TimeFrameBetweenRebill,
-                    SubscriptionDuration = x.SubscriptionDuration
-                })
-                .SingleOrDefaultAsync();
+            //product.RecurringPayment = await context.ProductAdditionalInfo
+            //    .AsNoTracking()
+            //    .Where(x => x.ProductId == productId && x.IsRecurring)
+            //    .Select(x => new RecurringPayment
+            //    {
+            //        TrialPeriod = x.TrialPeriod,
+            //        Price = x.Price,
+            //        RebillFrequency = x.RebillFrequency,
+            //        TimeFrameBetweenRebill = x.TimeFrameBetweenRebill,
+            //        SubscriptionDuration = x.SubscriptionDuration
+            //    })
+            //    .SingleOrDefaultAsync();
 
             // Additional Info
             //product.AdditionalInfo = await context.ProductAdditionalInfo

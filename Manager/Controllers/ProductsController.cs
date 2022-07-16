@@ -652,7 +652,7 @@ namespace Manager.Controllers
         [Route("Price")]
         public async Task<ActionResult> AddPricePoint(PricePointProperties pricePointProperties)
         {
-            ProductPrice pricePoint = new ProductPrice
+            PricePoint pricePoint = new PricePoint
             {
                 ProductId = pricePointProperties.ProductId
             };
@@ -675,7 +675,7 @@ namespace Manager.Controllers
         [HttpPut]
         public async Task<ActionResult> UpdatePricePoint(PricePointProperties pricePointProperties)
         {
-            ProductPrice pricePoint = await unitOfWork.ProductPrices.Get(x => x.ProductId == pricePointProperties.ProductId && x.Id == pricePointProperties.Id);
+            PricePoint pricePoint = await unitOfWork.ProductPrices.Get(x => x.ProductId == pricePointProperties.ProductId && x.Id == pricePointProperties.Id);
 
             pricePoint.Header = pricePointProperties.Header;
             pricePoint.Quantity = pricePointProperties.Quantity;
@@ -703,7 +703,7 @@ namespace Manager.Controllers
         [Route("Price")]
         public async Task<ActionResult> DeleteProductPrice(int productId, int priceId)
         {
-            ProductPrice productPrice = await unitOfWork.ProductPrices.Get(x => x.ProductId == productId && x.Id == priceId);
+            PricePoint productPrice = await unitOfWork.ProductPrices.Get(x => x.ProductId == productId && x.Id == priceId);
 
             // Remove and save
             unitOfWork.ProductPrices.Remove(productPrice);

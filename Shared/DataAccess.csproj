@@ -47,6 +47,12 @@
     <Compile Remove="Migrations\20220206222827_UpdateOTP.Designer.cs" />
     <Compile Remove="Migrations\20220611182245_PageReferenceItems.cs" />
     <Compile Remove="Migrations\20220611182245_PageReferenceItems.Designer.cs" />
+    <Compile Remove="Migrations\20220716001134_NewTables.cs" />
+    <Compile Remove="Migrations\20220716001134_NewTables.Designer.cs" />
+    <Compile Remove="Migrations\20220716001557_NewTables.cs" />
+    <Compile Remove="Migrations\20220716001557_NewTables.Designer.cs" />
+    <Compile Remove="Migrations\20220716004451_NewTables.cs" />
+    <Compile Remove="Migrations\20220716004451_NewTables.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>
