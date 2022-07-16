@@ -292,20 +292,7 @@ namespace Manager.Controllers
 
 
 
-        [Route("Hoplink")]
-        [HttpPut]
-        public async Task<ActionResult> UpdateHoplink(ItemViewModel updatedProperty)
-        {
-            Product product = await unitOfWork.Products.Get(updatedProperty.Id);
-
-            product.Hoplink = updatedProperty.Name;
-
-            // Update and save
-            unitOfWork.Products.Update(product);
-            await unitOfWork.Save();
-
-            return Ok();
-        }
+        
 
 
 
@@ -740,25 +727,79 @@ namespace Manager.Controllers
 
 
 
-            //[HttpDelete]
-            //[Route("Prices")]
-            //public async Task<ActionResult> DeleteMultipleProductPrices(int productId)
-            //{
-            //    // Get all the price points of the product
-            //    IEnumerable<ProductPrice> productPrices = await unitOfWork.ProductPrices.GetCollection(x => x.ProductId == productId);
+        //[HttpDelete]
+        //[Route("Prices")]
+        //public async Task<ActionResult> DeleteMultipleProductPrices(int productId)
+        //{
+        //    // Get all the price points of the product
+        //    IEnumerable<ProductPrice> productPrices = await unitOfWork.ProductPrices.GetCollection(x => x.ProductId == productId);
 
-            //    // Remove all the price points of that product and save
-            //    unitOfWork.ProductPrices.RemoveRange(productPrices);
-            //    await unitOfWork.Save();
+        //    // Remove all the price points of that product and save
+        //    unitOfWork.ProductPrices.RemoveRange(productPrices);
+        //    await unitOfWork.Save();
 
-            //    // Add a new price
-            //    //var priceId = await AddPrice(productId);
-            //    return Ok();
-            //}
-
-
+        //    // Add a new price
+        //    //var priceId = await AddPrice(productId);
+        //    return Ok();
+        //}
 
 
 
+        [HttpPut]
+        [Route("Shipping")]
+        public async Task<ActionResult> UpdateShipping(ProductShipping productShipping)
+        {
+            Product updatedProduct = await unitOfWork.Products.Get(productShipping.Id);
+
+            updatedProduct.ShippingType = productShipping.ShippingType;
+
+            // Update and save
+            unitOfWork.Products.Update(updatedProduct);
+            await unitOfWork.Save();
+
+            return Ok();
         }
+
+
+
+
+
+        [HttpPut]
+        [Route("RecurringPayment")]
+        public async Task<ActionResult> UpdateRecurringPayment(ProductRecurringPayment productRecurringPayment)
+        {
+            Product updatedProduct = await unitOfWork.Products.Get(productRecurringPayment.Id);
+
+            updatedProduct.TrialPeriod = productRecurringPayment.RecurringPayment.TrialPeriod;
+            updatedProduct.RecurringPrice = productRecurringPayment.RecurringPayment.RecurringPrice;
+            updatedProduct.RebillFrequency = productRecurringPayment.RecurringPayment.RebillFrequency;
+            updatedProduct.TimeFrameBetweenRebill = productRecurringPayment.RecurringPayment.TimeFrameBetweenRebill;
+            updatedProduct.SubscriptionDuration = productRecurringPayment.RecurringPayment.SubscriptionDuration;
+
+
+            // Update and save
+            unitOfWork.Products.Update(updatedProduct);
+            await unitOfWork.Save();
+
+            return Ok();
+        }
+
+
+
+        [HttpPut]
+        [Route("Hoplink")]
+        public async Task<ActionResult> UpdateHoplink(ProductHoplink productHoplink)
+        {
+            Product product = await unitOfWork.Products.Get(productHoplink.Id);
+
+            product.Hoplink = productHoplink.Hoplink;
+
+            // Update and save
+            unitOfWork.Products.Update(product);
+            await unitOfWork.Save();
+
+            return Ok();
+        }
+
+    }
 }
