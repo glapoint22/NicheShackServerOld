@@ -14,11 +14,7 @@ namespace Manager.ViewModels
         public string StrikethroughPrice { get; set; }
         public string Price { get; set; }
         public int ShippingType { get; set; }
-        public int TrialPeriod { get; set; }
-        public double RecurringPrice { get; set; }
-        public int RebillFrequency { get; set; }
-        public int TimeFrameBetweenRebill { get; set; }
-        public int SubscriptionDuration { get; set; }
+        public RecurringPayment RecurringPayment { get; set; }
 
     }
 }

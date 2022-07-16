@@ -34,7 +34,7 @@ namespace Manager.Repositories
         IRepository<SubgroupProduct> SubgroupProducts { get; }
         IRepository<ProductReview> ProductReviews { get; }
         IRepository<PageReferenceItem> PageReferenceItems { get; }
-        IRepository<PricePoint> ProductPrices { get; }
+        IRepository<PricePoint> PricePoints { get; }
         ISearchableRepository<KeywordGroup> KeywordGroups { get; }
         IRepository<KeywordGroup_Belonging_To_Product> KeywordGroups_Belonging_To_Product { get; }
         IRepository<Keyword_In_KeywordGroup> Keywords_In_KeywordGroup { get; }

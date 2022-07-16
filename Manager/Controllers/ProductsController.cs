@@ -649,7 +649,7 @@ namespace Manager.Controllers
 
 
         [HttpPost]
-        [Route("Price")]
+        [Route("PricePoint")]
         public async Task<ActionResult> AddPricePoint(PricePointProperties pricePointProperties)
         {
             PricePoint pricePoint = new PricePoint
@@ -658,7 +658,7 @@ namespace Manager.Controllers
             };
 
             // Add and save
-            unitOfWork.ProductPrices.Add(pricePoint);
+            unitOfWork.PricePoints.Add(pricePoint);
             await unitOfWork.Save();
 
 
@@ -671,11 +671,11 @@ namespace Manager.Controllers
 
 
 
-        [Route("Price")]
+        [Route("PricePoint")]
         [HttpPut]
         public async Task<ActionResult> UpdatePricePoint(PricePointProperties pricePointProperties)
         {
-            PricePoint pricePoint = await unitOfWork.ProductPrices.Get(x => x.ProductId == pricePointProperties.ProductId && x.Id == pricePointProperties.Id);
+            PricePoint pricePoint = await unitOfWork.PricePoints.Get(x => x.ProductId == pricePointProperties.ProductId && x.Id == pricePointProperties.Id);
 
             pricePoint.Header = pricePointProperties.Header;
             pricePoint.Quantity = pricePointProperties.Quantity;
@@ -684,13 +684,17 @@ namespace Manager.Controllers
             pricePoint.Unit = pricePointProperties.Unit;
             pricePoint.StrikethroughPrice = pricePointProperties.StrikethroughPrice;
             pricePoint.Price = pricePointProperties.Price;
-            //pricePoint.Shipping = pricePointProperties.Shipping;
-            //pricePoint.ShippingPrice = pricePointProperties.ShippingPrice;
+            pricePoint.ShippingType = pricePointProperties.ShippingType;
+            pricePoint.TrialPeriod = pricePointProperties.RecurringPayment.TrialPeriod;
+            pricePoint.RecurringPrice = pricePointProperties.RecurringPayment.RecurringPrice;
+            pricePoint.RebillFrequency = pricePointProperties.RecurringPayment.RebillFrequency;
+            pricePoint.TimeFrameBetweenRebill = pricePointProperties.RecurringPayment.TimeFrameBetweenRebill;
+            pricePoint.SubscriptionDuration = pricePointProperties.RecurringPayment.SubscriptionDuration;
 
 
 
-            // Update and save
-            unitOfWork.ProductPrices.Update(pricePoint);
+        // Update and save
+            unitOfWork.PricePoints.Update(pricePoint);
             await unitOfWork.Save();
 
             return Ok();
@@ -700,13 +704,13 @@ namespace Manager.Controllers
 
 
         [HttpDelete]
-        [Route("Price")]
-        public async Task<ActionResult> DeleteProductPrice(int productId, int priceId)
+        [Route("PricePoint")]
+        public async Task<ActionResult> DeletePricePoint(int productId, int pricePointId)
         {
-            PricePoint productPrice = await unitOfWork.ProductPrices.Get(x => x.ProductId == productId && x.Id == priceId);
+            PricePoint pricePoint = await unitOfWork.PricePoints.Get(x => x.ProductId == productId && x.Id == pricePointId);
 
             // Remove and save
-            unitOfWork.ProductPrices.Remove(productPrice);
+            unitOfWork.PricePoints.Remove(pricePoint);
             await unitOfWork.Save();
 
             return Ok();
