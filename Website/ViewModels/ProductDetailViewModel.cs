@@ -17,18 +17,14 @@ namespace Website.ViewModels
         public int TotalReviews { get; set; }
         public double MinPrice { get; set; }
         public double MaxPrice { get; set; }
+        public int ShippingType { get; set; }
+        public RecurringPayment RecurringPayment { get; set; }
         public IEnumerable<MediaViewModel> Media { get; set; }
         public IEnumerable<SubproductViewModel> Components { get; set; }
         public IEnumerable<SubproductViewModel> Bonuses { get; set; }
         public IEnumerable<PricePointViewModel> PricePoints { get; set; }
-        //public IEnumerable<AdditionalInfoViewModel> AdditionalInfo { get; set; }
         public IEnumerable<UrlItemViewModel> Breadcrumb { get; set; }
-
         public ProductGroupViewModel RelatedProducts { get; set; }
-
-
-        //public bool IsMultiPrice { get; set; }
-
         public string Description { get; set; }
         public string Hoplink { get; set; }
         public double OneStar { get; set; }

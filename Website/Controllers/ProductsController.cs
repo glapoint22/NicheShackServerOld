@@ -53,6 +53,15 @@ namespace Website.Controllers
                 Description = x.Description,
                 NicheId = x.NicheId,
                 Hoplink = x.Hoplink,
+                ShippingType = x.ShippingType,
+                RecurringPayment = new RecurringPayment
+                {
+                    TrialPeriod = x.TrialPeriod,
+                    RecurringPrice = x.RecurringPrice,
+                    RebillFrequency = x.RebillFrequency,
+                    TimeFrameBetweenRebill = x.TimeFrameBetweenRebill,
+                    SubscriptionDuration = x.SubscriptionDuration
+                },
                 Image = new ImageViewModel
                 {
                     Name = x.Media.Name,
