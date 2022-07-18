@@ -119,12 +119,6 @@ namespace Manager.Controllers
             unitOfWork.Products.Add(newProduct);
             await unitOfWork.Save();
 
-            // Add a new row to the Product Prices table
-            //await AddPrice(newProduct.Id);
-
-
-
-
 
             // Add keyword group to product
             KeywordGroup keywordGroup = new KeywordGroup
@@ -292,7 +286,7 @@ namespace Manager.Controllers
 
 
 
-        
+
 
 
 
@@ -503,19 +497,6 @@ namespace Manager.Controllers
 
 
 
-        //public async Task<ActionResult> SearchProducts(string searchWords)
-        //{
-        //    return Ok(await unitOfWork.Products.GetCollection<ItemViewModel<Product>>(searchWords));
-        //}
-
-
-
-        //[HttpGet]
-        //[Route("Search")]
-        //public async Task<ActionResult> Search(string searchWords)
-        //{
-        //    return await SearchProducts(searchWords);
-        //}
 
 
         [HttpGet]
@@ -544,12 +525,6 @@ namespace Manager.Controllers
 
 
 
-        //[HttpGet]
-        //[Route("Filters")]
-        //public async Task<ActionResult> GetFilters(int productId, int filterId)
-        //{
-        //    return Ok(await unitOfWork.Products.GetProductFilters(productId, filterId));
-        //}
 
 
         [HttpGet]
@@ -574,60 +549,6 @@ namespace Manager.Controllers
         {
             return Ok(await unitOfWork.ProductEmails.Get(x => x.Id == emailId, x => x.Content));
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        //[Route("IsMultiPrice")]
-        //[HttpPut]
-        //public async Task<ActionResult> UpdateIsMultiPrice(ProductItem productItem)
-        //{
-        //    Product product = await unitOfWork.Products.Get(x => x.Id == productItem.ProductId);
-
-        //    //product.IsMultiPrice = productItem.IsMultiPrice;
-
-        //    // Update and save
-        //    unitOfWork.Products.Update(product);
-        //    await unitOfWork.Save();
-
-        //    return Ok();
-        //}
-
-
-
-
-
 
 
 
@@ -662,7 +583,7 @@ namespace Manager.Controllers
         [HttpPut]
         public async Task<ActionResult> UpdatePricePoint(PricePointProperties pricePointProperties)
         {
-            PricePoint pricePoint = await unitOfWork.PricePoints.Get(x => x.ProductId == pricePointProperties.ProductId && x.Id == pricePointProperties.Id);
+            PricePoint pricePoint = await unitOfWork.PricePoints.Get(x => x.Id == pricePointProperties.Id);
 
             pricePoint.Header = pricePointProperties.Header;
             pricePoint.Quantity = pricePointProperties.Quantity;
@@ -678,9 +599,7 @@ namespace Manager.Controllers
             pricePoint.TimeFrameBetweenRebill = pricePointProperties.RecurringPayment.TimeFrameBetweenRebill;
             pricePoint.SubscriptionDuration = pricePointProperties.RecurringPayment.SubscriptionDuration;
 
-
-
-        // Update and save
+            // Update and save
             unitOfWork.PricePoints.Update(pricePoint);
             await unitOfWork.Save();
 
@@ -692,9 +611,9 @@ namespace Manager.Controllers
 
         [HttpDelete]
         [Route("PricePoint")]
-        public async Task<ActionResult> DeletePricePoint(int productId, int pricePointId)
+        public async Task<ActionResult> DeletePricePoint(int pricePointId)
         {
-            PricePoint pricePoint = await unitOfWork.PricePoints.Get(x => x.ProductId == productId && x.Id == pricePointId);
+            PricePoint pricePoint = await unitOfWork.PricePoints.Get(x => x.Id == pricePointId);
 
             // Remove and save
             unitOfWork.PricePoints.Remove(pricePoint);
@@ -727,21 +646,6 @@ namespace Manager.Controllers
 
 
 
-        //[HttpDelete]
-        //[Route("Prices")]
-        //public async Task<ActionResult> DeleteMultipleProductPrices(int productId)
-        //{
-        //    // Get all the price points of the product
-        //    IEnumerable<ProductPrice> productPrices = await unitOfWork.ProductPrices.GetCollection(x => x.ProductId == productId);
-
-        //    // Remove all the price points of that product and save
-        //    unitOfWork.ProductPrices.RemoveRange(productPrices);
-        //    await unitOfWork.Save();
-
-        //    // Add a new price
-        //    //var priceId = await AddPrice(productId);
-        //    return Ok();
-        //}
 
 
 
