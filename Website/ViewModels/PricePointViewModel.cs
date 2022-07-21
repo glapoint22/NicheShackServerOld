@@ -15,7 +15,7 @@ namespace Website.ViewModels
         public string Unit { get; set; }
         public string StrikethroughPrice { get; set; }
         public string Price { get; set; }
-        //public IEnumerable<AdditionalInfoViewModel> AdditionalInfo { get; set; }
-
+        public int ShippingType { get; set; }
+        public RecurringPayment RecurringPayment { get; set; }
     }
 }
