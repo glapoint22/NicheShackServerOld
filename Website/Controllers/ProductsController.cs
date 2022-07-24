@@ -184,7 +184,7 @@ namespace Website.Controllers
                     Name = x.Media.Name,
                     VideoId = x.Media.VideoId,
                     VideoType = x.Media.VideoType,
-                    Image = x.Media.Image,
+                    Src = x.Media.Image,
                     Type = x.Media.MediaType,
                     Thumbnail = x.Media.Thumbnail
                 });
