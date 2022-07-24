@@ -1,5 +1,4 @@
-﻿using DataAccess.Interfaces;
-using DataAccess.Models;
+﻿using DataAccess.Models;
 using DataAccess.Repositories;
 using System.Threading.Tasks;
 
@@ -36,12 +35,11 @@ namespace Manager.Repositories
         public IRepository<KeywordGroup_Belonging_To_Product> KeywordGroups_Belonging_To_Product { get; }
         public IRepository<Keyword_In_KeywordGroup> Keywords_In_KeywordGroup { get; }
         public IRepository<PageKeyword> PageKeywords { get; }
+        public IRepository<Subproduct> Subproducts { get; }
 
 
         // Custom Repositories
         public IProductRepository Products { get; }
-        //public IAdditionalInfoRepository<ProductAdditionalInfo> ProductAdditionalInfo { get; }
-        //public IAdditionalInfoRepository<ProductPriceAdditionalInfo> ProductPriceAdditionalInfo { get; }
 
 
 
@@ -76,11 +74,10 @@ namespace Manager.Repositories
             KeywordGroups_Belonging_To_Product = new Repository<KeywordGroup_Belonging_To_Product>(context);
             Keywords_In_KeywordGroup = new Repository<Keyword_In_KeywordGroup>(context);
             PageKeywords = new Repository<PageKeyword>(context);
+            Subproducts = new Repository<Subproduct>(context);
 
             // Custom Repositories
             Products = new ProductRepository(context);
-            //ProductAdditionalInfo = new AdditionalInfoRepository<ProductAdditionalInfo>(context);
-            //ProductPriceAdditionalInfo = new AdditionalInfoRepository<ProductPriceAdditionalInfo>(context);
         }
 
 

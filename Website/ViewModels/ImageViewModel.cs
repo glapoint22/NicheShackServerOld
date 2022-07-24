@@ -6,6 +6,6 @@ namespace Website.ViewModels
     {
 
         
-        public string Url { get; set; }
+        public string Src { get; set; }
     }
 }

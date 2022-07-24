@@ -29,7 +29,7 @@ namespace Manager.ViewModels
                 {
                     Id = m.Media.Id,
                     Name = m.Media.Name,
-                    Image = m.Media.Image,
+                    Src = m.Media.ImageAnySize,
                     Thumbnail = m.Media.VideoId,
                     Type = m.Media.MediaType
                 }),

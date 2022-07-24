@@ -498,6 +498,119 @@ namespace Manager.Controllers
 
 
 
+        [Route("Subproduct/Description")]
+        [HttpPut]
+        public async Task<ActionResult> UpdateSubproductDescription(ProductDescription productDescription)
+        {
+            Subproduct subproduct = await unitOfWork.Subproducts.Get(productDescription.ProductId);
+
+            subproduct.Description = productDescription.Description;
+
+            // Update and save
+            unitOfWork.Subproducts.Update(subproduct);
+            await unitOfWork.Save();
+
+            return Ok();
+        }
+
+
+
+
+
+        [Route("Subproduct/Image")]
+        [HttpPut]
+        public async Task<ActionResult> UpdateSubproductImage(UpdatedProperty updatedProperty)
+        {
+            Subproduct subproduct = await unitOfWork.Subproducts.Get(updatedProperty.ItemId);
+
+            subproduct.ImageId = updatedProperty.PropertyId;
+
+            // Update and save
+            unitOfWork.Subproducts.Update(subproduct);
+            await unitOfWork.Save();
+
+            return Ok();
+        }
+
+
+
+
+
+
+        [HttpPut]
+        [Route("Subproduct/Name")]
+        public async Task<ActionResult> UpdateSubproductName(ItemViewModel subproduct)
+        {
+            Subproduct updatedSubproduct = await unitOfWork.Subproducts.Get(subproduct.Id);
+
+            updatedSubproduct.Name = subproduct.Name;
+
+            // Update and save
+            unitOfWork.Subproducts.Update(updatedSubproduct);
+            await unitOfWork.Save();
+
+            return Ok();
+        }
+
+
+
+
+
+
+        [HttpPut]
+        [Route("Subproduct/Value")]
+        public async Task<ActionResult> UpdateSubproductValue(SubproductValue subproductValue)
+        {
+            Subproduct Subproduct = await unitOfWork.Subproducts.Get(subproductValue.SubproductId);
+
+            Subproduct.Value = subproductValue.Value;
+
+            // Update and save
+            unitOfWork.Subproducts.Update(Subproduct);
+            await unitOfWork.Save();
+
+            return Ok();
+        }
+
+
+
+        [HttpPost]
+        [Route("Subproduct")]
+        public async Task<ActionResult> AddSubproduct(NewSubproduct newSubproduct)
+        {
+            Subproduct subproduct = new Subproduct
+            {
+                ProductId = newSubproduct.ProductId,
+                Value = 0,
+                Type = newSubproduct.Type
+            };
+
+            // Add and save
+            unitOfWork.Subproducts.Add(subproduct);
+            await unitOfWork.Save();
+
+
+            return Ok(subproduct.Id);
+        }
+
+
+
+
+        [HttpDelete]
+        [Route("Subproduct")]
+        public async Task<ActionResult> DeleteSubproduct(int id)
+        {
+            Subproduct subproduct = await unitOfWork.Subproducts.Get(id);
+
+            // Remove and save
+            unitOfWork.Subproducts.Remove(subproduct);
+            await unitOfWork.Save();
+
+            return Ok();
+        }
+
+
+
 
         [HttpGet]
         [Route("QueryBuilder/Search")]

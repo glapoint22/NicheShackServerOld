@@ -1,9 +1,6 @@
-﻿using DataAccess.Interfaces;
-using DataAccess.Models;
+﻿using DataAccess.Models;
 using DataAccess.Repositories;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Manager.Repositories
@@ -39,13 +36,12 @@ namespace Manager.Repositories
         IRepository<KeywordGroup_Belonging_To_Product> KeywordGroups_Belonging_To_Product { get; }
         IRepository<Keyword_In_KeywordGroup> Keywords_In_KeywordGroup { get; }
         IRepository<PageKeyword> PageKeywords { get; }
+        IRepository<Subproduct> Subproducts { get; }
 
 
 
         // Custom Repositories
         IProductRepository Products { get; }
-        //IAdditionalInfoRepository<ProductAdditionalInfo> ProductAdditionalInfo { get;}
-        //IAdditionalInfoRepository<ProductPriceAdditionalInfo> ProductPriceAdditionalInfo { get; }
 
 
 

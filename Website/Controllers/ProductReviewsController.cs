@@ -99,7 +99,7 @@ namespace Website.Controllers
                 image = new
                 {
                     name = x.Media.Name,
-                    url = x.Media.Image
+                    url = x.Media.ImageAnySize
                 }
             });
 
@@ -221,7 +221,7 @@ namespace Website.Controllers
             ProductData product = await unitOfWork.Products.Get(x => x.Id == emailSetupParams.ProductId, x => new ProductData
             {
                 Name = x.Name,
-                Image = x.Media.Image,
+                Image = x.Media.ImageAnySize,
                 Url = emailSetupParams.Host + "/" + x.UrlName + "/" + x.UrlId
             });
 
@@ -269,7 +269,7 @@ namespace Website.Controllers
             }
 
 
-            return await unitOfWork.Media.Get(x => x.Name == imageName, x => x.Image);
+            return await unitOfWork.Media.Get(x => x.Name == imageName, x => x.ImageAnySize);
 
         }
 

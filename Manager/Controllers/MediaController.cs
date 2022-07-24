@@ -58,7 +58,7 @@ namespace Manager.Controllers
             Media media = new Media
             {
                 Name = imageName,
-                Image = imageUrl,
+                ImageAnySize = imageUrl,
                 MediaType = (int)MediaType.Image,
                 Thumbnail = imageUrl
             };
@@ -71,7 +71,7 @@ namespace Manager.Controllers
             return Ok(new
             {
                 id = media.Id,
-                Image = media.Image,
+                Image = media.ImageAnySize,
                 name = media.Name,
                 thumbnail = media.Thumbnail
             });
@@ -116,11 +116,11 @@ namespace Manager.Controllers
             // Delete the old image
             string wwwroot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
             string imagesFolder = Path.Combine(wwwroot, "images");
-            string filePath = Path.Combine(imagesFolder, media.Image);
+            string filePath = Path.Combine(imagesFolder, media.ImageAnySize);
             System.IO.File.Delete(filePath);
 
             // Update the url
-            media.Thumbnail = media.Image = imageUrl;
+            media.Thumbnail = media.ImageAnySize = imageUrl;
 
             // Update and save
             unitOfWork.Media.Update(media);
@@ -187,7 +187,7 @@ namespace Manager.Controllers
                 MediaType = (int)MediaType.Video,
                 VideoType = video.VideoType,
                 Thumbnail = thumbnail,
-                Image = ""
+                ImageAnySize = ""
             };
 
             // Add the new video
@@ -360,7 +360,7 @@ namespace Manager.Controllers
             string imagesFolder = Path.Combine(wwwroot, "images");
 
             if (media.Thumbnail != null && media.Thumbnail != string.Empty) System.IO.File.Delete(Path.Combine(imagesFolder, media.Thumbnail));
-            if (media.Image != null && media.Image != string.Empty) System.IO.File.Delete(Path.Combine(imagesFolder, media.Image));
+            if (media.ImageAnySize != null && media.ImageAnySize != string.Empty) System.IO.File.Delete(Path.Combine(imagesFolder, media.ImageAnySize));
 
 
 
