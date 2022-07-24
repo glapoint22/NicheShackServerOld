@@ -401,7 +401,7 @@ namespace Manager.Controllers
             {
                 Id = x.Id,
                 Name = x.Name,
-                Image = x.Image
+                Src = x.Image
             }));
         }
 

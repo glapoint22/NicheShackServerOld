@@ -18,7 +18,7 @@ namespace Manager.ViewModels
             {
                 Id = x.Id,
                 Name = x.Name,
-                Image = x.Image,
+                Src = x.Image,
                 Thumbnail = x.Thumbnail,
                 VideoId = x.VideoId,
                 VideoType = x.VideoType

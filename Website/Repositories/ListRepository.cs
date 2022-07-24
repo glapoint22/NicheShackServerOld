@@ -166,7 +166,7 @@ namespace Website.Repositories
                     Image = new ImageViewModel
                     {
                         Name = x.Product.Media.Name,
-                        Url = x.Product.Media.Image
+                        Src = x.Product.Media.Image
                     },
                     UrlName = x.Product.UrlName,
                     OneStar = x.Product.OneStar,

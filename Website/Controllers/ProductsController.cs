@@ -65,7 +65,7 @@ namespace Website.Controllers
                 Image = new ImageViewModel
                 {
                     Name = x.Media.Name,
-                    Url = x.Media.Image
+                    Src = x.Media.Image
                 }
             });
 
@@ -120,7 +120,7 @@ namespace Website.Controllers
                     Image = new ImageViewModel
                     {
                         Name = x.Media.Name,
-                        Url = x.Media.Image
+                        Src = x.Media.Image
                     },
                     Value = x.Value,
                     Type = x.Type
@@ -137,7 +137,7 @@ namespace Website.Controllers
                         Description = x.Description,
                         Image = x.Image,
                         Value = x.Value
-                    });
+                    }).ToList();
 
                     product.Bonuses = subproducts
                         .Where(x => x.Type == 1)
@@ -147,7 +147,7 @@ namespace Website.Controllers
                             Description = x.Description,
                             Image = x.Image,
                             Value = x.Value
-                        });
+                        }).ToList();
                 }
 
 
@@ -158,7 +158,7 @@ namespace Website.Controllers
                     Image = new ImageViewModel
                     {
                         Name = x.Media.Name,
-                        Url = x.Media.Image
+                        Src = x.Media.Image
                     },
                     Header = x.Header,
                     Quantity = x.Quantity,

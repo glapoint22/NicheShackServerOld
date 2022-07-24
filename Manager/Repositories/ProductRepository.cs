@@ -96,7 +96,7 @@ namespace Manager.Repositories
                     {
                         Id = x.Media.Id,
                         Name = x.Media.Name,
-                        Image = x.Media.Image
+                        Src = x.Media.Image
                     }
                 }).SingleOrDefaultAsync();
 
@@ -166,53 +166,55 @@ namespace Manager.Repositories
                     ItemId = y.Id,
                     Id = y.Media.Id,
                     Name = y.Media.Name,
-                    Image = y.Media.Image,
+                    Src = y.Media.Image,
                     Thumbnail = y.Media.VideoId,
                     Type = y.Media.MediaType
                 })
                 .ToListAsync();
 
 
-            // Shipping
-            //product.ShippingType = await context.ProductAdditionalInfo
-            //    .AsNoTracking()
-            //    .Where(x => x.ProductId == productId && !x.IsRecurring)
-            //    .Select(x => x.ShippingType)
-            //    .SingleOrDefaultAsync();
+            // Subproducts
+            var subproducts = await context.Subproducts
+                .AsNoTracking()
+                .Where(x => x.ProductId == productId)
+                .Select(x => new
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    Description = x.Description,
+                    Image = new ImageViewModel
+                    {
+                        Name = x.Media.Name,
+                        Src = x.Media.Image
+                    },
+                    Value = x.Value,
+                    Type = x.Type
+                }).ToListAsync();
 
-            // RecurringPayment
-            //product.RecurringPayment = await context.ProductAdditionalInfo
-            //    .AsNoTracking()
-            //    .Where(x => x.ProductId == productId && x.IsRecurring)
-            //    .Select(x => new RecurringPayment
-            //    {
-            //        TrialPeriod = x.TrialPeriod,
-            //        Price = x.Price,
-            //        RebillFrequency = x.RebillFrequency,
-            //        TimeFrameBetweenRebill = x.TimeFrameBetweenRebill,
-            //        SubscriptionDuration = x.SubscriptionDuration
-            //    })
-            //    .SingleOrDefaultAsync();
+            if (subproducts.Count() > 0)
+            {
+                product.Components = subproducts
+                .Where(x => x.Type == 0)
+                .Select(x => new SubproductViewModel
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    Description = x.Description,
+                    Image = x.Image,
+                    Value = x.Value
+                }).ToList();
 
-            // Additional Info
-            //product.AdditionalInfo = await context.ProductAdditionalInfo
-            //    .AsNoTracking()
-            //    .Where(x => x.ProductId == productId)
-            //    .Select(x => new AdditionalInfoViewModel
-            //    {
-            //        Id = x.Id,
-            //        IsRecurring = x.IsRecurring,
-            //        ShippingType = x.ShippingType,
-            //        RecurringPayment = new RecurringPayment
-            //        {
-            //            TrialPeriod = x.TrialPeriod,
-            //            Price = x.Price,
-            //            RebillFrequency = x.RebillFrequency,
-            //            TimeFrameBetweenRebill = x.TimeFrameBetweenRebill,
-            //            SubscriptionDuration = x.SubscriptionDuration
-            //        }
-            //    })
-            //    .ToListAsync();
+                product.Bonuses = subproducts
+                    .Where(x => x.Type == 1)
+                    .Select(x => new SubproductViewModel
+                    {
+                        Id = x.Id,
+                        Name = x.Name,
+                        Description = x.Description,
+                        Image = x.Image,
+                        Value = x.Value
+                    }).ToList();
+            }
 
 
             return product;

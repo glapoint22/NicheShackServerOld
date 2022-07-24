@@ -19,6 +19,8 @@ namespace Manager.ViewModels
         public IEnumerable<ProductMediaViewModel> Media { get; set; }
         public IEnumerable<ItemViewModel> Keywords { get; set; }
         public IEnumerable<ItemViewModel> Subgroups { get; set; }
+        public IEnumerable<SubproductViewModel> Components { get; set; }
+        public IEnumerable<SubproductViewModel> Bonuses { get; set; }
         public double MinPrice { get; set; }
         public double MaxPrice { get; set; }
         public int ShippingType { get; set; }

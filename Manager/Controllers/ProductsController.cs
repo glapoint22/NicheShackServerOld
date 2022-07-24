@@ -498,6 +498,62 @@ namespace Manager.Controllers
 
 
 
+        [Route("Subproduct/Description")]
+        [HttpPut]
+        public async Task<ActionResult> UpdateSubproductDescription(ProductDescription productDescription)
+        {
+            Subproduct subproduct = await unitOfWork.Subproducts.Get(productDescription.ProductId);
+
+            subproduct.Description = productDescription.Description;
+
+            // Update and save
+            unitOfWork.Subproducts.Update(subproduct);
+            await unitOfWork.Save();
+
+            return Ok();
+        }
+
+
+
+
+
+        [Route("Subproduct/Image")]
+        [HttpPut]
+        public async Task<ActionResult> UpdateSubproductImage(UpdatedProperty updatedProperty)
+        {
+            Subproduct subproduct = await unitOfWork.Subproducts.Get(updatedProperty.ItemId);
+
+            subproduct.ImageId = updatedProperty.PropertyId;
+
+            // Update and save
+            unitOfWork.Subproducts.Update(subproduct);
+            await unitOfWork.Save();
+
+            return Ok();
+        }
+
+
+
+
+
+
+        [HttpPut]
+        [Route("Subproduct/Name")]
+        public async Task<ActionResult> UpdateSubproductName(ItemViewModel subproduct)
+        {
+            Subproduct updatedSubproduct = await unitOfWork.Subproducts.Get(subproduct.Id);
+
+            updatedSubproduct.Name = subproduct.Name;
+
+            // Update and save
+            unitOfWork.Subproducts.Update(updatedSubproduct);
+            await unitOfWork.Save();
+
+            return Ok();
+        }
+
+
+
 
         [HttpGet]
         [Route("QueryBuilder/Search")]
