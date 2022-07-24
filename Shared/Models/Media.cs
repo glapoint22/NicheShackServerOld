@@ -7,19 +7,38 @@ namespace DataAccess.Models
     public class Media: IItem
     {
         public int Id { get; set; }
+
         [Required]
         [MaxLength(256)]
         public string Name { get; set; }
-        [Required]
-        [MaxLength(256)]
-        public string Image { get; set; }
-        [MaxLength(256)]
-        public string VideoId { get; set; }
-        [Required]
-        public int MediaType { get; set; }
-        public int VideoType { get; set; }
+
         [MaxLength(256)]
         public string Thumbnail { get; set; }
+
+        [MaxLength(256)]
+        public string ImageAnySize { get; set; }
+
+
+        [MaxLength(256)]
+        public string Image200x200 { get; set; }
+
+
+
+        [MaxLength(256)]
+        public string Image500x500 { get; set; }
+
+
+
+        [MaxLength(256)]
+        public string VideoId { get; set; }
+
+
+        [Required]
+        public int MediaType { get; set; }
+        
+
+
+        public int VideoType { get; set; }
 
 
         public virtual ICollection<Product> Products { get; set; }

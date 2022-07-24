@@ -166,7 +166,7 @@ namespace Website.Repositories
                     Image = new ImageViewModel
                     {
                         Name = x.Product.Media.Name,
-                        Src = x.Product.Media.Image
+                        Src = x.Product.Media.ImageAnySize
                     },
                     UrlName = x.Product.UrlName,
                     OneStar = x.Product.OneStar,
@@ -288,7 +288,7 @@ namespace Website.Repositories
                 .Select(x => new ProductData
                 {
                     Name = x.Name,
-                    Image = x.Media.Image,
+                    Image = x.Media.ImageAnySize,
                     Url = host + "/" + x.UrlName + "/" + x.UrlId
 
                 }).SingleAsync();

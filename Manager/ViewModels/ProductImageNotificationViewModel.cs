@@ -27,7 +27,7 @@ namespace Manager.ViewModels
                 {
                     Id = x.Product.Media.Id,
                     Name = x.Product.Media.Name,
-                    Src = x.Product.Media.Image
+                    Src = x.Product.Media.ImageAnySize
                 },
                 Type = x.Type
             });

@@ -65,7 +65,7 @@ namespace Website.Controllers
                 Image = new ImageViewModel
                 {
                     Name = x.Media.Name,
-                    Src = x.Media.Image
+                    Src = x.Media.ImageAnySize
                 }
             });
 
@@ -120,7 +120,7 @@ namespace Website.Controllers
                     Image = new ImageViewModel
                     {
                         Name = x.Media.Name,
-                        Src = x.Media.Image
+                        Src = x.Media.ImageAnySize
                     },
                     Value = x.Value,
                     Type = x.Type
@@ -158,7 +158,7 @@ namespace Website.Controllers
                     Image = new ImageViewModel
                     {
                         Name = x.Media.Name,
-                        Src = x.Media.Image
+                        Src = x.Media.ImageAnySize
                     },
                     Header = x.Header,
                     Quantity = x.Quantity,
@@ -184,7 +184,7 @@ namespace Website.Controllers
                     Name = x.Media.Name,
                     VideoId = x.Media.VideoId,
                     VideoType = x.Media.VideoType,
-                    Src = x.Media.Image,
+                    Src = x.Media.ImageAnySize,
                     Type = x.Media.MediaType,
                     Thumbnail = x.Media.Thumbnail
                 });

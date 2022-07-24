@@ -44,7 +44,7 @@ namespace Manager.Controllers
                 icon = new
                 {
                     name = x.Media.Name,
-                    url = x.Media.Image
+                    url = x.Media.ImageAnySize
                 }
             }));
         }
@@ -62,7 +62,7 @@ namespace Manager.Controllers
                 icon = new
                 {
                     name = x.Media.Name,
-                    url = x.Media.Image
+                    url = x.Media.ImageAnySize
                 }
             }));
         }
@@ -149,7 +149,7 @@ namespace Manager.Controllers
             {
                 Id = x.Id,
                 Name = x.Name,
-                Src = x.Image
+                Src = x.ImageAnySize
             }));
         }
 
