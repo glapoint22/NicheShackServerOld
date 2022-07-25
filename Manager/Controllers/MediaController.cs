@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -45,23 +48,60 @@ namespace Manager.Controllers
             // Get the new image
             IFormFile imageFile = Request.Form.Files["image"];
 
+
             // Get the image name
             StringValues imageName;
             Request.Form.TryGetValue("name", out imageName);
 
 
-            // Copy the image to the images folder
-            string imageUrl = await CopyImage(imageFile);
 
-
-            // Add the new image to the database
+            // Create a new media object
             Media media = new Media
             {
                 Name = imageName,
-                ImageAnySize = imageUrl,
                 MediaType = (int)MediaType.Image,
-                Thumbnail = imageUrl
             };
+
+
+
+
+            // Get the image size
+            StringValues imageSizeString;
+            Request.Form.TryGetValue("imageSize", out imageSizeString);
+            ImageSize imageSize = (ImageSize)int.Parse(imageSizeString);
+
+
+
+
+
+            // Copy the image to the images folder
+            string imageSrc = string.Empty;
+            string scaledImageSrc;
+
+            if (imageSize == ImageSize._500x500)
+            {
+                imageSrc = await ScaleImage(imageFile, 500);
+                media.Image500x500 = imageSrc;
+                scaledImageSrc = await ScaleImage(imageFile, 200);
+
+                media.Image200x200 = scaledImageSrc;
+            }
+            else if (imageSize == ImageSize._200x200)
+            {
+                imageSrc = await ScaleImage(imageFile, 200);
+                media.Image200x200 = imageSrc;
+            }
+
+            else if (imageSize == ImageSize.AnySize)
+            {
+                imageSrc = await CopyImage(imageFile);
+                media.ImageAnySize = imageSrc;
+            }
+
+
+            scaledImageSrc = await ScaleImage(imageFile, 50);
+            media.Thumbnail = scaledImageSrc;
+
 
 
             // Add the new image to the database
@@ -71,7 +111,7 @@ namespace Manager.Controllers
             return Ok(new
             {
                 id = media.Id,
-                Image = media.ImageAnySize,
+                src = imageSrc,
                 name = media.Name,
                 thumbnail = media.Thumbnail
             });
@@ -132,6 +172,55 @@ namespace Manager.Controllers
 
 
 
+
+        private async Task<string> ScaleImage(IFormFile imageFile, float size)
+        {
+            float originalWidth;
+            float originalHeight;
+
+            using (var image = Image.FromStream(imageFile.OpenReadStream()))
+            {
+                originalWidth = image.Width;
+                originalHeight = image.Height;
+            }
+
+
+            float maxSize = Math.Max(originalWidth, originalHeight);
+            float multiplier = size / maxSize;
+            int imageWidth = (int)Math.Round(originalWidth * multiplier);
+            int imageHeight = (int)Math.Round(originalHeight * multiplier);
+
+            //Convert from image file to bitmap
+            Bitmap bitmap;
+            using (var memoryStream = new MemoryStream())
+            {
+                await imageFile.CopyToAsync(memoryStream);
+
+                using (var tempImage = Image.FromStream(memoryStream))
+                {
+                    bitmap = new Bitmap(tempImage);
+                }
+            }
+
+
+
+            //Scale
+            Bitmap scaledBitmap = new Bitmap(imageWidth, imageHeight);
+            Graphics graph = Graphics.FromImage(scaledBitmap);
+            graph.InterpolationMode = InterpolationMode.High;
+            graph.DrawImage(bitmap, 0, 0, imageWidth, imageHeight);
+
+
+            string wwwroot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            string imagesFolder = Path.Combine(wwwroot, "images");
+
+            //Create the new image
+            string name = Guid.NewGuid().ToString("N") + ".png";
+            string newImage = Path.Combine(imagesFolder, name);
+            scaledBitmap.Save(newImage, ImageFormat.Png);
+
+            return name;
+        }
 
 
         private async Task<string> CopyImage(IFormFile imageFile)

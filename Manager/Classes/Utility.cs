@@ -32,6 +32,15 @@ namespace Manager.Classes
 
 
 
+
+        public enum ImageSize
+        {
+            _200x200,
+            _500x500,
+            AnySize
+        }
+
+
         public enum NotificationType
         {
             Message,
