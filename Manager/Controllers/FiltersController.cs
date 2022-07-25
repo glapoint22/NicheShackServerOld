@@ -153,20 +153,20 @@ namespace Manager.Controllers
 
 
 
-        //[Route("Options")]
-        //[HttpGet]
-        //public async Task<ActionResult> GetOptions(int parentId)
-        //{
-        //    return Ok(await unitOfWork.FilterOptions.GetCollection<ItemViewModel<FilterOption>>(x => x.FilterId == parentId));
-        //}
-
-
 
         [HttpGet]
         [Route("Options")]
-        public async Task<ActionResult> GetFilters(int productId, int parentId)
+        public async Task<ActionResult> GetFilters(int parentId, int productId)
         {
-            return Ok(await unitOfWork.Products.GetProductFilters(productId, parentId));
+
+            if (productId == 0)
+            {
+                return Ok(await unitOfWork.FilterOptions.GetCollection<ItemViewModel<FilterOption>>(x => x.FilterId == parentId));
+            }
+            else
+            {
+                return Ok(await unitOfWork.Products.GetProductFilters(productId, parentId));
+            }
         }
 
 
