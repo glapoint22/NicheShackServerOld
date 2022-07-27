@@ -32,8 +32,19 @@ namespace Manager.Controllers
         [HttpGet]
         public async Task<ActionResult> GetSubgroups(int productId)
         {
-            var subgroups = await unitOfWork.Subgroups.GetCollection(x => new { Id = x.Id, Name = x.Name, Checked = x.SubgroupProducts.Where(y => y.ProductId == productId).Select(y => y.SubgroupId).Contains(x.Id) });
-            return Ok(subgroups.OrderBy(x => x.Name));
+
+            if (productId == 0)
+            {
+                IEnumerable<ItemViewModel<Subgroup>> subgroups = await unitOfWork.Subgroups.GetCollection<ItemViewModel<Subgroup>>();
+                return Ok(subgroups.OrderBy(x => x.Name));
+            }
+            else
+            {
+                var subgroups = await unitOfWork.Subgroups.GetCollection(x => new { Id = x.Id, Name = x.Name, Checked = x.SubgroupProducts.Where(y => y.ProductId == productId).Select(y => y.SubgroupId).Contains(x.Id) });
+                return Ok(subgroups.OrderBy(x => x.Name));
+            }
+
+
         }
 
 
