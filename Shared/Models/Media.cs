@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DataAccess.Models
 {
-    public class Media: IItem
+    public class Media : IItem
     {
         public int Id { get; set; }
 
@@ -15,17 +15,42 @@ namespace DataAccess.Models
         [MaxLength(256)]
         public string Thumbnail { get; set; }
 
+
+        [MaxLength(256)]
+        public string ImageSm { get; set; }
+
+        public double ImageSmWidth { get; set; }
+
+        public double ImageSmHeight { get; set; }
+
+
+
+
+
+        [MaxLength(256)]
+        public string ImageMd { get; set; }
+
+        public double ImageMdWidth { get; set; }
+
+        public double ImageMdHeight { get; set; }
+
+
+        [MaxLength(256)]
+        public string ImageLg { get; set; }
+
+
+        public double ImageLgWidth { get; set; }
+
+        public double ImageLgHeight { get; set; }
+
+
         [MaxLength(256)]
         public string ImageAnySize { get; set; }
 
+        public double ImageAnySizeWidth { get; set; }
 
-        [MaxLength(256)]
-        public string Image200x200 { get; set; }
+        public double ImageAnySizeHeight { get; set; }
 
-
-
-        [MaxLength(256)]
-        public string Image500x500 { get; set; }
 
 
 
@@ -35,7 +60,7 @@ namespace DataAccess.Models
 
         [Required]
         public int MediaType { get; set; }
-        
+
 
 
         public int VideoType { get; set; }
@@ -47,6 +72,7 @@ namespace DataAccess.Models
         public virtual ICollection<Category> Categtories { get; set; }
         public virtual ICollection<Niche> Niches { get; set; }
         public virtual ICollection<Subproduct> Subproducts { get; set; }
+        public virtual ICollection<ImageReference> ImageReferences { get; set; }
 
 
         public Media()
@@ -57,6 +83,7 @@ namespace DataAccess.Models
             Categtories = new HashSet<Category>();
             Niches = new HashSet<Niche>();
             Subproducts = new HashSet<Subproduct>();
+            ImageReferences = new HashSet<ImageReference>();
         }
     }
 }

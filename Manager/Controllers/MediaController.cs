@@ -31,11 +31,11 @@ namespace Manager.Controllers
         }
 
 
-        [HttpGet]
-        public async Task<ActionResult> Get(int type)
-        {
-            return Ok(await unitOfWork.Media.GetCollection<MediaViewModel>(x => x.MediaType == type));
-        }
+        //[HttpGet]
+        //public async Task<ActionResult> Get(int type)
+        //{
+        //    return Ok(await unitOfWork.Media.GetCollection<MediaViewModel>(x => x.MediaType == type));
+        //}
 
 
 
@@ -70,37 +70,8 @@ namespace Manager.Controllers
             Request.Form.TryGetValue("imageSize", out imageSizeString);
             ImageSize imageSize = (ImageSize)int.Parse(imageSizeString);
 
-
-
-
-
-            // Copy the image to the images folder
-            string imageSrc = string.Empty;
-            string scaledImageSrc;
-
-            if (imageSize == ImageSize._500x500)
-            {
-                imageSrc = await ScaleImage(imageFile, 500);
-                media.Image500x500 = imageSrc;
-                scaledImageSrc = await ScaleImage(imageFile, 200);
-
-                media.Image200x200 = scaledImageSrc;
-            }
-            else if (imageSize == ImageSize._200x200)
-            {
-                imageSrc = await ScaleImage(imageFile, 200);
-                media.Image200x200 = imageSrc;
-            }
-
-            else if (imageSize == ImageSize.AnySize)
-            {
-                imageSrc = await CopyImage(imageFile);
-                media.ImageAnySize = imageSrc;
-            }
-
-
-            scaledImageSrc = await ScaleImage(imageFile, 50);
-            media.Thumbnail = scaledImageSrc;
+            // Set the image sizes for this image
+            string imageSrc = await SetImageSizes(imageSize, imageFile, media);
 
 
 
@@ -120,59 +91,6 @@ namespace Manager.Controllers
 
 
 
-
-
-
-
-
-        [HttpPost, DisableRequestSizeLimit]
-        [Route("UpdateImage")]
-        public async Task<ActionResult> UpdateImage()
-        {
-
-            // Get the new image
-            IFormFile imageFile = Request.Form.Files["image"];
-
-
-            StringValues idValue;
-
-            // Get the media type
-            Request.Form.TryGetValue("id", out idValue);
-            int id = Convert.ToInt32(idValue);
-
-
-
-            // Copy the image to the images folder
-            string imageUrl = await CopyImage(imageFile);
-
-
-
-            // Get the id of the image
-            Media media = await unitOfWork.Media.Get(id);
-
-
-
-
-            // Delete the old image
-            string wwwroot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-            string imagesFolder = Path.Combine(wwwroot, "images");
-            string filePath = Path.Combine(imagesFolder, media.ImageAnySize);
-            System.IO.File.Delete(filePath);
-
-            // Update the url
-            media.Thumbnail = media.ImageAnySize = imageUrl;
-
-            // Update and save
-            unitOfWork.Media.Update(media);
-            await unitOfWork.Save();
-
-
-            return Ok(new { src = imageUrl });
-        }
-
-
-
-
         private async Task<string> ScaleImage(IFormFile imageFile, float size)
         {
             float originalWidth;
@@ -186,6 +104,10 @@ namespace Manager.Controllers
 
 
             float maxSize = Math.Max(originalWidth, originalHeight);
+
+            if (maxSize <= size) return null;
+
+
             float multiplier = size / maxSize;
             int imageWidth = (int)Math.Round(originalWidth * multiplier);
             int imageHeight = (int)Math.Round(originalHeight * multiplier);
@@ -221,6 +143,180 @@ namespace Manager.Controllers
 
             return name;
         }
+
+
+
+        private async Task<string> SetImageSizes(ImageSize imageSize, IFormFile imageFile, Media media)
+        {
+            const int thumbnailSize = 100;
+            string imageSrc = string.Empty;
+
+            // 500
+            if (imageSize == ImageSize.Medium)
+            {
+                media.ImageLg = await ScaleImage(imageFile, 675);
+                media.ImageMd = imageSrc = await ScaleImage(imageFile, 500);
+
+                // Image is less or equal to 500
+                if (imageSrc == null)
+                {
+                    media.ImageLg = media.ImageMd = imageSrc = await CopyImage(imageFile);
+                }
+                else
+                {
+                    // If image is less or equal to 675
+                    if (media.ImageLg == null) media.ImageLg = media.ImageMd;
+                }
+
+                media.ImageSm = await ScaleImage(imageFile, 200);
+
+                // Image is less or equal to 200
+                if (media.ImageSm == null)
+                {
+                    media.ImageSm = media.ImageMd;
+                }
+
+
+
+                media.Thumbnail = await ScaleImage(imageFile, thumbnailSize);
+
+                // Image is less or equal to the thumbnail size
+                if (media.Thumbnail == null)
+                {
+                    media.Thumbnail = media.ImageSm;
+                }
+            }
+
+            // 200
+            else if (imageSize == ImageSize.Small)
+            {
+                media.ImageSm = imageSrc = await ScaleImage(imageFile, 200);
+
+                // Image is less or equal to 200
+                if (imageSrc == null)
+                {
+                    media.ImageSm = imageSrc = await CopyImage(imageFile);
+                }
+
+
+                media.Thumbnail = await ScaleImage(imageFile, thumbnailSize);
+
+                // Image is less or equal to the thumbnail size
+                if (media.Thumbnail == null)
+                {
+                    media.Thumbnail = media.ImageSm;
+                }
+            }
+
+
+            // Any Size
+            else if (imageSize == ImageSize.AnySize)
+            {
+                media.ImageAnySize = imageSrc = await CopyImage(imageFile);
+                media.Thumbnail = await ScaleImage(imageFile, thumbnailSize);
+
+                // Image is less or equal to the thumbnail size
+                if (media.Thumbnail == null)
+                {
+                    media.Thumbnail = media.ImageAnySize;
+                }
+            }
+
+            return imageSrc;
+        }
+
+
+
+
+        [HttpPost, DisableRequestSizeLimit]
+        [Route("UpdateImage")]
+        public async Task<ActionResult> UpdateImage()
+        {
+            // Get the new image
+            IFormFile imageFile = Request.Form.Files["image"];
+
+
+            // Get the Image id
+            StringValues idValue;
+            Request.Form.TryGetValue("id", out idValue);
+            int id = Convert.ToInt32(idValue);
+
+
+
+            // Get the image size
+            StringValues imageSizeString;
+            Request.Form.TryGetValue("imageSize", out imageSizeString);
+            ImageSize imageSize = (ImageSize)int.Parse(imageSizeString);
+            
+
+            // Get the id of the image
+            Media media = await unitOfWork.Media.Get(id);
+
+
+            // Delete the old images
+            string wwwroot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            string imagesFolder = Path.Combine(wwwroot, "images");
+
+            // Thumbnail
+            if (media.Thumbnail != null)
+            {
+                string image = Path.Combine(imagesFolder, media.Thumbnail);
+                System.IO.File.Delete(image);
+                media.Thumbnail = null;
+            }
+
+
+            // 200
+            if (media.ImageSm != null)
+            {
+                string image = Path.Combine(imagesFolder, media.ImageSm);
+                System.IO.File.Delete(image);
+                media.ImageSm = null;
+            }
+
+            // 500
+            if (media.ImageMd != null)
+            {
+                string image = Path.Combine(imagesFolder, media.ImageMd);
+                System.IO.File.Delete(image);
+                media.ImageMd = null;
+            }
+
+            // 675
+            if (media.ImageLg != null)
+            {
+                string image = Path.Combine(imagesFolder, media.ImageLg);
+                System.IO.File.Delete(image);
+                media.ImageLg = null;
+            }
+
+
+            // Any Size
+            if (media.ImageAnySize != null)
+            {
+                string image = Path.Combine(imagesFolder, media.ImageAnySize);
+                System.IO.File.Delete(image);
+                media.ImageAnySize = null;
+            }
+
+
+            // Set the image sizes for this image
+            string imageSrc = await SetImageSizes(imageSize, imageFile, media);
+
+
+            
+
+            // Update and save
+            unitOfWork.Media.Update(media);
+            await unitOfWork.Save();
+
+            return Ok(new { src = imageSrc });
+        }
+
+
+
+
+        
 
 
         private async Task<string> CopyImage(IFormFile imageFile)
