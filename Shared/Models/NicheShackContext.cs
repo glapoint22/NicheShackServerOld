@@ -11,7 +11,7 @@ namespace DataAccess.Models
         }
 
         // Tables
-        
+
 
         public virtual DbSet<Category> Categories { get; set; }
         public virtual DbSet<Customer> Customers { get; set; }
@@ -22,6 +22,8 @@ namespace DataAccess.Models
 
         public virtual DbSet<Filter> Filters { get; set; }
         public virtual DbSet<FilterOption> FilterOptions { get; set; }
+
+        public virtual DbSet<ImageReference> ImageReferences { get; set; }
 
 
         public virtual DbSet<Keyword> Keywords { get; set; }
@@ -78,7 +80,7 @@ namespace DataAccess.Models
         public virtual DbSet<PriceRange> PriceRanges { get; set; }
         public virtual DbSet<Product> Products { get; set; }
 
-        
+
 
 
         public virtual DbSet<ProductEmail> ProductEmails { get; set; }
@@ -90,19 +92,19 @@ namespace DataAccess.Models
         public virtual DbSet<ProductKeyword> ProductKeywords { get; set; }
         public virtual DbSet<ProductMedia> ProductMedia { get; set; }
         public virtual DbSet<ProductOrder> ProductOrders { get; set; }
-        
+
 
 
 
         public virtual DbSet<ProductReview> ProductReviews { get; set; }
 
-        
+
 
 
         public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
 
 
-        
+
 
         public virtual DbSet<Subgroup> Subgroups { get; set; }
 
@@ -531,7 +533,7 @@ namespace DataAccess.Models
 
 
 
-            
+
 
 
 
@@ -685,7 +687,7 @@ namespace DataAccess.Models
 
 
 
-            
+
 
 
 

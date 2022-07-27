@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(NicheShackContext))]
-    [Migration("20220724181140_UpdateMedia")]
-    partial class UpdateMedia
+    [Migration("20220727170028_UpdatedMedia")]
+    partial class UpdatedMedia
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -328,6 +328,37 @@ namespace DataAccess.Migrations
                     b.ToTable("FilterOptions");
                 });
 
+            modelBuilder.Entity("DataAccess.Models.ImageReference", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("Builder")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Host")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(256)")
+                        .HasMaxLength(256);
+
+                    b.Property<int>("ImageId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ImageSize")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Location")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ImageId");
+
+                    b.ToTable("ImageReferences");
+                });
+
             modelBuilder.Entity("DataAccess.Models.Keyword", b =>
                 {
                     b.Property<int>("Id")
@@ -600,17 +631,45 @@ namespace DataAccess.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("Image200x200")
-                        .HasColumnType("nvarchar(256)")
-                        .HasMaxLength(256);
-
-                    b.Property<string>("Image500x500")
-                        .HasColumnType("nvarchar(256)")
-                        .HasMaxLength(256);
-
                     b.Property<string>("ImageAnySize")
                         .HasColumnType("nvarchar(256)")
                         .HasMaxLength(256);
+
+                    b.Property<double>("ImageAnySizeHeight")
+                        .HasColumnType("float");
+
+                    b.Property<double>("ImageAnySizeWidth")
+                        .HasColumnType("float");
+
+                    b.Property<string>("ImageLg")
+                        .HasColumnType("nvarchar(256)")
+                        .HasMaxLength(256);
+
+                    b.Property<double>("ImageLgHeight")
+                        .HasColumnType("float");
+
+                    b.Property<double>("ImageLgWidth")
+                        .HasColumnType("float");
+
+                    b.Property<string>("ImageMd")
+                        .HasColumnType("nvarchar(256)")
+                        .HasMaxLength(256);
+
+                    b.Property<double>("ImageMdHeight")
+                        .HasColumnType("float");
+
+                    b.Property<double>("ImageMdWidth")
+                        .HasColumnType("float");
+
+                    b.Property<string>("ImageSm")
+                        .HasColumnType("nvarchar(256)")
+                        .HasMaxLength(256);
+
+                    b.Property<double>("ImageSmHeight")
+                        .HasColumnType("float");
+
+                    b.Property<double>("ImageSmWidth")
+                        .HasColumnType("float");
 
                     b.Property<int>("MediaType")
                         .HasColumnType("int");
@@ -1619,6 +1678,15 @@ namespace DataAccess.Migrations
                     b.HasOne("DataAccess.Models.Filter", "Filter")
                         .WithMany("FilterOptions")
                         .HasForeignKey("FilterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("DataAccess.Models.ImageReference", b =>
+                {
+                    b.HasOne("DataAccess.Models.Media", "Media")
+                        .WithMany("ImageReferences")
+                        .HasForeignKey("ImageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

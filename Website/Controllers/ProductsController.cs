@@ -65,7 +65,7 @@ namespace Website.Controllers
                 Image = new ImageViewModel
                 {
                     Name = x.Media.Name,
-                    Src = x.Media.ImageAnySize
+                    Src = x.Media.ImageMd
                 }
             });
 

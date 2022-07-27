@@ -53,6 +53,12 @@
     <Compile Remove="Migrations\20220716001557_NewTables.Designer.cs" />
     <Compile Remove="Migrations\20220716004451_NewTables.cs" />
     <Compile Remove="Migrations\20220716004451_NewTables.Designer.cs" />
+    <Compile Remove="Migrations\20220724181140_UpdateMedia.cs" />
+    <Compile Remove="Migrations\20220724181140_UpdateMedia.Designer.cs" />
+    <Compile Remove="Migrations\20220725132944_UpdatedMedia.cs" />
+    <Compile Remove="Migrations\20220725132944_UpdatedMedia.Designer.cs" />
+    <Compile Remove="Migrations\20220727153953_UpdatedMedia.cs" />
+    <Compile Remove="Migrations\20220727153953_UpdatedMedia.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

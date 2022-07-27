@@ -96,7 +96,7 @@ namespace Manager.Repositories
                     {
                         Id = x.Media.Id,
                         Name = x.Media.Name,
-                        Src = x.Media.ImageAnySize
+                        Src = x.Media.ImageMd
                     }
                 }).SingleOrDefaultAsync();
 
@@ -185,7 +185,7 @@ namespace Manager.Repositories
                     Image = new ImageViewModel
                     {
                         Name = x.Media.Name,
-                        Src = x.Media.ImageAnySize
+                        Src = x.Media.ImageSm
                     },
                     Value = x.Value,
                     Type = x.Type
