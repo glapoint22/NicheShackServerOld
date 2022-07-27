@@ -19,20 +19,12 @@ namespace Manager.Controllers
             this.unitOfWork = unitOfWork;
         }
 
-        //[HttpGet]
-        //public async Task<ActionResult> GetSubgroups()
-        //{
-        //    IEnumerable<ItemViewModel<Subgroup>> subgroups = await unitOfWork.Subgroups.GetCollection<ItemViewModel<Subgroup>>();
-
-        //    return Ok(subgroups.OrderBy(x => x.Name));
-        //}
-
+        
 
 
         [HttpGet]
         public async Task<ActionResult> GetSubgroups(int productId)
         {
-
             if (productId == 0)
             {
                 IEnumerable<ItemViewModel<Subgroup>> subgroups = await unitOfWork.Subgroups.GetCollection<ItemViewModel<Subgroup>>();
@@ -43,8 +35,6 @@ namespace Manager.Controllers
                 var subgroups = await unitOfWork.Subgroups.GetCollection(x => new { Id = x.Id, Name = x.Name, Checked = x.SubgroupProducts.Where(y => y.ProductId == productId).Select(y => y.SubgroupId).Contains(x.Id) });
                 return Ok(subgroups.OrderBy(x => x.Name));
             }
-
-
         }
 
 
