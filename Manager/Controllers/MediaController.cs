@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text.Json;
@@ -10,6 +11,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DataAccess.Models;
 using DataAccess.ViewModels;
+using Manager.Classes;
 using Manager.Repositories;
 using Manager.ViewModels;
 using Microsoft.AspNetCore.Http;
@@ -31,13 +33,22 @@ namespace Manager.Controllers
         }
 
 
-        //[HttpGet]
-        //public async Task<ActionResult> Get(int type)
-        //{
-        //    return Ok(await unitOfWork.Media.GetCollection<MediaViewModel>(x => x.MediaType == type));
-        //}
 
+        private async Task<Image> GetImageFromFile(IFormFile imageFile)
+        {
+            Image image;
 
+            using (var memoryStream = new MemoryStream())
+            {
+                await imageFile.CopyToAsync(memoryStream);
+                using (var img = Image.FromStream(memoryStream))
+                {
+                    image = (Image)img.Clone();
+                }
+            }
+
+            return image;
+        }
 
 
 
@@ -47,6 +58,7 @@ namespace Manager.Controllers
         {
             // Get the new image
             IFormFile imageFile = Request.Form.Files["image"];
+            Image image = await GetImageFromFile(imageFile);
 
 
             // Get the image name
@@ -71,7 +83,7 @@ namespace Manager.Controllers
             ImageSize imageSize = (ImageSize)int.Parse(imageSizeString);
 
             // Set the image sizes for this image
-            string imageSrc = await SetImageSizes(imageSize, imageFile, media);
+            string imageSrc = SetImageSizes(imageSize, image, media);
 
 
 
@@ -91,120 +103,282 @@ namespace Manager.Controllers
 
 
 
-        private async Task<string> ScaleImage(IFormFile imageFile, float size)
+        private ScaledImage ScaleImage(Image image, float targetSize)
         {
-            float originalWidth;
-            float originalHeight;
-
-            using (var image = Image.FromStream(imageFile.OpenReadStream()))
-            {
-                originalWidth = image.Width;
-                originalHeight = image.Height;
-            }
-
-
-            float maxSize = Math.Max(originalWidth, originalHeight);
-
-            if (maxSize <= size) return null;
-
-
-            float multiplier = size / maxSize;
-            int imageWidth = (int)Math.Round(originalWidth * multiplier);
-            int imageHeight = (int)Math.Round(originalHeight * multiplier);
-
-            //Convert from image file to bitmap
-            Bitmap bitmap;
-            using (var memoryStream = new MemoryStream())
-            {
-                await imageFile.CopyToAsync(memoryStream);
-
-                using (var tempImage = Image.FromStream(memoryStream))
-                {
-                    bitmap = new Bitmap(tempImage);
-                }
-            }
-
-
+            float maxSize = Math.Max(image.Width, image.Height);
+            float multiplier = targetSize / maxSize;
+            int scaledWidth = (int)Math.Round(image.Width * multiplier);
+            int scaledHeight = (int)Math.Round(image.Height * multiplier);
 
             //Scale
-            Bitmap scaledBitmap = new Bitmap(imageWidth, imageHeight);
-            Graphics graph = Graphics.FromImage(scaledBitmap);
-            graph.InterpolationMode = InterpolationMode.High;
-            graph.DrawImage(bitmap, 0, 0, imageWidth, imageHeight);
+            Bitmap scaledBitmap = new Bitmap(scaledWidth, scaledHeight);
+            Graphics graphics = Graphics.FromImage(scaledBitmap);
+            graphics.InterpolationMode = InterpolationMode.High;
+            graphics.DrawImage(image, 0, 0, scaledWidth, scaledHeight);
 
-
+            // Get the path
             string wwwroot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
             string imagesFolder = Path.Combine(wwwroot, "images");
 
             //Create the new image
-            string name = Guid.NewGuid().ToString("N") + ".png";
-            string newImage = Path.Combine(imagesFolder, name);
-            scaledBitmap.Save(newImage, ImageFormat.Png);
+            string ext = ImageCodecInfo.GetImageEncoders().FirstOrDefault(x => x.FormatID == image.RawFormat.Guid).FilenameExtension.Split(";").First().Trim('*').ToLower();
+            string imageFile = Guid.NewGuid().ToString("N") + ext;
+            string newImage = Path.Combine(imagesFolder, imageFile);
+            scaledBitmap.Save(newImage);
 
-            return name;
+            return new ScaledImage
+            {
+                Src = imageFile,
+                Width = scaledWidth,
+                Height = scaledHeight
+            };
+        }
+
+
+        private void SetLargeImageSize(Image image, Media media)
+        {
+            const float large = (float)ImageSize.Large;
+            const float medium = (float)ImageSize.Medium;
+            float width = image.Width;
+            float height = image.Height;
+
+            if (width > large || height > large)
+            {
+                ScaledImage scaledImage = ScaleImage(image, large);
+
+                media.ImageLg = scaledImage.Src;
+                media.ImageLgWidth = scaledImage.Width;
+                media.ImageLgHeight = scaledImage.Height;
+            }
+            else if (width == large || height == large || width > medium || height > medium)
+            {
+                if (media.ImageAnySize == null || (media.ImageAnySizeWidth != width && media.ImageAnySizeHeight != height))
+                {
+                    media.ImageLg = CopyImage(image);
+                    media.ImageLgWidth = (int)width;
+                    media.ImageLgHeight = (int)height;
+                }
+                else
+                {
+                    media.ImageLg = media.ImageAnySize;
+                    media.ImageLgWidth = media.ImageAnySizeWidth;
+                    media.ImageLgHeight = media.ImageAnySizeHeight;
+                }
+
+            }
+        }
+
+
+        private string SetMediumImageSize(Image image, Media media)
+        {
+            float width = image.Width;
+            float height = image.Height;
+            const float medium = (float)ImageSize.Medium;
+            string imageSrc;
+
+            if (width > medium || height > medium)
+            {
+                ScaledImage scaledImage = ScaleImage(image, medium);
+
+                media.ImageMd = imageSrc = scaledImage.Src;
+                media.ImageMdWidth = scaledImage.Width;
+                media.ImageMdHeight = scaledImage.Height;
+            }
+            else
+            {
+                media.ImageMd = imageSrc = CopyImage(image);
+                media.ImageMdWidth = (int)width;
+                media.ImageMdHeight = (int)height;
+            }
+
+            return imageSrc;
         }
 
 
 
-        private async Task<string> SetImageSizes(ImageSize imageSize, IFormFile imageFile, Media media)
+        private string SetSmallImageSize(Image image, Media media)
         {
-            const int thumbnailSize = 100;
-            string imageSrc = string.Empty;
+            float width = image.Width;
+            float height = image.Height;
+            const float small = (float)ImageSize.Small;
+            string imageSrc;
 
-            // 500
+            if (width > small || height > small)
+            {
+                ScaledImage scaledImage = ScaleImage(image, small);
+
+                media.ImageSm = imageSrc = scaledImage.Src;
+                media.ImageSmWidth = scaledImage.Width;
+                media.ImageSmHeight = scaledImage.Height;
+            }
+            else
+            {
+                media.ImageSm = imageSrc = CopyImage(image);
+                media.ImageSmWidth = (int)width;
+                media.ImageSmHeight = (int)height;
+            }
+
+            return imageSrc;
+        }
+
+
+
+
+        private void SetThumbnailSize(Image image, Media media)
+        {
+            float width = image.Width;
+            float height = image.Height;
+            const float thumbnail = (float)ImageSize.Thumbnail;
+
+            if (width > thumbnail || height > thumbnail)
+            {
+                ScaledImage scaledImage = ScaleImage(image, thumbnail);
+
+                media.Thumbnail = scaledImage.Src;
+                media.ThumbnailWidth = scaledImage.Width;
+                media.ThumbnailHeight = scaledImage.Height;
+            }
+            else
+            {
+                media.Thumbnail = CopyImage(image);
+                media.ThumbnailWidth = (int)width;
+                media.ThumbnailHeight = (int)height;
+            }
+        }
+
+
+
+
+        private string SetImageAnySize(Image image, Media media)
+        {
+            float width = image.Width;
+            float height = image.Height;
+            string imageSrc;
+
+            media.ImageAnySize = imageSrc = CopyImage(image);
+            media.ImageAnySizeWidth = (int)width;
+            media.ImageAnySizeHeight = (int)height;
+
+            return imageSrc;
+        }
+
+
+        private string SetImageSizes(ImageSize imageSize, Image image, Media media)
+        {
+            string imageSrc = string.Empty;
+            int imageAnySizeMax = Math.Max(media.ImageAnySizeWidth, media.ImageAnySizeHeight);
+
+            // Medium
             if (imageSize == ImageSize.Medium)
             {
-                media.ImageLg = await ScaleImage(imageFile, 675);
-                media.ImageMd = imageSrc = await ScaleImage(imageFile, 500);
 
-                // Image is less or equal to 500
-                if (imageSrc == null)
+
+                // Set the large image size
+                if (media.ImageAnySize != null && imageAnySizeMax == (int)ImageSize.Large)
                 {
-                    media.ImageLg = media.ImageMd = imageSrc = await CopyImage(imageFile);
+                    media.ImageLg = media.ImageAnySize;
+                    media.ImageLgWidth = media.ImageAnySizeWidth;
+                    media.ImageLgHeight = media.ImageAnySizeHeight;
                 }
                 else
                 {
-                    // If image is less or equal to 675
-                    if (media.ImageLg == null) media.ImageLg = media.ImageMd;
+                    SetLargeImageSize(image, media);
                 }
 
-                media.ImageSm = await ScaleImage(imageFile, 200);
 
-                // Image is less or equal to 200
+
+
+                // Set the medium image
+                if (media.ImageMd == null)
+                {
+                    if (media.ImageAnySize != null && imageAnySizeMax == (int)ImageSize.Medium)
+                    {
+                        media.ImageMd = imageSrc = media.ImageAnySize;
+                        media.ImageMdWidth = media.ImageAnySizeWidth;
+                        media.ImageMdHeight = media.ImageAnySizeHeight;
+                    }
+                    else
+                    {
+                        imageSrc = SetMediumImageSize(image, media);
+                    }
+
+                    if (media.ImageLg == null)
+                    {
+                        media.ImageLg = media.ImageMd;
+                        media.ImageLgWidth = media.ImageMdWidth;
+                        media.ImageLgHeight = media.ImageMdHeight;
+                    }
+                }
+
+
+
+
+                // Set the small image
                 if (media.ImageSm == null)
                 {
-                    media.ImageSm = media.ImageMd;
+                    if (image.Width > (int)ImageSize.Small || image.Height > (int)ImageSize.Small)
+                    {
+                        SetSmallImageSize(image, media);
+                    }
+                    else
+                    {
+                        media.ImageSm = media.ImageMd;
+                        media.ImageSmWidth = media.ImageMdWidth;
+                        media.ImageSmHeight = media.ImageMdHeight;
+                    }
                 }
 
 
-
-                media.Thumbnail = await ScaleImage(imageFile, thumbnailSize);
-
-                // Image is less or equal to the thumbnail size
+                // Set the thumbnail
                 if (media.Thumbnail == null)
                 {
-                    media.Thumbnail = media.ImageSm;
+                    if (image.Width > (int)ImageSize.Thumbnail || image.Height > (int)ImageSize.Thumbnail)
+                    {
+                        SetThumbnailSize(image, media);
+                    }
+                    else
+                    {
+                        media.Thumbnail = media.ImageSm;
+                        media.ThumbnailWidth = media.ImageSmWidth;
+                        media.ThumbnailHeight = media.ImageSmHeight;
+                    }
                 }
+
             }
 
-            // 200
+            // Small
             else if (imageSize == ImageSize.Small)
             {
-                media.ImageSm = imageSrc = await ScaleImage(imageFile, 200);
-
-                // Image is less or equal to 200
-                if (imageSrc == null)
+                // Set the small image
+                if (media.ImageSm == null)
                 {
-                    media.ImageSm = imageSrc = await CopyImage(imageFile);
+                    if (media.ImageAnySize != null && imageAnySizeMax == (int)ImageSize.Small)
+                    {
+                        media.ImageSm = imageSrc = media.ImageAnySize;
+                        media.ImageSmWidth = media.ImageAnySizeWidth;
+                        media.ImageSmHeight = media.ImageAnySizeHeight;
+                    }
+                    else
+                    {
+                        imageSrc = SetSmallImageSize(image, media);
+                    }
                 }
 
 
-                media.Thumbnail = await ScaleImage(imageFile, thumbnailSize);
 
-                // Image is less or equal to the thumbnail size
+                // Set the thumbnail
                 if (media.Thumbnail == null)
                 {
-                    media.Thumbnail = media.ImageSm;
+                    if (image.Width > (int)ImageSize.Thumbnail || image.Height > (int)ImageSize.Thumbnail)
+                    {
+                        SetThumbnailSize(image, media);
+                    }
+                    else
+                    {
+                        media.Thumbnail = media.ImageSm;
+                        media.ThumbnailWidth = media.ImageSmWidth;
+                        media.ThumbnailHeight = media.ImageSmHeight;
+                    }
                 }
             }
 
@@ -212,17 +386,59 @@ namespace Manager.Controllers
             // Any Size
             else if (imageSize == ImageSize.AnySize)
             {
-                media.ImageAnySize = imageSrc = await CopyImage(imageFile);
-                media.Thumbnail = await ScaleImage(imageFile, thumbnailSize);
+                if (media.ImageSmWidth == image.Width && media.ImageSmHeight == image.Height)
+                {
+                    media.ImageAnySize = media.ImageSm;
+                    media.ImageAnySizeWidth = media.ImageSmWidth;
+                    media.ImageAnySizeHeight = media.ImageSmHeight;
+                }
+                else
+                {
+                    imageSrc = SetImageAnySize(image, media);
+                }
 
-                // Image is less or equal to the thumbnail size
+
+
+
+                // Set the thumbnail
                 if (media.Thumbnail == null)
                 {
-                    media.Thumbnail = media.ImageAnySize;
+                    if (image.Width > (int)ImageSize.Thumbnail || image.Height > (int)ImageSize.Thumbnail)
+                    {
+                        SetThumbnailSize(image, media);
+                    }
                 }
+
+
+
+
             }
 
             return imageSrc;
+        }
+
+
+
+
+        [HttpGet]
+        [Route("Image")]
+        public async Task<ActionResult> AddImageSize(int imageId, ImageSize imageSize)
+        {
+            Media media = await unitOfWork.Media.Get(imageId);
+            string src = media.ImageAnySize;
+            string wwwroot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            string imagesFolder = Path.Combine(wwwroot, "images");
+            string imagePath = Path.Combine(imagesFolder, src);
+            Image image = Image.FromFile(imagePath);
+
+            // Set the image sizes for this image
+            string imageSrc = SetImageSizes(imageSize, image, media);
+
+            // Update and save
+            unitOfWork.Media.Update(media);
+            await unitOfWork.Save();
+
+            return Ok(new { src = imageSrc });
         }
 
 
@@ -232,8 +448,11 @@ namespace Manager.Controllers
         [Route("UpdateImage")]
         public async Task<ActionResult> UpdateImage()
         {
-            // Get the new image
+            string imageSrc = string.Empty;
+
+            // Get the image
             IFormFile imageFile = Request.Form.Files["image"];
+            Image updatedImage = await GetImageFromFile(imageFile);
 
 
             // Get the Image id
@@ -247,64 +466,137 @@ namespace Manager.Controllers
             StringValues imageSizeString;
             Request.Form.TryGetValue("imageSize", out imageSizeString);
             ImageSize imageSize = (ImageSize)int.Parse(imageSizeString);
-            
+
 
             // Get the id of the image
             Media media = await unitOfWork.Media.Get(id);
 
 
-            // Delete the old images
+
             string wwwroot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
             string imagesFolder = Path.Combine(wwwroot, "images");
 
-            // Thumbnail
-            if (media.Thumbnail != null)
-            {
-                string image = Path.Combine(imagesFolder, media.Thumbnail);
-                System.IO.File.Delete(image);
-                media.Thumbnail = null;
-            }
+
+            //if (imageSize == ImageSize.Medium || imageSize == ImageSize.Small)
+            //{
+            //    string image;
+
+            //    // Reset thumbnail
+            //    if (media.Thumbnail != null)
+            //    {
+            //        image = Path.Combine(imagesFolder, media.Thumbnail);
+            //        System.IO.File.Delete(image);
+
+            //        media.Thumbnail = null;
+            //        media.ThumbnailWidth = 0;
+            //        media.ThumbnailHeight = 0;
+            //    }
 
 
-            // 200
-            if (media.ImageSm != null)
-            {
-                string image = Path.Combine(imagesFolder, media.ImageSm);
-                System.IO.File.Delete(image);
-                media.ImageSm = null;
-            }
+            //    // Reset small
+            //    if (media.ImageSm != null)
+            //    {
+            //        image = Path.Combine(imagesFolder, media.ImageSm);
+            //        System.IO.File.Delete(image);
 
-            // 500
-            if (media.ImageMd != null)
-            {
-                string image = Path.Combine(imagesFolder, media.ImageMd);
-                System.IO.File.Delete(image);
-                media.ImageMd = null;
-            }
-
-            // 675
-            if (media.ImageLg != null)
-            {
-                string image = Path.Combine(imagesFolder, media.ImageLg);
-                System.IO.File.Delete(image);
-                media.ImageLg = null;
-            }
+            //        media.ImageSm = null;
+            //        media.ImageSmWidth = 0;
+            //        media.ImageSmHeight = 0;
+            //    }
 
 
-            // Any Size
-            if (media.ImageAnySize != null)
-            {
-                string image = Path.Combine(imagesFolder, media.ImageAnySize);
-                System.IO.File.Delete(image);
-                media.ImageAnySize = null;
-            }
+
+            //    // Reset medium
+            //    if (media.ImageMd != null)
+            //    {
+            //        image = Path.Combine(imagesFolder, media.ImageMd);
+            //        System.IO.File.Delete(image);
+
+            //        media.ImageMd = null;
+            //        media.ImageMdWidth = 0;
+            //        media.ImageMdHeight = 0;
+            //    }
 
 
-            // Set the image sizes for this image
-            string imageSrc = await SetImageSizes(imageSize, imageFile, media);
+            //    // Reset large
+            //    if (media.ImageLg != null)
+            //    {
+            //        image = Path.Combine(imagesFolder, media.ImageLg);
+            //        System.IO.File.Delete(image);
+
+            //        media.ImageLg = null;
+            //        media.ImageLgWidth = 0;
+            //        media.ImageLgHeight = 0;
+            //    }
 
 
-            
+            //    if (media.ImageAnySize != null)
+            //    {
+            //        image = Path.Combine(imagesFolder, media.ImageAnySize);
+            //        System.IO.File.Delete(image);
+
+            //        int updatedImageMaxSize = Math.Max(updatedImage.Width, updatedImage.Height);
+            //        int imageAnySizeMaxSize = Math.Max(media.ImageAnySizeWidth, media.ImageAnySizeHeight);
+
+            //        if (updatedImageMaxSize > imageAnySizeMaxSize)
+            //        {
+            //            ScaledImage scaledImage = ScaleImage(updatedImage, imageAnySizeMaxSize);
+
+            //            media.ImageAnySize = scaledImage.Src;
+            //            media.ImageAnySizeWidth = scaledImage.Width;
+            //            media.ImageAnySizeHeight = scaledImage.Height;
+            //        }
+            //        else
+            //        {
+            //            SetImageAnySize(updatedImage, media);
+            //        }
+            //    }
+
+            //    imageSrc = SetImageSizes(imageSize, updatedImage, media);
+
+            //    if (imageSize == ImageSize.Small && (updatedImage.Width >= (int)ImageSize.Medium || updatedImage.Height >= (int)ImageSize.Medium)) // && builder ==  product && location == product || location == media
+            //    {
+            //        SetImageSizes(ImageSize.Medium, updatedImage, media);
+            //    }
+            //}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            //// Reset any size
+            //if (media.ImageAnySize != null)
+            //{
+            //    image = Path.Combine(imagesFolder, media.ImageAnySize);
+            //    System.IO.File.Delete(image);
+
+            //    media.ImageAnySize = null;
+            //    media.ImageAnySizeWidth = 0;
+            //    media.ImageAnySizeHeight = 0;
+            //}
+
+
+
+
+
+
 
             // Update and save
             unitOfWork.Media.Update(media);
@@ -316,37 +608,26 @@ namespace Manager.Controllers
 
 
 
-        
 
 
-        private async Task<string> CopyImage(IFormFile imageFile)
+
+        private string CopyImage(Image image)
         {
-            // This will get the file extension
-            Regex regex = new Regex(@"\.(jpg|jpeg|gif|png|bmp|tiff|tga|svg|webp)$", RegexOptions.IgnoreCase);
-            Match match = regex.Match(imageFile.FileName);
-            string fileExtension = match.Value;
-
-
             // Create a new unique name for the image
-            string imageUrl = Guid.NewGuid().ToString("N") + fileExtension;
+            string ext = ImageCodecInfo.GetImageEncoders().FirstOrDefault(x => x.FormatID == image.RawFormat.Guid).FilenameExtension.Split(";").First().Trim('*').ToLower();
+            string imageFile = Guid.NewGuid().ToString("N") + ext;
 
-            // Place the new image into the images folder
+            // Get the file path
             string wwwroot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
             string imagesFolder = Path.Combine(wwwroot, "images");
-            string filePath = Path.Combine(imagesFolder, imageUrl);
-
-            // Create the file stream
-            var fileStream = new FileStream(filePath, FileMode.Create);
-
-            // Copy to image to the images folder
-            await imageFile.CopyToAsync(fileStream);
+            string filePath = Path.Combine(imagesFolder, imageFile);
 
 
-            // Close the file stream
-            fileStream.Close();
+            // Save the image to the images folder
+            Bitmap bitmap = new Bitmap(image);
+            bitmap.Save(filePath);
 
-
-            return imageUrl;
+            return imageFile;
         }
 
 
@@ -565,7 +846,48 @@ namespace Manager.Controllers
         [Route("Search")]
         public async Task<ActionResult> Search(int type, string searchWords)
         {
-            return Ok(await unitOfWork.Media.GetCollection<MediaViewModel>(x => x.MediaType == type, searchWords));
+            return Ok(await unitOfWork.Media.GetCollection(x => x.MediaType == type, searchWords, x => new SearchedMedia
+            {
+                Id = x.Id,
+                Name = x.Name,
+                Thumbnail = x.Thumbnail,
+                ThumbnailWidth = x.ThumbnailWidth,
+                ThumbnailHeight = x.ThumbnailHeight,
+                ImageSm = x.ImageSm,
+                ImageSmWidth = x.ImageSmWidth,
+                ImageSmHeight = x.ImageSmHeight,
+                ImageMd = x.ImageMd,
+                ImageMdWidth = x.ImageMdWidth,
+                ImageMdHeight = x.ImageMdHeight,
+                ImageLg = x.ImageLg,
+                ImageLgWidth = x.ImageLgWidth,
+                ImageLgHeight = x.ImageLgHeight,
+                ImageAnySize = x.ImageAnySize,
+                ImageAnySizeWidth = x.ImageAnySizeWidth,
+                ImageAnySizeHeight = x.ImageAnySizeHeight
+            }));
+        }
+
+
+
+
+        [HttpPost]
+        [Route("ImageReference")]
+        public async Task<ActionResult> AddImageReference(ImageReferenceViewModel imageReferenceViewModel)
+        {
+            ImageReference imageReference = new ImageReference
+            {
+                ImageId = imageReferenceViewModel.ImageId,
+                ImageSize = imageReferenceViewModel.ImageSize,
+                Builder = imageReferenceViewModel.Builder,
+                Host = imageReferenceViewModel.Host,
+                Location = imageReferenceViewModel.Location
+            };
+
+            unitOfWork.ImageReferences.Add(imageReference);
+            await unitOfWork.Save();
+
+            return Ok();
         }
 
     }

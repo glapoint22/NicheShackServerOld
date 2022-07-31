@@ -16,17 +16,17 @@ namespace DataAccess.Migrations
                 maxLength: 256,
                 nullable: true);
 
-            migrationBuilder.AddColumn<double>(
+            migrationBuilder.AddColumn<int>(
                 name: "ImageAnySizeHeight",
                 table: "Media",
                 nullable: false,
-                defaultValue: 0.0);
+                defaultValue: 0);
 
-            migrationBuilder.AddColumn<double>(
+            migrationBuilder.AddColumn<int>(
                 name: "ImageAnySizeWidth",
                 table: "Media",
                 nullable: false,
-                defaultValue: 0.0);
+                defaultValue: 0);
 
             migrationBuilder.AddColumn<string>(
                 name: "ImageLg",
@@ -34,17 +34,17 @@ namespace DataAccess.Migrations
                 maxLength: 256,
                 nullable: true);
 
-            migrationBuilder.AddColumn<double>(
+            migrationBuilder.AddColumn<int>(
                 name: "ImageLgHeight",
                 table: "Media",
                 nullable: false,
-                defaultValue: 0.0);
+                defaultValue: 0);
 
-            migrationBuilder.AddColumn<double>(
+            migrationBuilder.AddColumn<int>(
                 name: "ImageLgWidth",
                 table: "Media",
                 nullable: false,
-                defaultValue: 0.0);
+                defaultValue: 0);
 
             migrationBuilder.AddColumn<string>(
                 name: "ImageMd",
@@ -52,17 +52,17 @@ namespace DataAccess.Migrations
                 maxLength: 256,
                 nullable: true);
 
-            migrationBuilder.AddColumn<double>(
+            migrationBuilder.AddColumn<int>(
                 name: "ImageMdHeight",
                 table: "Media",
                 nullable: false,
-                defaultValue: 0.0);
+                defaultValue: 0);
 
-            migrationBuilder.AddColumn<double>(
+            migrationBuilder.AddColumn<int>(
                 name: "ImageMdWidth",
                 table: "Media",
                 nullable: false,
-                defaultValue: 0.0);
+                defaultValue: 0);
 
             migrationBuilder.AddColumn<string>(
                 name: "ImageSm",
@@ -70,17 +70,29 @@ namespace DataAccess.Migrations
                 maxLength: 256,
                 nullable: true);
 
-            migrationBuilder.AddColumn<double>(
+            migrationBuilder.AddColumn<int>(
                 name: "ImageSmHeight",
                 table: "Media",
                 nullable: false,
-                defaultValue: 0.0);
+                defaultValue: 0);
 
-            migrationBuilder.AddColumn<double>(
+            migrationBuilder.AddColumn<int>(
                 name: "ImageSmWidth",
                 table: "Media",
                 nullable: false,
-                defaultValue: 0.0);
+                defaultValue: 0);
+
+            migrationBuilder.AddColumn<int>(
+                name: "ThumbnailHeight",
+                table: "Media",
+                nullable: false,
+                defaultValue: 0);
+
+            migrationBuilder.AddColumn<int>(
+                name: "ThumbnailWidth",
+                table: "Media",
+                nullable: false,
+                defaultValue: 0);
 
             migrationBuilder.CreateTable(
                 name: "ImageReferences",
@@ -162,6 +174,14 @@ namespace DataAccess.Migrations
 
             migrationBuilder.DropColumn(
                 name: "ImageSmWidth",
+                table: "Media");
+
+            migrationBuilder.DropColumn(
+                name: "ThumbnailHeight",
+                table: "Media");
+
+            migrationBuilder.DropColumn(
+                name: "ThumbnailWidth",
                 table: "Media");
 
             migrationBuilder.AddColumn<string>(

@@ -14,14 +14,17 @@ namespace DataAccess.Models
 
         [MaxLength(256)]
         public string Thumbnail { get; set; }
+        public int ThumbnailWidth { get; set; }
+
+        public int ThumbnailHeight { get; set; }
 
 
         [MaxLength(256)]
         public string ImageSm { get; set; }
 
-        public double ImageSmWidth { get; set; }
+        public int ImageSmWidth { get; set; }
 
-        public double ImageSmHeight { get; set; }
+        public int ImageSmHeight { get; set; }
 
 
 
@@ -30,26 +33,26 @@ namespace DataAccess.Models
         [MaxLength(256)]
         public string ImageMd { get; set; }
 
-        public double ImageMdWidth { get; set; }
+        public int ImageMdWidth { get; set; }
 
-        public double ImageMdHeight { get; set; }
+        public int ImageMdHeight { get; set; }
 
 
         [MaxLength(256)]
         public string ImageLg { get; set; }
 
 
-        public double ImageLgWidth { get; set; }
+        public int ImageLgWidth { get; set; }
 
-        public double ImageLgHeight { get; set; }
+        public int ImageLgHeight { get; set; }
 
 
         [MaxLength(256)]
         public string ImageAnySize { get; set; }
 
-        public double ImageAnySizeWidth { get; set; }
+        public int ImageAnySizeWidth { get; set; }
 
-        public double ImageAnySizeHeight { get; set; }
+        public int ImageAnySizeHeight { get; set; }
 
 
 

@@ -179,16 +179,17 @@ namespace Manager.Repositories
                 .Where(x => x.ProductId == productId)
                 .Select(x => new
                 {
-                    Id = x.Id,
-                    Name = x.Name,
-                    Description = x.Description,
+                    x.Id,
+                    x.Name,
+                    x.Description,
                     Image = new ImageViewModel
                     {
+                        Id = x.Media.Id,
                         Name = x.Media.Name,
                         Src = x.Media.ImageSm
                     },
-                    Value = x.Value,
-                    Type = x.Type
+                    x.Value,
+                    x.Type
                 }).ToListAsync();
 
             if (subproducts.Count() > 0)

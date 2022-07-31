@@ -35,11 +35,37 @@ namespace Manager.Classes
 
         public enum ImageSize
         {
-            Thumbnail,
-            Small,
-            Medium,
-            Large,
-            AnySize
+            AnySize = 0,
+            Thumbnail = 100,
+            Small = 200,
+            Medium = 500,
+            Large = 675
+        }
+
+
+        public enum BuilderType
+        {
+            Product,
+            Page,
+            Email
+        }
+
+
+        public enum ImageLocation
+        {
+            Product,
+            Media,
+            PricePoint,
+            Component,
+            Bonus,
+            PageBackground,
+            RowBackground,
+            ColumnBackground,
+            ImageWidget,
+            CarouselWidgetBanner,
+            TextWidgetBackground,
+            ContainerWidgetBackground,
+            ButtonWidgetBackground
         }
 
 

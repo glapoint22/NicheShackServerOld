@@ -633,41 +633,41 @@ namespace DataAccess.Migrations
                         .HasColumnType("nvarchar(256)")
                         .HasMaxLength(256);
 
-                    b.Property<double>("ImageAnySizeHeight")
-                        .HasColumnType("float");
+                    b.Property<int>("ImageAnySizeHeight")
+                        .HasColumnType("int");
 
-                    b.Property<double>("ImageAnySizeWidth")
-                        .HasColumnType("float");
+                    b.Property<int>("ImageAnySizeWidth")
+                        .HasColumnType("int");
 
                     b.Property<string>("ImageLg")
                         .HasColumnType("nvarchar(256)")
                         .HasMaxLength(256);
 
-                    b.Property<double>("ImageLgHeight")
-                        .HasColumnType("float");
+                    b.Property<int>("ImageLgHeight")
+                        .HasColumnType("int");
 
-                    b.Property<double>("ImageLgWidth")
-                        .HasColumnType("float");
+                    b.Property<int>("ImageLgWidth")
+                        .HasColumnType("int");
 
                     b.Property<string>("ImageMd")
                         .HasColumnType("nvarchar(256)")
                         .HasMaxLength(256);
 
-                    b.Property<double>("ImageMdHeight")
-                        .HasColumnType("float");
+                    b.Property<int>("ImageMdHeight")
+                        .HasColumnType("int");
 
-                    b.Property<double>("ImageMdWidth")
-                        .HasColumnType("float");
+                    b.Property<int>("ImageMdWidth")
+                        .HasColumnType("int");
 
                     b.Property<string>("ImageSm")
                         .HasColumnType("nvarchar(256)")
                         .HasMaxLength(256);
 
-                    b.Property<double>("ImageSmHeight")
-                        .HasColumnType("float");
+                    b.Property<int>("ImageSmHeight")
+                        .HasColumnType("int");
 
-                    b.Property<double>("ImageSmWidth")
-                        .HasColumnType("float");
+                    b.Property<int>("ImageSmWidth")
+                        .HasColumnType("int");
 
                     b.Property<int>("MediaType")
                         .HasColumnType("int");
@@ -680,6 +680,12 @@ namespace DataAccess.Migrations
                     b.Property<string>("Thumbnail")
                         .HasColumnType("nvarchar(256)")
                         .HasMaxLength(256);
+
+                    b.Property<int>("ThumbnailHeight")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ThumbnailWidth")
+                        .HasColumnType("int");
 
                     b.Property<string>("VideoId")
                         .HasColumnType("nvarchar(256)")
