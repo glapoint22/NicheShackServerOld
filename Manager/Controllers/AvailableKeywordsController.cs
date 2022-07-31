@@ -26,17 +26,27 @@ namespace Manager.Controllers
         public async Task<ActionResult> GetKeywordGroups(int productId)
         {
 
-            IEnumerable<int> keywordGroupIds = await unitOfWork.KeywordGroups_Belonging_To_Product.GetCollection(x => x.ProductId == productId, x => x.KeywordGroupId);
+            if(productId == 0)
+            {
+                IEnumerable<KeywordGroup> keywordGroups = await unitOfWork.KeywordGroups.GetCollection(x => !x.ForProduct);
+                return Ok(keywordGroups);
+            }
+            else
+            {
+                IEnumerable<int> keywordGroupIds = await unitOfWork.KeywordGroups_Belonging_To_Product.GetCollection(x => x.ProductId == productId, x => x.KeywordGroupId);
 
-            IEnumerable<KeywordGroup> keywordGroups = await unitOfWork.KeywordGroups.GetCollection(x => !x.ForProduct);
-            return Ok(keywordGroups
-                .Select(x => new
-                {
-                    id = x.Id,
-                    name = x.Name,
-                    forProduct = keywordGroupIds.Contains(x.Id)
-                })
-                .OrderBy(x => x.name));
+                IEnumerable<KeywordGroup> keywordGroups = await unitOfWork.KeywordGroups.GetCollection(x => !x.ForProduct);
+                return Ok(keywordGroups
+                    .Select(x => new
+                    {
+                        id = x.Id,
+                        name = x.Name,
+                        forProduct = keywordGroupIds.Contains(x.Id)
+                    })
+                    .OrderBy(x => x.name));
+            }
+
+            
         }
 
 
