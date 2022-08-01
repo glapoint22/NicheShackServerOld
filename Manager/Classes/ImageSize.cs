@@ -1,6 +1,6 @@
 ﻿namespace Manager.Classes
 {
-    public class ScaledImage
+    public class ImageSize
     {
         public string Src { get; set; }
         public int Width { get; set; }

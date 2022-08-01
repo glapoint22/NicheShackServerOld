@@ -33,7 +33,7 @@ namespace Manager.Classes
 
 
 
-        public enum ImageSize
+        public enum ImageSizeType
         {
             AnySize = 0,
             Thumbnail = 100,

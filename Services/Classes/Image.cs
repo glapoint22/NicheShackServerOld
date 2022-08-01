@@ -42,7 +42,7 @@ namespace Services.Classes
             .Select(x => new Image
             {
                 Name = x.Name,
-                Src = x.ImageAnySize != null ? x.ImageAnySize : x.ImageLg != null ? x.ImageLg : x.ImageMd != null ? x.ImageMd : x.ImageSm != null ? x.ImageSm : null
+                Src = x.ImageAnySize
             })
             .SingleOrDefaultAsync();
 
