@@ -17,6 +17,7 @@ using Manager.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
+using Services.Classes;
 using static Manager.Classes.Utility;
 
 namespace Manager.Controllers
@@ -41,7 +42,7 @@ namespace Manager.Controllers
         {
             // Get the new image
             IFormFile imageFile = Request.Form.Files["image"];
-            Image image = await GetImageFromFile(imageFile);
+            System.Drawing.Image image = await GetImageFromFile(imageFile);
 
 
             // Get the image name
@@ -96,7 +97,7 @@ namespace Manager.Controllers
 
             // Get the image
             IFormFile imageFile = Request.Form.Files["image"];
-            Image updatedImage = await GetImageFromFile(imageFile);
+            System.Drawing.Image updatedImage = await GetImageFromFile(imageFile);
 
 
             // Get the Image id
@@ -228,7 +229,7 @@ namespace Manager.Controllers
             string wwwroot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
             string imagesFolder = Path.Combine(wwwroot, "images");
             string imagePath = Path.Combine(imagesFolder, src);
-            Image image = Image.FromFile(imagePath);
+            System.Drawing.Image image = System.Drawing.Image.FromFile(imagePath);
 
             // Set the image sizes for this image
             string imageSrc = SetImageSizes(imageSize, image, media);
@@ -445,21 +446,38 @@ namespace Manager.Controllers
 
 
 
+        // ------------------------------------------------------------------------ Get Image References --------------------------------------------------------------------------
+        [HttpGet]
+        [Route("ImageReferences")]
+        public async Task<ActionResult> GetImageReferences(int imageId, int? imageSize)
+        {
+            return Ok(await unitOfWork.ImageReferences.GetCollection(x => x.ImageId == imageId && (imageSize == null ? x.ImageSize >= 0 : x.ImageSize == imageSize), x => new
+            {
+                imageSizeType = x.ImageSize,
+                builderType = x.Builder,
+                host = x.Host,
+                imageLocation = x.Location
+            }));
+        }
+
+
+
+
 
 
 
 
         // ------------------------------------------------------------------------ Get Image FromFile --------------------------------------------------------------------------
-        private async Task<Image> GetImageFromFile(IFormFile imageFile)
+        private async Task<System.Drawing.Image> GetImageFromFile(IFormFile imageFile)
         {
-            Image image;
+            System.Drawing.Image image;
 
             using (var memoryStream = new MemoryStream())
             {
                 await imageFile.CopyToAsync(memoryStream);
-                using (var img = Image.FromStream(memoryStream))
+                using (var img = System.Drawing.Image.FromStream(memoryStream))
                 {
-                    image = (Image)img.Clone();
+                    image = (System.Drawing.Image)img.Clone();
                 }
             }
 
@@ -478,7 +496,7 @@ namespace Manager.Controllers
 
 
         // ----------------------------------------------------------------------------- Scale Image -----------------------------------------------------------------------------
-        private ImageSize ScaleImage(Image image, float targetSize)
+        private ImageSize ScaleImage(System.Drawing.Image image, float targetSize)
         {
             float maxSize = Math.Max(image.Width, image.Height);
             float multiplier = targetSize / maxSize;
@@ -522,7 +540,7 @@ namespace Manager.Controllers
 
 
         // ------------------------------------------------------------------------- Set Large Image Size --------------------------------------------------------------------------
-        private void SetLargeImageSize(Image image, Media media)
+        private void SetLargeImageSize(System.Drawing.Image image, Media media)
         {
             const float large = (float)ImageSizeType.Large;
             const float medium = (float)ImageSizeType.Medium;
@@ -577,7 +595,7 @@ namespace Manager.Controllers
 
 
         // ------------------------------------------------------------------------- Set Medium Image Size --------------------------------------------------------------------------
-        private string SetMediumImageSize(Image image, Media media)
+        private string SetMediumImageSize(System.Drawing.Image image, Media media)
         {
             const float medium = (float)ImageSizeType.Medium;
             string imageSrc;
@@ -638,7 +656,7 @@ namespace Manager.Controllers
 
 
         // ------------------------------------------------------------------------- Set Small Image Size --------------------------------------------------------------------------
-        private string SetSmallImageSize(Image image, Media media)
+        private string SetSmallImageSize(System.Drawing.Image image, Media media)
         {
             const float small = (float)ImageSizeType.Small;
             string imageSrc;
@@ -692,7 +710,7 @@ namespace Manager.Controllers
 
 
         // ------------------------------------------------------------------------- Set Thumbnail Size --------------------------------------------------------------------------
-        private void SetThumbnailSize(Image image, Media media)
+        private void SetThumbnailSize(System.Drawing.Image image, Media media)
         {
             const float thumbnail = (float)ImageSizeType.Thumbnail;
 
@@ -724,7 +742,7 @@ namespace Manager.Controllers
 
 
         // ------------------------------------------------------------------------- Set Image Any Size --------------------------------------------------------------------------
-        private string SetImageAnySize(Image image, Media media)
+        private string SetImageAnySize(System.Drawing.Image image, Media media)
         {
             string imageSrc;
 
@@ -859,7 +877,7 @@ namespace Manager.Controllers
 
 
         // ------------------------------------------------------------------------- Set Image Sizes --------------------------------------------------------------------------
-        private string SetImageSizes(ImageSizeType imageSizeType, Image image, Media media)
+        private string SetImageSizes(ImageSizeType imageSizeType, System.Drawing.Image image, Media media)
         {
             string imageSrc = string.Empty;
 
@@ -986,7 +1004,7 @@ namespace Manager.Controllers
 
 
         // ------------------------------------------------------------------------- Copy Image --------------------------------------------------------------------------
-        private string CopyImage(Image image)
+        private string CopyImage(System.Drawing.Image image)
         {
             // Create a new unique name for the image
             string ext = ImageCodecInfo.GetImageEncoders().FirstOrDefault(x => x.FormatID == image.RawFormat.Guid).FilenameExtension.Split(";").First().Trim('*').ToLower();
