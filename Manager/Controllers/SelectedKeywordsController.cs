@@ -171,6 +171,20 @@ namespace Manager.Controllers
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // Not Custom
         [HttpPut]
         [Route("Groups/Remove")]
         public async Task<ActionResult> RemoveKeywordGroup(UpdatedProductItem updatedProductItem)
@@ -197,6 +211,58 @@ namespace Manager.Controllers
 
 
 
+        // Custom
+        [HttpDelete]
+        [Route("Groups")]
+        public async Task<ActionResult> DeleteKeywordGroup(int id)
+        {
+            IEnumerable<int> KeywordIds = await unitOfWork.Keywords_In_KeywordGroup.GetCollection(x => x.KeywordGroupId == id, x => x.KeywordId);
+
+
+            IEnumerable<Keyword> keywords = await unitOfWork.Keywords.GetCollection(x => KeywordIds.Contains(x.Id));
+
+            unitOfWork.Keywords.RemoveRange(keywords);
+
+
+            KeywordGroup keywordGroup = await unitOfWork.KeywordGroups.Get(id);
+
+            unitOfWork.KeywordGroups.Remove(keywordGroup);
+
+            await unitOfWork.Save();
+
+            return Ok();
+        }
+
+
+
+
+        // Custom
+        [HttpDelete]
+        public async Task<ActionResult> DeleteKeyword(int id)
+        {
+            Keyword keyword = await unitOfWork.Keywords.Get(id);
+
+            unitOfWork.Keywords.Remove(keyword);
+
+            await unitOfWork.Save();
+
+            return Ok();
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         [HttpPut]
         [Route("Groups")]
@@ -212,6 +278,14 @@ namespace Manager.Controllers
 
             return Ok();
         }
+
+
+
+
+
+
+
+
 
 
 
@@ -238,41 +312,12 @@ namespace Manager.Controllers
 
 
 
-        [HttpDelete]
-        [Route("Groups")]
-        public async Task<ActionResult> DeleteKeywordGroup(int id)
-        {
-            IEnumerable<int> KeywordIds = await unitOfWork.Keywords_In_KeywordGroup.GetCollection(x => x.KeywordGroupId == id, x => x.KeywordId);
-
-
-            IEnumerable<Keyword> keywords = await unitOfWork.Keywords.GetCollection(x => KeywordIds.Contains(x.Id));
-
-            unitOfWork.Keywords.RemoveRange(keywords);
-
-
-            KeywordGroup keywordGroup = await unitOfWork.KeywordGroups.Get(id);
-
-            unitOfWork.KeywordGroups.Remove(keywordGroup);
-
-            await unitOfWork.Save();
-
-            return Ok();
-        }
+        
 
 
 
 
-        [HttpDelete]
-        public async Task<ActionResult> DeleteKeyword(int id)
-        {
-            Keyword keyword = await unitOfWork.Keywords.Get(id);
-
-            unitOfWork.Keywords.Remove(keyword);
-
-            await unitOfWork.Save();
-
-            return Ok();
-        }
+        
 
 
 
