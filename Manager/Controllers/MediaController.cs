@@ -188,6 +188,7 @@ namespace Manager.Controllers
 
 
             List<int> imageSizes = (List<int>)await unitOfWork.ImageReferences.GetCollection(x => x.ImageId == id, x => x.ImageSize);
+            imageSizes.Add((int)imageSize);
             imageSizes = imageSizes.Distinct().OrderBy(x => x).ToList();
 
             foreach (int imageSizeType in imageSizes)
