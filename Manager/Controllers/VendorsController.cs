@@ -121,9 +121,9 @@ namespace Manager.Controllers
 
         [HttpGet]
         [Route("Search")]
-        public async Task<ActionResult> Search(string searchWords)
+        public async Task<ActionResult> Search(string searchTerm)
         {
-            return Ok(await unitOfWork.Vendors.GetCollection<ItemViewModel<Vendor>>(searchWords));
+            return Ok(await unitOfWork.Vendors.GetCollection<ItemViewModel<Vendor>>(searchTerm));
         }
 
 
