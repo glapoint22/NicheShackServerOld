@@ -468,6 +468,40 @@ namespace Manager.Controllers
 
 
 
+
+        // ----------------------------------------------------------------------------- Get Media Info ----------------------------------------------------------------------------------
+        [HttpGet]
+        [Route("MediaInfo")]
+        public async Task<ActionResult> GetMediaInfo(int id)
+        {
+            return Ok(await unitOfWork.Media.Get(x => x.Id == id, x => new
+            {
+                x.Id,
+                x.Name,
+                x.Thumbnail,
+                x.ThumbnailWidth,
+                x.ThumbnailHeight,
+                x.ImageSm,
+                x.ImageSmWidth,
+                x.ImageSmHeight,
+                x.ImageMd,
+                x.ImageMdWidth,
+                x.ImageMdHeight,
+                x.ImageLg,
+                x.ImageLgWidth,
+                x.ImageLgHeight,
+                x.ImageAnySize,
+                x.ImageAnySizeWidth,
+                x.ImageAnySizeHeight
+            }));
+        }
+
+
+
+
+
+
+
         // ------------------------------------------------------------------------ Get Image FromFile --------------------------------------------------------------------------
         private async Task<System.Drawing.Image> GetImageFromFile(IFormFile imageFile)
         {
