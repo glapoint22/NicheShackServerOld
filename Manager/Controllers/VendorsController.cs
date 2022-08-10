@@ -2,6 +2,7 @@
 using DataAccess.Models;
 using DataAccess.ViewModels;
 using Manager.Repositories;
+using Manager.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Manager.Controllers
@@ -35,7 +36,6 @@ namespace Manager.Controllers
 
 
 
-        [Route("Vendor")]
         [HttpPut]
         public async Task<ActionResult> UpdateVendor(Vendor updatedVendor)
         {
@@ -76,7 +76,6 @@ namespace Manager.Controllers
 
 
 
-        [Route("Vendor")]
         [HttpPost]
         public async Task<ActionResult> AddVendor(Vendor vendor)
         {
@@ -123,7 +122,10 @@ namespace Manager.Controllers
         [Route("Search")]
         public async Task<ActionResult> Search(string searchTerm)
         {
-            return Ok(await unitOfWork.Vendors.GetCollection<ItemViewModel<Vendor>>(searchTerm));
+
+            var vendor = await unitOfWork.Vendors.GetCollection(searchTerm, x => new VendorViewModel { Id = x.Id, Name = x.Name, PrimaryEmail = x.PrimaryEmail, PrimaryFirstName = x.PrimaryFirstName, PrimaryLastName = x.PrimaryLastName});
+
+            return Ok(vendor);
         }
 
 
