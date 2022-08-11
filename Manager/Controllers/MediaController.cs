@@ -353,19 +353,56 @@ namespace Manager.Controllers
 
 
 
-        // --------------------------------------------------------------------------- Delete Media -------------------------------------------------------------------------
+        // --------------------------------------------------------------------------- Delete Image -------------------------------------------------------------------------
         [HttpDelete]
-        public async Task<ActionResult> DeleteMedia(int id)
+        public async Task<ActionResult> DeleteImage(int id)
         {
+
             Media media = await unitOfWork.Media.Get(id);
-
-
-            // Delete thumbnail and image
             string wwwroot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
             string imagesFolder = Path.Combine(wwwroot, "images");
+            string image;
 
-            if (media.Thumbnail != null && media.Thumbnail != string.Empty) System.IO.File.Delete(Path.Combine(imagesFolder, media.Thumbnail));
-            if (media.ImageAnySize != null && media.ImageAnySize != string.Empty) System.IO.File.Delete(Path.Combine(imagesFolder, media.ImageAnySize));
+            // Remove thumbnail
+            if (media.Thumbnail != null)
+            {
+                image = Path.Combine(imagesFolder, media.Thumbnail);
+                System.IO.File.Delete(image);
+            }
+
+
+            // Remove small
+            if (media.ImageSm != null)
+            {
+                image = Path.Combine(imagesFolder, media.ImageSm);
+                System.IO.File.Delete(image);
+            }
+
+
+
+            // Remove medium
+            if (media.ImageMd != null)
+            {
+                image = Path.Combine(imagesFolder, media.ImageMd);
+                System.IO.File.Delete(image);
+            }
+
+
+            // Remove large
+            if (media.ImageLg != null)
+            {
+                image = Path.Combine(imagesFolder, media.ImageLg);
+                System.IO.File.Delete(image);
+            }
+
+
+
+            // Remove any size
+            if (media.ImageAnySize != null)
+            {
+                image = Path.Combine(imagesFolder, media.ImageAnySize);
+                System.IO.File.Delete(image);
+            }
 
 
 
@@ -431,13 +468,46 @@ namespace Manager.Controllers
             ImageReference imageReference = new ImageReference
             {
                 ImageId = imageReferenceViewModel.ImageId,
-                ImageSize = imageReferenceViewModel.ImageSize,
+                ImageSize = imageReferenceViewModel.ImageSizeType,
                 Builder = imageReferenceViewModel.Builder,
                 Host = imageReferenceViewModel.Host,
                 Location = imageReferenceViewModel.Location
             };
 
             unitOfWork.ImageReferences.Add(imageReference);
+            await unitOfWork.Save();
+
+            return Ok();
+        }
+
+
+
+
+
+        // ------------------------------------------------------------------------ Get Image Reference Count --------------------------------------------------------------------------
+        [HttpGet]
+        [Route("ImageReference")]
+        public async Task<ActionResult> GetImageReferenceCount(int imageId)
+        {
+            return Ok(await unitOfWork.ImageReferences.GetCount(x => x.ImageId == imageId));
+        }
+
+
+
+
+
+        // ------------------------------------------------------------------------ Remove Image Reference --------------------------------------------------------------------------
+        [HttpPost]
+        [Route("ImageReference/Remove")]
+        public async Task<ActionResult> RemoveImageReference(ImageReferenceViewModel imageReferenceViewModel)
+        {
+            ImageReference imageReference = await unitOfWork.ImageReferences.Get(x => x.ImageId == imageReferenceViewModel.ImageId &&
+                x.ImageSize == imageReferenceViewModel.ImageSizeType &&
+                x.Builder == imageReferenceViewModel.Builder &&
+                x.Host == imageReferenceViewModel.Host &&
+                x.Location == imageReferenceViewModel.Location);
+
+            unitOfWork.ImageReferences.Remove(imageReference);
             await unitOfWork.Save();
 
             return Ok();
@@ -455,9 +525,9 @@ namespace Manager.Controllers
             return Ok(await unitOfWork.ImageReferences.GetCollection(x => x.ImageId == imageId && (imageSize == null ? x.ImageSize >= 0 : x.ImageSize == imageSize), x => new
             {
                 imageSizeType = x.ImageSize,
-                builderType = x.Builder,
+                builder = x.Builder,
                 host = x.Host,
-                imageLocation = x.Location
+                location = x.Location
             }));
         }
 

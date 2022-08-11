@@ -4,7 +4,7 @@
     {
         public int ImageId { get; set; }
 
-        public int ImageSize { get; set; }
+        public int ImageSizeType { get; set; }
 
         public int Builder { get; set; }
 

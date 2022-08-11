@@ -224,6 +224,21 @@ namespace Manager.Controllers
 
 
 
+        [HttpDelete]
+        [Route("Image")]
+        public async Task<ActionResult> DeleteProductImage(int productId)
+        {
+            Product product = await unitOfWork.Products.Get(productId);
+
+            product.ImageId = null;
+
+            // Update and save
+            unitOfWork.Products.Update(product);
+            await unitOfWork.Save();
+
+            return Ok();
+        }
+
 
 
         [HttpPut]
