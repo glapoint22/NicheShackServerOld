@@ -112,7 +112,8 @@ namespace Manager.Controllers
             return Ok(await unitOfWork.Products.GetCollection(x => x.VendorId == vendorId, x => new { 
                 x.Id,
                 x.Name,
-                x.Hoplink
+                //x.Hoplink,
+                x.Media.Thumbnail
             }));
         }
 
