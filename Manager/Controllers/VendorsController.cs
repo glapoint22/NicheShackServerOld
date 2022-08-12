@@ -119,6 +119,15 @@ namespace Manager.Controllers
 
 
 
+        [Route("ProductCount")]
+        [HttpGet]
+        public async Task<ActionResult> GetProductCount(int vendorId)
+        {
+            return Ok(await unitOfWork.Products.GetCount(x => x.VendorId == vendorId));
+        }
+
+
+
         [HttpGet]
         [Route("Search")]
         public async Task<ActionResult> Search(string searchTerm)
@@ -130,5 +139,15 @@ namespace Manager.Controllers
         }
 
 
+
+        [HttpGet]
+        [Route("Duplicate")]
+        public async Task<ActionResult> CheckDuplicate(string vendorName)
+        {
+
+            var vendor = await unitOfWork.Vendors.Get(x => x.Name.ToUpper() == vendorName.ToUpper());
+
+            return Ok(vendor);
+        }
     }
 }
