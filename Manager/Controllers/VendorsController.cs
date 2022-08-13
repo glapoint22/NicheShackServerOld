@@ -112,8 +112,18 @@ namespace Manager.Controllers
             return Ok(await unitOfWork.Products.GetCollection(x => x.VendorId == vendorId, x => new { 
                 x.Id,
                 x.Name,
-                x.Hoplink
+                //x.Hoplink,
+                x.Media.Thumbnail
             }));
+        }
+
+
+
+        [Route("ProductCount")]
+        [HttpGet]
+        public async Task<ActionResult> GetProductCount(int vendorId)
+        {
+            return Ok(await unitOfWork.Products.GetCount(x => x.VendorId == vendorId));
         }
 
 
@@ -129,5 +139,15 @@ namespace Manager.Controllers
         }
 
 
+
+        [HttpGet]
+        [Route("Duplicate")]
+        public async Task<ActionResult> CheckDuplicate(string vendorName)
+        {
+
+            var vendor = await unitOfWork.Vendors.Get(x => x.Name.ToUpper() == vendorName.ToUpper());
+
+            return Ok(vendor);
+        }
     }
 }
