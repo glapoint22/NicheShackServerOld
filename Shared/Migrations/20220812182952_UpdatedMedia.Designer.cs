@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(NicheShackContext))]
-    [Migration("20220727195733_UpdatedMedia")]
+    [Migration("20220812182952_UpdatedMedia")]
     partial class UpdatedMedia
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -338,15 +338,13 @@ namespace DataAccess.Migrations
                     b.Property<int>("Builder")
                         .HasColumnType("int");
 
-                    b.Property<string>("Host")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(256)")
-                        .HasMaxLength(256);
+                    b.Property<int>("HostId")
+                        .HasColumnType("int");
 
                     b.Property<int>("ImageId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ImageSize")
+                    b.Property<int>("ImageSizeType")
                         .HasColumnType("int");
 
                     b.Property<int>("Location")

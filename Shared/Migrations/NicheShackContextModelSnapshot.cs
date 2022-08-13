@@ -336,15 +336,13 @@ namespace DataAccess.Migrations
                     b.Property<int>("Builder")
                         .HasColumnType("int");
 
-                    b.Property<string>("Host")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(256)")
-                        .HasMaxLength(256);
+                    b.Property<int>("HostId")
+                        .HasColumnType("int");
 
                     b.Property<int>("ImageId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ImageSize")
+                    b.Property<int>("ImageSizeType")
                         .HasColumnType("int");
 
                     b.Property<int>("Location")

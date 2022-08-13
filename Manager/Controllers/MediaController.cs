@@ -187,7 +187,7 @@ namespace Manager.Controllers
             }
 
 
-            List<int> imageSizes = (List<int>)await unitOfWork.ImageReferences.GetCollection(x => x.ImageId == id, x => x.ImageSize);
+            List<int> imageSizes = (List<int>)await unitOfWork.ImageReferences.GetCollection(x => x.ImageId == id, x => x.ImageSizeType);
             imageSizes.Add((int)imageSize);
             imageSizes = imageSizes.Distinct().OrderBy(x => x).ToList();
 
@@ -468,9 +468,9 @@ namespace Manager.Controllers
             ImageReference imageReference = new ImageReference
             {
                 ImageId = imageReferenceViewModel.ImageId,
-                ImageSize = imageReferenceViewModel.ImageSizeType,
+                ImageSizeType = imageReferenceViewModel.ImageSizeType,
                 Builder = imageReferenceViewModel.Builder,
-                Host = imageReferenceViewModel.Host,
+                HostId = imageReferenceViewModel.HostId,
                 Location = imageReferenceViewModel.Location
             };
 
@@ -496,19 +496,27 @@ namespace Manager.Controllers
 
 
 
-        // ------------------------------------------------------------------------ Remove Image Reference --------------------------------------------------------------------------
+        // ------------------------------------------------------------------------ Remove Image References --------------------------------------------------------------------------
         [HttpPost]
-        [Route("ImageReference/Remove")]
-        public async Task<ActionResult> RemoveImageReference(ImageReferenceViewModel imageReferenceViewModel)
+        [Route("ImageReferences/Remove")]
+        public async Task<ActionResult> RemoveImageReferences(List<ImageReferenceViewModel> imageReferenceViewModels)
         {
-            ImageReference imageReference = await unitOfWork.ImageReferences.Get(x => x.ImageId == imageReferenceViewModel.ImageId &&
-                x.ImageSize == imageReferenceViewModel.ImageSizeType &&
-                x.Builder == imageReferenceViewModel.Builder &&
-                x.Host == imageReferenceViewModel.Host &&
-                x.Location == imageReferenceViewModel.Location);
+            if (imageReferenceViewModels.Count > 0)
+            {
+                foreach (ImageReferenceViewModel imageReferenceViewModel in imageReferenceViewModels)
+                {
+                    ImageReference imageReference = await unitOfWork.ImageReferences.Get(x => x.ImageId == imageReferenceViewModel.ImageId &&
+                   x.ImageSizeType == imageReferenceViewModel.ImageSizeType &&
+                   x.Builder == imageReferenceViewModel.Builder &&
+                   x.HostId == imageReferenceViewModel.HostId &&
+                   x.Location == imageReferenceViewModel.Location);
 
-            unitOfWork.ImageReferences.Remove(imageReference);
-            await unitOfWork.Save();
+                    unitOfWork.ImageReferences.Remove(imageReference);
+                }
+
+                await unitOfWork.Save();
+            }
+
 
             return Ok();
         }
@@ -522,13 +530,33 @@ namespace Manager.Controllers
         [Route("ImageReferences")]
         public async Task<ActionResult> GetImageReferences(int imageId, int? imageSize)
         {
-            return Ok(await unitOfWork.ImageReferences.GetCollection(x => x.ImageId == imageId && (imageSize == null ? x.ImageSize >= 0 : x.ImageSize == imageSize), x => new
+            List<ImageReferenceViewModel> imageReferences = (List<ImageReferenceViewModel>)await unitOfWork.ImageReferences.GetCollection(x => x.ImageId == imageId && (imageSize == null ? x.ImageSizeType >= 0 : x.ImageSizeType == imageSize), x => new ImageReferenceViewModel
             {
-                imageSizeType = x.ImageSize,
-                builder = x.Builder,
-                host = x.Host,
-                location = x.Location
-            }));
+                ImageSizeType = x.ImageSizeType,
+                Builder = x.Builder,
+                Location = x.Location,
+                HostId = x.HostId
+            });
+
+            foreach (ImageReferenceViewModel imageReference in imageReferences)
+            {
+                switch (imageReference.Builder)
+                {
+                    case (int)BuilderType.Product:
+                        imageReference.Host = await unitOfWork.Products.Get(x => x.Id == imageReference.HostId, x => x.Name);
+                        break;
+
+                    case (int)BuilderType.Page:
+                        imageReference.Host = await unitOfWork.Pages.Get(x => x.Id == imageReference.HostId, x => x.Name);
+                        break;
+
+                    case (int)BuilderType.Email:
+                        imageReference.Host = await unitOfWork.Emails.Get(x => x.Id == imageReference.HostId, x => x.Name);
+                        break;
+                }
+            }
+
+            return Ok(imageReferences);
         }
 
 
