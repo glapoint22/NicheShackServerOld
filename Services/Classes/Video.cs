@@ -8,9 +8,10 @@ namespace Services.Classes
     public class Video
     {
         public int Id { get; set; }
-        public string Src { get; set; }
         public string Thumbnail { get; set; }
         public string Name { get; set; }
+        public int VideoType { get; set; }
+        public string VideoId { get; set; }
 
         public async Task SetData(NicheShackContext context)
         {
@@ -19,7 +20,10 @@ namespace Services.Classes
             .Where(x => x.Id == Id)
             .Select(x => new Video
             {
-                Thumbnail = x.Thumbnail
+                Name = x.Name,
+                Thumbnail = x.Thumbnail,
+                VideoType = x.VideoType,
+                VideoId = x.VideoId
             })
             .SingleOrDefaultAsync();
 
@@ -27,7 +31,10 @@ namespace Services.Classes
             // If this video exists
             if (video != null)
             {
+                Name = video.Name;
                 Thumbnail = video.Thumbnail;
+                VideoType = video.VideoType;
+                VideoId = video.VideoId;
             }
         }
     }

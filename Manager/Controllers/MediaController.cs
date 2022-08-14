@@ -266,8 +266,7 @@ namespace Manager.Controllers
                 VideoId = video.VideoId,
                 MediaType = (int)MediaType.Video,
                 VideoType = video.VideoType,
-                Thumbnail = thumbnail,
-                ImageAnySize = ""
+                Thumbnail = thumbnail
             };
 
             // Add the new video
@@ -444,7 +443,9 @@ namespace Manager.Controllers
                 ImageLgHeight = x.ImageLgHeight,
                 ImageAnySize = x.ImageAnySize,
                 ImageAnySizeWidth = x.ImageAnySizeWidth,
-                ImageAnySizeHeight = x.ImageAnySizeHeight
+                ImageAnySizeHeight = x.ImageAnySizeHeight,
+                VideoId = x.VideoId,
+                VideoType = x.VideoType
             }));
         }
 
