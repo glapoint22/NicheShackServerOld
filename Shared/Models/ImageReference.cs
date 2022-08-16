@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataAccess.Models
 {
@@ -10,13 +9,11 @@ namespace DataAccess.Models
         [ForeignKey("Media")]
         public int ImageId { get; set; }
 
-        public int ImageSize { get; set; }
+        public int ImageSizeType { get; set; }
 
         public int Builder { get; set; }
 
-        [MaxLength(256)]
-        [Required]
-        public string Host { get; set; }
+        public int HostId { get; set; }
 
         public int Location { get; set; }
 

@@ -581,6 +581,23 @@ namespace Manager.Controllers
 
 
 
+        [HttpDelete]
+        [Route("Subproduct/Image")]
+        public async Task<ActionResult> DeleteSubproductImage(int subproductId)
+        {
+            Subproduct subproduct = await unitOfWork.Subproducts.Get(subproductId);
+
+            subproduct.ImageId = null;
+
+            // Update and save
+            unitOfWork.Subproducts.Update(subproduct);
+            await unitOfWork.Save();
+
+            return Ok();
+        }
+
+
+
 
 
         [HttpPut]

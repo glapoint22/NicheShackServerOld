@@ -112,7 +112,7 @@ namespace Manager.Repositories
                      {
                          Id = x.Media.Id,
                          Name = x.Media.Name,
-                         Src = x.Media.ImageAnySize
+                         Src = x.Media.ImageSm
                      },
                      Header = x.Header,
                      Quantity = x.Quantity,

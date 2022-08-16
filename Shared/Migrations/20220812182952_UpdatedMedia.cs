@@ -101,9 +101,9 @@ namespace DataAccess.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ImageId = table.Column<int>(nullable: false),
-                    ImageSize = table.Column<int>(nullable: false),
+                    ImageSizeType = table.Column<int>(nullable: false),
                     Builder = table.Column<int>(nullable: false),
-                    Host = table.Column<string>(maxLength: 256, nullable: false),
+                    HostId = table.Column<int>(nullable: false),
                     Location = table.Column<int>(nullable: false)
                 },
                 constraints: table =>

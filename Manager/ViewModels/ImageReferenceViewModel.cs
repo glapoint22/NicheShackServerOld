@@ -8,6 +8,8 @@
 
         public int Builder { get; set; }
 
+        public int HostId { get; set; }
+
         public string Host { get; set; }
 
         public int Location { get; set; }

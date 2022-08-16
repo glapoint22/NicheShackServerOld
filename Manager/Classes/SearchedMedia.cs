@@ -28,5 +28,9 @@
         public string ImageAnySize { get; set; }
         public int ImageAnySizeWidth { get; set; }
         public int ImageAnySizeHeight { get; set; }
+
+
+        public string VideoId { get; set; }
+        public int VideoType { get; set; }
     }
 }
