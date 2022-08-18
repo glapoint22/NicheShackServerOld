@@ -37,7 +37,7 @@ namespace Manager.Repositories
         IRepository<Keyword_In_KeywordGroup> Keywords_In_KeywordGroup { get; }
         IRepository<PageKeyword> PageKeywords { get; }
         IRepository<Subproduct> Subproducts { get; }
-        IRepository<ImageReference> ImageReferences { get; }
+        IRepository<MediaReference> MediaReferences { get; }
 
 
 

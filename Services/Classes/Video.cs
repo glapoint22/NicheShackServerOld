@@ -12,6 +12,7 @@ namespace Services.Classes
         public string Name { get; set; }
         public int VideoType { get; set; }
         public string VideoId { get; set; }
+        public int ReferenceId { get; set; }
 
         public async Task SetData(NicheShackContext context)
         {

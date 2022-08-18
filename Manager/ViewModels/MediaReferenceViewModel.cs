@@ -1,8 +1,8 @@
 ﻿namespace Manager.ViewModels
 {
-    public class ImageReferenceViewModel
+    public class MediaReferenceViewModel
     {
-        public int ImageId { get; set; }
+        public int MediaId { get; set; }
 
         public int ImageSizeType { get; set; }
 

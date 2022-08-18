@@ -42,7 +42,7 @@ namespace Manager.Classes
         }
 
 
-        public enum ImageLocation
+        public enum MediaLocation
         {
             Product,
             Media,
@@ -56,7 +56,8 @@ namespace Manager.Classes
             CarouselWidgetBanner,
             TextWidgetBackground,
             ContainerWidgetBackground,
-            ButtonWidgetBackground
+            ButtonWidgetBackground,
+            VideoWidget
         }
 
 

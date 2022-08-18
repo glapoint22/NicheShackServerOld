@@ -187,7 +187,7 @@ namespace Manager.Controllers
             }
 
 
-            List<int> imageSizes = (List<int>)await unitOfWork.ImageReferences.GetCollection(x => x.ImageId == id, x => x.ImageSizeType);
+            List<int> imageSizes = (List<int>)await unitOfWork.MediaReferences.GetCollection(x => x.MediaId == id, x => x.ImageSizeType);
             imageSizes.Add((int)imageSize);
             imageSizes = imageSizes.Distinct().OrderBy(x => x).ToList();
 
@@ -224,7 +224,7 @@ namespace Manager.Controllers
         // ------------------------------------------------------------------------ Add Image Size ------------------------------------------------------------------------
         [HttpGet]
         [Route("Image")]
-        public async Task<ActionResult> AddImageSize(int imageId, ImageSizeType imageSize, string src)
+        public async Task<ActionResult> AddImageSize(int imageId, ImageSizeType imageSizeType, string src)
         {
             Media media = await unitOfWork.Media.Get(imageId);
             string wwwroot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
@@ -233,7 +233,7 @@ namespace Manager.Controllers
             System.Drawing.Image image = System.Drawing.Image.FromFile(imagePath);
 
             // Set the image sizes for this image
-            string imageSrc = SetImageSizes(imageSize, image, media);
+            string imageSrc = SetImageSizes(imageSizeType, image, media);
 
             // Update and save
             unitOfWork.Media.Update(media);
@@ -461,64 +461,58 @@ namespace Manager.Controllers
 
 
 
-        // ------------------------------------------------------------------------ Add Image Reference --------------------------------------------------------------------------
+        // ------------------------------------------------------------------------ Add Media Reference --------------------------------------------------------------------------
         [HttpPost]
-        [Route("ImageReference")]
-        public async Task<ActionResult> AddImageReference(ImageReferenceViewModel imageReferenceViewModel)
+        [Route("MediaReference")]
+        public async Task<ActionResult> AddMediaReference(MediaReferenceViewModel mediaReferenceViewModel)
         {
-            ImageReference imageReference = new ImageReference
+            MediaReference mediaReference = new MediaReference
             {
-                ImageId = imageReferenceViewModel.ImageId,
-                ImageSizeType = imageReferenceViewModel.ImageSizeType,
-                Builder = imageReferenceViewModel.Builder,
-                HostId = imageReferenceViewModel.HostId,
-                Location = imageReferenceViewModel.Location
+                MediaId = mediaReferenceViewModel.MediaId,
+                ImageSizeType = mediaReferenceViewModel.ImageSizeType,
+                Builder = mediaReferenceViewModel.Builder,
+                HostId = mediaReferenceViewModel.HostId,
+                Location = mediaReferenceViewModel.Location
             };
 
-            unitOfWork.ImageReferences.Add(imageReference);
+            unitOfWork.MediaReferences.Add(mediaReference);
             await unitOfWork.Save();
 
-            return Ok();
+            return Ok(mediaReference.Id);
         }
 
 
 
 
 
-        // ------------------------------------------------------------------------ Get Image Reference Count --------------------------------------------------------------------------
+        // ------------------------------------------------------------------------ Get Media Reference Count --------------------------------------------------------------------------
         [HttpGet]
-        [Route("ImageReference")]
-        public async Task<ActionResult> GetImageReferenceCount(int imageId)
+        [Route("MediaReference/Count")]
+        public async Task<ActionResult> GetMediaReferenceCount(int MediaId)
         {
-            return Ok(await unitOfWork.ImageReferences.GetCount(x => x.ImageId == imageId));
+            return Ok(await unitOfWork.MediaReferences.GetCount(x => x.MediaId == MediaId));
         }
 
 
 
 
 
-        // ------------------------------------------------------------------------ Remove Image References --------------------------------------------------------------------------
+        // ------------------------------------------------------------------------ Remove Media References --------------------------------------------------------------------------
         [HttpPost]
-        [Route("ImageReferences/Remove")]
-        public async Task<ActionResult> RemoveImageReferences(List<ImageReferenceViewModel> imageReferenceViewModels)
+        [Route("MediaReferences/Remove")]
+        public async Task<ActionResult> RemoveMediaReferences(int[] referenceIds)
         {
-            if (imageReferenceViewModels.Count > 0)
+            if (referenceIds.Length > 0)
             {
-                foreach (ImageReferenceViewModel imageReferenceViewModel in imageReferenceViewModels)
+                foreach (int referenceId in referenceIds)
                 {
-                    ImageReference imageReference = await unitOfWork.ImageReferences.Get(x => x.ImageId == imageReferenceViewModel.ImageId &&
-                   x.ImageSizeType == imageReferenceViewModel.ImageSizeType &&
-                   x.Builder == imageReferenceViewModel.Builder &&
-                   x.HostId == imageReferenceViewModel.HostId &&
-                   x.Location == imageReferenceViewModel.Location);
+                    var mediaReference = await unitOfWork.MediaReferences.Get(referenceId);
 
-                    unitOfWork.ImageReferences.Remove(imageReference);
+                    unitOfWork.MediaReferences.Remove(mediaReference);
                 }
-
-                await unitOfWork.Save();
             }
 
-
+            await unitOfWork.Save();
             return Ok();
         }
 
@@ -526,12 +520,56 @@ namespace Manager.Controllers
 
 
 
-        // ------------------------------------------------------------------------ Get Image References --------------------------------------------------------------------------
-        [HttpGet]
-        [Route("ImageReferences")]
-        public async Task<ActionResult> GetImageReferences(int imageId, int? imageSize)
+        // ------------------------------------------------------------------------ Duplicate Media References --------------------------------------------------------------------------
+        [HttpPost]
+        [Route("MediaReferences/Duplicate")]
+        public async Task<ActionResult> DuplicateMediaReferences(int[] referenceIds)
         {
-            List<ImageReferenceViewModel> imageReferences = (List<ImageReferenceViewModel>)await unitOfWork.ImageReferences.GetCollection(x => x.ImageId == imageId && (imageSize == null ? x.ImageSizeType >= 0 : x.ImageSizeType == imageSize), x => new ImageReferenceViewModel
+            List<UpdatedMediaReferenceId> updatedMediaReferenceIds = new List<UpdatedMediaReferenceId>();
+
+            if (referenceIds.Length > 0)
+            {
+                foreach (int referenceId in referenceIds)
+                {
+                    var mediaReference = await unitOfWork.MediaReferences.Get(referenceId);
+
+                    // Create the new media reference
+                    MediaReference newMediaReference = new MediaReference
+                    {
+                        MediaId = mediaReference.MediaId,
+                        ImageSizeType = mediaReference.ImageSizeType,
+                        Builder = mediaReference.Builder,
+                        HostId = mediaReference.HostId,
+                        Location = mediaReference.Location
+                    };
+
+                    unitOfWork.MediaReferences.Add(newMediaReference);
+                    await unitOfWork.Save();
+
+                    updatedMediaReferenceIds.Add(new UpdatedMediaReferenceId
+                    {
+                        OldId = referenceId,
+                        NewId = newMediaReference.Id
+                    });
+                }
+            }
+
+            return Ok(updatedMediaReferenceIds);
+        }
+
+
+
+
+
+
+
+
+        // ------------------------------------------------------------------------ Get Media References --------------------------------------------------------------------------
+        [HttpGet]
+        [Route("MediaReferences")]
+        public async Task<ActionResult> GetMediaReferences(int mediaId)
+        {
+            List<MediaReferenceViewModel> mediaReferences = (List<MediaReferenceViewModel>)await unitOfWork.MediaReferences.GetCollection(x => x.MediaId == mediaId, x => new MediaReferenceViewModel
             {
                 ImageSizeType = x.ImageSizeType,
                 Builder = x.Builder,
@@ -539,25 +577,25 @@ namespace Manager.Controllers
                 HostId = x.HostId
             });
 
-            foreach (ImageReferenceViewModel imageReference in imageReferences)
+            foreach (MediaReferenceViewModel mediaReference in mediaReferences)
             {
-                switch (imageReference.Builder)
+                switch (mediaReference.Builder)
                 {
                     case (int)BuilderType.Product:
-                        imageReference.Host = await unitOfWork.Products.Get(x => x.Id == imageReference.HostId, x => x.Name);
+                        mediaReference.Host = await unitOfWork.Products.Get(x => x.Id == mediaReference.HostId, x => x.Name);
                         break;
 
                     case (int)BuilderType.Page:
-                        imageReference.Host = await unitOfWork.Pages.Get(x => x.Id == imageReference.HostId, x => x.Name);
+                        mediaReference.Host = await unitOfWork.Pages.Get(x => x.Id == mediaReference.HostId, x => x.Name);
                         break;
 
                     case (int)BuilderType.Email:
-                        imageReference.Host = await unitOfWork.Emails.Get(x => x.Id == imageReference.HostId, x => x.Name);
+                        mediaReference.Host = await unitOfWork.Emails.Get(x => x.Id == mediaReference.HostId, x => x.Name);
                         break;
                 }
             }
 
-            return Ok(imageReferences);
+            return Ok(mediaReferences);
         }
 
 
@@ -568,10 +606,10 @@ namespace Manager.Controllers
 
 
 
-        // ----------------------------------------------------------------------------- Get Media Info ----------------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------- Get Image Info ----------------------------------------------------------------------------------
         [HttpGet]
-        [Route("MediaInfo")]
-        public async Task<ActionResult> GetMediaInfo(int id)
+        [Route("ImageInfo")]
+        public async Task<ActionResult> GetImageInfo(int id)
         {
             return Ok(await unitOfWork.Media.Get(x => x.Id == id, x => new
             {

@@ -326,35 +326,6 @@ namespace DataAccess.Migrations
                     b.ToTable("FilterOptions");
                 });
 
-            modelBuilder.Entity("DataAccess.Models.ImageReference", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("Builder")
-                        .HasColumnType("int");
-
-                    b.Property<int>("HostId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ImageId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ImageSizeType")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Location")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ImageId");
-
-                    b.ToTable("ImageReferences");
-                });
-
             modelBuilder.Entity("DataAccess.Models.Keyword", b =>
                 {
                     b.Property<int>("Id")
@@ -695,6 +666,35 @@ namespace DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Media");
+                });
+
+            modelBuilder.Entity("DataAccess.Models.MediaReference", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("Builder")
+                        .HasColumnType("int");
+
+                    b.Property<int>("HostId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ImageSizeType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Location")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MediaId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MediaId");
+
+                    b.ToTable("MediaReferences");
                 });
 
             modelBuilder.Entity("DataAccess.Models.Niche", b =>
@@ -1684,15 +1684,6 @@ namespace DataAccess.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("DataAccess.Models.ImageReference", b =>
-                {
-                    b.HasOne("DataAccess.Models.Media", "Media")
-                        .WithMany("ImageReferences")
-                        .HasForeignKey("ImageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("DataAccess.Models.KeywordGroup_Belonging_To_Product", b =>
                 {
                     b.HasOne("DataAccess.Models.KeywordGroup", "KeywordGroup")
@@ -1776,6 +1767,15 @@ namespace DataAccess.Migrations
                     b.HasOne("DataAccess.Models.Product", "Product")
                         .WithMany("ListProducts")
                         .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("DataAccess.Models.MediaReference", b =>
+                {
+                    b.HasOne("DataAccess.Models.Media", "Media")
+                        .WithMany("MediaReferences")
+                        .HasForeignKey("MediaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

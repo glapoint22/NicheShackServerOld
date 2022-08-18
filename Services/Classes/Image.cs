@@ -12,6 +12,7 @@ namespace Services.Classes
         public string Name { get; set; }
         public string Src { get; set; }
         public ImageSizeType ImageSizeType { get; set; }
+        public int ReferenceId { get; set; }
 
 
         public async Task SetStyle(HtmlNode node, NicheShackContext context)

@@ -2,12 +2,12 @@
 
 namespace DataAccess.Models
 {
-    public class ImageReference
+    public class MediaReference
     {
         public int Id { get; set; }
 
         [ForeignKey("Media")]
-        public int ImageId { get; set; }
+        public int MediaId { get; set; }
 
         public int ImageSizeType { get; set; }
 
