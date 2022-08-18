@@ -53,6 +53,37 @@ namespace Manager.Controllers
 
 
 
+
+
+
+        [Route("NicheId_SubNicheId")]
+        [HttpGet]
+        public async Task<ActionResult> GetNicheAndSubNicheIds(int productId)
+        {
+            var subNicheId = await unitOfWork.Products.Get(x => x.Id == productId, x => x.NicheId);
+            var nicheId = await unitOfWork.Niches.Get(x => x.Id == subNicheId, x => x.CategoryId);
+
+            return Ok(new { NicheId = nicheId, SubNicheId = subNicheId });
+        }
+
+
+
+        [Route("SubNiches_Products")]
+        [HttpGet]
+        public async Task<ActionResult> GetNichesAndSubNiches(int nicheId, int subNicheId)
+        {
+            var subNiches = await unitOfWork.Niches.GetCollection<ItemViewModel<Niche>>(x => x.CategoryId == nicheId);
+            var products = await unitOfWork.Products.GetCollection<ItemViewModel<Product>>(x => x.NicheId == subNicheId);
+            
+
+            return Ok(new { subNiches, products });
+        }
+
+
+
+
+
+
         [HttpGet]
         [Route("QueryBuilder")]
         public async Task<ActionResult> GetQueryBuilderProducts()
