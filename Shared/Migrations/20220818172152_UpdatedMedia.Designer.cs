@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(NicheShackContext))]
-    [Migration("20220815164159_UpdatedMedia")]
+    [Migration("20220818172152_UpdatedMedia")]
     partial class UpdatedMedia
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -668,35 +668,6 @@ namespace DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Media");
-                });
-
-            modelBuilder.Entity("DataAccess.Models.MediaReference", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("Builder")
-                        .HasColumnType("int");
-
-                    b.Property<int>("HostId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ImageSizeType")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Location")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MediaId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MediaId");
-
-                    b.ToTable("MediaReferences");
                 });
 
             modelBuilder.Entity("DataAccess.Models.Niche", b =>
@@ -1769,15 +1740,6 @@ namespace DataAccess.Migrations
                     b.HasOne("DataAccess.Models.Product", "Product")
                         .WithMany("ListProducts")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("DataAccess.Models.MediaReference", b =>
-                {
-                    b.HasOne("DataAccess.Models.Media", "Media")
-                        .WithMany("MediaReferences")
-                        .HasForeignKey("MediaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

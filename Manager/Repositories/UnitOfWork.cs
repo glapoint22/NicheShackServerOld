@@ -36,7 +36,6 @@ namespace Manager.Repositories
         public IRepository<Keyword_In_KeywordGroup> Keywords_In_KeywordGroup { get; }
         public IRepository<PageKeyword> PageKeywords { get; }
         public IRepository<Subproduct> Subproducts { get; }
-        public IRepository<MediaReference> MediaReferences { get; }
 
 
         // Custom Repositories
@@ -76,7 +75,6 @@ namespace Manager.Repositories
             Keywords_In_KeywordGroup = new Repository<Keyword_In_KeywordGroup>(context);
             PageKeywords = new Repository<PageKeyword>(context);
             Subproducts = new Repository<Subproduct>(context);
-            MediaReferences = new Repository<MediaReference>(context);
 
             // Custom Repositories
             Products = new ProductRepository(context);

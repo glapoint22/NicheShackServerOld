@@ -113,8 +113,13 @@ namespace Manager.Controllers
             ImageSizeType imageSize = (ImageSizeType)int.Parse(imageSizeString);
 
 
-            // Get the id of the image
+
+            // Get media
             Media media = await unitOfWork.Media.Get(id);
+
+            List<ImageSizeType> imageSizes = new List<ImageSizeType>();
+
+            imageSizes.Add(imageSize);
 
 
 
@@ -126,6 +131,8 @@ namespace Manager.Controllers
             // Reset thumbnail
             if (media.Thumbnail != null)
             {
+                imageSizes.Add(ImageSizeType.Thumbnail);
+
                 image = Path.Combine(imagesFolder, media.Thumbnail);
                 System.IO.File.Delete(image);
 
@@ -138,6 +145,8 @@ namespace Manager.Controllers
             // Reset small
             if (media.ImageSm != null)
             {
+                imageSizes.Add(ImageSizeType.Small);
+
                 image = Path.Combine(imagesFolder, media.ImageSm);
                 System.IO.File.Delete(image);
 
@@ -151,6 +160,8 @@ namespace Manager.Controllers
             // Reset medium
             if (media.ImageMd != null)
             {
+                imageSizes.Add(ImageSizeType.Medium);
+
                 image = Path.Combine(imagesFolder, media.ImageMd);
                 System.IO.File.Delete(image);
 
@@ -163,6 +174,8 @@ namespace Manager.Controllers
             // Reset large
             if (media.ImageLg != null)
             {
+                imageSizes.Add(ImageSizeType.Large);
+
                 image = Path.Combine(imagesFolder, media.ImageLg);
                 System.IO.File.Delete(image);
 
@@ -178,6 +191,8 @@ namespace Manager.Controllers
             // Reset any size
             if (media.ImageAnySize != null)
             {
+                imageSizes.Add(ImageSizeType.AnySize);
+
                 image = Path.Combine(imagesFolder, media.ImageAnySize);
                 System.IO.File.Delete(image);
 
@@ -187,14 +202,13 @@ namespace Manager.Controllers
             }
 
 
-            List<int> imageSizes = (List<int>)await unitOfWork.MediaReferences.GetCollection(x => x.MediaId == id, x => x.ImageSizeType);
-            imageSizes.Add((int)imageSize);
             imageSizes = imageSizes.Distinct().OrderBy(x => x).ToList();
 
-            foreach (int imageSizeType in imageSizes)
+            foreach (ImageSizeType imageSizeType in imageSizes)
             {
-                SetImageSizes((ImageSizeType)imageSizeType, updatedImage, media);
+                SetImageSizes(imageSizeType, updatedImage, media);
             }
+
 
 
             // Set the image src
@@ -449,189 +463,6 @@ namespace Manager.Controllers
             }));
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-        // ------------------------------------------------------------------------ Add Media Reference --------------------------------------------------------------------------
-        [HttpPost]
-        [Route("MediaReference")]
-        public async Task<ActionResult> AddMediaReference(MediaReferenceViewModel mediaReferenceViewModel)
-        {
-            MediaReference mediaReference = new MediaReference
-            {
-                MediaId = mediaReferenceViewModel.MediaId,
-                ImageSizeType = mediaReferenceViewModel.ImageSizeType,
-                Builder = mediaReferenceViewModel.Builder,
-                HostId = mediaReferenceViewModel.HostId,
-                Location = mediaReferenceViewModel.Location
-            };
-
-            unitOfWork.MediaReferences.Add(mediaReference);
-            await unitOfWork.Save();
-
-            return Ok(mediaReference.Id);
-        }
-
-
-
-
-
-        // ------------------------------------------------------------------------ Get Media Reference Count --------------------------------------------------------------------------
-        [HttpGet]
-        [Route("MediaReference/Count")]
-        public async Task<ActionResult> GetMediaReferenceCount(int MediaId)
-        {
-            return Ok(await unitOfWork.MediaReferences.GetCount(x => x.MediaId == MediaId));
-        }
-
-
-
-
-
-        // ------------------------------------------------------------------------ Remove Media References --------------------------------------------------------------------------
-        [HttpPost]
-        [Route("MediaReferences/Remove")]
-        public async Task<ActionResult> RemoveMediaReferences(int[] referenceIds)
-        {
-            if (referenceIds.Length > 0)
-            {
-                foreach (int referenceId in referenceIds)
-                {
-                    var mediaReference = await unitOfWork.MediaReferences.Get(referenceId);
-
-                    unitOfWork.MediaReferences.Remove(mediaReference);
-                }
-            }
-
-            await unitOfWork.Save();
-            return Ok();
-        }
-
-
-
-
-
-        // ------------------------------------------------------------------------ Duplicate Media References --------------------------------------------------------------------------
-        [HttpPost]
-        [Route("MediaReferences/Duplicate")]
-        public async Task<ActionResult> DuplicateMediaReferences(int[] referenceIds)
-        {
-            List<UpdatedMediaReferenceId> updatedMediaReferenceIds = new List<UpdatedMediaReferenceId>();
-
-            if (referenceIds.Length > 0)
-            {
-                foreach (int referenceId in referenceIds)
-                {
-                    var mediaReference = await unitOfWork.MediaReferences.Get(referenceId);
-
-                    // Create the new media reference
-                    MediaReference newMediaReference = new MediaReference
-                    {
-                        MediaId = mediaReference.MediaId,
-                        ImageSizeType = mediaReference.ImageSizeType,
-                        Builder = mediaReference.Builder,
-                        HostId = mediaReference.HostId,
-                        Location = mediaReference.Location
-                    };
-
-                    unitOfWork.MediaReferences.Add(newMediaReference);
-                    await unitOfWork.Save();
-
-                    updatedMediaReferenceIds.Add(new UpdatedMediaReferenceId
-                    {
-                        OldId = referenceId,
-                        NewId = newMediaReference.Id
-                    });
-                }
-            }
-
-            return Ok(updatedMediaReferenceIds);
-        }
-
-
-
-
-
-
-
-
-        // ------------------------------------------------------------------------ Get Media References --------------------------------------------------------------------------
-        [HttpGet]
-        [Route("MediaReferences")]
-        public async Task<ActionResult> GetMediaReferences(int mediaId)
-        {
-            List<MediaReferenceViewModel> mediaReferences = (List<MediaReferenceViewModel>)await unitOfWork.MediaReferences.GetCollection(x => x.MediaId == mediaId, x => new MediaReferenceViewModel
-            {
-                ImageSizeType = x.ImageSizeType,
-                Builder = x.Builder,
-                Location = x.Location,
-                HostId = x.HostId
-            });
-
-            foreach (MediaReferenceViewModel mediaReference in mediaReferences)
-            {
-                switch (mediaReference.Builder)
-                {
-                    case (int)BuilderType.Product:
-                        mediaReference.Host = await unitOfWork.Products.Get(x => x.Id == mediaReference.HostId, x => x.Name);
-                        break;
-
-                    case (int)BuilderType.Page:
-                        mediaReference.Host = await unitOfWork.Pages.Get(x => x.Id == mediaReference.HostId, x => x.Name);
-                        break;
-
-                    case (int)BuilderType.Email:
-                        mediaReference.Host = await unitOfWork.Emails.Get(x => x.Id == mediaReference.HostId, x => x.Name);
-                        break;
-                }
-            }
-
-            return Ok(mediaReferences);
-        }
-
-
-
-
-
-
-
-
-
-        // ----------------------------------------------------------------------------- Get Image Info ----------------------------------------------------------------------------------
-        [HttpGet]
-        [Route("ImageInfo")]
-        public async Task<ActionResult> GetImageInfo(int id)
-        {
-            return Ok(await unitOfWork.Media.Get(x => x.Id == id, x => new
-            {
-                x.Id,
-                x.Name,
-                x.Thumbnail,
-                x.ThumbnailWidth,
-                x.ThumbnailHeight,
-                x.ImageSm,
-                x.ImageSmWidth,
-                x.ImageSmHeight,
-                x.ImageMd,
-                x.ImageMdWidth,
-                x.ImageMdHeight,
-                x.ImageLg,
-                x.ImageLgWidth,
-                x.ImageLgHeight,
-                x.ImageAnySize,
-                x.ImageAnySizeWidth,
-                x.ImageAnySizeHeight
-            }));
-        }
 
 
 

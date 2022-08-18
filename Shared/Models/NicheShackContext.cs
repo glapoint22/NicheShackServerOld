@@ -23,7 +23,6 @@ namespace DataAccess.Models
         public virtual DbSet<Filter> Filters { get; set; }
         public virtual DbSet<FilterOption> FilterOptions { get; set; }
 
-        public virtual DbSet<MediaReference> MediaReferences { get; set; }
 
 
         public virtual DbSet<Keyword> Keywords { get; set; }

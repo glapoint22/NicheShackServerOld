@@ -75,7 +75,6 @@ namespace DataAccess.Models
         public virtual ICollection<Category> Categtories { get; set; }
         public virtual ICollection<Niche> Niches { get; set; }
         public virtual ICollection<Subproduct> Subproducts { get; set; }
-        public virtual ICollection<MediaReference> MediaReferences { get; set; }
 
 
         public Media()
@@ -86,7 +85,6 @@ namespace DataAccess.Models
             Categtories = new HashSet<Category>();
             Niches = new HashSet<Niche>();
             Subproducts = new HashSet<Subproduct>();
-            MediaReferences = new HashSet<MediaReference>();
         }
     }
 }

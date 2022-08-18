@@ -145,7 +145,7 @@ namespace Manager.Controllers
             var duplicatePage = new Page
             {
                 Name = currentPage.Name + " Copy",
-                Content = null,
+                Content = currentPage.Content,
                 UrlId = currentPage.UrlId,
                 UrlName = currentPage.UrlName,
                 PageType = currentPage.PageType
@@ -154,38 +154,7 @@ namespace Manager.Controllers
             unitOfWork.Pages.Add(duplicatePage);
             await unitOfWork.Save();
 
-            // Get all media references
-            Regex regex = new Regex(@"""referenceId\"":(\w+)");
-            MatchCollection matches = regex.Matches(newContent);
-
-
-            foreach (Match match in matches)
-            {
-                int referenceId = int.Parse(match.Groups[1].Value);
-                MediaReference mediaReference = await unitOfWork.MediaReferences.Get(referenceId);
-
-                // Create the new media reference
-                MediaReference newMediaReference = new MediaReference
-                {
-                    MediaId = mediaReference.MediaId,
-                    ImageSizeType = mediaReference.ImageSizeType,
-                    Builder = mediaReference.Builder,
-                    HostId = duplicatePage.Id,
-                    Location = mediaReference.Location
-                };
-
-                unitOfWork.MediaReferences.Add(newMediaReference);
-                await unitOfWork.Save();
-
-                // Replace the old reference Id with the new one
-                regex = new Regex(@"""referenceId\"":(" + referenceId + ")");
-                newContent = regex.Replace(newContent, @"""referenceId"":" + newMediaReference.Id);
-            }
-
-            // Update the new page content
-            duplicatePage.Content = newContent;
-            unitOfWork.Pages.Update(duplicatePage);
-            await unitOfWork.Save();
+            
 
 
             // If page type is browse or search
