@@ -108,7 +108,7 @@ namespace Manager.Controllers
         public async Task<ActionResult> Load()
         {
 
-            var notifications = await unitOfWork.Notifications.GetCollection<NotificationListItemViewModel>(x => x.State == 0 || x.State == 1);
+            var notifications = await unitOfWork.Notifications.GetCollection<NotificationListItemViewModel>(x => x.State == 0);
 
             foreach(NotificationListItemViewModel notification in notifications)
             {
