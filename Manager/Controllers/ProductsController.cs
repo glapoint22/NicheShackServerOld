@@ -74,7 +74,7 @@ namespace Manager.Controllers
         {
             var subNiches = await unitOfWork.Niches.GetCollection<ItemViewModel<Niche>>(x => x.CategoryId == nicheId);
             var products = await unitOfWork.Products.GetCollection<ItemViewModel<Product>>(x => x.NicheId == subNicheId);
-            
+
 
             return Ok(new { subNiches, products });
         }
@@ -364,39 +364,28 @@ namespace Manager.Controllers
 
         [HttpPut]
         [Route("Media")]
-        public async Task<ActionResult> UpdateProductMedia(UpdatedProperty updatedProductMedia)
+        public async Task<ActionResult> UpdateProductMedia(UpdatedProductMedia updatedProductMedia)
         {
-            ProductMedia productMedia = await unitOfWork.ProductMedia.Get(updatedProductMedia.ItemId);
+            if (updatedProductMedia.OldMediaId != 0)
+            {
+                ProductMedia productMedia = await unitOfWork.ProductMedia.Get(x => x.MediaId == updatedProductMedia.OldMediaId);
 
-            productMedia.MediaId = updatedProductMedia.PropertyId;
-
-            // Update and save
-            unitOfWork.ProductMedia.Update(productMedia);
-            await unitOfWork.Save();
-
-            return Ok();
-        }
-
-
-
-
-        [HttpPost]
-        [Route("Media")]
-        public async Task<ActionResult> AddProductMedia(UpdatedProperty productMedia)
-        {
+                unitOfWork.ProductMedia.Remove(productMedia);
+            }
 
             ProductMedia newProductMedia = new ProductMedia
             {
-                ProductId = productMedia.ItemId,
-                MediaId = productMedia.PropertyId
+                ProductId = updatedProductMedia.ProductId,
+                MediaId = updatedProductMedia.NewMediaId
             };
 
             unitOfWork.ProductMedia.Add(newProductMedia);
 
             await unitOfWork.Save();
 
-            return Ok(newProductMedia.Id);
+            return Ok();
         }
+
 
 
 

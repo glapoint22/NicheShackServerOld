@@ -92,12 +92,12 @@ namespace Manager.Repositories
                         TimeFrameBetweenRebill = x.TimeFrameBetweenRebill,
                         SubscriptionDuration = x.SubscriptionDuration
                     },
-                    Image = new ImageViewModel
-                    {
-                        Id = x.Media.Id,
-                        Name = x.Media.Name,
-                        Src = x.Media.ImageMd
-                    }
+                    //Image = new ImageViewModel
+                    //{
+                    //    Id = x.Media.Id,
+                    //    Name = x.Media.Name,
+                    //    Src = x.Media.ImageMd
+                    //}
                 }).SingleOrDefaultAsync();
 
 
@@ -166,9 +166,11 @@ namespace Manager.Repositories
                     ItemId = y.Id,
                     Id = y.Media.Id,
                     Name = y.Media.Name,
-                    Src = y.Media.ImageAnySize,
-                    Thumbnail = y.Media.VideoId,
-                    Type = y.Media.MediaType
+                    Thumbnail = y.Media.Thumbnail,
+                    Type = y.Media.MediaType,
+                    ImageMd = y.Media.ImageMd,
+                    VideoId = y.Media.VideoId,
+                    VideoType = y.Media.VideoType
                 })
                 .ToListAsync();
 
