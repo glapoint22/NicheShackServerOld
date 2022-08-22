@@ -6,11 +6,11 @@ using System.Linq;
 
 namespace Manager.ViewModels
 {
-    public class NotificationListItemViewModel : IQueryableSelect<Notification, NotificationListItemViewModel>
+    public class NotificationListItemViewModel: IQueryableSelect<Notification, NotificationListItemViewModel>
     {
         public int? ProductId { get; set; }
         public string Name { get; set; }
-        public string Image { get; set; }
+        public string ListIcon { get; set; }
         public int Type { get; set; }
         public int State { get; set; }
         public int Count { get; set; }
@@ -26,7 +26,7 @@ namespace Manager.ViewModels
                 ProductId = x.ProductId,
                 Type = x.Type,
                 Name = Utility.GetNotificationName(x.Type),
-                Image = x.Type > 0 ? x.Product.Media.Thumbnail : "message.png"
+                ListIcon = x.Type > 0 ? x.Product.Media.ImageAnySize :"message.png"
             }).Distinct();
         }
     }
