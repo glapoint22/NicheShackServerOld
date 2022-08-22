@@ -108,12 +108,23 @@ namespace Manager.Controllers
         public async Task<ActionResult> Load()
         {
 
-            var notifications = await unitOfWork.Notifications.GetCollection<NotificationListItemViewModel>(x => x.State == 0);
 
-            foreach(NotificationListItemViewModel notification in notifications)
-            {
-                notification.Count = await unitOfWork.Notifications.GetCount(x => x.State == notification.State && x.ProductId == notification.ProductId && x.Type == notification.Type);
-            }
+            var notifications = await unitOfWork.Notifications.GetNewNotifications();
+
+            //var notifications = await unitOfWork.Notifications.GetCollection(x => x.State == 0, x => new
+            //{
+            //    State = x.State,
+            //    ProductId = x.ProductId,
+            //    Type = x.Type,
+            //    Image = x.Product.Media.Thumbnail,
+            //    Date = x.NotificationText.Where(y => y.NotificationId == x.Id && y.Type ==0).Select(y => y.TimeStamp.ToString("MMMM dd, yyyy hh:mm tt")).FirstOrDefault()
+
+            //});
+
+            //foreach(NotificationListItemViewModel notification in notifications)
+            //{
+            //    notification.Count = await unitOfWork.Notifications.GetCount(x => x.State == notification.State && x.ProductId == notification.ProductId && x.Type == notification.Type);
+            //}
 
             return Ok(notifications);
         }

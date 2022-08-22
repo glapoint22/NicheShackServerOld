@@ -22,7 +22,6 @@ namespace Manager.Repositories
         ISearchableRepository<Email> Emails { get; }
         ISearchableRepository<Media> Media { get; }
         ISearchableRepository<Keyword> Keywords { get; }
-        IRepository<Notification> Notifications { get; }
         IRepository<ProductFilter> ProductFilters { get; }
         IRepository<ProductMedia> ProductMedia { get; }
         IRepository<ProductKeyword> ProductKeywords { get; }
@@ -42,6 +41,7 @@ namespace Manager.Repositories
 
         // Custom Repositories
         IProductRepository Products { get; }
+        INotificationRepository Notifications { get; }
 
 
 

@@ -21,7 +21,7 @@ namespace Manager.Repositories
         public ISearchableRepository<Email> Emails { get; }
         public ISearchableRepository<Media> Media { get; }
         public ISearchableRepository<Keyword> Keywords { get; }
-        public IRepository<Notification> Notifications { get; }
+        
         public IRepository<ProductFilter> ProductFilters { get; }
         public IRepository<ProductMedia> ProductMedia { get; }
         public IRepository<ProductKeyword> ProductKeywords { get; }
@@ -40,7 +40,7 @@ namespace Manager.Repositories
 
         // Custom Repositories
         public IProductRepository Products { get; }
-
+        public INotificationRepository Notifications { get; }
 
 
         public UnitOfWork(NicheShackContext context)
@@ -60,7 +60,6 @@ namespace Manager.Repositories
             Emails = new SearchableRepository<Email>(context);
             Media = new SearchableRepository<Media>(context);
             Keywords = new SearchableRepository<Keyword>(context);
-            Notifications = new Repository<Notification>(context);
             ProductFilters = new Repository<ProductFilter>(context);
             ProductMedia = new Repository<ProductMedia>(context);
             ProductKeywords = new Repository<ProductKeyword>(context);
@@ -78,6 +77,7 @@ namespace Manager.Repositories
 
             // Custom Repositories
             Products = new ProductRepository(context);
+            Notifications = new NotificationRepository(context);
         }
 
 
