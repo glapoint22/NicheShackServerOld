@@ -291,27 +291,6 @@ namespace Manager.Controllers
 
 
 
-        //[Route("Email")]
-        //[HttpPut]
-        //public async Task<ActionResult> UpdateProductEmail(UpdatedPage updatedPage)
-        //{
-        //    ProductEmail productEmail = await unitOfWork.ProductEmails.Get(updatedPage.Id);
-
-        //    productEmail.Name = updatedPage.Name;
-        //    productEmail.Content = updatedPage.Content;
-
-        //    // Update and save
-        //    unitOfWork.ProductEmails.Update(productEmail);
-        //    await unitOfWork.Save();
-
-        //    return Ok();
-        //}
-
-
-
-
-
-
 
         [Route("Vendor")]
         [HttpPut]
@@ -366,23 +345,48 @@ namespace Manager.Controllers
         [Route("Media")]
         public async Task<ActionResult> UpdateProductMedia(UpdatedProductMedia updatedProductMedia)
         {
-            if (updatedProductMedia.OldMediaId != 0)
-            {
-                ProductMedia productMedia = await unitOfWork.ProductMedia.Get(x => x.MediaId == updatedProductMedia.OldMediaId);
+            ProductMedia productMedia;
 
-                unitOfWork.ProductMedia.Remove(productMedia);
+            if (updatedProductMedia.ProductMediaId != 0)
+            {
+                productMedia = await unitOfWork.ProductMedia.Get(updatedProductMedia.ProductMediaId);
+                productMedia.MediaId = updatedProductMedia.mediaId;
+                unitOfWork.ProductMedia.Update(productMedia);
             }
-
-            ProductMedia newProductMedia = new ProductMedia
+            else
             {
-                ProductId = updatedProductMedia.ProductId,
-                MediaId = updatedProductMedia.NewMediaId
-            };
+                productMedia = new ProductMedia
+                {
+                    ProductId = updatedProductMedia.ProductId,
+                    MediaId = updatedProductMedia.mediaId,
+                    Index = await unitOfWork.ProductMedia.GetCount(x => x.ProductId == updatedProductMedia.ProductId)
+                };
 
-            unitOfWork.ProductMedia.Add(newProductMedia);
+                unitOfWork.ProductMedia.Add(productMedia);
+            }
 
             await unitOfWork.Save();
 
+            return Ok(productMedia.Id);
+        }
+
+
+
+
+
+        [HttpPut]
+        [Route("Media/Indices")]
+        public async Task<ActionResult> UpdateProductMediaIndices(List<UpdatedProductMedia> updatedProductMedia)
+        {
+            IEnumerable<ProductMedia> productMedia = await unitOfWork.ProductMedia.GetCollection(x => x.ProductId == updatedProductMedia[0].ProductId);
+
+            foreach (ProductMedia media in productMedia)
+            {
+                media.Index = updatedProductMedia.Where(x => x.ProductMediaId == media.Id).Select(x => x.Index).Single();
+                unitOfWork.ProductMedia.Update(media);
+            }
+
+            await unitOfWork.Save();
             return Ok();
         }
 
@@ -390,13 +394,11 @@ namespace Manager.Controllers
 
 
 
-
         [HttpDelete]
         [Route("Media")]
-        public async Task<ActionResult> DeleteProductMedia(int productId, int mediaId)
+        public async Task<ActionResult> DeleteProductMedia(int id)
         {
-
-            ProductMedia productMedia = await unitOfWork.ProductMedia.Get(x => x.ProductId == productId && x.MediaId == mediaId);
+            ProductMedia productMedia = await unitOfWork.ProductMedia.Get(id);
 
             unitOfWork.ProductMedia.Remove(productMedia);
 

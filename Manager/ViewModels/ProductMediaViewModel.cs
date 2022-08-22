@@ -2,8 +2,8 @@
 {
     public class ProductMediaViewModel: MediaViewModel
     {
-        public int ItemId { get; set; }
+        public int ProductMediaId { get; set; }
         public string ImageMd { get; set; }
-
+        public int Index { get; set; }
     }
 }

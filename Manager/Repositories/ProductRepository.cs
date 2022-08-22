@@ -160,17 +160,19 @@ namespace Manager.Repositories
             // Media
             product.Media = await context.ProductMedia
                 .AsNoTracking()
+                .OrderBy(x => x.Index)
                 .Where(x => x.ProductId == productId)
                 .Select(y => new ProductMediaViewModel
                 {
-                    ItemId = y.Id,
+                    ProductMediaId = y.Id,
                     Id = y.Media.Id,
                     Name = y.Media.Name,
                     Thumbnail = y.Media.Thumbnail,
                     Type = y.Media.MediaType,
                     ImageMd = y.Media.ImageMd,
                     VideoId = y.Media.VideoId,
-                    VideoType = y.Media.VideoType
+                    VideoType = y.Media.VideoType,
+                    Index = y.Index
                 })
                 .ToListAsync();
 
