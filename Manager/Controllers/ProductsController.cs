@@ -400,7 +400,7 @@ namespace Manager.Controllers
 
             unitOfWork.ProductMedia.Remove(productMedia);
 
-            //await unitOfWork.Save();
+            await unitOfWork.Save();
 
             return Ok();
         }
