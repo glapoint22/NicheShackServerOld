@@ -54,7 +54,7 @@ namespace Manager.Controllers
             // Create a new media object
             Media media = new Media
             {
-                Name = imageName,
+                Name = imageName.ToString().Trim(),
                 MediaType = (int)MediaType.Image
             };
 
@@ -276,7 +276,7 @@ namespace Manager.Controllers
 
             Media newVideo = new Media
             {
-                Name = video.Name,
+                Name = video.Name.Trim(),
                 VideoId = video.VideoId,
                 MediaType = (int)MediaType.Video,
                 VideoType = video.VideoType,
@@ -347,7 +347,7 @@ namespace Manager.Controllers
         {
             Media updatedMedia = await unitOfWork.Media.Get(media.Id);
 
-            updatedMedia.Name = media.Name;
+            updatedMedia.Name = media.Name.Trim();
 
             // Update and save
             unitOfWork.Media.Update(updatedMedia);
