@@ -61,12 +61,12 @@ namespace Website.Controllers
                     RebillFrequency = x.RebillFrequency,
                     TimeFrameBetweenRebill = x.TimeFrameBetweenRebill,
                     SubscriptionDuration = x.SubscriptionDuration
-                },
-                Image = new ImageViewModel
-                {
-                    Name = x.Media.Name,
-                    Src = x.Media.ImageMd
                 }
+                //Image = new ImageViewModel
+                //{
+                //    Name = x.Media.Name,
+                //    Src = x.Media.ImageMd
+                //}
             });
 
 
@@ -179,15 +179,19 @@ namespace Website.Controllers
 
 
                 // Media
+
+                // Make sure to OrderBy index
                 product.Media = await unitOfWork.ProductMedia.GetCollection(x => x.ProductId == product.Id, x => new MediaViewModel
                 {
                     Name = x.Media.Name,
-                    VideoId = x.Media.VideoId,
-                    VideoType = x.Media.VideoType,
-                    Src = x.Media.ImageAnySize,
+                    Thumbnail = x.Media.Thumbnail,
                     Type = x.Media.MediaType,
-                    Thumbnail = x.Media.Thumbnail
+                    ImageMd = x.Media.ImageMd,
+                    ImageLg = x.Media.ImageLg,
+                    VideoId = x.Media.VideoId,
+                    VideoType = x.Media.VideoType
                 });
+
 
 
 

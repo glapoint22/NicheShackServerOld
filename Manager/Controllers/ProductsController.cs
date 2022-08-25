@@ -363,6 +363,14 @@ namespace Manager.Controllers
                 };
 
                 unitOfWork.ProductMedia.Add(productMedia);
+
+                if (productMedia.Index == 0)
+                {
+                    Product product = await unitOfWork.Products.Get(updatedProductMedia.ProductId);
+
+                    product.ImageId = productMedia.MediaId;
+                    unitOfWork.Products.Update(product);
+                }
             }
 
             await unitOfWork.Save();
@@ -376,14 +384,22 @@ namespace Manager.Controllers
 
         [HttpPut]
         [Route("Media/Indices")]
-        public async Task<ActionResult> UpdateProductMediaIndices(List<UpdatedProductMedia> updatedProductMedia)
+        public async Task<ActionResult> UpdateProductMediaIndices(UpdatedProductMediaIndices UpdatedProductMediaIndices)
         {
-            IEnumerable<ProductMedia> productMedia = await unitOfWork.ProductMedia.GetCollection(x => x.ProductId == updatedProductMedia[0].ProductId);
+            IEnumerable<ProductMedia> productMedia = await unitOfWork.ProductMedia.GetCollection(x => x.ProductId == UpdatedProductMediaIndices.ProductId);
 
             foreach (ProductMedia media in productMedia)
             {
-                media.Index = updatedProductMedia.Where(x => x.ProductMediaId == media.Id).Select(x => x.Index).Single();
+                media.Index = UpdatedProductMediaIndices.ProductMedia.Where(x => x.ProductMediaId == media.Id).Select(x => x.Index).Single();
                 unitOfWork.ProductMedia.Update(media);
+
+                if (media.Index == 0)
+                {
+                    Product product = await unitOfWork.Products.Get(UpdatedProductMediaIndices.ProductId);
+
+                    product.ImageId = media.MediaId;
+                    unitOfWork.Products.Update(product);
+                }
             }
 
             await unitOfWork.Save();
@@ -399,10 +415,19 @@ namespace Manager.Controllers
         public async Task<ActionResult> DeleteProductMedia(int id)
         {
             ProductMedia productMedia = await unitOfWork.ProductMedia.Get(id);
+            int productId = productMedia.ProductId;
 
             unitOfWork.ProductMedia.Remove(productMedia);
 
             await unitOfWork.Save();
+
+            if (await unitOfWork.ProductMedia.GetCount(x => x.ProductId == productId) == 0)
+            {
+                Product product = await unitOfWork.Products.Get(productId);
+                product.ImageId = null;
+                unitOfWork.Products.Update(product);
+                await unitOfWork.Save();
+            }
 
             return Ok();
         }
