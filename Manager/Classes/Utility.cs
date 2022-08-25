@@ -89,6 +89,14 @@ namespace Manager.Classes
         }
 
 
+        public enum NotificationDetailsType
+        {
+            User,
+            Employee,
+            ReviewWriter
+        }
+
+
         public static string GetNotificationName(int type)
         {
             string name = string.Empty;
