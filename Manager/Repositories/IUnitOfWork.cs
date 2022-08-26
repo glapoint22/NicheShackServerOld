@@ -25,7 +25,7 @@ namespace Manager.Repositories
         IRepository<ProductFilter> ProductFilters { get; }
         IRepository<ProductMedia> ProductMedia { get; }
         IRepository<ProductKeyword> ProductKeywords { get; }
-        IRepository<NotificationText> NotificationText { get; }
+        IRepository<NotificationDetails> NotificationText { get; }
         ISearchableRepository<Subgroup> Subgroups { get; }
         IRepository<SubgroupProduct> SubgroupProducts { get; }
         IRepository<ProductReview> ProductReviews { get; }

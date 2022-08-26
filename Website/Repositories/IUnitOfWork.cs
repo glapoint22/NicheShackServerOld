@@ -22,7 +22,7 @@ namespace Website.Repositories
         IRepository<ListProduct> ListProducts { get; }
         IRepository<Media> Media { get; }
         IRepository<Notification> Notifications { get; }
-        IRepository<NotificationText> NotificationText { get; }
+        IRepository<NotificationDetails> NotificationText { get; }
         IRepository<Page> Pages { get; }
         IRepository<OrderProduct> OrderProducts { get; }
         IRepository<ProductKeyword> ProductKeywords { get; }

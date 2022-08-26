@@ -11,12 +11,12 @@ namespace DataAccess.Models
         public int Type { get; set; }
         public int State { get; set; }
         public virtual Product Product { get; set; }
-        public virtual ICollection<NotificationText> NotificationText { get; set; }
+        public virtual ICollection<NotificationDetails> NotificationDetails { get; set; }
 
 
         public Notification()
         {
-            NotificationText = new HashSet<NotificationText>();
+            NotificationDetails = new HashSet<NotificationDetails>();
         }
 
     }

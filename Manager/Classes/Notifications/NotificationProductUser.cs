@@ -1,8 +1,7 @@
 ﻿namespace Manager.Classes.Notifications
 {
-    public class NotificationProductUser : NotificationSecurity
+    public class NotificationProductUser : NotificationIdentity
     {
-        public int NotificationId { get; set; }
         public string Comment { get; set; }
     }
 }

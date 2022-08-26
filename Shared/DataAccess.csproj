@@ -65,6 +65,10 @@
     <Compile Remove="Migrations\20220727195733_UpdatedMedia.Designer.cs" />
     <Compile Remove="Migrations\20220815164159_UpdatedMedia.cs" />
     <Compile Remove="Migrations\20220815164159_UpdatedMedia.Designer.cs" />
+    <Compile Remove="Migrations\20220825172835_Notifications.cs" />
+    <Compile Remove="Migrations\20220825172835_Notifications.Designer.cs" />
+    <Compile Remove="Migrations\20220825182818_Notifications.cs" />
+    <Compile Remove="Migrations\20220825182818_Notifications.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -11,8 +11,6 @@ using static Manager.Classes.Utility;
 
 namespace Manager.Repositories
 {
-
-
     public class NotificationRepository : Repository<Notification>, INotificationRepository
     {
         private readonly NicheShackContext context;
@@ -24,17 +22,21 @@ namespace Manager.Repositories
 
 
 
+
+
+
+
         public async Task<IEnumerable> GetNewNotifications()
         {
 
-            var messageNotifications = await context.Notifications.Where(x => x.State == 0 && x.Type == (int)NotificationType.Message && x.NotificationText.Select(z => z.Email).FirstOrDefault() != null).Select(x => new
+            var messageNotifications = await context.Notifications.Where(x => x.State == 0 && x.Type == (int)NotificationType.Message && x.NotificationDetails.Select(z => z.Email).FirstOrDefault() != null).Select(x => new
             {
                 ProductId = x.ProductId,
                 Thumbnail = x.Product.Media.Thumbnail,
                 Type = (int)NotificationType.Message,
-                Email = x.NotificationText.Select(y => y.Email).FirstOrDefault(),
+                Email = x.NotificationDetails.Select(y => y.Email).FirstOrDefault(),
                 State = x.State,
-                count = context.NotificationText.Where(y => y.Notification.State == x.State && y.Notification.Type == x.Type && y.Email == x.NotificationText.Select(z => z.Email).FirstOrDefault()).Count()
+                count = context.NotificationDetails.Where(y => y.Notification.State == x.State && y.Notification.Type == x.Type && y.Email == x.NotificationDetails.Select(z => z.Email).FirstOrDefault()).Count()
             }).ToListAsync();
 
 
@@ -43,7 +45,7 @@ namespace Manager.Repositories
                 ProductId = x.ProductId,
                 Thumbnail = x.Product.Media.Thumbnail,
                 Type = x.Type,
-                Email = x.NotificationText.Select(y => y.Email).FirstOrDefault(),
+                Email = x.NotificationDetails.Select(y => y.Email).FirstOrDefault(),
                 State = x.State,
                 count = context.Notifications.Where(y => y.State == x.State && y.ProductId == x.ProductId && y.Type == x.Type).Count()
             }).ToListAsync();
@@ -61,10 +63,10 @@ namespace Manager.Repositories
 
         public async Task<IEnumerable> GetMessageNotification(int type, int state, string email)
         {
-            var notificationIds = await context.Notifications.Where(x => x.Type == type && x.State == state && x.NotificationText.Select(y => y.Email).FirstOrDefault() == email).Select(x => x.Id).ToListAsync();
+            var notificationIds = await context.Notifications.Where(x => x.Type == type && x.State == state && x.NotificationDetails.Select(y => y.Email).FirstOrDefault() == email).Select(x => x.Id).ToListAsync();
 
 
-            var user = await context.NotificationText.Where(x => notificationIds.Contains(x.NotificationId) && x.Type == (int)NotificationDetailsType.User).Select(x => new
+            var user = await context.NotificationDetails.Where(x => notificationIds.Contains(x.NotificationId)).Select(x => new
             {
                 NotificationId = x.NotificationId,
                 Date = x.TimeStamp,
@@ -74,7 +76,7 @@ namespace Manager.Repositories
             }).ToListAsync();
 
 
-            var employee = await context.NotificationText.Where(x => notificationIds.Contains(x.NotificationId) && x.Type == (int)NotificationDetailsType.Employee).Select(x => new
+            var employee = await context.NotificationDetails.Where(x => notificationIds.Contains(x.NotificationId)).Select(x => new
             {
                 NotificationId = x.NotificationId,
                 NotificationDetailsId = x.Id,
@@ -137,7 +139,7 @@ namespace Manager.Repositories
             var notificationIds = await context.Notifications.Where(x => x.ProductId == productId && x.Type == type && x.State == state).Select(x => x.Id).ToListAsync();
 
 
-            IEnumerable<NotificationReviewUser> user = await context.NotificationText.Where(x => notificationIds.Contains(x.NotificationId) && x.Type == (int)NotificationDetailsType.User).Select(x => new NotificationReviewUser
+            IEnumerable<NotificationReviewUser> user = await context.NotificationDetails.Where(x => notificationIds.Contains(x.NotificationId)).Select(x => new NotificationReviewUser
             {
                 Date = x.TimeStamp,
                 Email = x.Customer.Email,
@@ -166,7 +168,7 @@ namespace Manager.Repositories
             //}).ToListAsync();
 
 
-            var reviewId = await context.NotificationText.Where(x => notificationIds.Contains(x.NotificationId)).Select(x => x.ReviewId).FirstOrDefaultAsync();
+            var reviewId = await context.NotificationDetails.Where(x => notificationIds.Contains(x.NotificationId)).Select(x => x.ReviewId).FirstOrDefaultAsync();
 
             NotificationReviewWriter reviewWriter = await context.ProductReviews.Where(x => x.Id == reviewId)
                 .Select(x => new NotificationReviewWriter
@@ -232,7 +234,7 @@ namespace Manager.Repositories
 
 
 
-            var user = await context.NotificationText.Where(x => notificationIds.Contains(x.NotificationId) && x.Type == (int)NotificationDetailsType.User).Select(x => new
+            var user = await context.NotificationDetails.Where(x => notificationIds.Contains(x.NotificationId)).Select(x => new
             {
                 NotificationId = x.NotificationId,
                 Date = x.TimeStamp,
@@ -246,7 +248,7 @@ namespace Manager.Repositories
             }).ToListAsync();
 
 
-            var employee = await context.NotificationText.Where(x => notificationIds.Contains(x.NotificationId) && x.Type == (int)NotificationDetailsType.Employee).Select(x => new
+            var employee = await context.NotificationDetails.Where(x => notificationIds.Contains(x.NotificationId)).Select(x => new
             {
                 NotificationId = x.NotificationId,
                 NotificationDetailsId = x.Id,

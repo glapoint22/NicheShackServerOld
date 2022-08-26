@@ -30,6 +30,9 @@ namespace DataAccess.Models
         public bool? EmailPrefDeletedList { get; set; }
         public bool? EmailPrefReview { get; set; }
 
+        public int NoncompliantStrikes { get; set; }
+        public bool BlockNotificationSending { get; set; }
+
         public bool? Active { get; set; }
 
 
@@ -38,7 +41,8 @@ namespace DataAccess.Models
         public virtual ICollection<RefreshToken> RefreshTokens { get; set; }
         public virtual ICollection<ProductOrder> ProductOrders { get; set; }
         public virtual ICollection<ProductReview> ProductReviews { get; set; }
-        public virtual ICollection<NotificationText> NotificationText { get; set; }
+        public virtual ICollection<NotificationDetails> NotificationDetails { get; set; }
+        public virtual ICollection<NotificationEmployee> NotificationEmployee { get; set; }
 
 
         public Customer()
@@ -48,7 +52,8 @@ namespace DataAccess.Models
             RefreshTokens = new HashSet<RefreshToken>();
             ProductOrders = new HashSet<ProductOrder>();
             ProductReviews = new HashSet<ProductReview>();
-            NotificationText = new HashSet<NotificationText>();
+            NotificationDetails = new HashSet<NotificationDetails>();
+            NotificationEmployee = new HashSet<NotificationEmployee>();
         }
     }
 }

@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataAccess.Models
 {
-    public class NotificationText
+    public class NotificationDetails
     {
         public int Id { get; set; }
         [ForeignKey("Customer")]
@@ -13,9 +13,10 @@ namespace DataAccess.Models
         public int NotificationId { get; set; }
         [ForeignKey("ProductReview")]
         public int? ReviewId { get; set; }
+        [ForeignKey("NotificationEmployee")]
+        public int? NotificationEmployeeId { get; set; }
         public DateTime TimeStamp { get; set; }
         public string Text { get; set; }
-        public int Type { get; set; }
         [MaxLength(256)]
         public string Name { get; set; }
         [MaxLength(256)]
@@ -23,5 +24,6 @@ namespace DataAccess.Models
         public virtual Customer Customer { get; set; }
         public virtual Notification Notification { get; set; }
         public virtual ProductReview ProductReview { get; set; }
+        public virtual NotificationEmployee NotificationEmployee { get; set; }
     }
 }

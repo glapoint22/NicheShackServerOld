@@ -112,47 +112,47 @@ namespace Manager.Controllers
 
 
 
-        [HttpPost]
-        [Route("NewNote")]
-        public async Task<ActionResult> NewNote(UpdatedNotificationNotes updatedNotificationNotes)
-        {
-            NotificationText newNote = new NotificationText
-            {
-                CustomerId = "FF48C7E8FD",
-                NotificationId = updatedNotificationNotes.NotificationId,
-                TimeStamp = DateTime.Now,
-                Text = updatedNotificationNotes.NotificationNote,
-                Type = 1
-            };
+        //[HttpPost]
+        //[Route("NewNote")]
+        //public async Task<ActionResult> NewNote(UpdatedNotificationNotes updatedNotificationNotes)
+        //{
+        //    NotificationDetails newNote = new NotificationDetails
+        //    {
+        //        CustomerId = "FF48C7E8FD",
+        //        NotificationId = updatedNotificationNotes.NotificationId,
+        //        TimeStamp = DateTime.Now,
+        //        Text = updatedNotificationNotes.NotificationNote,
+        //        Type = 1
+        //    };
 
-            unitOfWork.NotificationText.Add(newNote);
+        //    unitOfWork.NotificationText.Add(newNote);
 
-            await unitOfWork.Save();
+        //    await unitOfWork.Save();
 
-            return Ok();
-        }
-
-
+        //    return Ok();
+        //}
 
 
 
 
 
-        [HttpPut]
-        [Route("UpdateNote")]
-        public async Task<ActionResult> UpdateNote(UpdatedNotificationNotes updatedNotificationNotes)
-        {
 
-            NotificationText updatedNote = await unitOfWork.NotificationText.Get(x => x.NotificationId == updatedNotificationNotes.NotificationId && x.Type == 1);
 
-            updatedNote.Text = updatedNotificationNotes.NotificationNote;
+        //[HttpPut]
+        //[Route("UpdateNote")]
+        //public async Task<ActionResult> UpdateNote(UpdatedNotificationNotes updatedNotificationNotes)
+        //{
 
-            unitOfWork.NotificationText.Update(updatedNote);
+        //    NotificationDetails updatedNote = await unitOfWork.NotificationText.Get(x => x.NotificationId == updatedNotificationNotes.NotificationId && x.Type == 1);
 
-            await unitOfWork.Save();
+        //    updatedNote.Text = updatedNotificationNotes.NotificationNote;
 
-            return Ok();
-        }
+        //    unitOfWork.NotificationText.Update(updatedNote);
+
+        //    await unitOfWork.Save();
+
+        //    return Ok();
+        //}
 
 
 

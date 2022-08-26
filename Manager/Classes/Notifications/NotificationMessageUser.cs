@@ -1,8 +1,9 @@
-﻿namespace Manager.Classes
+﻿using Manager.Classes.Notifications;
+
+namespace Manager.Classes
 {
-    public class NotificationMessageUser : Notification
+    public class NotificationMessageUser : NotificationIdentity
     {
-        public int NotificationId { get; set; }
         public string Name { get; set; }
         public string Message { get; set; }
     }

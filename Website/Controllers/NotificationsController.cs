@@ -28,7 +28,7 @@ namespace Website.Controllers
             Notification notification = new Notification
             {
                 ProductId = notificationData.ProductId,
-                Type = notificationData.Type,
+                //Type = notificationData.Type,
                 State = 0
             };
 
@@ -38,13 +38,13 @@ namespace Website.Controllers
             
             await unitOfWork.Save();
 
-            NotificationText notificationText = new NotificationText
+            NotificationDetails notificationText = new NotificationDetails
             {
                 CustomerId = User.FindFirst(ClaimTypes.NameIdentifier).Value,
                 NotificationId = notification.Id,
                 ReviewId = notificationData.ReviewId,
                 TimeStamp = DateTime.Now,
-                Type = 0,
+                //Type = 0,
                 Text = notificationData.Comments
             };
 
@@ -71,15 +71,15 @@ namespace Website.Controllers
 
             await unitOfWork.Save();
 
-            NotificationText notificationText = new NotificationText
+            NotificationDetails notificationText = new NotificationDetails
             {
                 CustomerId = User.FindFirst(ClaimTypes.NameIdentifier) != null ? User.FindFirst(ClaimTypes.NameIdentifier).Value : null,
                 NotificationId = notification.Id,
                 TimeStamp = DateTime.Now,
-                Type = 0,
+                //Type = 0,
                 Text = messageNotification.Message,
-                Email = messageNotification.Email,
-                Name = messageNotification.Name
+                Email = messageNotification.Email,// **** Put email of user if user is signed in **** \\
+                Name = messageNotification.Name// **** Put name of user if user is signed in **** \\
             };
 
 
