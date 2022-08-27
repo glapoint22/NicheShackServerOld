@@ -35,23 +35,22 @@ namespace Manager.Controllers
         {
             PageContent pageContent = null;
 
+            // Get the page
+            Page page = await unitOfWork.Pages.Get(id);
+
             // Get the page content
-            string pageContentString = await unitOfWork.Pages.Get(x => x.Id == id, x => x.Content);
-
-            if (pageContentString != null)
-                pageContent = await pageService.GePage(pageContentString, new QueryParams());
+            if (page != null && page.Content != null)
+                pageContent = await pageService.GePage(page.Content, new QueryParams());
 
 
-            // Get the page properties
-            PageData pageData = await unitOfWork.Pages.Get(x => x.Id == id, x => new PageData
+
+            return Ok(new PageData
             {
-                Id = x.Id,
-                Name = x.Name,
-                PageType = x.PageType,
+                Id = page.Id,
+                Name = page.Name,
+                PageType = page.PageType,
                 Content = pageContent
             });
-
-            return Ok(pageData);
         }
 
 
@@ -139,7 +138,6 @@ namespace Manager.Controllers
         {
             // Copy the page properties
             Page currentPage = await unitOfWork.Pages.Get(page.Id);
-            string newContent = currentPage.Content;
 
             // Create the new page
             var duplicatePage = new Page
