@@ -4,7 +4,6 @@ namespace Services.Classes
 {
     public class PageContent
     {
-        public int Width { get; set; }
         public Background Background { get; set; }
         public IEnumerable<Row> Rows { get; set; }
 

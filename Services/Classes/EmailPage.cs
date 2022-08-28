@@ -8,6 +8,8 @@ namespace Services.Classes
 {
     public class EmailPage : PageContent
     {
+        private readonly int width = 600;
+
         public async Task<string> CreateBody(NicheShackContext context)
         {
             // Document
@@ -50,7 +52,7 @@ namespace Services.Classes
             // Body
             HtmlNode body = await Table.Create(td, new TableOptions
             {
-                Width = Width,
+                Width = width,
                 Background = Background
             }, context);
 
