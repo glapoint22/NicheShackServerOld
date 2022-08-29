@@ -63,7 +63,7 @@ namespace Manager.Controllers
             Email email = new Email
             {
                 Name = newPage.Name,
-                Content = "{}",
+                Content = newPage.Content,
             };
 
             unitOfWork.Emails.Add(email);

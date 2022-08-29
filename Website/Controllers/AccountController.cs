@@ -25,6 +25,8 @@ using Services.Classes;
 using System.Web;
 using static Website.Classes.Enums;
 using System.Drawing.Drawing2D;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 
 namespace Website.Controllers
 {
@@ -36,13 +38,15 @@ namespace Website.Controllers
         private readonly IConfiguration configuration;
         private readonly IUnitOfWork unitOfWork;
         private readonly EmailService emailService;
+        private readonly IWebHostEnvironment env;
 
-        public AccountController(UserManager<Customer> userManager, IConfiguration configuration, IUnitOfWork unitOfWork, EmailService emailService)
+        public AccountController(UserManager<Customer> userManager, IConfiguration configuration, IUnitOfWork unitOfWork, EmailService emailService, IWebHostEnvironment env)
         {
             this.userManager = userManager;
             this.configuration = configuration;
             this.unitOfWork = unitOfWork;
             this.emailService = emailService;
+            this.env = env;
         }
 
 
@@ -594,7 +598,8 @@ namespace Website.Controllers
                             {
                                 FirstName = originalFirstName,
                                 LastName = originalLastName
-                            }
+                            },
+                            Host = GetHost()
                         });
                     }
 
@@ -1407,6 +1412,20 @@ namespace Website.Controllers
 
             Match result = Regex.Match(value, @"(?:Bearer\s)(.+)");
             return result.Groups[1].Value;
+        }
+
+
+
+
+        // ..................................................................................Get Host.....................................................................
+        private string GetHost()
+        {
+            if (env.IsDevelopment())
+            {
+                return "http://localhost:4200";
+            }
+
+            return HttpContext.Request.Scheme + "://" + HttpContext.Request.Host.Value;
         }
     }
 }

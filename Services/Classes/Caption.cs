@@ -53,11 +53,11 @@ namespace Services.Classes
 
 
             // Font
-            styles += "font-family: " + Font + ";";
+            styles += "font-family: " + (Font.Value != null ? Font.Value : "Arial, Helvetica, sans-serif") + ";";
 
 
             // Font Size
-            styles += "font-size: " + FontSize + "px;";
+            styles += "font-size: " + (FontSize.Key != null ? FontSize.Key : "14") + "px;";
 
 
             // Text Break

@@ -40,7 +40,7 @@ namespace Services.Classes
             // Main Table
             HtmlNode mainTable = await Table.Create(doc.DocumentNode.FirstChild.LastChild, new TableOptions
             {
-                Background = new Background { Color = "#edf0f3" },
+                Background = new Background { Color = "#dddddd" },
                 CreateRow = true
             }, context);
 
