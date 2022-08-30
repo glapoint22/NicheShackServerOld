@@ -14,76 +14,78 @@ namespace Services.Classes
         public string Name { get; set; }
 
 
-        public void SetStyle(HtmlNode node)
+        public async Task SetStyle(HtmlNode node, NicheShackContext context)
         {
+            await SetData(context);
+
             node.SetAttributeValue("href", LinkType == LinkType.WebAddress ? Url : "{host}/" + Url);
             node.SetAttributeValue("target", "_blank");
         }
 
 
 
-        //public async Task SetData(NicheShackContext context)
-        //{
-        //    if (LinkType != LinkType.Page && LinkType != LinkType.Product) return;
+        public async Task SetData(NicheShackContext context)
+        {
+            if (LinkType != LinkType.Page && LinkType != LinkType.Product) return;
 
-        //    if (LinkType == LinkType.Page)
-        //    {
-        //        var page = await context.Pages
-        //            .AsNoTracking()
-        //            .Where(x => x.Id == Id)
-        //            .Select(x => new
-        //            {
-        //                x.Name,
-        //                x.PageType,
-        //                x.UrlName,
-        //                x.UrlId
-        //            })
-        //            .SingleOrDefaultAsync();
+            if (LinkType == LinkType.Page)
+            {
+                var page = await context.Pages
+                    .AsNoTracking()
+                    .Where(x => x.Id == Id)
+                    .Select(x => new
+                    {
+                        x.Name,
+                        x.PageType,
+                        x.UrlName,
+                        x.UrlId
+                    })
+                    .SingleOrDefaultAsync();
 
-        //        if (page != null)
-        //        {
-        //            //OptionValue = page.Name;
-        //            Url = GetPageDisplay((PageType)page.PageType) + page.UrlName + "/" + page.UrlId;
-        //        }
-        //    }
-        //    else if (LinkType == LinkType.Product)
-        //    {
-        //        var product = await context.Products
-        //            .AsNoTracking()
-        //            .Where(x => x.Id == Id)
-        //            .Select(x => new
-        //            {
-        //                x.Name,
-        //                x.UrlName,
-        //                x.UrlId
-        //            })
-        //            .SingleOrDefaultAsync();
+                if (page != null)
+                {
+                    Name = page.Name;
+                    Url = GetPageDisplay((PageType)page.PageType) + page.UrlName + "/" + page.UrlId;
+                }
+            }
+            else if (LinkType == LinkType.Product)
+            {
+                var product = await context.Products
+                    .AsNoTracking()
+                    .Where(x => x.Id == Id)
+                    .Select(x => new
+                    {
+                        x.Name,
+                        x.UrlName,
+                        x.UrlId
+                    })
+                    .SingleOrDefaultAsync();
 
-        //        if (product != null)
-        //        {
-        //            //OptionValue = product.Name;
-        //            Url = product.UrlName + "/" + product.UrlId;
-        //        }
-        //    }
-        //}
+                if (product != null)
+                {
+                    Name = product.Name;
+                    Url = product.UrlName + "/" + product.UrlId;
+                }
+            }
+        }
 
 
 
-        //private string GetPageDisplay(PageType pageDisplayType)
-        //{
-        //    string value = "";
+        private string GetPageDisplay(PageType pageDisplayType)
+        {
+            string value = "";
 
-        //    switch (pageDisplayType)
-        //    {
-        //        case PageType.Custom:
-        //            value = "cp/";
-        //            break;
-        //        case PageType.Browse:
-        //            value = "browse/";
-        //            break;
-        //    }
+            switch (pageDisplayType)
+            {
+                case PageType.Custom:
+                    value = "cp/";
+                    break;
+                case PageType.Browse:
+                    value = "browse/";
+                    break;
+            }
 
-        //    return value;
-        //}
+            return value;
+        }
     }
 }

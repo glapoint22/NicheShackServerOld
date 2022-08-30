@@ -127,9 +127,6 @@ namespace Services.Classes
             int paddingBottom = Padding != null ? Padding.Values.Where(x => x.PaddingType == 2).Select(x => x.Padding).SingleOrDefault() : 0;
             int paddingLeft = Padding != null ? Padding.Values.Where(x => x.PaddingType == 3).Select(x => x.Padding).SingleOrDefault() : 0;
 
-            //var paddingTop = Padding != null && Padding.Top != null ? int.Parse(Padding.Top.Substring(0, Padding.Top.Length - 2)) : 0;
-            //var paddingBottom = Padding != null && Padding.Bottom != null ? int.Parse(Padding.Bottom.Substring(0, Padding.Bottom.Length - 2)) : 0;
-
 
             styles += "padding-top: " + (padding + paddingTop) + "px;";
             styles += "padding-bottom: " + (padding + paddingBottom) + "px;";
@@ -143,7 +140,7 @@ namespace Services.Classes
             Caption.SetStyle(anchorNode);
 
             // Link
-            if (Link != null) Link.SetStyle(anchorNode);
+            if (Link != null) await Link.SetStyle(anchorNode, context);
 
 
             td.AppendChild(new HtmlDocument().CreateComment(Table.MicrosoftIf +
@@ -169,7 +166,7 @@ namespace Services.Classes
                 await Background.Image.SetData(context);
             }
 
-            //if (Link != null) await Link.SetData(context);
+            if (Link != null) await Link.SetData(context);
 
         }
     }

@@ -35,7 +35,7 @@ namespace Services.Classes
 
             foreach (TextBoxData data in TextBoxData)
             {
-                GenerateHtml(data, td);
+               await GenerateHtml(data, td, context);
             }
 
             return textWidget;
@@ -44,7 +44,7 @@ namespace Services.Classes
 
 
 
-        private void GenerateHtml(TextBoxData textBoxData, HtmlNode parent)
+        private async Task GenerateHtml(TextBoxData textBoxData, HtmlNode parent, NicheShackContext context)
         {
             HtmlNode newNode = null;
 
@@ -100,8 +100,10 @@ namespace Services.Classes
             // Anchor
             else if (textBoxData.ElementType == ElementType.Anchor)
             {
+                await textBoxData.Link.SetData(context);
+
                 newNode = HtmlNode.CreateNode("<a>");
-                newNode.SetAttributeValue("href", textBoxData.Link.Url);
+                newNode.SetAttributeValue("href", textBoxData.Link.LinkType == LinkType.WebAddress ? textBoxData.Link.Url : "{host}/" + textBoxData.Link.Url);
                 newNode.SetAttributeValue("target", "_blank");
 
                 parent.AppendChild(newNode);
@@ -135,7 +137,7 @@ namespace Services.Classes
             {
                 foreach (TextBoxData childData in textBoxData.Children)
                 {
-                    GenerateHtml(childData, newNode);
+                    await GenerateHtml(childData, newNode, context);
                 }
             }
         }

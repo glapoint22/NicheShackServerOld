@@ -94,7 +94,7 @@ namespace Manager.Controllers
             page.Content = updatedPage.Content;
             page.PageType = updatedPage.PageType;
 
-            if (page.PageType == (int)PageType.Custom)
+            if (page.PageType == (int)PageType.Custom || page.PageType == (int)PageType.Browse)
             {
                 page.UrlId = page.UrlId == null ? Utility.GetUrlId() : page.UrlId;
                 page.UrlName = Utility.GetUrlName(page.Name);
@@ -152,7 +152,7 @@ namespace Manager.Controllers
             unitOfWork.Pages.Add(duplicatePage);
             await unitOfWork.Save();
 
-            
+
 
 
             // If page type is browse or search
@@ -223,11 +223,11 @@ namespace Manager.Controllers
         [Route("Link")]
         public async Task<ActionResult> Link(string searchTerm)
         {
-            return Ok(await unitOfWork.Pages.GetCollection(x => x.PageType == (int)PageType.Custom, searchTerm, x => new LinkSearchItem
+            return Ok(await unitOfWork.Pages.GetCollection(x => x.PageType == (int)PageType.Custom || x.PageType == (int)PageType.Browse, searchTerm, x => new LinkSearchItem
             {
                 Id = x.Id,
                 Name = x.Name,
-                Link = "cp/" + x.UrlName + "/" + x.UrlId
+                Link = (x.PageType == (int)PageType.Custom ? "cp/" : "browse/") + x.UrlName + "/" + x.UrlId
             }));
         }
 
