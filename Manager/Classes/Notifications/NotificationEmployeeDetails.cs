@@ -1,6 +1,6 @@
 ﻿namespace Manager.Classes.Notifications
 {
-    public class NotificationEmployee: NotificationPerson
+    public class NotificationEmployeeDetails: NotificationProfile
     {
         public string Note { get; set; }
     }

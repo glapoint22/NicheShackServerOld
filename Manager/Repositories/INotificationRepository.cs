@@ -10,11 +10,11 @@ using System.Threading.Tasks;
 
 namespace Manager.Repositories
 {
-    public interface INotificationRepository : IRepository<DataAccess.Models.Notification>
+    public interface INotificationRepository : IRepository<Notification>
     {
         Task<IEnumerable> GetNewNotifications();
-        Task<IEnumerable> GetMessageNotification(int type, int state, string email);
+        Task<NotificationMessage> GetMessageNotification(int type, int state, string email);
         Task<NotificationReviewComplaint> GetReviewComplaintNotification(int productId, int type, int state);
-        Task<IEnumerable> GetProductNotification(int productId, int type, int state);
+        Task<NotificationProduct> GetProductNotification(int productId, int type, int state);
     }
 }

@@ -4,7 +4,7 @@ namespace Manager.Classes.Notifications
 {
     public class NotificationMessage
     {
-        public IEnumerable<NotificationMessageUser> User { get; set; }
-        public NotificationMessageEmployee Employee { get; set; }
+        public IEnumerable<NotificationMessageUser> Users { get; set; }
+        public IEnumerable<NotificationMessageEmployee> Employee { get; set; }
     }
 }
