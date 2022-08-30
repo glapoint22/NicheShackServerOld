@@ -35,23 +35,22 @@ namespace Manager.Controllers
         {
             PageContent pageContent = null;
 
+            // Get the page
+            Page page = await unitOfWork.Pages.Get(id);
+
             // Get the page content
-            string pageContentString = await unitOfWork.Pages.Get(x => x.Id == id, x => x.Content);
-
-            if (pageContentString != null)
-                pageContent = await pageService.GePage(pageContentString, new QueryParams());
+            if (page != null && page.Content != null)
+                pageContent = await pageService.GePage(page.Content, new QueryParams());
 
 
-            // Get the page properties
-            PageData pageData = await unitOfWork.Pages.Get(x => x.Id == id, x => new PageData
+
+            return Ok(new PageData
             {
-                Id = x.Id,
-                Name = x.Name,
-                PageType = x.PageType,
+                Id = page.Id,
+                Name = page.Name,
+                PageType = page.PageType,
                 Content = pageContent
             });
-
-            return Ok(pageData);
         }
 
 
@@ -95,7 +94,7 @@ namespace Manager.Controllers
             page.Content = updatedPage.Content;
             page.PageType = updatedPage.PageType;
 
-            if (page.PageType == (int)PageType.Custom)
+            if (page.PageType == (int)PageType.Custom || page.PageType == (int)PageType.Browse)
             {
                 page.UrlId = page.UrlId == null ? Utility.GetUrlId() : page.UrlId;
                 page.UrlName = Utility.GetUrlName(page.Name);
@@ -139,7 +138,6 @@ namespace Manager.Controllers
         {
             // Copy the page properties
             Page currentPage = await unitOfWork.Pages.Get(page.Id);
-            string newContent = currentPage.Content;
 
             // Create the new page
             var duplicatePage = new Page
@@ -154,7 +152,7 @@ namespace Manager.Controllers
             unitOfWork.Pages.Add(duplicatePage);
             await unitOfWork.Save();
 
-            
+
 
 
             // If page type is browse or search
@@ -225,11 +223,11 @@ namespace Manager.Controllers
         [Route("Link")]
         public async Task<ActionResult> Link(string searchTerm)
         {
-            return Ok(await unitOfWork.Pages.GetCollection(x => x.PageType == (int)PageType.Custom, searchTerm, x => new LinkSearchItem
+            return Ok(await unitOfWork.Pages.GetCollection(x => x.PageType == (int)PageType.Custom || x.PageType == (int)PageType.Browse, searchTerm, x => new LinkSearchItem
             {
                 Id = x.Id,
                 Name = x.Name,
-                Link = "cp/" + x.UrlName + "/" + x.UrlId
+                Link = (x.PageType == (int)PageType.Custom ? "cp/" : "browse/") + x.UrlName + "/" + x.UrlId
             }));
         }
 

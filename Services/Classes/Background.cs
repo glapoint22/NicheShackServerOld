@@ -11,7 +11,6 @@ namespace Services.Classes
         public bool Enabled { get; set; }
 
 
-
         public async Task SetStyle(HtmlNode node, NicheShackContext context)
         {
             string styles = node.GetAttributeValue("style", "");

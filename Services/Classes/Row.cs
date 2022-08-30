@@ -61,6 +61,7 @@ namespace Services.Classes
 
 
             row.SetAttributeValue("valign", valign);
+            row.SetAttributeValue("align", "center");
 
             return row;
         }

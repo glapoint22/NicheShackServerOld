@@ -1,5 +1,6 @@
 ﻿using HtmlAgilityPack;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Services.Classes
 {
@@ -12,12 +13,17 @@ namespace Services.Classes
         {
             string styles = node.GetAttributeValue("style", "");
 
-            //if (Top != null) styles += "padding-top: " + Top + ";";
-            //if (Right != null) styles += "padding-right: " + Right + ";";
-            //if (Bottom != null) styles += "padding-bottom: " + Bottom + ";";
-            //if (Left != null) styles += "padding-left: " + Left + ";";
+            styles += "padding-top: " + GetValue(PaddingType.Top) + "px;";
+            styles += "padding-right: " + GetValue(PaddingType.Right) + "px;";
+            styles += "padding-bottom: " + GetValue(PaddingType.Bottom) + "px;";
+            styles += "padding-left: " + GetValue(PaddingType.Left) + "px;";
 
             node.SetAttributeValue("style", styles);
+        }
+
+        public int GetValue(PaddingType paddingType)
+        {
+            return Values.Where(x => x.PaddingType == (int)paddingType).Select(x => x.Padding).SingleOrDefault();
         }
     }
 }

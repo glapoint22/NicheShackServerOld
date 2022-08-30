@@ -41,7 +41,7 @@ namespace Services.Classes
             {
                 // Anchor
                 HtmlNode anchorNode = HtmlNode.CreateNode("<a>");
-                Link.SetStyle(anchorNode);
+                await Link.SetStyle(anchorNode, context);
 
                 anchorNode.AppendChild(img);
 

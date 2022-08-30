@@ -1,6 +1,7 @@
 ﻿using DataAccess.Models;
 using HtmlAgilityPack;
 using System;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -101,8 +102,11 @@ namespace Services.Classes
             // Td
             HtmlNode td = widget.SelectSingleNode("tr/td");
 
+
             // Set the styles
-            if (Background != null) await Background.SetStyle(td, context);
+            if (Background == null) Background = new Background { Color = "#808080" };
+
+            await Background.SetStyle(td, context);
             if (Border != null) Border.SetStyle(td);
             if (Corners != null) Corners.SetStyle(td);
             if (Shadow != null) Shadow.SetStyle(td);
@@ -115,17 +119,19 @@ namespace Services.Classes
 
 
 
-            var fontSize = int.Parse(Caption.FontSize.Value);
-            //var padding = Math.Max(0, ((height - fontSize) / 2) - 1);
-            //var paddingTop = Padding != null && Padding.Top != null ? int.Parse(Padding.Top.Substring(0, Padding.Top.Length - 2)) : 0;
-            //var paddingBottom = Padding != null && Padding.Bottom != null ? int.Parse(Padding.Bottom.Substring(0, Padding.Bottom.Length - 2)) : 0;
+            var fontSize = Caption.FontSize.Value != null ? int.Parse(Caption.FontSize.Key) : 14;
+            var padding = Math.Max(0, ((height - fontSize) / 2) - 1);
+
+            int paddingTop = Padding != null ? Padding.Values.Where(x => x.PaddingType == 0).Select(x => x.Padding).SingleOrDefault() : 0;
+            int paddingRight = Padding != null ? Padding.Values.Where(x => x.PaddingType == 1).Select(x => x.Padding).SingleOrDefault() : 0;
+            int paddingBottom = Padding != null ? Padding.Values.Where(x => x.PaddingType == 2).Select(x => x.Padding).SingleOrDefault() : 0;
+            int paddingLeft = Padding != null ? Padding.Values.Where(x => x.PaddingType == 3).Select(x => x.Padding).SingleOrDefault() : 0;
 
 
-            //styles += "padding-top: " + (padding + paddingTop) + "px;";
-            //styles += "padding-bottom: " + (padding + paddingBottom) + "px;";
-
-            //if (Padding != null && Padding.Right != null) styles += "padding-right: " + Padding.Right + "px;";
-            //if (Padding != null && Padding.Left != null) styles += "padding-left: " + Padding.Left + "px;";
+            styles += "padding-top: " + (padding + paddingTop) + "px;";
+            styles += "padding-bottom: " + (padding + paddingBottom) + "px;";
+            styles += "padding-right: " + paddingRight + "px;";
+            styles += "padding-left: " + paddingLeft + "px;";
 
 
             anchorNode.SetAttributeValue("style", styles);
@@ -134,15 +140,15 @@ namespace Services.Classes
             Caption.SetStyle(anchorNode);
 
             // Link
-            if (Link != null) Link.SetStyle(anchorNode);
+            if (Link != null) await Link.SetStyle(anchorNode, context);
 
 
-            //td.AppendChild(new HtmlDocument().CreateComment(Table.MicrosoftIf +
-            //    "<table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" align=\"center\" style=\"padding-top: " +
-            //    (padding + paddingTop) + "px;padding-bottom: " +
-            //    (padding + paddingBottom) +
-            //    "px;text-align: center;\"><tr><td>" +
-            //    Table.MicrosoftEndIf));
+            td.AppendChild(new HtmlDocument().CreateComment(Table.MicrosoftIf +
+                "<table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" align=\"center\" style=\"padding-top: " +
+                (padding + paddingTop) + "px;padding-bottom: " +
+                (padding + paddingBottom) +
+                "px;text-align: center;\"><tr><td>" +
+                Table.MicrosoftEndIf));
 
 
 
@@ -160,7 +166,7 @@ namespace Services.Classes
                 await Background.Image.SetData(context);
             }
 
-            //if (Link != null) await Link.SetData(context);
+            if (Link != null) await Link.SetData(context);
 
         }
     }

@@ -9,9 +9,9 @@
 
         public void SetStyle(ref string styles)
         {
-            //if (Position != null) styles += "background-position: " + Position + ";";
-            //if (Repeat != null) styles += "background-repeat: " + Repeat + ";";
-            //if (Attachment != null) styles += "background-attachment: " + Attachment + ";";
+            if (Position.Value != null) styles += "background-position: " + Position.Value + ";";
+            if (Repeat.Value != null) styles += "background-repeat: " + Repeat.Value + ";";
+            if (Attachment.Value != null) styles += "background-attachment: " + Attachment.Value + ";";
         }
     }
 }

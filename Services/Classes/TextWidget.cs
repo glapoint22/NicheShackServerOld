@@ -29,14 +29,120 @@ namespace Services.Classes
             }
 
             // Apply the styles
-            td.SetAttributeValue("style", "font-family: Arial, Helvetica, sans-serif;font-size: 14px;color: #000000;line-height: normal;");
+            td.SetAttributeValue("style", "font-family: Arial, Helvetica, sans-serif;font-size: 14px;color: #000000;");
             if (Background != null) await Background.SetStyle(td, context);
             if (Padding != null) Padding.SetStyle(td);
+
+            foreach (TextBoxData data in TextBoxData)
+            {
+               await GenerateHtml(data, td, context);
+            }
 
             return textWidget;
         }
 
-        
+
+
+
+        private async Task GenerateHtml(TextBoxData textBoxData, HtmlNode parent, NicheShackContext context)
+        {
+            HtmlNode newNode = null;
+
+            // Div
+            if (textBoxData.ElementType == ElementType.Div)
+            {
+                newNode = HtmlNode.CreateNode("<div>");
+                parent.AppendChild(newNode);
+            }
+
+            // Span
+            else if (textBoxData.ElementType == ElementType.Span)
+            {
+                newNode = HtmlNode.CreateNode("<span>");
+                parent.AppendChild(newNode);
+            }
+
+            // Text
+            else if (textBoxData.ElementType == ElementType.Text)
+            {
+                newNode = new HtmlDocument().CreateTextNode(textBoxData.Text);
+                parent.AppendChild(newNode);
+            }
+
+            // Break
+            else if (textBoxData.ElementType == ElementType.Break)
+            {
+                newNode = HtmlNode.CreateNode("<br>");
+                parent.AppendChild(newNode);
+            }
+
+            // Unordered List
+            else if (textBoxData.ElementType == ElementType.UnorderedList)
+            {
+                newNode = HtmlNode.CreateNode("<ul>");
+                parent.AppendChild(newNode);
+            }
+
+            // Ordered List
+            else if (textBoxData.ElementType == ElementType.OrderedList)
+            {
+                newNode = HtmlNode.CreateNode("<ol>");
+                parent.AppendChild(newNode);
+            }
+
+            // List Item
+            else if (textBoxData.ElementType == ElementType.ListItem)
+            {
+                newNode = HtmlNode.CreateNode("<li>");
+                parent.AppendChild(newNode);
+            }
+
+            // Anchor
+            else if (textBoxData.ElementType == ElementType.Anchor)
+            {
+                await textBoxData.Link.SetData(context);
+
+                newNode = HtmlNode.CreateNode("<a>");
+                newNode.SetAttributeValue("href", textBoxData.Link.LinkType == LinkType.WebAddress ? textBoxData.Link.Url : "{host}/" + textBoxData.Link.Url);
+                newNode.SetAttributeValue("target", "_blank");
+
+                parent.AppendChild(newNode);
+            }
+
+            // Styles
+            if (textBoxData.Styles != null && textBoxData.Styles.Count > 0)
+            {
+                string styles = "";
+
+                foreach (StyleData style in textBoxData.Styles)
+                {
+                    styles += style.Name + ": " + style.Value + ";";
+                }
+
+                newNode.SetAttributeValue("style", styles);
+            }
+
+            // Indent
+            if (textBoxData.Indent > 0)
+            {
+                string styles = newNode.GetAttributeValue("style", "");
+
+                styles += "text-indent: " + (textBoxData.Indent * 40) + 20 + "px;";
+                newNode.SetAttributeValue("style", styles);
+            }
+
+
+            // Children
+            if (textBoxData.Children != null && textBoxData.Children.Count > 0)
+            {
+                foreach (TextBoxData childData in textBoxData.Children)
+                {
+                    await GenerateHtml(childData, newNode, context);
+                }
+            }
+        }
+
+
 
         public override void SetProperty(string property, ref Utf8JsonReader reader, JsonSerializerOptions options)
         {
