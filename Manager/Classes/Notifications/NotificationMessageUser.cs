@@ -2,9 +2,8 @@
 
 namespace Manager.Classes
 {
-    public class NotificationMessageUser : NotificationIdentity
+    public class NotificationMessageUser : NotificationUser
     {
         public string Name { get; set; }
-        public string Message { get; set; }
     }
 }
