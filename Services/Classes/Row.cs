@@ -15,6 +15,7 @@ namespace Services.Classes
         public Padding Padding { get; set; }
         public VerticalAlignment VerticalAlignment { get; set; }
         public List<Column> Columns { get; set; }
+        public float RelativeTop { get; set; }
 
 
 
@@ -22,11 +23,11 @@ namespace Services.Classes
         public async Task<HtmlNode> Create(HtmlNode table, NicheShackContext context)
         {
             // Insert a row for spacing
-            if (Top > 0)
+            if (RelativeTop > 0)
             {
                 HtmlNode blankRow = table.AppendChild(HtmlNode.CreateNode("<tr>"));
                 HtmlNode blankColumn = blankRow.AppendChild(HtmlNode.CreateNode("<td>"));
-                blankColumn.SetAttributeValue("height", Top.ToString());
+                blankColumn.SetAttributeValue("height", RelativeTop.ToString());
             }
 
             // Create the row
