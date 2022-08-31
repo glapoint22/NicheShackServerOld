@@ -42,7 +42,7 @@ namespace DataAccess.Models
         public virtual ICollection<ProductOrder> ProductOrders { get; set; }
         public virtual ICollection<ProductReview> ProductReviews { get; set; }
         public virtual ICollection<NotificationDetails> NotificationDetails { get; set; }
-        public virtual ICollection<NotificationEmployee> NotificationEmployee { get; set; }
+        public virtual ICollection<NotificationEmployeeDetails> NotificationEmployeeDetails { get; set; }
 
 
         public Customer()
@@ -53,7 +53,7 @@ namespace DataAccess.Models
             ProductOrders = new HashSet<ProductOrder>();
             ProductReviews = new HashSet<ProductReview>();
             NotificationDetails = new HashSet<NotificationDetails>();
-            NotificationEmployee = new HashSet<NotificationEmployee>();
+            NotificationEmployeeDetails = new HashSet<NotificationEmployeeDetails>();
         }
     }
 }

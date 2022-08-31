@@ -13,7 +13,7 @@ namespace DataAccess.Models
         public int NotificationId { get; set; }
         [ForeignKey("ProductReview")]
         public int? ReviewId { get; set; }
-        [ForeignKey("NotificationEmployee")]
+        [ForeignKey("NotificationEmployeeDetails")]
         public int? NotificationEmployeeId { get; set; }
         public DateTime TimeStamp { get; set; }
         public string Text { get; set; }
@@ -24,6 +24,6 @@ namespace DataAccess.Models
         public virtual Customer Customer { get; set; }
         public virtual Notification Notification { get; set; }
         public virtual ProductReview ProductReview { get; set; }
-        public virtual NotificationEmployee NotificationEmployee { get; set; }
+        public virtual NotificationEmployeeDetails NotificationEmployeeDetails { get; set; }
     }
 }

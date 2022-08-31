@@ -60,7 +60,7 @@ namespace DataAccess.Models
         public virtual DbSet<Notification> Notifications { get; set; }
         public virtual DbSet<NotificationDetails> NotificationDetails { get; set; }
 
-        public virtual DbSet<NotificationEmployee> NotificationEmployees { get; set; }
+        public virtual DbSet<NotificationEmployeeDetails> NotificationEmployeeDetails { get; set; }
 
         public virtual DbSet<OrderProduct> OrderProducts { get; set; }
 
@@ -474,7 +474,7 @@ namespace DataAccess.Models
                 .OnDelete(DeleteBehavior.Cascade);
 
 
-                entity.HasOne(x => x.NotificationEmployee)
+                entity.HasOne(x => x.NotificationEmployeeDetails)
                 .WithMany(x => x.NotificationDetails)
                 .OnDelete(DeleteBehavior.ClientSetNull);
             });
