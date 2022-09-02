@@ -84,12 +84,12 @@ namespace Manager.Controllers
 
 
 
-        [HttpGet]
-        [Route("QueryBuilder")]
-        public async Task<ActionResult> GetQueryBuilderProducts()
-        {
-            return Ok(await unitOfWork.Products.GetCollection<ItemViewModel<Product>>());
-        }
+        //[HttpGet]
+        //[Route("QueryBuilder")]
+        //public async Task<ActionResult> GetQueryBuilderProducts()
+        //{
+        //    return Ok(await unitOfWork.Products.GetCollection<ItemViewModel<Product>>());
+        //}
 
 
 
