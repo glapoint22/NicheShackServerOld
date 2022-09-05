@@ -2,6 +2,6 @@
 {
     public class NotificationEmployee: NotificationProfile
     {
-        public int? NotificationEmployeeId { get; set; }
+        public int? NoteId { get; set; }
     }
 }

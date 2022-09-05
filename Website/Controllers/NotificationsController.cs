@@ -29,7 +29,7 @@ namespace Website.Controllers
             {
                 ProductId = notificationData.ProductId,
                 //Type = notificationData.Type,
-                State = 0
+                //State = 0
             };
 
             unitOfWork.Notifications.Add(notification);
@@ -64,7 +64,7 @@ namespace Website.Controllers
             {
                 ProductId = null,
                 Type = 0,
-                State = 0
+                //State = 0
             };
 
             unitOfWork.Notifications.Add(notification);

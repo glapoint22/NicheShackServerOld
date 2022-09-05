@@ -1,7 +1,8 @@
 ﻿namespace Manager.Classes.Notifications
 {
-    public class NotificationUser : NotificationSecurity
+    public class NotificationUser : NotificationProfile
     {
-        public int NotificationId { get; set; }
+        public int NoncompliantStrikes { get; set; }
+        public bool BlockNotificationSending { get; set; }
     }
 }

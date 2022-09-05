@@ -48,6 +48,9 @@ namespace DataAccess.Repositories
         // Add Range
         void AddRange(IEnumerable<T> entities);
 
+        // Update Range
+        void UpdateRange(IEnumerable<T> entities);
+
         // Any
         Task<bool> Any(Expression<Func<T, bool>> predicate);
     }

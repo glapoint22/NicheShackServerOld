@@ -195,6 +195,15 @@ namespace DataAccess.Repositories
         }
 
 
+
+        // Update Range
+        public void UpdateRange(IEnumerable<T> entities)
+        {
+            context.Set<T>().UpdateRange(entities);
+        }
+
+
+
         // Any
         public async Task<bool> Any(Expression<Func<T, bool>> predicate)
         {

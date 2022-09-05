@@ -4,14 +4,16 @@ using DataAccess.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(NicheShackContext))]
-    partial class NicheShackContextModelSnapshot : ModelSnapshot
+    [Migration("20220831164827_AddedArchiveDateFieldToNotificationsTable")]
+    partial class AddedArchiveDateFieldToNotificationsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -729,6 +731,9 @@ namespace DataAccess.Migrations
                     b.Property<int?>("ProductId")
                         .HasColumnType("int");
 
+                    b.Property<int>("State")
+                        .HasColumnType("int");
+
                     b.Property<int>("Type")
                         .HasColumnType("int");
 
@@ -757,7 +762,7 @@ namespace DataAccess.Migrations
                         .HasColumnType("nvarchar(256)")
                         .HasMaxLength(256);
 
-                    b.Property<int?>("NotificationEmployeeNoteId")
+                    b.Property<int?>("NotificationEmployeeId")
                         .HasColumnType("int");
 
                     b.Property<int>("NotificationId")
@@ -776,7 +781,7 @@ namespace DataAccess.Migrations
 
                     b.HasIndex("CustomerId");
 
-                    b.HasIndex("NotificationEmployeeNoteId");
+                    b.HasIndex("NotificationEmployeeId");
 
                     b.HasIndex("NotificationId");
 
@@ -785,7 +790,7 @@ namespace DataAccess.Migrations
                     b.ToTable("NotificationDetails");
                 });
 
-            modelBuilder.Entity("DataAccess.Models.NotificationEmployeeNote", b =>
+            modelBuilder.Entity("DataAccess.Models.NotificationEmployeeDetails", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -806,7 +811,7 @@ namespace DataAccess.Migrations
 
                     b.HasIndex("EmployeeId");
 
-                    b.ToTable("NotificationEmployeeNotes");
+                    b.ToTable("NotificationEmployeeDetails");
                 });
 
             modelBuilder.Entity("DataAccess.Models.OneTimePassword", b =>
@@ -1804,9 +1809,9 @@ namespace DataAccess.Migrations
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("DataAccess.Models.NotificationEmployeeNote", "NotificationEmployeeNotes")
+                    b.HasOne("DataAccess.Models.NotificationEmployeeDetails", "NotificationEmployeeDetails")
                         .WithMany("NotificationDetails")
-                        .HasForeignKey("NotificationEmployeeNoteId");
+                        .HasForeignKey("NotificationEmployeeId");
 
                     b.HasOne("DataAccess.Models.Notification", "Notification")
                         .WithMany("NotificationDetails")
@@ -1819,10 +1824,10 @@ namespace DataAccess.Migrations
                         .HasForeignKey("ReviewId");
                 });
 
-            modelBuilder.Entity("DataAccess.Models.NotificationEmployeeNote", b =>
+            modelBuilder.Entity("DataAccess.Models.NotificationEmployeeDetails", b =>
                 {
                     b.HasOne("DataAccess.Models.Customer", "Customer")
-                        .WithMany("NotificationEmployeeNotes")
+                        .WithMany("NotificationEmployeeDetails")
                         .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

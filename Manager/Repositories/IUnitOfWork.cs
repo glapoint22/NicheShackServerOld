@@ -25,7 +25,7 @@ namespace Manager.Repositories
         IRepository<ProductFilter> ProductFilters { get; }
         IRepository<ProductMedia> ProductMedia { get; }
         IRepository<ProductKeyword> ProductKeywords { get; }
-        IRepository<NotificationDetails> NotificationText { get; }
+        IRepository<NotificationDetails> NotificationDetails { get; }
         ISearchableRepository<Subgroup> Subgroups { get; }
         IRepository<SubgroupProduct> SubgroupProducts { get; }
         IRepository<ProductReview> ProductReviews { get; }
@@ -36,6 +36,7 @@ namespace Manager.Repositories
         IRepository<Keyword_In_KeywordGroup> Keywords_In_KeywordGroup { get; }
         IRepository<PageKeyword> PageKeywords { get; }
         IRepository<Subproduct> Subproducts { get; }
+        IRepository<NotificationEmployeeNote> NotificationEmployeeNotes { get; }
 
 
 

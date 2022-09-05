@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataAccess.Models
 {
-    public class NotificationEmployeeDetails
+    public class NotificationEmployeeNote
     {
         public int Id { get; set; }
         [ForeignKey("Customer")]
@@ -18,7 +18,7 @@ namespace DataAccess.Models
         public virtual ICollection<NotificationDetails> NotificationDetails { get; set; }
 
 
-        public NotificationEmployeeDetails()
+        public NotificationEmployeeNote()
         {
             NotificationDetails = new HashSet<NotificationDetails>();
         }

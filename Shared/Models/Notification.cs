@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataAccess.Models
@@ -9,7 +10,7 @@ namespace DataAccess.Models
         [ForeignKey("Product")]
         public int? ProductId { get; set; }
         public int Type { get; set; }
-        public int State { get; set; }
+        public DateTime? ArchiveDate { get; set; }
         public virtual Product Product { get; set; }
         public virtual ICollection<NotificationDetails> NotificationDetails { get; set; }
 

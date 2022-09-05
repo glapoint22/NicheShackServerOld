@@ -3,6 +3,7 @@ using DataAccess.Repositories;
 using Manager.Classes;
 using Manager.Classes.Notifications;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,9 +33,9 @@ namespace Manager.Repositories
 
 
 
-        public async Task<IEnumerable> GetNewNotifications()
+        public async Task<IEnumerable> GetNotifications(bool isNew)
         {
-            var allNewNotifications = await context.NotificationDetails.Where(x => x.Notification.State == 0)
+            var allNotifications = await context.NotificationDetails.Where(x => isNew ? x.Notification.ArchiveDate == null : x.Notification.ArchiveDate != null)
                 .Select(x => new
                 {
                     ProductId = x.Notification.ProductId,
@@ -42,12 +43,13 @@ namespace Manager.Repositories
                     Thumbnail = x.Notification.Product.Media.Thumbnail,
                     Type = x.Notification.Type,
                     Email = x.Email != null ? x.Email : x.Customer.Email,
-                    Date = x.TimeStamp
+                    Date = x.TimeStamp,
+                    ArchiveDate = x.Notification.ArchiveDate
                 }).ToListAsync();
 
 
 
-            var groupByTypeNotifications = allNewNotifications.GroupBy(x => x.Type, (key, n) => new
+            var groupByTypeNotifications = allNotifications.GroupBy(x => x.Type, (key, n) => new
             {
                 Type = key,
                 Notifications = n.OrderByDescending(x => x.Date)
@@ -55,111 +57,90 @@ namespace Manager.Repositories
 
 
 
-            var newNotifications = new List<NewNotification>();
+            var notifications = new List<NotificationItem>();
 
             foreach (var x in groupByTypeNotifications)
             {
-
                 if (x.Type == 0)
                 {
-                    var messageNotifications = x.Notifications.GroupBy(y => y.Email, (key, a) => new
+                    var messageNotifications = x.Notifications.GroupBy(y => new { y.Email, y.ArchiveDate }, (key, a) => new
                     {
                         Count = a.Count(),
                         Notification = a.FirstOrDefault()
-                    }).Select(b => new NewNotification
+                    }).Select(b => new NotificationItem
                     {
-                        State = 0,
+                        IsNew = isNew,
                         Type = b.Notification.Type,
                         ProductId = b.Notification.ProductId,
                         Thumbnail = b.Notification.Thumbnail,
                         Email = b.Notification.Email,
                         Date = b.Notification.Date,
-                        Count = b.Count
+                        Count = b.Count,
+                        ArchiveDate = b.Notification.ArchiveDate
                     }).ToList();
-                    newNotifications.AddRange(messageNotifications);
+                    notifications.AddRange(messageNotifications);
                 }
                 else
                 {
-
-
-                    var productNotifications = x.Notifications.GroupBy(y => y.ProductId, (key, a) => new
+                    var productNotifications = x.Notifications.GroupBy(y => new { y.ProductId, y.ArchiveDate }, (key, a) => new
                     {
                         Count = a.Count(),
                         Notification = a.FirstOrDefault()
 
-                    }).Select(b => new NewNotification
+                    }).Select(b => new NotificationItem
                     {
-                        State = 0,
+                        IsNew = isNew,
                         Type = b.Notification.Type,
                         ProductId = b.Notification.ProductId,
                         productName = b.Notification.ProductName,
                         Thumbnail = b.Notification.Thumbnail,
                         Email = b.Notification.Email,
                         Date = b.Notification.Date,
-                        Count = b.Count
+                        Count = b.Count,
+                        ArchiveDate = b.Notification.ArchiveDate
                     }).ToList();
 
-                    newNotifications.AddRange(productNotifications);
+                    notifications.AddRange(productNotifications);
                 }
             }
 
-            return newNotifications.OrderByDescending(x => x.Date);
+            return notifications.OrderByDescending(x => isNew ? x.Date : x.ArchiveDate);
         }
 
 
 
 
 
-
-
-
-
-
-
-
-        public async Task<NotificationMessage> GetMessageNotification(int type, int state, string email)
+        public async Task<List<NotificationMessage>> GetMessageNotification(string email, int type, DateTime? archiveDate)
         {
-            var notificationIds = await context.Notifications.Where(x => x.Type == type && x.State == state &&
-            (x.NotificationDetails.Select(z => z.Customer).FirstOrDefault() == null ?
-                (x.NotificationDetails.Select(y => y.Email).FirstOrDefault() == email) : x.NotificationDetails.Select(z => z.Customer.Email).FirstOrDefault() == email)).Select(x => x.Id).ToListAsync();
+            var notificationIds = await context.Notifications.Where(x => (x.NotificationDetails.Select(y => y.Customer).FirstOrDefault() == null ?
+                                                                             (x.NotificationDetails.Select(y => y.Email).FirstOrDefault() == email) :
+                                                                              x.NotificationDetails.Select(y => y.Customer.Email).FirstOrDefault() == email) &&
+                                                                          x.Type == type &&
+                                                                          x.ArchiveDate == archiveDate)
+                                                             .Select(x => x.Id).ToListAsync();
 
-
-            List<NotificationMessageUser> user = await context.NotificationDetails.Where(x => notificationIds.Contains(x.NotificationId)).Select(x => new NotificationMessageUser
+            List<NotificationMessage> users = await context.NotificationDetails.Where(x => notificationIds.Contains(x.NotificationId)).Select(x => new NotificationMessage
             {
-                NotificationId = x.NotificationId,
+                MessageId = x.NotificationId,
                 Date = x.TimeStamp,
-                Name = x.Name,
+                SenderName = x.Name,
                 FirstName = x.Customer.FirstName,
                 LastName = x.Customer.LastName,
                 Image = x.Customer.Image,
                 Email = x.Email,
                 Text = x.Text,
                 NoncompliantStrikes = x.Customer.NoncompliantStrikes,
-                BlockNotificationSending = x.Customer.BlockNotificationSending
-            }).ToListAsync();
+                BlockNotificationSending = x.Customer.BlockNotificationSending,
+                EmployeeReplyId = x.NotificationEmployeeNoteId,
+                EmployeeFirstName = x.NotificationEmployeeNotes.Customer.FirstName,
+                EmployeeLastName = x.NotificationEmployeeNotes.Customer.LastName,
+                EmployeeImage = x.NotificationEmployeeNotes.Customer.Image,
+                ReplyDate = x.NotificationEmployeeNotes.TimeStamp,
+                Reply = x.NotificationEmployeeNotes.Text
+            }).OrderByDescending(x => x.Date).ToListAsync();
 
-
-
-            List<NotificationEmployee> employee = await context.NotificationEmployeeDetails.Where(x => notificationIds.Contains(x.Id)).Select(x => new NotificationEmployee
-            {
-                NotificationEmployeeId = x.Id,
-                Date = x.TimeStamp,
-                FirstName = x.Customer.FirstName,
-                LastName = x.Customer.LastName,
-                Image = x.Customer.Image,
-                Email = x.Customer.Email,
-                Text = x.Text
-            }).ToListAsync();
-
-
-            NotificationMessage notification = new NotificationMessage
-            {
-                Users = user,
-                Employee = employee
-            };
-
-
-            return notification;
+            return users;
         }
 
 
@@ -174,14 +155,15 @@ namespace Manager.Repositories
 
 
 
-        public async Task<NotificationReviewComplaint> GetReviewComplaintNotification(int productId, int type, int state)
+        public async Task<NotificationReview> GetReviewNotification(int productId, int type, DateTime? archiveDate)
         {
-            var notificationIds = await context.Notifications.Where(x => x.ProductId == productId && x.Type == type && x.State == state).Select(x => x.Id).ToListAsync();
+            var notificationIds = await context.Notifications.Where(x => x.ProductId == productId &&
+                                                                         x.Type == type &&
+                                                                         x.ArchiveDate == archiveDate)
+                                                            .Select(x => x.Id).ToListAsync();
 
-
-            IEnumerable<NotificationUser> user = await context.NotificationDetails.Where(x => notificationIds.Contains(x.NotificationId)).Select(x => new NotificationUser
+            List<NotificationUser> users = await context.NotificationDetails.Where(x => notificationIds.Contains(x.NotificationId)).Select(x => new NotificationUser
             {
-                NotificationId = x.NotificationId,
                 Date = x.TimeStamp,
                 FirstName = x.Customer.FirstName,
                 LastName = x.Customer.LastName,
@@ -214,28 +196,28 @@ namespace Manager.Repositories
 
 
 
-            var notificationEmployeeId = await context.NotificationDetails.Where(x => notificationIds.Contains(x.NotificationId) && x.NotificationEmployeeId != null).Select(x => x.NotificationEmployeeId).FirstOrDefaultAsync();
-            NotificationEmployee employee = await context.NotificationEmployeeDetails.Where(x => x.Id == notificationEmployeeId).Select(x => new NotificationEmployee
+            var notificationEmployeeNoteId = await context.NotificationDetails.Where(x => notificationIds.Contains(x.NotificationId) && x.NotificationEmployeeNoteId != null).Select(x => x.NotificationEmployeeNoteId).FirstOrDefaultAsync();
+            List<NotificationEmployee> employees = await context.NotificationEmployeeNotes.Where(x => x.Id == notificationEmployeeNoteId).Select(x => new NotificationEmployee
             {
-                NotificationEmployeeId = x.Id,
+                NoteId = x.Id,
                 Date = x.TimeStamp,
                 FirstName = x.Customer.FirstName,
                 LastName = x.Customer.LastName,
                 Image = x.Customer.Image,
                 Email = x.Customer.Email,
                 Text = x.Text
-            }).FirstOrDefaultAsync();
+            }).ToListAsync();
 
 
 
 
 
 
-            NotificationReviewComplaint notification = new NotificationReviewComplaint
+            NotificationReview notification = new NotificationReview
             {
-                Users = user,
+                Users = users,
                 ReviewWriter = reviewWriter,
-                Employee = employee
+                Employees = employees
             };
 
             return notification;
@@ -246,27 +228,15 @@ namespace Manager.Repositories
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        public async Task<NotificationProduct> GetProductNotification(int productId, int type, int state)
+        public async Task<NotificationProduct> GetProductNotification(int productId, int type, DateTime? archiveDate)
         {
-            var notificationIds = await context.Notifications.Where(x => x.ProductId == productId && x.Type == type && x.State == state).Select(x => x.Id).ToListAsync();
+            var notificationIds = await context.Notifications.Where(x => x.ProductId == productId &&
+                                                                         x.Type == type &&
+                                                                         x.ArchiveDate == archiveDate)
+                                                            .Select(x => x.Id).ToListAsync();
 
-            List<NotificationUser> user = await context.NotificationDetails.Where(x => notificationIds.Contains(x.NotificationId)).Select(x => new NotificationUser
+            List<NotificationUser> users = await context.NotificationDetails.Where(x => notificationIds.Contains(x.NotificationId)).Select(x => new NotificationUser
             {
-                NotificationId = x.NotificationId,
                 Date = x.TimeStamp,
                 FirstName = x.Customer.FirstName,
                 LastName = x.Customer.LastName,
@@ -278,27 +248,27 @@ namespace Manager.Repositories
             }).ToListAsync();
 
 
-            var notificationEmployeeId = await context.NotificationDetails.Where(x => notificationIds.Contains(x.NotificationId) && x.NotificationEmployeeId != null).Select(x => x.NotificationEmployeeId).FirstOrDefaultAsync();
-            NotificationEmployee employee = await context.NotificationEmployeeDetails.Where(x => x.Id == notificationEmployeeId).Select(x => new NotificationEmployee
+            var notificationEmployeeNoteId = await context.NotificationDetails.Where(x => notificationIds.Contains(x.NotificationId) && x.NotificationEmployeeNoteId != null).Select(x => x.NotificationEmployeeNoteId).FirstOrDefaultAsync();
+            List<NotificationEmployee> employees = await context.NotificationEmployeeNotes.Where(x => x.Id == notificationEmployeeNoteId).Select(x => new NotificationEmployee
             {
-                NotificationEmployeeId = notificationEmployeeId,
+                NoteId = notificationEmployeeNoteId,
                 Date = x.TimeStamp,
                 FirstName = x.Customer.FirstName,
                 LastName = x.Customer.LastName,
                 Image = x.Customer.Image,
                 Email = x.Customer.Email,
                 Text = x.Text
-            }).FirstOrDefaultAsync();
-
+            }).ToListAsync();
 
 
             NotificationProduct notification = new NotificationProduct
             {
-                Users = user,
-                Employee = employee
+                Users = users,
+                Employees = employees
             };
 
             return notification;
         }
+
     }
 }

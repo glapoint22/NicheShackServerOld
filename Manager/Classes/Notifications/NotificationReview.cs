@@ -2,10 +2,10 @@
 
 namespace Manager.Classes.Notifications
 {
-    public class NotificationReviewComplaint
+    public class NotificationReview
     {
         public IEnumerable<NotificationUser> Users { get; set; }
-        public NotificationEmployee Employee { get; set; }
         public NotificationReviewWriter ReviewWriter { get; set; }
+        public IEnumerable<NotificationEmployee> Employees { get; set; }
     }
 }
