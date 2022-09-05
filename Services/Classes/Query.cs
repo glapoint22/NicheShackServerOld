@@ -10,13 +10,11 @@ namespace Services.Classes
         None,
         Category,
         Niche,
-        ProductSubgroup,
-        FeaturedProducts,
-        ProductPrice,
-        ProductRating,
-        ProductKeywords,
-        ProductCreationDate,
-        SubQuery,
+        Subgroup,
+        Price,
+        Rating,
+        KeywordGroup,
+        Date,
         Auto
     }
 
@@ -24,7 +22,7 @@ namespace Services.Classes
 
     public enum ComparisonOperatorType
     {
-        Equal = 1,
+        Equal,
         NotEqual,
         GreaterThan,
         GreaterThanOrEqual,
@@ -35,7 +33,7 @@ namespace Services.Classes
 
     public enum LogicalOperatorType
     {
-        And = 1,
+        And,
         Or
     }
 
