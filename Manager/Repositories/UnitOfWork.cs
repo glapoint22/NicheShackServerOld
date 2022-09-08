@@ -25,7 +25,6 @@ namespace Manager.Repositories
         public IRepository<ProductFilter> ProductFilters { get; }
         public IRepository<ProductMedia> ProductMedia { get; }
         public IRepository<ProductKeyword> ProductKeywords { get; }
-        public IRepository<NotificationDetails> NotificationDetails { get; }
         public ISearchableRepository<Subgroup> Subgroups { get; }
         public IRepository<SubgroupProduct> SubgroupProducts { get; }
         public IRepository<ProductReview> ProductReviews { get; }
@@ -37,6 +36,8 @@ namespace Manager.Repositories
         public IRepository<PageKeyword> PageKeywords { get; }
         public IRepository<Subproduct> Subproducts { get; }
         public IRepository<NotificationEmployeeNote> NotificationEmployeeNotes { get; }
+        public IRepository<NotificationEmployeeMessage> NotificationEmployeeMessages { get; }
+        public IRepository<NotificationGroup> NotificationGroups { get; }
 
 
         // Custom Repositories
@@ -64,7 +65,6 @@ namespace Manager.Repositories
             ProductFilters = new Repository<ProductFilter>(context);
             ProductMedia = new Repository<ProductMedia>(context);
             ProductKeywords = new Repository<ProductKeyword>(context);
-            NotificationDetails = new Repository<NotificationDetails>(context);
             Subgroups = new SearchableRepository<Subgroup>(context);
             SubgroupProducts = new Repository<SubgroupProduct>(context);
             ProductReviews = new Repository<ProductReview>(context);
@@ -76,6 +76,8 @@ namespace Manager.Repositories
             PageKeywords = new Repository<PageKeyword>(context);
             Subproducts = new Repository<Subproduct>(context);
             NotificationEmployeeNotes = new Repository<NotificationEmployeeNote>(context);
+            NotificationEmployeeMessages = new Repository<NotificationEmployeeMessage>(context);
+            NotificationGroups = new Repository<NotificationGroup>(context);
 
             // Custom Repositories
             Products = new ProductRepository(context);

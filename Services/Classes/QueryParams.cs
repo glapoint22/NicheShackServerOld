@@ -173,7 +173,7 @@ namespace Services.Classes
                     }
 
                     // Product Subgroup
-                    else if (query.QueryType == QueryType.ProductSubgroup)
+                    else if (query.QueryType == QueryType.Subgroup)
                     {
                         query.IntValues = await context.SubgroupProducts
                             .AsNoTracking()
@@ -182,7 +182,7 @@ namespace Services.Classes
                     }
 
                     // Product Keywords
-                    else if (query.QueryType == QueryType.ProductKeywords)
+                    else if (query.QueryType == QueryType.KeywordGroup)
                     {
                         List<int> keywordIds = await context.ProductKeywords
                             .AsNoTracking()
@@ -198,7 +198,7 @@ namespace Services.Classes
                     }
 
                     // Subquery
-                    else if (query.QueryType == QueryType.SubQuery)
+                    else if (query.QueryType == QueryType.None)
                     {
                         await UpdateQueries(query.SubQueries, context);
                     }

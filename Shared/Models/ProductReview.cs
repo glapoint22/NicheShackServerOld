@@ -27,12 +27,12 @@ namespace DataAccess.Models
 
         public virtual Product Product { get; set; }
         public virtual Customer Customer { get; set; }
-        public virtual ICollection<NotificationDetails> NotificationDetails { get; set; }
+        public virtual ICollection<Notification> Notifications { get; set; }
 
 
         public ProductReview()
         {
-            NotificationDetails = new HashSet<NotificationDetails>();
+            Notifications = new HashSet<Notification>();
         }
     }
 }

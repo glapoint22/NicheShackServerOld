@@ -21,7 +21,7 @@ namespace Website.Repositories
         public IRepository<ListProduct> ListProducts { get; }
         public IRepository<Media> Media { get; }
         public IRepository<Notification> Notifications { get; }
-        public IRepository<NotificationDetails> NotificationText { get; }
+        //public IRepository<NotificationDetails> NotificationText { get; }
         public IRepository<Page> Pages { get; }
         public IRepository<OrderProduct> OrderProducts { get; }
         public IRepository<ProductKeyword> ProductKeywords { get; }
@@ -57,7 +57,7 @@ namespace Website.Repositories
             ListProducts = new Repository<ListProduct>(context);
             Media = new Repository<Media>(context);
             Notifications = new Repository<Notification>(context);
-            NotificationText = new Repository<NotificationDetails>(context);
+            //NotificationText = new Repository<NotificationDetails>(context);
             Pages = new Repository<Page>(context);
             OrderProducts = new Repository<OrderProduct>(context);
             ProductKeywords = new Repository<ProductKeyword>(context);

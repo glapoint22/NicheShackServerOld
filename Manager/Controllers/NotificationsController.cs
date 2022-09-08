@@ -39,9 +39,9 @@ namespace Manager.Controllers
 
         [HttpGet]
         [Route("Message")]
-        public async Task<ActionResult> GetMessageNotification(string email, int type, DateTime? archiveDate)
+        public async Task<ActionResult> GetMessageNotification(int notificationGroupId)
         {
-            return Ok(await unitOfWork.Notifications.GetMessageNotification(email, type, archiveDate));
+            return Ok(await unitOfWork.Notifications.GetMessageNotification(notificationGroupId));
         }
 
 
@@ -50,9 +50,9 @@ namespace Manager.Controllers
 
         [HttpGet]
         [Route("Review")]
-        public async Task<ActionResult> GetReviewNotification(int productId, int type, DateTime? archiveDate)
+        public async Task<ActionResult> GetReviewNotification(int notificationGroupId)
         {
-            return Ok(await unitOfWork.Notifications.GetReviewNotification(productId, type, archiveDate));
+            return Ok(await unitOfWork.Notifications.GetReviewNotification(notificationGroupId));
         }
 
 
@@ -60,39 +60,29 @@ namespace Manager.Controllers
 
         [HttpGet]
         [Route("Product")]
-        public async Task<ActionResult> GetProductNotification(int productId, int type, DateTime? archiveDate)
+        public async Task<ActionResult> GetProductNotification(int notificationGroupId)
         {
-            return Ok(await unitOfWork.Notifications.GetProductNotification(productId, type, archiveDate));
+            return Ok(await unitOfWork.Notifications.GetProductNotification(notificationGroupId));
         }
 
 
 
 
 
-        
+
         [HttpPost]
         [Route("PostNote")]
         public async Task PostNote(NewNotificationEmployeeNote newNotificationEmployeeNote)
         {
-            int notificationId = await unitOfWork.Notifications.Get(x => x.ProductId == newNotificationEmployeeNote.ProductId &&
-                                                                         x.Type == newNotificationEmployeeNote.NotificationType &&
-                                                                         x.ArchiveDate == newNotificationEmployeeNote.ArchiveDate,
-                                                                    x => x.Id);
-
             // Post the new note
             NotificationEmployeeNote notificationEmployeeNote = new NotificationEmployeeNote
             {
+                NotificationGroupId = newNotificationEmployeeNote.NotificationGroupId,
                 EmployeeId = "835529FC9A",
-                TimeStamp = DateTime.Now,
-                Text = newNotificationEmployeeNote.Text
+                Note = newNotificationEmployeeNote.Note,
+                CreationDate = DateTime.Now
             };
             unitOfWork.NotificationEmployeeNotes.Add(notificationEmployeeNote);
-            await unitOfWork.Save();
-
-            // Store the id of the new posted note in the NotificationDetails table so that the associated notification has reference to it 
-            NotificationDetails notificationDetails = await unitOfWork.NotificationDetails.Get(x => x.NotificationId == notificationId);
-            notificationDetails.NotificationEmployeeNoteId = notificationEmployeeNote.Id;
-            unitOfWork.NotificationDetails.Update(notificationDetails);
             await unitOfWork.Save();
         }
 
@@ -102,31 +92,23 @@ namespace Manager.Controllers
 
 
         [HttpPost]
-        [Route("PostReply")]
-        public async Task PostReply(NewNotificationEmployeeNote newNotificationMessageReply)
+        [Route("PostMessage")]
+        public async Task PostMessage(NewNotificationEmployeeMessage newNotificationEmployeeMessage)
         {
-            int notificationId = await unitOfWork.Notifications.Get(x => x.Id == newNotificationMessageReply.MessageId &&
-                                                                        (x.NotificationDetails.Select(y => y.Customer).FirstOrDefault() == null ?
-                                                                            (x.NotificationDetails.Select(y => y.Email).FirstOrDefault() == newNotificationMessageReply.Email) :
-                                                                             x.NotificationDetails.Select(y => y.Customer.Email).FirstOrDefault() == newNotificationMessageReply.Email) &&
-                                                                         x.Type == newNotificationMessageReply.NotificationType &&
-                                                                         x.ArchiveDate == newNotificationMessageReply.ArchiveDate,
-                                                                    x => x.Id);
-
-            // Post the new message reply
-            NotificationEmployeeNote notificationMessageReply = new NotificationEmployeeNote
+            // Post the new message
+            NotificationEmployeeMessage notificationEmployeeMessage = new NotificationEmployeeMessage
             {
                 EmployeeId = "835529FC9A",
-                TimeStamp = DateTime.Now,
-                Text = newNotificationMessageReply.Text
+                Message = newNotificationEmployeeMessage.Message,
+                CreationDate = DateTime.Now,
             };
-            unitOfWork.NotificationEmployeeNotes.Add(notificationMessageReply);
+            unitOfWork.NotificationEmployeeMessages.Add(notificationEmployeeMessage);
             await unitOfWork.Save();
 
-            // Store the id of the new message reply in the NotificationDetails table so that the associated notification has reference to it 
-            NotificationDetails notificationDetails = await unitOfWork.NotificationDetails.Get(x => x.NotificationId == notificationId);
-            notificationDetails.NotificationEmployeeNoteId = notificationMessageReply.Id;
-            unitOfWork.NotificationDetails.Update(notificationDetails);
+            // Store the id of the new message in the Notifications table so that the associated notification has reference to it 
+            Notification notification = await unitOfWork.Notifications.Get(x => x.Id == newNotificationEmployeeMessage.NotificationId);
+            notification.EmployeeMessageId = notificationEmployeeMessage.Id;
+            unitOfWork.Notifications.Update(notification);
             await unitOfWork.Save();
         }
 
@@ -141,39 +123,12 @@ namespace Manager.Controllers
         public async Task ArchiveNotification(ArchiveNotification archiveNotification)
         {
             DateTime archiveDate = DateTime.Now;
-            IEnumerable<Notification> notifications = await unitOfWork.Notifications.GetCollection(x => x.ProductId == archiveNotification.ProductId &&
-                                                                                                        x.Type == archiveNotification.NotificationType &&
-                                                                                                        x.ArchiveDate == null);
+            NotificationGroup notificationGroup = await unitOfWork.NotificationGroups.Get(x => x.Id == archiveNotification.NotificationGroupId);
 
-            foreach (Notification notification in notifications)
-            {
-                notification.ArchiveDate = archiveDate;
-            }
-            unitOfWork.Notifications.UpdateRange(notifications);
+            notificationGroup.ArchiveDate = archiveDate;
+
+            unitOfWork.NotificationGroups.Update(notificationGroup);
             await unitOfWork.Save();
         }
-
-
-
-
-        [HttpPut]
-        [Route("Message/Archive")]
-        public async Task ArchiveMessageNotification(ArchiveNotification archiveNotification)
-        {
-            DateTime archiveDate = DateTime.Now;
-            IEnumerable<Notification> notifications = await unitOfWork.Notifications.GetCollection(x => (x.NotificationDetails.Select(y => y.Customer).FirstOrDefault() == null ?
-                                                                                                            (x.NotificationDetails.Select(y => y.Email).FirstOrDefault() == archiveNotification.Email) :
-                                                                                                             x.NotificationDetails.Select(y => y.Customer.Email).FirstOrDefault() == archiveNotification.Email) &&
-                                                                                                         x.Type == archiveNotification.NotificationType &&
-                                                                                                         x.ArchiveDate == null);
-
-            foreach (Notification notification in notifications)
-            {
-                notification.ArchiveDate = archiveDate;
-            }
-            unitOfWork.Notifications.UpdateRange(notifications);
-            await unitOfWork.Save();
-        }
-
     }
 }

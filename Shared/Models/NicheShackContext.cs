@@ -57,8 +57,15 @@ namespace DataAccess.Models
 
 
         public virtual DbSet<Niche> Niches { get; set; }
+
+
+        public virtual DbSet<NotificationGroup> NotificationGroups { get; set; }
+
+
         public virtual DbSet<Notification> Notifications { get; set; }
-        public virtual DbSet<NotificationDetails> NotificationDetails { get; set; }
+
+
+        public virtual DbSet<NotificationEmployeeMessage> NotificationEmployeeMessages { get; set; }
 
         public virtual DbSet<NotificationEmployeeNote> NotificationEmployeeNotes { get; set; }
 
@@ -461,23 +468,6 @@ namespace DataAccess.Models
 
 
 
-
-            // NotificationDetails
-            modelBuilder.Entity<NotificationDetails>(entity =>
-            {
-                entity.HasOne(x => x.Customer)
-                .WithMany(x => x.NotificationDetails)
-                .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(x => x.Notification)
-                .WithMany(x => x.NotificationDetails)
-                .OnDelete(DeleteBehavior.Cascade);
-
-
-                entity.HasOne(x => x.NotificationEmployeeNotes)
-                .WithMany(x => x.NotificationDetails)
-                .OnDelete(DeleteBehavior.ClientSetNull);
-            });
 
 
 

@@ -38,19 +38,19 @@ namespace Website.Controllers
             
             await unitOfWork.Save();
 
-            NotificationDetails notificationText = new NotificationDetails
-            {
-                CustomerId = User.FindFirst(ClaimTypes.NameIdentifier).Value,
-                NotificationId = notification.Id,
-                ReviewId = notificationData.ReviewId,
-                TimeStamp = DateTime.Now,
-                //Type = 0,
-                Text = notificationData.Comments
-            };
+            //NotificationDetails notificationText = new NotificationDetails
+            //{
+            //    CustomerId = User.FindFirst(ClaimTypes.NameIdentifier).Value,
+            //    NotificationId = notification.Id,
+            //    ReviewId = notificationData.ReviewId,
+            //    TimeStamp = DateTime.Now,
+            //    //Type = 0,
+            //    Text = notificationData.Comments
+            //};
 
 
-            unitOfWork.NotificationText.Add(notificationText);
-            await unitOfWork.Save();
+            //unitOfWork.NotificationText.Add(notificationText);
+            //await unitOfWork.Save();
 
             return Ok();
         }
@@ -71,20 +71,20 @@ namespace Website.Controllers
 
             await unitOfWork.Save();
 
-            NotificationDetails notificationText = new NotificationDetails
-            {
-                CustomerId = User.FindFirst(ClaimTypes.NameIdentifier) != null ? User.FindFirst(ClaimTypes.NameIdentifier).Value : null,
-                NotificationId = notification.Id,
-                TimeStamp = DateTime.Now,
-                //Type = 0,
-                Text = messageNotification.Message,
-                Email = messageNotification.Email,// **** Put email of user if user is signed in **** \\
-                Name = messageNotification.Name// **** Put name of user if user is signed in **** \\
-            };
+            //NotificationDetails notificationText = new NotificationDetails
+            //{
+            //    CustomerId = User.FindFirst(ClaimTypes.NameIdentifier) != null ? User.FindFirst(ClaimTypes.NameIdentifier).Value : null,
+            //    NotificationId = notification.Id,
+            //    TimeStamp = DateTime.Now,
+            //    //Type = 0,
+            //    Text = messageNotification.Message,
+            //    Email = messageNotification.Email,// **** Put email of user if user is signed in **** \\
+            //    Name = messageNotification.Name// **** Put name of user if user is signed in **** \\
+            //};
 
 
-            unitOfWork.NotificationText.Add(notificationText);
-            await unitOfWork.Save();
+            //unitOfWork.NotificationText.Add(notificationText);
+            //await unitOfWork.Save();
 
             return Ok();
         }

@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace Manager.Classes.Notifications
 {
-    public class NewNotificationEmployeeNote
+    public class NewNotificationEmployeeMessage
     {
-        public int NotificationGroupId { get; set; }
-        public string Note { get; set; }
+        public int NotificationId { get; set; }
+        public string Message { get; set; }
     }
 }

@@ -4,14 +4,16 @@ using DataAccess.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(NicheShackContext))]
-    partial class NicheShackContextModelSnapshot : ModelSnapshot
+    [Migration("20220905193934_CreatedNotificationGroupsTable")]
+    partial class CreatedNotificationGroupsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -729,9 +731,6 @@ namespace DataAccess.Migrations
                     b.Property<string>("CustomerId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int?>("EmployeeMessageId")
-                        .HasColumnType("int");
-
                     b.Property<string>("NonAccountUserEmail")
                         .HasColumnType("nvarchar(256)")
                         .HasMaxLength(256);
@@ -759,8 +758,6 @@ namespace DataAccess.Migrations
 
                     b.HasIndex("CustomerId");
 
-                    b.HasIndex("EmployeeMessageId");
-
                     b.HasIndex("NotificationGroupId");
 
                     b.HasIndex("ProductId");
@@ -768,30 +765,6 @@ namespace DataAccess.Migrations
                     b.HasIndex("ReviewId");
 
                     b.ToTable("Notifications");
-                });
-
-            modelBuilder.Entity("DataAccess.Models.NotificationEmployeeMessage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("CreationDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("EmployeeId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Message")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EmployeeId");
-
-                    b.ToTable("NotificationEmployeeMessages");
                 });
 
             modelBuilder.Entity("DataAccess.Models.NotificationEmployeeNote", b =>
@@ -1825,10 +1798,6 @@ namespace DataAccess.Migrations
                         .WithMany("Notifications")
                         .HasForeignKey("CustomerId");
 
-                    b.HasOne("DataAccess.Models.NotificationEmployeeMessage", "NotificationEmployeeMessage")
-                        .WithMany()
-                        .HasForeignKey("EmployeeMessageId");
-
                     b.HasOne("DataAccess.Models.NotificationGroup", "NotificationGroup")
                         .WithMany("Notifications")
                         .HasForeignKey("NotificationGroupId")
@@ -1842,15 +1811,6 @@ namespace DataAccess.Migrations
                     b.HasOne("DataAccess.Models.ProductReview", "ProductReview")
                         .WithMany("Notifications")
                         .HasForeignKey("ReviewId");
-                });
-
-            modelBuilder.Entity("DataAccess.Models.NotificationEmployeeMessage", b =>
-                {
-                    b.HasOne("DataAccess.Models.Customer", "Customer")
-                        .WithMany()
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("DataAccess.Models.NotificationEmployeeNote", b =>

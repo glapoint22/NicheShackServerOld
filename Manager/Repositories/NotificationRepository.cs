@@ -33,114 +33,72 @@ namespace Manager.Repositories
 
 
 
-        public async Task<IEnumerable> GetNotifications(bool isNew)
+        public async Task<List<NotificationItem>> GetNotifications(bool isNew)
         {
-            var allNotifications = await context.NotificationDetails.Where(x => isNew ? x.Notification.ArchiveDate == null : x.Notification.ArchiveDate != null)
-                .Select(x => new
-                {
-                    ProductId = x.Notification.ProductId,
-                    ProductName = x.Notification.Product.Name,
-                    Thumbnail = x.Notification.Product.Media.Thumbnail,
-                    Type = x.Notification.Type,
-                    Email = x.Email != null ? x.Email : x.Customer.Email,
-                    Date = x.TimeStamp,
-                    ArchiveDate = x.Notification.ArchiveDate
-                }).ToListAsync();
-
-
-
-            var groupByTypeNotifications = allNotifications.GroupBy(x => x.Type, (key, n) => new
+            var allNotifications = await context.Notifications.Where(x => isNew ? x.NotificationGroup.ArchiveDate == null : x.NotificationGroup.ArchiveDate != null).Select(x => new
             {
-                Type = key,
-                Notifications = n.OrderByDescending(x => x.Date)
+                NotificationGroupId = x.NotificationGroupId,
+                Email = x.Type == 0 ?
+                    x.NonAccountUserEmail != null ? x.NonAccountUserEmail :
+                    x.Customer.Email :
+                    null,
+                ProductImage = x.Product.Media.Thumbnail,
+                NotificationType = x.Type,
+                CreationDate = x.CreationDate,
+                ArchiveDate = x.NotificationGroup.ArchiveDate,
+                Count = x.NotificationGroup.Notifications.Count()
+            }).ToListAsync();
+
+
+            List<NotificationItem> notifications = allNotifications
+            // Group each notification by the group they belong to
+            .GroupBy(x => x.NotificationGroupId, (key, n) => n
+            // Then order each notification in each group by the most recent date
+            .OrderByDescending(y => y.CreationDate)
+            // And then return a list that consists of only the first notification of each group
+            .FirstOrDefault())
+            // Then take that list and order it by either the creation date (if we're compiling a New list) or the archive date (if we're compiling an Archive list)
+            .OrderByDescending(x => isNew ? x.CreationDate : x.ArchiveDate)
+            .Select(x => new NotificationItem
+            {
+                NotificationGroupId = x.NotificationGroupId,
+                NotificationType = x.NotificationType,
+                Name = x.Email != null ? x.Email : GetNotificationName(x.NotificationType),
+                Image = x.ProductImage,
+                IsNew = isNew,
+                Count = x.Count
             }).ToList();
 
-
-
-            var notifications = new List<NotificationItem>();
-
-            foreach (var x in groupByTypeNotifications)
-            {
-                if (x.Type == 0)
-                {
-                    var messageNotifications = x.Notifications.GroupBy(y => new { y.Email, y.ArchiveDate }, (key, a) => new
-                    {
-                        Count = a.Count(),
-                        Notification = a.FirstOrDefault()
-                    }).Select(b => new NotificationItem
-                    {
-                        IsNew = isNew,
-                        Type = b.Notification.Type,
-                        ProductId = b.Notification.ProductId,
-                        Thumbnail = b.Notification.Thumbnail,
-                        Email = b.Notification.Email,
-                        Date = b.Notification.Date,
-                        Count = b.Count,
-                        ArchiveDate = b.Notification.ArchiveDate
-                    }).ToList();
-                    notifications.AddRange(messageNotifications);
-                }
-                else
-                {
-                    var productNotifications = x.Notifications.GroupBy(y => new { y.ProductId, y.ArchiveDate }, (key, a) => new
-                    {
-                        Count = a.Count(),
-                        Notification = a.FirstOrDefault()
-
-                    }).Select(b => new NotificationItem
-                    {
-                        IsNew = isNew,
-                        Type = b.Notification.Type,
-                        ProductId = b.Notification.ProductId,
-                        productName = b.Notification.ProductName,
-                        Thumbnail = b.Notification.Thumbnail,
-                        Email = b.Notification.Email,
-                        Date = b.Notification.Date,
-                        Count = b.Count,
-                        ArchiveDate = b.Notification.ArchiveDate
-                    }).ToList();
-
-                    notifications.AddRange(productNotifications);
-                }
-            }
-
-            return notifications.OrderByDescending(x => isNew ? x.Date : x.ArchiveDate);
+            return notifications;
         }
 
 
 
 
 
-        public async Task<List<NotificationMessage>> GetMessageNotification(string email, int type, DateTime? archiveDate)
-        {
-            var notificationIds = await context.Notifications.Where(x => (x.NotificationDetails.Select(y => y.Customer).FirstOrDefault() == null ?
-                                                                             (x.NotificationDetails.Select(y => y.Email).FirstOrDefault() == email) :
-                                                                              x.NotificationDetails.Select(y => y.Customer.Email).FirstOrDefault() == email) &&
-                                                                          x.Type == type &&
-                                                                          x.ArchiveDate == archiveDate)
-                                                             .Select(x => x.Id).ToListAsync();
 
-            List<NotificationMessage> users = await context.NotificationDetails.Where(x => notificationIds.Contains(x.NotificationId)).Select(x => new NotificationMessage
+        public async Task<List<NotificationMessage>> GetMessageNotification(int notificationGroupId)
+        {
+            List<NotificationMessage> message = await context.Notifications.Where(x => x.NotificationGroupId == notificationGroupId).Select(x => new NotificationMessage
             {
-                MessageId = x.NotificationId,
-                Date = x.TimeStamp,
-                SenderName = x.Name,
+                NotificationId = x.Id,
+                UserName = x.NonAccountUserName,
+                Date = x.CreationDate,
                 FirstName = x.Customer.FirstName,
                 LastName = x.Customer.LastName,
                 Image = x.Customer.Image,
-                Email = x.Email,
-                Text = x.Text,
+                Email = x.NonAccountUserEmail != null ? x.NonAccountUserEmail : x.Customer.Email,
+                Text = x.UserComment,
                 NoncompliantStrikes = x.Customer.NoncompliantStrikes,
                 BlockNotificationSending = x.Customer.BlockNotificationSending,
-                EmployeeReplyId = x.NotificationEmployeeNoteId,
-                EmployeeFirstName = x.NotificationEmployeeNotes.Customer.FirstName,
-                EmployeeLastName = x.NotificationEmployeeNotes.Customer.LastName,
-                EmployeeImage = x.NotificationEmployeeNotes.Customer.Image,
-                ReplyDate = x.NotificationEmployeeNotes.TimeStamp,
-                Reply = x.NotificationEmployeeNotes.Text
+                EmployeeFirstName = x.NotificationEmployeeMessage.Customer.FirstName,
+                EmployeeLastName = x.NotificationEmployeeMessage.Customer.LastName,
+                EmployeeImage = x.NotificationEmployeeMessage.Customer.Image,
+                EmployeeMessageDate = x.NotificationEmployeeMessage.CreationDate,
+                EmployeeMessage = x.NotificationEmployeeMessage.Message
             }).OrderByDescending(x => x.Date).ToListAsync();
 
-            return users;
+            return message;
         }
 
 
@@ -149,27 +107,16 @@ namespace Manager.Repositories
 
 
 
-
-
-
-
-
-
-        public async Task<NotificationReview> GetReviewNotification(int productId, int type, DateTime? archiveDate)
+        public async Task<NotificationReview> GetReviewNotification(int notificationGroupId)
         {
-            var notificationIds = await context.Notifications.Where(x => x.ProductId == productId &&
-                                                                         x.Type == type &&
-                                                                         x.ArchiveDate == archiveDate)
-                                                            .Select(x => x.Id).ToListAsync();
-
-            List<NotificationUser> users = await context.NotificationDetails.Where(x => notificationIds.Contains(x.NotificationId)).Select(x => new NotificationUser
+            List<NotificationUser> users = await context.Notifications.Where(x => x.NotificationGroupId == notificationGroupId).Select(x => new NotificationUser
             {
-                Date = x.TimeStamp,
+                Date = x.CreationDate,
                 FirstName = x.Customer.FirstName,
                 LastName = x.Customer.LastName,
                 Image = x.Customer.Image,
                 Email = x.Customer.Email,
-                Text = x.Text,
+                Text = x.UserComment,
                 NoncompliantStrikes = x.Customer.NoncompliantStrikes,
                 BlockNotificationSending = x.Customer.BlockNotificationSending,
             }).ToListAsync();
@@ -178,7 +125,7 @@ namespace Manager.Repositories
 
 
 
-            var reviewId = await context.NotificationDetails.Where(x => notificationIds.Contains(x.NotificationId)).Select(x => x.ReviewId).FirstOrDefaultAsync();
+            var reviewId = await context.Notifications.Where(x => x.NotificationGroupId == notificationGroupId).Select(x => x.ReviewId).FirstOrDefaultAsync();
             NotificationReviewWriter reviewWriter = await context.ProductReviews.Where(x => x.Id == reviewId).Select(x => new NotificationReviewWriter
             {
                 Email = x.Customer.Email,
@@ -196,19 +143,15 @@ namespace Manager.Repositories
 
 
 
-            var notificationEmployeeNoteId = await context.NotificationDetails.Where(x => notificationIds.Contains(x.NotificationId) && x.NotificationEmployeeNoteId != null).Select(x => x.NotificationEmployeeNoteId).FirstOrDefaultAsync();
-            List<NotificationEmployee> employees = await context.NotificationEmployeeNotes.Where(x => x.Id == notificationEmployeeNoteId).Select(x => new NotificationEmployee
+            List<NotificationProfile> employees = await context.NotificationEmployeeNotes.Where(x => x.NotificationGroupId == notificationGroupId).Select(x => new NotificationProfile
             {
-                NoteId = x.Id,
-                Date = x.TimeStamp,
+                Date = x.CreationDate,
                 FirstName = x.Customer.FirstName,
                 LastName = x.Customer.LastName,
                 Image = x.Customer.Image,
                 Email = x.Customer.Email,
-                Text = x.Text
+                Text = x.Note
             }).ToListAsync();
-
-
 
 
 
@@ -228,36 +171,36 @@ namespace Manager.Repositories
 
 
 
-        public async Task<NotificationProduct> GetProductNotification(int productId, int type, DateTime? archiveDate)
-        {
-            var notificationIds = await context.Notifications.Where(x => x.ProductId == productId &&
-                                                                         x.Type == type &&
-                                                                         x.ArchiveDate == archiveDate)
-                                                            .Select(x => x.Id).ToListAsync();
 
-            List<NotificationUser> users = await context.NotificationDetails.Where(x => notificationIds.Contains(x.NotificationId)).Select(x => new NotificationUser
+
+
+
+
+
+
+        public async Task<NotificationProduct> GetProductNotification(int notificationGroupId)
+        {
+            List<NotificationUser> users = await context.Notifications.Where(x => x.NotificationGroupId == notificationGroupId).Select(x => new NotificationUser
             {
-                Date = x.TimeStamp,
+                Date = x.CreationDate,
                 FirstName = x.Customer.FirstName,
                 LastName = x.Customer.LastName,
                 Image = x.Customer.Image,
                 Email = x.Customer.Email,
-                Text = x.Text,
+                Text = x.UserComment,
                 NoncompliantStrikes = x.Customer.NoncompliantStrikes,
                 BlockNotificationSending = x.Customer.BlockNotificationSending
             }).ToListAsync();
 
 
-            var notificationEmployeeNoteId = await context.NotificationDetails.Where(x => notificationIds.Contains(x.NotificationId) && x.NotificationEmployeeNoteId != null).Select(x => x.NotificationEmployeeNoteId).FirstOrDefaultAsync();
-            List<NotificationEmployee> employees = await context.NotificationEmployeeNotes.Where(x => x.Id == notificationEmployeeNoteId).Select(x => new NotificationEmployee
+            List<NotificationProfile> employees = await context.NotificationEmployeeNotes.Where(x => x.NotificationGroupId == notificationGroupId).Select(x => new NotificationProfile
             {
-                NoteId = notificationEmployeeNoteId,
-                Date = x.TimeStamp,
+                Date = x.CreationDate,
                 FirstName = x.Customer.FirstName,
                 LastName = x.Customer.LastName,
                 Image = x.Customer.Image,
                 Email = x.Customer.Email,
-                Text = x.Text
+                Text = x.Note
             }).ToListAsync();
 
 
@@ -270,5 +213,113 @@ namespace Manager.Repositories
             return notification;
         }
 
+
+
+
+
+
+
+
+
+        string GetNotificationName(int notificationType)
+        {
+            string notificationName = "";
+
+            switch (notificationType)
+            {
+                case 1:
+                    notificationName = "Review Complaint";
+                    break;
+
+                case 2:
+                    notificationName = "Product Name Doesn\'t Match With Product Description";
+                    break;
+
+                case 3:
+                    notificationName = "Product Name Doesn\'t Match With Product Image";
+                    break;
+
+                case 4:
+                    notificationName = "Product Name (Other)";
+                    break;
+
+                case 5:
+                    notificationName = "Product Price Too High";
+                    break;
+
+                case 6:
+                    notificationName = "Product Price Not Correct";
+                    break;
+
+                case 7:
+                    notificationName = "Product Price (Other)";
+                    break;
+
+                case 8:
+                    notificationName = "Videos & Images are Different From Product";
+                    break;
+
+                case 9:
+                    notificationName = "Not Enough Videos & Images";
+                    break;
+
+                case 10:
+                    notificationName = "Videos & Images Not Clear";
+                    break;
+
+                case 11:
+                    notificationName = "Videos & Images Misleading";
+                    break;
+
+                case 12:
+                    notificationName = "Videos & Images (Other)";
+                    break;
+
+                case 13:
+                    notificationName = "Product Description Incorrect";
+                    break;
+
+                case 14:
+                    notificationName = "Product Description Too Vague";
+                    break;
+
+                case 15:
+                    notificationName = "Product Description Misleading";
+                    break;
+
+                case 16:
+                    notificationName = "Product Description (Other)";
+                    break;
+
+                case 17:
+                    notificationName = "Product Reported As Illegal";
+                    break;
+
+                case 18:
+                    notificationName = "Product Reported As Having Adult Content";
+                    break;
+
+                case 19:
+                    notificationName = "Offensive Product (Other)";
+                    break;
+
+
+                case 20:
+                    notificationName = "Product Inactive";
+                    break;
+
+                case 21:
+                    notificationName = "Product site no longer in service";
+                    break;
+
+
+                case 22:
+                    notificationName = "Missing Product (Other)";
+                    break;
+            }
+
+
+            return notificationName;
+        }
     }
 }

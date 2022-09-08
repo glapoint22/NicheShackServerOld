@@ -41,7 +41,7 @@ namespace DataAccess.Models
         public virtual ICollection<RefreshToken> RefreshTokens { get; set; }
         public virtual ICollection<ProductOrder> ProductOrders { get; set; }
         public virtual ICollection<ProductReview> ProductReviews { get; set; }
-        public virtual ICollection<NotificationDetails> NotificationDetails { get; set; }
+        public virtual ICollection<Notification> Notifications { get; set; }
         public virtual ICollection<NotificationEmployeeNote> NotificationEmployeeNotes { get; set; }
 
 
@@ -52,7 +52,7 @@ namespace DataAccess.Models
             RefreshTokens = new HashSet<RefreshToken>();
             ProductOrders = new HashSet<ProductOrder>();
             ProductReviews = new HashSet<ProductReview>();
-            NotificationDetails = new HashSet<NotificationDetails>();
+            Notifications = new HashSet<Notification>();
             NotificationEmployeeNotes = new HashSet<NotificationEmployeeNote>();
         }
     }
