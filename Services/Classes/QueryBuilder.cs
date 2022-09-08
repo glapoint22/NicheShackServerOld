@@ -112,7 +112,7 @@ namespace Services.Classes
 
 
                         // Product Rating
-                        else if (query.QueryType == QueryType.ProductRating)
+                        else if (query.QueryType == QueryType.Rating)
                         {
                             PropertyInfo ratingProperty = typeof(Product).GetProperty("Rating");
                             MemberExpression rating = Expression.Property(product, ratingProperty);
@@ -128,7 +128,7 @@ namespace Services.Classes
 
 
                         // Product Price
-                        else if (query.QueryType == QueryType.ProductPrice)
+                        else if (query.QueryType == QueryType.Price)
                         {
                             PropertyInfo priceProperty1 = typeof(Product).GetProperty("MinPrice");
                             PropertyInfo priceProperty2 = typeof(Product).GetProperty("MaxPrice");
@@ -147,7 +147,7 @@ namespace Services.Classes
 
 
                         // Product Subgroup, Product Keywords, or Featured Products
-                        else if (query.QueryType == QueryType.ProductSubgroup || query.QueryType == QueryType.ProductKeywords)
+                        else if (query.QueryType == QueryType.ProductGroup || query.QueryType == QueryType.KeywordGroup)
                         {
                             PropertyInfo productProperty = typeof(Product).GetProperty("Id");
                             MemberExpression productId = Expression.Property(product, productProperty);
@@ -159,7 +159,7 @@ namespace Services.Classes
 
 
                         // Product Creation Date
-                        else if (query.QueryType == QueryType.ProductCreationDate)
+                        else if (query.QueryType == QueryType.Date)
                         {
                             PropertyInfo dateProperty = typeof(Product).GetProperty("Date");
                             MemberExpression date = Expression.Property(product, dateProperty);
@@ -175,7 +175,7 @@ namespace Services.Classes
 
 
                         // Subquery
-                        else if (query.QueryType == QueryType.SubQuery)
+                        else if (query.QueryType == QueryType.None)
                         {
                             right = GetQueries(query.SubQueries);
                         }

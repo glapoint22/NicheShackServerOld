@@ -18,6 +18,13 @@ namespace Manager.Controllers
         }
 
 
+        [HttpGet]
+        public async Task<ActionResult> GetCategories()
+        {
+            return Ok(await unitOfWork.KeywordGroups.GetCollection<ItemViewModel<KeywordGroup>>(x => !x.ForProduct));
+        }
+
+
 
         [HttpGet]
         [Route("Search")]
