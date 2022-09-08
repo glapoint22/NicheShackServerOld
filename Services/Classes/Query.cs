@@ -10,7 +10,7 @@ namespace Services.Classes
         None,
         Category,
         Niche,
-        Subgroup,
+        ProductGroup,
         Price,
         Rating,
         KeywordGroup,

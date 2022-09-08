@@ -173,7 +173,11 @@ namespace Services.Classes
                     }
 
                     // Product Subgroup
+<<<<<<< HEAD
                     else if (query.QueryType == QueryType.Subgroup)
+=======
+                    else if (query.QueryType == QueryType.ProductGroup)
+>>>>>>> 51a31aaf6e1bd3e4b6baecab025a371937285dba
                     {
                         query.IntValues = await context.SubgroupProducts
                             .AsNoTracking()

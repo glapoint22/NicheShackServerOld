@@ -147,7 +147,11 @@ namespace Services.Classes
 
 
                         // Product Subgroup, Product Keywords, or Featured Products
+<<<<<<< HEAD
                         else if (query.QueryType == QueryType.Subgroup || query.QueryType == QueryType.KeywordGroup)
+=======
+                        else if (query.QueryType == QueryType.ProductGroup || query.QueryType == QueryType.KeywordGroup)
+>>>>>>> 51a31aaf6e1bd3e4b6baecab025a371937285dba
                         {
                             PropertyInfo productProperty = typeof(Product).GetProperty("Id");
                             MemberExpression productId = Expression.Property(product, productProperty);
