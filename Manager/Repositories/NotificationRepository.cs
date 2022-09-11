@@ -3,21 +3,12 @@ using DataAccess.Repositories;
 using Manager.Classes;
 using Manager.Classes.Notifications;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Manager.Repositories
 {
-
-
-
-
-
-
-
     public class NotificationRepository : Repository<Notification>, INotificationRepository
     {
         private readonly NicheShackContext context;
@@ -88,12 +79,12 @@ namespace Manager.Repositories
             {
                 NotificationId = x.Id,
                 UserName = x.NonAccountUserName,
-                Date = x.CreationDate,
                 FirstName = x.Customer.FirstName,
                 LastName = x.Customer.LastName,
                 Image = x.Customer.Image,
                 Email = x.NonAccountUserEmail != null ? x.NonAccountUserEmail : x.Customer.Email,
                 Text = x.UserComment,
+                Date = x.CreationDate,
                 NoncompliantStrikes = x.Customer.NoncompliantStrikes,
                 BlockNotificationSending = x.Customer.BlockNotificationSending,
                 EmployeeFirstName = x.NotificationEmployeeMessage.Customer.FirstName,
@@ -116,12 +107,12 @@ namespace Manager.Repositories
         {
             List<NotificationUser> users = await context.Notifications.Where(x => x.NotificationGroupId == notificationGroupId).Select(x => new NotificationUser
             {
-                Date = x.CreationDate,
                 FirstName = x.Customer.FirstName,
                 LastName = x.Customer.LastName,
                 Image = x.Customer.Image,
                 Email = x.Customer.Email,
                 Text = x.UserComment,
+                Date = x.CreationDate,
                 NoncompliantStrikes = x.Customer.NoncompliantStrikes,
                 BlockNotificationSending = x.Customer.BlockNotificationSending,
             }).ToListAsync();
@@ -133,15 +124,15 @@ namespace Manager.Repositories
             var reviewId = await context.Notifications.Where(x => x.NotificationGroupId == notificationGroupId).Select(x => x.ReviewId).FirstOrDefaultAsync();
             NotificationReviewWriter reviewWriter = await context.ProductReviews.Where(x => x.Id == reviewId).Select(x => new NotificationReviewWriter
             {
-                Email = x.Customer.Email,
-                Date = x.Date,
                 FirstName = x.Customer.FirstName,
                 LastName = x.Customer.LastName,
                 Image = x.Customer.Image,
+                Email = x.Customer.Email,
+                Text = x.Text,
+                Date = x.Date,
                 NoncompliantStrikes = x.Customer.NoncompliantStrikes,
                 BlockNotificationSending = x.Customer.BlockNotificationSending,
-                ReviewTitle = x.Title,
-                Text = x.Text
+                ReviewTitle = x.Title
             }).FirstOrDefaultAsync();
 
 
@@ -150,12 +141,12 @@ namespace Manager.Repositories
 
             List<NotificationProfile> employees = await context.NotificationEmployeeNotes.Where(x => x.NotificationGroupId == notificationGroupId).Select(x => new NotificationProfile
             {
-                Date = x.CreationDate,
                 FirstName = x.Customer.FirstName,
                 LastName = x.Customer.LastName,
                 Image = x.Customer.Image,
                 Email = x.Customer.Email,
-                Text = x.Note
+                Text = x.Note,
+                Date = x.CreationDate
             }).ToListAsync();
 
 
@@ -185,27 +176,24 @@ namespace Manager.Repositories
 
         public async Task<NotificationProduct> GetProductNotification(int notificationGroupId)
         {
-
             var product = await context.Notifications.Where(x => x.NotificationGroupId == notificationGroupId).Select(x => new
             {
                 Id = x.ProductId,
-                Disabled = x.Product.Disabled,
-                Hoplink = x.Product.Hoplink
+                Hoplink = x.Product.Hoplink,
+                Disabled = x.Product.Disabled
             }).FirstOrDefaultAsync();
-
-
-
 
 
 
             List<NotificationUser> users = await context.Notifications.Where(x => x.NotificationGroupId == notificationGroupId).Select(x => new NotificationUser
             {
-                Date = x.CreationDate,
+                UserId = x.Customer.Id,
                 FirstName = x.Customer.FirstName,
                 LastName = x.Customer.LastName,
                 Image = x.Customer.Image,
                 Email = x.Customer.Email,
                 Text = x.UserComment,
+                Date = x.CreationDate,
                 NoncompliantStrikes = x.Customer.NoncompliantStrikes,
                 BlockNotificationSending = x.Customer.BlockNotificationSending
             }).ToListAsync();
@@ -213,12 +201,12 @@ namespace Manager.Repositories
 
             List<NotificationProfile> employees = await context.NotificationEmployeeNotes.Where(x => x.NotificationGroupId == notificationGroupId).Select(x => new NotificationProfile
             {
-                Date = x.CreationDate,
                 FirstName = x.Customer.FirstName,
                 LastName = x.Customer.LastName,
                 Image = x.Customer.Image,
                 Email = x.Customer.Email,
-                Text = x.Note
+                Text = x.Note,
+                Date = x.CreationDate
             }).ToListAsync();
 
 
