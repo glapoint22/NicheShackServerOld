@@ -36,6 +36,30 @@ namespace Manager.Controllers
 
 
 
+        [HttpGet]
+        [Route("Count")]
+        public async Task<ActionResult> GetNotificationCount(int currentCount)
+        {
+            var newCount = await unitOfWork.Notifications.GetCount(x => x.NotificationGroup.ArchiveDate == null);
+
+            if (currentCount != newCount)
+            {
+                var notifications = await unitOfWork.Notifications.GetNotifications(true);
+                return Ok(new { Count = newCount, Notifications = notifications });
+            }
+            else
+            {
+                return Ok();
+            }
+
+
+
+
+
+        }
+
+
+
 
         [HttpGet]
         [Route("Message")]
@@ -123,11 +147,33 @@ namespace Manager.Controllers
         public async Task ArchiveNotification(ArchiveNotification archiveNotification)
         {
             DateTime archiveDate = DateTime.Now;
-            NotificationGroup notificationGroup = await unitOfWork.NotificationGroups.Get(x => x.Id == archiveNotification.NotificationGroupId);
+            NotificationGroup notificationGroup = await unitOfWork.NotificationGroups.Get(archiveNotification.NotificationGroupId);
 
-            notificationGroup.ArchiveDate = archiveDate;
+
+            if (notificationGroup.ArchiveDate == null)
+            {
+                notificationGroup.ArchiveDate = archiveDate;
+            }
+            else
+            {
+                notificationGroup.ArchiveDate = null;
+            }
+
 
             unitOfWork.NotificationGroups.Update(notificationGroup);
+            await unitOfWork.Save();
+        }
+
+
+
+
+        [HttpPut]
+        [Route("DisableProduct")]
+        public async Task DisableProduct(DisableProduct disableProduct)
+        {
+            Product product = await unitOfWork.Products.Get(disableProduct.ProductId);
+            product.Disabled = disableProduct.ProductDisabled;
+            unitOfWork.Products.Update(product);
             await unitOfWork.Save();
         }
     }
