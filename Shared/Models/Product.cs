@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataAccess.Models
 {
-    public class Product: IItem
+    public class Product : IItem
     {
         public int Id { get; set; }
         [ForeignKey("Vendor")]
@@ -27,7 +27,7 @@ namespace DataAccess.Models
         [MaxLength(256)]
         public string Hoplink { get; set; }
         public string Description { get; set; }
-       
+
         public int TotalReviews { get; set; }
         public double Rating { get; set; }
         public int OneStar { get; set; }
@@ -35,20 +35,42 @@ namespace DataAccess.Models
         public int ThreeStars { get; set; }
         public int FourStars { get; set; }
         public int FiveStars { get; set; }
-        public DateTime Date { get; set; }
+
+
         public double MinPrice { get; set; }
         public double MaxPrice { get; set; }
-        public int ShippingType { get; set; }
-        public int TrialPeriod { get; set; }
-        public double RecurringPrice { get; set; }
+
         public int RebillFrequency { get; set; }
-        public int TimeFrameBetweenRebill { get; set; }
+
+        public double RecurringPrice { get; set; }
+
+
+
+        public int ShippingType { get; set; }
+
         public int SubscriptionDuration { get; set; }
+
+
+        public int TimeFrameBetweenRebill { get; set; }
+
+
+
+        public int TrialPeriod { get; set; }
+
+
+        public DateTime Date { get; set; }
+
+
+
+        public bool Disabled { get; set; }
+
+
+
 
 
         public virtual Niche Niche { get; set; }
         public virtual Media Media { get; set; }
-        public virtual  Vendor Vendor { get; set; }
+        public virtual Vendor Vendor { get; set; }
         public virtual ICollection<ProductFilter> ProductFilters { get; set; }
         public virtual ICollection<ProductMedia> ProductMedia { get; set; }
         public virtual ICollection<PricePoint> ProductPrices { get; set; }

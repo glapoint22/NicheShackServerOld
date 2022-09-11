@@ -37,11 +37,13 @@ namespace Manager.Repositories
         {
             var allNotifications = await context.Notifications.Where(x => isNew ? x.NotificationGroup.ArchiveDate == null : x.NotificationGroup.ArchiveDate != null).Select(x => new
             {
+                Id = x.Id,
                 NotificationGroupId = x.NotificationGroupId,
                 Email = x.Type == 0 ?
                     x.NonAccountUserEmail != null ? x.NonAccountUserEmail :
                     x.Customer.Email :
                     null,
+                ProductName = x.Product.Name,
                 ProductImage = x.Product.Media.Thumbnail,
                 NotificationType = x.Type,
                 CreationDate = x.CreationDate,
@@ -61,11 +63,14 @@ namespace Manager.Repositories
             .OrderByDescending(x => isNew ? x.CreationDate : x.ArchiveDate)
             .Select(x => new NotificationItem
             {
+                Id = x.Id,
                 NotificationGroupId = x.NotificationGroupId,
                 NotificationType = x.NotificationType,
                 Name = x.Email != null ? x.Email : GetNotificationName(x.NotificationType),
+                ProductName = x.ProductName,
                 Image = x.ProductImage,
                 IsNew = isNew,
+                CreationDate = x.CreationDate,
                 Count = x.Count
             }).ToList();
 
@@ -180,6 +185,19 @@ namespace Manager.Repositories
 
         public async Task<NotificationProduct> GetProductNotification(int notificationGroupId)
         {
+
+            var product = await context.Notifications.Where(x => x.NotificationGroupId == notificationGroupId).Select(x => new
+            {
+                Id = x.ProductId,
+                Disabled = x.Product.Disabled,
+                Hoplink = x.Product.Hoplink
+            }).FirstOrDefaultAsync();
+
+
+
+
+
+
             List<NotificationUser> users = await context.Notifications.Where(x => x.NotificationGroupId == notificationGroupId).Select(x => new NotificationUser
             {
                 Date = x.CreationDate,
@@ -206,6 +224,9 @@ namespace Manager.Repositories
 
             NotificationProduct notification = new NotificationProduct
             {
+                ProductId = product.Id,
+                ProductHoplink = product.Hoplink,
+                ProductDisabled = product.Disabled,
                 Users = users,
                 Employees = employees
             };
