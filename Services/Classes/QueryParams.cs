@@ -17,7 +17,7 @@ namespace Services.Classes
         public QueryFilter PriceFilter { get; set; }
         public QueryFilter PriceRangeFilter { get; set; }
         public QueryFilter RatingFilter { get; set; }
-        public IEnumerable<Query> Queries { get; set; }
+        //public IEnumerable<Query> Queries { get; set; }
         public double Page { get; set; }
         public double Limit { get; set; }
         public string Filters { get; set; }
@@ -37,7 +37,7 @@ namespace Services.Classes
             SetFilters();
             await SetFilteredProducts(context);
             await SetKeywords(context);
-            await UpdateQueries(Queries, context);
+            //await UpdateQueries(Queries, context);
         }
 
 
@@ -156,54 +156,54 @@ namespace Services.Classes
 
 
         // ..................................................................................Update Queries....................................................................
-        async Task UpdateQueries(IEnumerable<Query> queries, NicheShackContext context)
-        {
-            if (queries != null && queries.Count() > 0)
-            {
-                foreach (Query query in queries)
-                {
+        //async Task UpdateQueries(IEnumerable<Query> queries, NicheShackContext context)
+        //{
+        //    if (queries != null && queries.Count() > 0)
+        //    {
+        //        foreach (Query query in queries)
+        //        {
 
-                    // Auto
-                    if (query.QueryType == QueryType.Auto && query.IntValue == 2)
-                    {
-                        query.IntValues = await context.Products
-                            .AsNoTracking()
-                            .Where(x => x.Id == ProductId)
-                            .Select(x => x.NicheId).ToListAsync();
-                    }
+        //            // Auto
+        //            if (query.QueryType == QueryType.Auto && query.IntValue == 2)
+        //            {
+        //                query.IntValues = await context.Products
+        //                    .AsNoTracking()
+        //                    .Where(x => x.Id == ProductId)
+        //                    .Select(x => x.NicheId).ToListAsync();
+        //            }
 
-                    // Product Subgroup
-                    else if (query.QueryType == QueryType.ProductGroup)
-                    {
-                        query.IntValues = await context.SubgroupProducts
-                            .AsNoTracking()
-                            .Where(x => x.SubgroupId == query.IntValue)
-                            .Select(x => x.ProductId).ToListAsync();
-                    }
+        //            // Product Subgroup
+        //            else if (query.QueryType == QueryType.ProductGroup)
+        //            {
+        //                query.IntValues = await context.SubgroupProducts
+        //                    .AsNoTracking()
+        //                    .Where(x => x.SubgroupId == query.IntValue)
+        //                    .Select(x => x.ProductId).ToListAsync();
+        //            }
 
-                    // Product Keywords
-                    else if (query.QueryType == QueryType.KeywordGroup)
-                    {
-                        List<int> keywordIds = await context.ProductKeywords
-                            .AsNoTracking()
-                            .Where(x => query.StringValues.Contains(x.Keyword.Name))
-                            .Select(x => x.Keyword.Id).Distinct()
-                            .ToListAsync();
+        //            // Product Keywords
+        //            else if (query.QueryType == QueryType.KeywordGroup)
+        //            {
+        //                List<int> keywordIds = await context.ProductKeywords
+        //                    .AsNoTracking()
+        //                    .Where(x => query.StringValues.Contains(x.Keyword.Name))
+        //                    .Select(x => x.Keyword.Id).Distinct()
+        //                    .ToListAsync();
 
 
-                        query.IntValues = await context.ProductKeywords
-                            .Where(x => keywordIds.Contains(x.KeywordId))
-                            .Select(x => x.ProductId)
-                            .ToListAsync();
-                    }
+        //                query.IntValues = await context.ProductKeywords
+        //                    .Where(x => keywordIds.Contains(x.KeywordId))
+        //                    .Select(x => x.ProductId)
+        //                    .ToListAsync();
+        //            }
 
-                    // Subquery
-                    else if (query.QueryType == QueryType.None)
-                    {
-                        await UpdateQueries(query.SubQueries, context);
-                    }
-                }
-            }
-        }
+        //            // Subquery
+        //            else if (query.QueryType == QueryType.None)
+        //            {
+        //                await UpdateQueries(query.SubQueries, context);
+        //            }
+        //        }
+        //    }
+        //}
     }
 }

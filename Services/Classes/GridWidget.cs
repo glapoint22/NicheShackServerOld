@@ -7,7 +7,7 @@ namespace Services.Classes
 {
     public class GridWidget : Widget
     {
-        public List<Query> Queries { get; set; }
+        //public List<Query> Queries { get; set; }
         public GridData GridData { get; set; }
 
 
@@ -15,28 +15,28 @@ namespace Services.Classes
         {
             base.SetProperty(property, ref reader, options);
 
-            switch (property)
-            {
-                case "queries":
-                    Queries = (List<Query>)JsonSerializer.Deserialize(ref reader, typeof(List<Query>), options);
-                    break;
-            }
+            //switch (property)
+            //{
+            //    case "queries":
+            //        Queries = (List<Query>)JsonSerializer.Deserialize(ref reader, typeof(List<Query>), options);
+            //        break;
+            //}
         }
 
 
 
         public async override Task SetData(NicheShackContext context, QueryParams queryParams)
         {
-            if (Queries != null) queryParams.Queries = Queries;
+            //if (Queries != null) queryParams.Queries = Queries;
 
-            if (queryParams.Queries != null || queryParams.Search != null || queryParams.CategoryId != null || queryParams.NicheId != null)
-            {
-                queryParams.Limit = 40;
-                queryParams.UsesFilters = true;
-                if (queryParams.Page == 0) queryParams.Page = 1;
-                QueryService queryService = new QueryService(context);
-                GridData = await queryService.GetGridData(queryParams);
-            }
+            //if (queryParams.Queries != null || queryParams.Search != null || queryParams.CategoryId != null || queryParams.NicheId != null)
+            //{
+            //    queryParams.Limit = 40;
+            //    queryParams.UsesFilters = true;
+            //    if (queryParams.Page == 0) queryParams.Page = 1;
+            //    QueryService queryService = new QueryService(context);
+            //    GridData = await queryService.GetGridData(queryParams);
+            //}
 
         }
     }
