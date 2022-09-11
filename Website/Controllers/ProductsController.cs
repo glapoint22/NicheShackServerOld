@@ -217,24 +217,24 @@ namespace Website.Controllers
 
 
                 // Related Products
-                ProductGroupWidget productGroupWidget = new ProductGroupWidget();
-                productGroupWidget.Queries = new List<Query>
-                {
-                    new Query
-                    {
-                        IntValue = 2,
-                        QueryType = QueryType.Auto
-                    }
-                };
+                //ProductGroupWidget productGroupWidget = new ProductGroupWidget();
+                //productGroupWidget.Queries = new List<Query>
+                //{
+                //    new Query
+                //    {
+                //        IntValue = 2,
+                //        QueryType = QueryType.Auto
+                //    }
+                //};
 
-                QueryParams queryParams = new QueryParams();
-                queryParams.ProductId = product.Id;
+                //QueryParams queryParams = new QueryParams();
+                //queryParams.ProductId = product.Id;
 
-                await productGroupWidget.SetData(context, queryParams);
+                //await productGroupWidget.SetData(context, queryParams);
 
-                product.RelatedProducts = new ProductGroupViewModel();
-                product.RelatedProducts.Caption = "More " + niche.Name + " products";
-                product.RelatedProducts.Products = productGroupWidget.Products;
+                //product.RelatedProducts = new ProductGroupViewModel();
+                //product.RelatedProducts.Caption = "More " + niche.Name + " products";
+                //product.RelatedProducts.Products = productGroupWidget.Products;
 
 
                 return Ok(product);
