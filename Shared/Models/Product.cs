@@ -73,7 +73,7 @@ namespace DataAccess.Models
         public virtual Vendor Vendor { get; set; }
         public virtual ICollection<ProductFilter> ProductFilters { get; set; }
         public virtual ICollection<ProductMedia> ProductMedia { get; set; }
-        public virtual ICollection<PricePoint> ProductPrices { get; set; }
+        public virtual ICollection<PricePoint> PricePoints { get; set; }
         public virtual ICollection<ProductReview> ProductReviews { get; set; }
         public virtual ICollection<ListProduct> ListProducts { get; set; }
         public virtual ICollection<ProductOrder> ProductOrders { get; set; }
@@ -91,7 +91,7 @@ namespace DataAccess.Models
         {
             ProductFilters = new HashSet<ProductFilter>();
             ProductMedia = new HashSet<ProductMedia>();
-            ProductPrices = new HashSet<PricePoint>();
+            PricePoints = new HashSet<PricePoint>();
             ProductReviews = new HashSet<ProductReview>();
             ListProducts = new HashSet<ListProduct>();
             ProductOrders = new HashSet<ProductOrder>();
