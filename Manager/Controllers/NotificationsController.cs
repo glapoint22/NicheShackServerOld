@@ -176,5 +176,32 @@ namespace Manager.Controllers
             unitOfWork.Products.Update(product);
             await unitOfWork.Save();
         }
+
+
+
+
+        [HttpPut]
+        [Route("NotificationSending")]
+        public async Task NotificationSending(NoncompliantUser noncompliantUser)
+        {
+            Customer user = await unitOfWork.Customers.Get(noncompliantUser.UserId);
+            user.BlockNotificationSending = !user.BlockNotificationSending;
+            unitOfWork.Customers.Update(user);
+            await unitOfWork.Save();
+        }
+
+
+
+
+        [HttpPut]
+        [Route("AddNoncompliantStrike")]
+        public async Task AddNoncompliantStrike(NoncompliantUser noncompliantUser)
+        {
+            Customer user = await unitOfWork.Customers.Get(noncompliantUser.UserId);
+            user.NoncompliantStrikes++;
+            if (noncompliantUser.RemoveProfilePic) user.Image = null;
+            unitOfWork.Customers.Update(user);
+            await unitOfWork.Save();
+        }
     }
 }

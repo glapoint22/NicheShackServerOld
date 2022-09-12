@@ -21,7 +21,6 @@ namespace Manager.Repositories
         public ISearchableRepository<Email> Emails { get; }
         public ISearchableRepository<Media> Media { get; }
         public ISearchableRepository<Keyword> Keywords { get; }
-        
         public IRepository<ProductFilter> ProductFilters { get; }
         public IRepository<ProductMedia> ProductMedia { get; }
         public IRepository<ProductKeyword> ProductKeywords { get; }
@@ -38,6 +37,7 @@ namespace Manager.Repositories
         public IRepository<NotificationEmployeeNote> NotificationEmployeeNotes { get; }
         public IRepository<NotificationEmployeeMessage> NotificationEmployeeMessages { get; }
         public IRepository<NotificationGroup> NotificationGroups { get; }
+        public IRepository<Customer> Customers { get; }
 
 
         // Custom Repositories
@@ -78,6 +78,7 @@ namespace Manager.Repositories
             NotificationEmployeeNotes = new Repository<NotificationEmployeeNote>(context);
             NotificationEmployeeMessages = new Repository<NotificationEmployeeMessage>(context);
             NotificationGroups = new Repository<NotificationGroup>(context);
+            Customers = new Repository<Customer>(context);
 
             // Custom Repositories
             Products = new ProductRepository(context);

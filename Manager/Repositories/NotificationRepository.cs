@@ -78,6 +78,7 @@ namespace Manager.Repositories
             List<NotificationMessage> message = await context.Notifications.Where(x => x.NotificationGroupId == notificationGroupId).Select(x => new NotificationMessage
             {
                 NotificationId = x.Id,
+                UserId = x.Customer.Id,
                 UserName = x.NonAccountUserName,
                 FirstName = x.Customer.FirstName,
                 LastName = x.Customer.LastName,
@@ -107,6 +108,7 @@ namespace Manager.Repositories
         {
             List<NotificationUser> users = await context.Notifications.Where(x => x.NotificationGroupId == notificationGroupId).Select(x => new NotificationUser
             {
+                UserId = x.Customer.Id,
                 FirstName = x.Customer.FirstName,
                 LastName = x.Customer.LastName,
                 Image = x.Customer.Image,
@@ -124,6 +126,7 @@ namespace Manager.Repositories
             var reviewId = await context.Notifications.Where(x => x.NotificationGroupId == notificationGroupId).Select(x => x.ReviewId).FirstOrDefaultAsync();
             NotificationReviewWriter reviewWriter = await context.ProductReviews.Where(x => x.Id == reviewId).Select(x => new NotificationReviewWriter
             {
+                UserId = x.Customer.Id,
                 FirstName = x.Customer.FirstName,
                 LastName = x.Customer.LastName,
                 Image = x.Customer.Image,
