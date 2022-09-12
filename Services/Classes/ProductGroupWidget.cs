@@ -36,12 +36,75 @@ namespace Services.Classes
         public async override Task SetData(NicheShackContext context, QueryParams queryParams)
         {
             ParameterExpression productParam = Expression.Parameter(typeof(Product), "x");
-            Expression expression = GetQueryExpession(Query, productParam);
-            Expression<Func<Product, bool>> exp = Expression.Lambda<Func<Product, bool>>(expression, productParam);
+            //Expression expression = GetQueryExpession(Query, productParam);
+            //Expression<Func<Product, bool>> exp = Expression.Lambda<Func<Product, bool>>(expression, productParam);
+
+            ConstantExpression products = Expression.Constant(context.Products);
+            ConstantExpression pricePoints = Expression.Constant(context.PricePoints);
+
+
+
+            MemberExpression idProperty = Expression.Property(productParam, "Id");
+
+            //MethodCallExpression selectExp = Expression.Call(
+            //            typeof(Enumerable),
+            //            "Select",
+            //            new Type[] { typeof(Product), typeof(int) },
+            //            products,
+            //            Expression.Lambda<Func<Product, int>>(idProperty, productParam));
+
+
+            //MethodCallExpression groupJoinExp = Expression.Call(
+            //    typeof(Enumerable),
+            //    "GroupJoin",
+            //    new Type[] { typeof(Product), typeof(PricePoint), typeof(int),  },
+            //    );
+
+
+            //var trumpy = await context.Products
+            //    .Where(x => context.Products
+            //        .GroupJoin(context.PricePoints, a => a.Id, b => b.ProductId, (product, pricePoints) => new
+            //        {
+            //            product,
+            //            pricePoints
+            //        })
+            //        .SelectMany(z => z.pricePoints.DefaultIfEmpty(), (a, b) => new
+            //        {
+            //            id = a.product.Id,
+            //            minPrice = a.product.MinPrice,
+            //            pricePointPrice = b.Price
+            //        })
+            //        .Where(x => x.minPrice > 10 || x.pricePointPrice > 10)
+            //        .Select(x => x.id)
+            //        .Contains(x.Id))
+            //    .Select(x => x.Name)
+            //    .ToListAsync();
+
+
+
+            //var prods = await context.Products
+            //    .GroupJoin(context.PricePoints, a => a.Id, b => b.ProductId, (products, pricePoints) => new
+            //    {
+            //        products,
+            //        pricePoints
+            //    })
+            //    .SelectMany(z => z.pricePoints.DefaultIfEmpty(), (a, b) => new
+            //    {
+            //        id = a.products.Id,
+            //        minPrice = a.products.MinPrice,
+            //        pricePointPrice = b.Price
+            //    })
+            //    .Where(x => x.minPrice > 10 || x.pricePointPrice > 10)
+            //    .Select(x => x.id)
+            //    .ToListAsync();
+
+
+
+
 
 
             Products = await context.Products
-                .Where(exp)
+                //.Where(exp)
                 .Select(x => new QueriedProduct
                 {
                     Id = x.Id,
