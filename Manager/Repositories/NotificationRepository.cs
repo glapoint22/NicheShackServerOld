@@ -87,7 +87,7 @@ namespace Manager.Repositories
                 Text = x.UserComment,
                 Date = x.CreationDate,
                 NoncompliantStrikes = x.Customer.NoncompliantStrikes,
-                BlockNotificationSending = x.Customer.BlockNotificationSending,
+                BlockNotificationSending = x.NonAccountUserEmail != null ? context.BlockedNonAccountEmails.Where(y => y.Email == x.NonAccountUserEmail).FirstOrDefault() == null ? false : true : x.Customer.BlockNotificationSending,
                 EmployeeFirstName = x.NotificationEmployeeMessage.Customer.FirstName,
                 EmployeeLastName = x.NotificationEmployeeMessage.Customer.LastName,
                 EmployeeImage = x.NotificationEmployeeMessage.Customer.Image,
@@ -106,6 +106,12 @@ namespace Manager.Repositories
 
         public async Task<NotificationReview> GetReviewNotification(int notificationGroupId)
         {
+            var review = await context.Notifications.Where(x => x.NotificationGroupId == notificationGroupId).Select(x => new
+            {
+                Id = x.ProductReview.Id,
+                Deleted = x.ProductReview.Deleted
+            }).FirstOrDefaultAsync();
+
             List<NotificationUser> users = await context.Notifications.Where(x => x.NotificationGroupId == notificationGroupId).Select(x => new NotificationUser
             {
                 UserId = x.Customer.Id,
@@ -157,6 +163,8 @@ namespace Manager.Repositories
 
             NotificationReview notification = new NotificationReview
             {
+                ReviewId = review.Id,
+                ReviewDeleted = review.Deleted,
                 Users = users,
                 ReviewWriter = reviewWriter,
                 Employees = employees

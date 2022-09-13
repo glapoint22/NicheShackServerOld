@@ -39,6 +39,7 @@ namespace Manager.Repositories
         IRepository<NotificationEmployeeMessage> NotificationEmployeeMessages { get; }
         IRepository<NotificationGroup> NotificationGroups { get; }
         IRepository<Customer> Customers { get; }
+        IRepository<BlockedNonAccountEmail> BlockedNonAccountEmails { get; }
 
 
 

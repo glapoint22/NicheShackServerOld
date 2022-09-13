@@ -38,6 +38,7 @@ namespace Manager.Repositories
         public IRepository<NotificationEmployeeMessage> NotificationEmployeeMessages { get; }
         public IRepository<NotificationGroup> NotificationGroups { get; }
         public IRepository<Customer> Customers { get; }
+        public IRepository<BlockedNonAccountEmail> BlockedNonAccountEmails { get; }
 
 
         // Custom Repositories
@@ -79,6 +80,7 @@ namespace Manager.Repositories
             NotificationEmployeeMessages = new Repository<NotificationEmployeeMessage>(context);
             NotificationGroups = new Repository<NotificationGroup>(context);
             Customers = new Repository<Customer>(context);
+            BlockedNonAccountEmails = new Repository<BlockedNonAccountEmail>(context);
 
             // Custom Repositories
             Products = new ProductRepository(context);
