@@ -4,14 +4,16 @@ using DataAccess.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(NicheShackContext))]
-    partial class NicheShackContextModelSnapshot : ModelSnapshot
+    [Migration("20220912155629_CreatedBlockedNonAccountEmailsTable")]
+    partial class CreatedBlockedNonAccountEmailsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -746,9 +748,6 @@ namespace DataAccess.Migrations
 
                     b.Property<int?>("EmployeeMessageId")
                         .HasColumnType("int");
-
-                    b.Property<bool>("MessageArchived")
-                        .HasColumnType("bit");
 
                     b.Property<string>("NonAccountUserEmail")
                         .HasColumnType("nvarchar(256)")

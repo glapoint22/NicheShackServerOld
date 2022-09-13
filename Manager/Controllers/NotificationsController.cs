@@ -40,7 +40,7 @@ namespace Manager.Controllers
         [Route("Count")]
         public async Task<ActionResult> GetNotificationCount(int currentCount)
         {
-            var newCount = await unitOfWork.Notifications.GetCount(x => x.NotificationGroup.ArchiveDate == null);
+            var newCount = await unitOfWork.Notifications.GetCount(x => x.NotificationGroup.ArchiveDate == null && !x.MessageArchived);
 
             if (currentCount != newCount)
             {
@@ -63,9 +63,9 @@ namespace Manager.Controllers
 
         [HttpGet]
         [Route("Message")]
-        public async Task<ActionResult> GetMessageNotification(int notificationGroupId)
+        public async Task<ActionResult> GetMessageNotification(int notificationGroupId, bool isNew)
         {
-            return Ok(await unitOfWork.Notifications.GetMessageNotification(notificationGroupId));
+            return Ok(await unitOfWork.Notifications.GetMessageNotification(notificationGroupId, isNew));
         }
 
 
@@ -167,13 +167,101 @@ namespace Manager.Controllers
 
 
 
+
+        [HttpPut]
+        [Route("RemoveReview")]
+        public async Task RemoveReview(RemoveReview removeReview)
+        {
+            ProductReview review = await unitOfWork.ProductReviews.Get(removeReview.ReviewId);
+            review.Deleted = !review.Deleted;
+            unitOfWork.ProductReviews.Update(review);
+            await unitOfWork.Save();
+        }
+
+
+
+
         [HttpPut]
         [Route("DisableProduct")]
         public async Task DisableProduct(DisableProduct disableProduct)
         {
             Product product = await unitOfWork.Products.Get(disableProduct.ProductId);
-            product.Disabled = disableProduct.ProductDisabled;
+            product.Disabled = !product.Disabled;
             unitOfWork.Products.Update(product);
+            await unitOfWork.Save();
+        }
+
+
+
+
+        [HttpPut]
+        [Route("NotificationSending")]
+        public async Task NotificationSending(NoncompliantUser noncompliantUser)
+        {
+            Customer user = await unitOfWork.Customers.Get(noncompliantUser.UserId);
+            user.BlockNotificationSending = !user.BlockNotificationSending;
+            unitOfWork.Customers.Update(user);
+            await unitOfWork.Save();
+        }
+
+
+
+        [HttpPost]
+        [Route("BlockEmail")]
+        public async Task BlockEmail(NoncompliantUser noncompliantUser)
+        {
+            var email = await unitOfWork.BlockedNonAccountEmails.Get(x => x.Email == noncompliantUser.Email);
+
+            if (email == null)
+            {
+                var newBlockedEmail = new BlockedNonAccountEmail
+                {
+                    Email = noncompliantUser.Email
+                };
+
+                unitOfWork.BlockedNonAccountEmails.Add(newBlockedEmail);
+                await unitOfWork.Save();
+            }
+        }
+
+
+
+
+        [HttpDelete]
+        [Route("UnblockEmail")]
+        public async Task UnblockEmail(string blockedEmail)
+        {
+            var email = await unitOfWork.BlockedNonAccountEmails.Get(x => x.Email == blockedEmail);
+
+            if (email != null)
+            {
+                unitOfWork.BlockedNonAccountEmails.Remove(email);
+                await unitOfWork.Save();
+            }
+        }
+
+
+
+
+        [HttpPut]
+        [Route("AddNoncompliantStrike")]
+        public async Task AddNoncompliantStrike(NoncompliantUser noncompliantUser)
+        {
+            Customer user = await unitOfWork.Customers.Get(noncompliantUser.UserId);
+            user.NoncompliantStrikes++;
+            if (noncompliantUser.RemoveProfilePic) user.Image = null;
+            unitOfWork.Customers.Update(user);
+            await unitOfWork.Save();
+        }
+
+
+
+        [HttpDelete]
+        public async Task DeleteNotification(int notificationGroupId)
+        {
+            var notificationGroup = await unitOfWork.NotificationGroups.Get(notificationGroupId);
+
+            unitOfWork.NotificationGroups.Remove(notificationGroup);
             await unitOfWork.Save();
         }
     }

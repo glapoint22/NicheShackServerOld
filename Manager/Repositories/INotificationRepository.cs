@@ -10,7 +10,7 @@ namespace Manager.Repositories
     public interface INotificationRepository : IRepository<Notification>
     {
         Task<List<NotificationItem>> GetNotifications(bool isNew);
-        Task<List<NotificationMessage>> GetMessageNotification(int notificationGroupId);
+        Task<List<NotificationMessage>> GetMessageNotification(int notificationGroupId, bool isNew);
         Task<NotificationReview> GetReviewNotification(int notificationGroupId);
         Task<NotificationProduct> GetProductNotification(int notificationGroupId);
     }

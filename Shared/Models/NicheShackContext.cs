@@ -12,6 +12,7 @@ namespace DataAccess.Models
 
         // Tables
 
+        public virtual DbSet<BlockedNonAccountEmail> BlockedNonAccountEmails { get; set; }
 
         public virtual DbSet<Category> Categories { get; set; }
         public virtual DbSet<Customer> Customers { get; set; }
