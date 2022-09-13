@@ -47,6 +47,12 @@ namespace DataAccess.Models
 
 
 
+
+        public bool MessageArchived { get; set; }
+
+
+
+
         [ForeignKey("NotificationEmployeeMessage")]
         public int? EmployeeMessageId { get; set; }
 

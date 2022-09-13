@@ -40,7 +40,7 @@ namespace Manager.Controllers
         [Route("Count")]
         public async Task<ActionResult> GetNotificationCount(int currentCount)
         {
-            var newCount = await unitOfWork.Notifications.GetCount(x => x.NotificationGroup.ArchiveDate == null);
+            var newCount = await unitOfWork.Notifications.GetCount(x => x.NotificationGroup.ArchiveDate == null && !x.MessageArchived);
 
             if (currentCount != newCount)
             {
@@ -63,9 +63,9 @@ namespace Manager.Controllers
 
         [HttpGet]
         [Route("Message")]
-        public async Task<ActionResult> GetMessageNotification(int notificationGroupId)
+        public async Task<ActionResult> GetMessageNotification(int notificationGroupId, bool isNew)
         {
-            return Ok(await unitOfWork.Notifications.GetMessageNotification(notificationGroupId));
+            return Ok(await unitOfWork.Notifications.GetMessageNotification(notificationGroupId, isNew));
         }
 
 

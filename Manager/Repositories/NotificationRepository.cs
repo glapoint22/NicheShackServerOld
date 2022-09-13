@@ -26,9 +26,9 @@ namespace Manager.Repositories
 
         public async Task<List<NotificationItem>> GetNotifications(bool isNew)
         {
-            var allNotifications = await context.Notifications.Where(x => isNew ? x.NotificationGroup.ArchiveDate == null : x.NotificationGroup.ArchiveDate != null).Select(x => new
+            var allNotifications = await context.Notifications.Where(x => isNew ? x.NotificationGroup.ArchiveDate == null || !x.MessageArchived : x.NotificationGroup.ArchiveDate != null || x.MessageArchived).Select(x => new
             {
-                Id = x.Id,
+                // Id = x.Id,
                 NotificationGroupId = x.NotificationGroupId,
                 Email = x.Type == 0 ?
                     x.NonAccountUserEmail != null ? x.NonAccountUserEmail :
@@ -39,7 +39,7 @@ namespace Manager.Repositories
                 NotificationType = x.Type,
                 CreationDate = x.CreationDate,
                 ArchiveDate = x.NotificationGroup.ArchiveDate,
-                Count = x.NotificationGroup.Notifications.Count()
+                Count = x.Type == 0 ? x.NotificationGroup.Notifications.Where(y => isNew ? !y.MessageArchived : y.MessageArchived).Count() : x.NotificationGroup.Notifications.Count()
             }).ToListAsync();
 
 
@@ -54,7 +54,7 @@ namespace Manager.Repositories
             .OrderByDescending(x => isNew ? x.CreationDate : x.ArchiveDate)
             .Select(x => new NotificationItem
             {
-                Id = x.Id,
+                // Id = x.Id,
                 NotificationGroupId = x.NotificationGroupId,
                 NotificationType = x.NotificationType,
                 Name = x.Email != null ? x.Email : GetNotificationName(x.NotificationType),
@@ -73,9 +73,9 @@ namespace Manager.Repositories
 
 
 
-        public async Task<List<NotificationMessage>> GetMessageNotification(int notificationGroupId)
+        public async Task<List<NotificationMessage>> GetMessageNotification(int notificationGroupId, bool isNew)
         {
-            List<NotificationMessage> message = await context.Notifications.Where(x => x.NotificationGroupId == notificationGroupId).Select(x => new NotificationMessage
+            List<NotificationMessage> message = await context.Notifications.Where(x => x.NotificationGroupId == notificationGroupId && (isNew ? !x.MessageArchived : x.MessageArchived)).Select(x => new NotificationMessage
             {
                 NotificationId = x.Id,
                 UserId = x.Customer.Id,
