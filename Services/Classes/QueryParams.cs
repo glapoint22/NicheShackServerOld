@@ -17,7 +17,7 @@ namespace Services.Classes
         public QueryFilter PriceFilter { get; set; }
         public QueryFilter PriceRangeFilter { get; set; }
         public QueryFilter RatingFilter { get; set; }
-        //public IEnumerable<Query> Queries { get; set; }
+        public Query Query { get; set; }
         public double Page { get; set; }
         public double Limit { get; set; }
         public string Filters { get; set; }

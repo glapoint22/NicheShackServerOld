@@ -11,6 +11,7 @@ using System;
 using Services.Classes;
 using Services;
 using Manager.ViewModels;
+using System.Text.Json;
 
 namespace Manager.Controllers
 {
@@ -84,36 +85,48 @@ namespace Manager.Controllers
 
 
 
-        //[HttpGet]
-        //[Route("QueryBuilder")]
-        //public async Task<ActionResult> GetQueryBuilderProducts()
+        [HttpGet]
+        [Route("QueryBuilder")]
+        public async Task<ActionResult> GetQueryBuilderProducts(string queryString)
+        {
+           Query query = JsonSerializer.Deserialize<Query>(queryString, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            QueryParams queryParams = new QueryParams();
+
+            queryParams.Query = query;
+            queryParams.Limit = 24;
+            queryParams.UsesFilters = false;
+            
+
+            return Ok(await queryService.GetProductGroup(queryParams));
+        }
+
+
+
+
+        //[HttpPost]
+        //[Route("GridData")]
+        //public async Task<ActionResult> GetGridData(QueryParams queryParams)
         //{
-        //    return Ok(await unitOfWork.Products.GetCollection<ItemViewModel<Product>>());
+        //    queryParams.Cookies = Request.Cookies.ToList();
+        //    return Ok(await queryService.GetGridData(queryParams));
         //}
 
 
 
 
-        [HttpPost]
-        [Route("GridData")]
-        public async Task<ActionResult> GetGridData(QueryParams queryParams)
-        {
-            queryParams.Cookies = Request.Cookies.ToList();
-            return Ok(await queryService.GetGridData(queryParams));
-        }
 
 
-
-
-
-
-        [HttpPost]
-        [Route("ProductGroup")]
-        public async Task<ActionResult> GetProductGroup(QueryParams queryParams)
-        {
-            queryParams.Cookies = Request.Cookies.ToList();
-            return Ok(await queryService.GetProductGroup(queryParams));
-        }
+        //[HttpPost]
+        //[Route("ProductGroup")]
+        //public async Task<ActionResult> GetProductGroup(QueryParams queryParams)
+        //{
+        //    queryParams.Cookies = Request.Cookies.ToList();
+        //    return Ok(await queryService.GetProductGroup(queryParams));
+        //}
 
 
 
@@ -691,12 +704,12 @@ namespace Manager.Controllers
 
 
 
-        [HttpGet]
-        [Route("QueryBuilder/Search")]
-        public async Task<ActionResult> SearchQueryBuilderProducts(string searchWords)
-        {
-            return Ok(await unitOfWork.Products.GetCollection<ItemViewModel<Product>>(searchWords));
-        }
+        //[HttpGet]
+        //[Route("QueryBuilder/Search")]
+        //public async Task<ActionResult> SearchQueryBuilderProducts(string searchWords)
+        //{
+        //    return Ok(await unitOfWork.Products.GetCollection<ItemViewModel<Product>>(searchWords));
+        //}
 
 
 

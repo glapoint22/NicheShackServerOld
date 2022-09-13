@@ -21,201 +21,249 @@ namespace Services.Classes
         }
 
 
+
+
+        public Expression<Func<T, bool>> BuildQuery<T>(Query query)
+        {
+            ParameterExpression parameter = Expression.Parameter(typeof(T));
+            Expression expression = GetQueryExpression(query, parameter);
+
+            if (expression == null) return null;
+
+            return Expression.Lambda<Func<T, bool>>(expression, parameter);
+        }
+
+
+        private Expression GetQueryExpression(Query query, ParameterExpression parameter)
+        {
+            Expression expression = null;
+
+            for (int i = 0; i < query.Elements.Count; i++)
+            {
+                QueryElement queryElement = query.Elements[i];
+
+                if (i == 0)
+                {
+                    expression = queryElement.QueryElementType == QueryElementType.QueryRow ?
+                        GetRowExpression(queryElement.QueryRow, parameter) : GetQueryExpression(queryElement.QueryGroup.Query, parameter);
+                }
+                else
+                {
+                    Expression rightExpression;
+                    QueryElement nextQueryElement = query.Elements[i + 1];
+
+                    // Is the query element a row or group?
+                    if (nextQueryElement.QueryElementType == QueryElementType.QueryRow)
+                    {
+                        rightExpression = GetRowExpression(nextQueryElement.QueryRow, parameter);
+                    }
+                    else
+                    {
+                        rightExpression = GetQueryExpression(nextQueryElement.QueryGroup.Query, parameter);
+                    }
+
+
+
+                    // Is the logical operator AND or OR
+                    if (queryElement.QueryRow.LogicalOperatorType == LogicalOperatorType.And)
+                    {
+                        expression = Expression.AndAlso(expression, rightExpression);
+                    }
+                    else
+                    {
+                        expression = Expression.OrElse(expression, rightExpression);
+                    }
+
+                    i++;
+                }
+            }
+
+            return expression;
+        }
+
+
+
+        private Expression GetRowExpression(QueryRow queryRow, ParameterExpression parameter)
+        {
+            Expression expression = null;
+
+            switch (queryRow.QueryType)
+            {
+                case QueryType.Category:
+                    MemberExpression niche = Expression.Property(parameter, "Niche");
+                    MemberExpression category = Expression.Property(niche, "Category");
+                    MemberExpression categoryIdProperty = Expression.Property(category, "Id");
+                    ConstantExpression categoryIdValue = Expression.Constant(queryRow.Item.Id);
+                    expression = Expression.Equal(categoryIdProperty, categoryIdValue);
+                    break;
+
+                case QueryType.Niche:
+                    MemberExpression nicheIdProperty = Expression.Property(parameter, "NicheId");
+                    ConstantExpression nicheId = Expression.Constant(queryRow.Item.Id);
+                    expression = Expression.Equal(nicheIdProperty, nicheId);
+                    break;
+
+                case QueryType.ProductGroup:
+                    // Product properties
+                    MemberExpression SubgroupProductsProperty = Expression.Property(parameter, "SubgroupProducts");
+                    MemberExpression idProperty = Expression.Property(parameter, "Id");
+
+
+                    // SubgroupProduct param and its properties
+                    ParameterExpression subgroupProductParameter = Expression.Parameter(typeof(SubgroupProduct));
+                    MemberExpression subgroupIdProperty = Expression.Property(subgroupProductParameter, "SubgroupId");
+                    MemberExpression productIdProperty = Expression.Property(subgroupProductParameter, "ProductId");
+
+
+                    // Product Group Id
+                    ConstantExpression subgroupId = Expression.Constant(queryRow.Item.Id);
+
+
+                    // Where
+                    MethodCallExpression whereExp = Expression.Call(
+                        typeof(Enumerable),
+                        "Where",
+                        new Type[] { typeof(SubgroupProduct) },
+                        SubgroupProductsProperty,
+                        Expression.Lambda<Func<SubgroupProduct,
+                        bool>>(Expression.Equal(subgroupIdProperty, subgroupId), subgroupProductParameter));
+
+
+
+                    // Select
+                    MethodCallExpression selectExp = Expression.Call(
+                        typeof(Enumerable),
+                        "Select",
+                        new Type[] { typeof(SubgroupProduct), typeof(int) },
+                        whereExp,
+                        Expression.Lambda<Func<SubgroupProduct, int>>(productIdProperty, subgroupProductParameter));
+
+
+                    // Contains
+                    expression = Expression.Call(
+                        typeof(Enumerable),
+                        "Contains",
+                        new[] { typeof(int) },
+                        selectExp,
+                        idProperty);
+
+
+                    break;
+
+                case QueryType.Price:
+                    MemberExpression minPriceProperty = Expression.Property(parameter, "MinPrice");
+                    ConstantExpression price = Expression.Constant(queryRow.Price);
+                    expression = GetComparisonOperatorExpression((ComparisonOperatorType)queryRow.ComparisonOperatorType, minPriceProperty, price);
+                    break;
+
+                case QueryType.Rating:
+                    MemberExpression rating = Expression.Property(parameter, "Rating");
+                    ConstantExpression value = Expression.Constant(queryRow.Integer);
+                    expression = GetComparisonOperatorExpression((ComparisonOperatorType)queryRow.ComparisonOperatorType, rating, value);
+                    break;
+
+                case QueryType.KeywordGroup:
+                    // Product properties
+                    MemberExpression KeywordGroupsBelongingToProductProperty = Expression.Property(parameter, "KeywordGroups_Belonging_To_Product");
+                    MemberExpression idProp = Expression.Property(parameter, "Id");
+
+
+                    // KeywordGroupBelongingToProduct param and its properties
+                    ParameterExpression KeywordGroupBelongingToProductParameter = Expression.Parameter(typeof(KeywordGroup_Belonging_To_Product));
+                    MemberExpression keywordGroupIdProperty = Expression.Property(KeywordGroupBelongingToProductParameter, "KeywordGroupId");
+                    MemberExpression productIdProp = Expression.Property(KeywordGroupBelongingToProductParameter, "ProductId");
+
+
+                    // Keyword Group Id
+                    ConstantExpression keywordGroupId = Expression.Constant(queryRow.Item.Id);
+
+
+                    // Where
+                    MethodCallExpression whereExpression = Expression.Call(
+                        typeof(Enumerable),
+                        "Where",
+                        new Type[] { typeof(KeywordGroup_Belonging_To_Product) },
+                        KeywordGroupsBelongingToProductProperty,
+                        Expression.Lambda<Func<KeywordGroup_Belonging_To_Product,
+                        bool>>(Expression.Equal(keywordGroupIdProperty, keywordGroupId), KeywordGroupBelongingToProductParameter));
+
+
+
+                    // Select
+                    MethodCallExpression selectExpression = Expression.Call(
+                        typeof(Enumerable),
+                        "Select",
+                        new Type[] { typeof(KeywordGroup_Belonging_To_Product), typeof(int) },
+                        whereExpression,
+                        Expression.Lambda<Func<KeywordGroup_Belonging_To_Product, int>>(productIdProp, KeywordGroupBelongingToProductParameter));
+
+
+                    // Contains
+                    expression = Expression.Call(
+                        typeof(Enumerable),
+                        "Contains",
+                        new[] { typeof(int) },
+                        selectExpression,
+                        idProp);
+
+                    break;
+
+                case QueryType.Date:
+                    MemberExpression date = Expression.Property(parameter, "Date");
+                    ConstantExpression dateValue = Expression.Constant(queryRow.Date);
+                    expression = GetComparisonOperatorExpression((ComparisonOperatorType)queryRow.ComparisonOperatorType, date, dateValue);
+                    break;
+
+                case QueryType.Auto:
+                    break;
+            }
+
+            return expression;
+        }
+
+
+
+
+        private Expression GetComparisonOperatorExpression(ComparisonOperatorType comparisonOperatorType, Expression left, Expression right)
+        {
+            Expression expression = null;
+
+            switch (comparisonOperatorType)
+            {
+                case ComparisonOperatorType.Equal:
+                    expression = Expression.Equal(left, right);
+                    break;
+                case ComparisonOperatorType.NotEqual:
+                    expression = Expression.NotEqual(left, right);
+                    break;
+                case ComparisonOperatorType.GreaterThan:
+                    expression = Expression.GreaterThan(left, right);
+                    break;
+                case ComparisonOperatorType.GreaterThanOrEqual:
+                    expression = Expression.GreaterThanOrEqual(left, right);
+                    break;
+                case ComparisonOperatorType.LessThan:
+                    expression = Expression.LessThan(left, right);
+                    break;
+                case ComparisonOperatorType.LessThanOrEqual:
+                    expression = Expression.LessThanOrEqual(left, right);
+                    break;
+            }
+
+            return expression;
+        }
+
+
         public IQueryable<Product> SetWhere(IQueryable<Product> source)
         {
 
-            // Queries
-            //if (queryParams.Queries != null && queryParams.Queries.Count() > 0)
-            //{
-            //    ParameterExpression product = Expression.Parameter(typeof(Product));
+            Expression<Func<Product, bool>> expression = BuildQuery<Product>(queryParams.Query);
 
-            //    BinaryExpression GetQueries(IEnumerable<Query> queries)
-            //    {
-            //        List<BinaryExpression> left = new List<BinaryExpression>();
-            //        BinaryExpression right = null;
-
-
-            //        foreach (Query query in queries)
-            //        {
-
-            //            // Auto
-            //            if (query.QueryType == QueryType.Auto)
-            //            {
-            //                // Browsed Products
-            //                if (query.IntValue == 1)
-            //                {
-            //                    if (queryParams.Cookies == null || queryParams.Cookies.Count(x => x.Key == "browse") == 0) continue;
-
-            //                    string browseCookie = queryParams.Cookies.Where(x => x.Key == "browse").Select(x => x.Value).SingleOrDefault();
-
-            //                    if (browseCookie == null) continue;
-
-            //                    List<int> productIds = browseCookie.Split(',').Select(x => Int32.Parse(x)).ToList();
-
-            //                    PropertyInfo productProperty = typeof(Product).GetProperty("Id");
-            //                    MemberExpression productId = Expression.Property(product, productProperty);
-            //                    ConstantExpression values = Expression.Constant(productIds);
-            //                    MethodInfo method = productIds.GetType().GetMethod("Contains");
-            //                    MethodCallExpression call = Expression.Call(values, method, productId);
-            //                    right = Expression.Equal(call, Expression.Constant(true));
-            //                }
-
-            //                // Related products
-            //                else if (query.IntValue == 2 && queryParams.ProductId > 0)
-            //                {
-            //                    PropertyInfo nicheProperty = typeof(Product).GetProperty("NicheId");
-            //                    PropertyInfo idProperty = typeof(Product).GetProperty("Id");
-            //                    MemberExpression id = Expression.Property(product, idProperty);
-            //                    ConstantExpression productId = Expression.Constant(queryParams.ProductId);
-            //                    MemberExpression nicheId = Expression.Property(product, nicheProperty);
-            //                    ConstantExpression value = Expression.Constant(query.IntValues[0]);
-
-            //                    right = Expression.AndAlso(Expression.Equal(nicheId, value), Expression.NotEqual(id, productId));
-            //                }
-            //            }
-
-
-            //            // Category
-            //            else if (query.QueryType == QueryType.Category)
-            //            {
-            //                PropertyInfo categoryProperty1 = typeof(Product).GetProperty("Niche");
-            //                PropertyInfo categoryProperty2 = categoryProperty1.PropertyType.GetProperty("Category");
-            //                PropertyInfo categoryProperty3 = categoryProperty2.PropertyType.GetProperty("Id");
-            //                MemberExpression niche = Expression.Property(product, categoryProperty1);
-            //                MemberExpression niche_Category = Expression.Property(niche, categoryProperty2);
-            //                MemberExpression niche_Category_Id = Expression.Property(niche_Category, categoryProperty3);
-            //                ConstantExpression value = Expression.Constant(query.IntValue);
-            //                right = Expression.Equal(niche_Category_Id, value);
-            //            }
-
-
-            //            // Niche
-            //            else if (query.QueryType == QueryType.Niche)
-            //            {
-            //                if (query.IntValue > 0)
-            //                {
-            //                    PropertyInfo nicheProperty = typeof(Product).GetProperty("NicheId");
-            //                    MemberExpression nicheId = Expression.Property(product, nicheProperty);
-            //                    ConstantExpression value = Expression.Constant(query.IntValue);
-            //                    right = Expression.Equal(nicheId, value);
-            //                }
-            //                else
-            //                {
-            //                    PropertyInfo categoryProperty1 = typeof(Product).GetProperty("Niche");
-            //                    PropertyInfo categoryProperty2 = categoryProperty1.PropertyType.GetProperty("UrlId");
-            //                    MemberExpression niche = Expression.Property(product, categoryProperty1);
-            //                    MemberExpression niche_Url_Id = Expression.Property(niche, categoryProperty2);
-            //                    ConstantExpression value = Expression.Constant(query.StringValue);
-            //                    right = Expression.Equal(niche_Url_Id, value);
-            //                }
-            //            }
-
-
-            //            // Product Rating
-            //            else if (query.QueryType == QueryType.Rating)
-            //            {
-            //                PropertyInfo ratingProperty = typeof(Product).GetProperty("Rating");
-            //                MemberExpression rating = Expression.Property(product, ratingProperty);
-            //                ConstantExpression value = Expression.Constant(query.DoubleValue);
-
-            //                if (query.ComparisonOperator == ComparisonOperatorType.Equal) right = Expression.Equal(rating, value);
-            //                if (query.ComparisonOperator == ComparisonOperatorType.NotEqual) right = Expression.NotEqual(rating, value);
-            //                if (query.ComparisonOperator == ComparisonOperatorType.GreaterThan) right = Expression.GreaterThan(rating, value);
-            //                if (query.ComparisonOperator == ComparisonOperatorType.GreaterThanOrEqual) right = Expression.GreaterThanOrEqual(rating, value);
-            //                if (query.ComparisonOperator == ComparisonOperatorType.LessThan) right = Expression.LessThan(rating, value);
-            //                if (query.ComparisonOperator == ComparisonOperatorType.LessThanOrEqual) right = Expression.LessThanOrEqual(rating, value);
-            //            }
-
-
-            //            // Product Price
-            //            else if (query.QueryType == QueryType.Price)
-            //            {
-            //                PropertyInfo priceProperty1 = typeof(Product).GetProperty("MinPrice");
-            //                PropertyInfo priceProperty2 = typeof(Product).GetProperty("MaxPrice");
-            //                MemberExpression minPrice = Expression.Property(product, priceProperty1);
-            //                MemberExpression maxPrice = Expression.Property(product, priceProperty2);
-            //                ConstantExpression zero = Expression.Constant(0.0);
-            //                ConstantExpression value = Expression.Constant(query.DoubleValue);
-
-            //                if (query.ComparisonOperator == ComparisonOperatorType.Equal) right = Expression.OrElse(Expression.AndAlso(Expression.Equal(maxPrice, zero), Expression.Equal(minPrice, value)), Expression.Equal(maxPrice, value));
-            //                if (query.ComparisonOperator == ComparisonOperatorType.NotEqual) right = Expression.OrElse(Expression.AndAlso(Expression.Equal(maxPrice, zero), Expression.NotEqual(minPrice, value)), Expression.NotEqual(maxPrice, value));
-            //                if (query.ComparisonOperator == ComparisonOperatorType.GreaterThan) right = Expression.OrElse(Expression.AndAlso(Expression.Equal(maxPrice, zero), Expression.GreaterThan(minPrice, value)), Expression.GreaterThan(maxPrice, value));
-            //                if (query.ComparisonOperator == ComparisonOperatorType.GreaterThanOrEqual) right = Expression.OrElse(Expression.AndAlso(Expression.Equal(maxPrice, zero), Expression.GreaterThanOrEqual(minPrice, value)), Expression.GreaterThanOrEqual(maxPrice, value));
-            //                if (query.ComparisonOperator == ComparisonOperatorType.LessThan) right = Expression.OrElse(Expression.AndAlso(Expression.Equal(maxPrice, zero), Expression.LessThan(minPrice, value)), Expression.LessThan(maxPrice, value));
-            //                if (query.ComparisonOperator == ComparisonOperatorType.LessThanOrEqual) right = Expression.OrElse(Expression.AndAlso(Expression.Equal(maxPrice, zero), Expression.LessThanOrEqual(minPrice, value)), Expression.LessThanOrEqual(maxPrice, value));
-            //            }
-
-
-            //            // Product Subgroup, Product Keywords, or Featured Products
-            //            else if (query.QueryType == QueryType.ProductGroup || query.QueryType == QueryType.KeywordGroup)
-            //            {
-            //                PropertyInfo productProperty = typeof(Product).GetProperty("Id");
-            //                MemberExpression productId = Expression.Property(product, productProperty);
-            //                ConstantExpression values = Expression.Constant(query.IntValues);
-            //                MethodInfo method = query.IntValues.GetType().GetMethod("Contains");
-            //                MethodCallExpression call = Expression.Call(values, method, productId);
-            //                right = Expression.Equal(call, Expression.Constant(true));
-            //            }
-
-
-            //            // Product Creation Date
-            //            else if (query.QueryType == QueryType.Date)
-            //            {
-            //                PropertyInfo dateProperty = typeof(Product).GetProperty("Date");
-            //                MemberExpression date = Expression.Property(product, dateProperty);
-            //                ConstantExpression value = Expression.Constant(query.DateValue);
-
-            //                if (query.ComparisonOperator == ComparisonOperatorType.Equal) right = Expression.Equal(date, value);
-            //                if (query.ComparisonOperator == ComparisonOperatorType.NotEqual) right = Expression.NotEqual(date, value);
-            //                if (query.ComparisonOperator == ComparisonOperatorType.GreaterThan) right = Expression.GreaterThan(date, value);
-            //                if (query.ComparisonOperator == ComparisonOperatorType.GreaterThanOrEqual) right = Expression.GreaterThanOrEqual(date, value);
-            //                if (query.ComparisonOperator == ComparisonOperatorType.LessThan) right = Expression.LessThan(date, value);
-            //                if (query.ComparisonOperator == ComparisonOperatorType.LessThanOrEqual) right = Expression.LessThanOrEqual(date, value);
-            //            }
-
-
-            //            // Subquery
-            //            else if (query.QueryType == QueryType.None)
-            //            {
-            //                right = GetQueries(query.SubQueries);
-            //            }
-
-
-
-            //            if (left.Count == 0) left.Add(right);
-
-
-            //            if (left[^1] != right)
-            //            {
-
-            //                if (query.LogicalOperator == LogicalOperatorType.And)
-            //                {
-            //                    left.Add(Expression.AndAlso(left[^1], right));
-            //                }
-            //                else
-            //                {
-            //                    left.Add(Expression.OrElse(left[^1], right));
-            //                }
-            //            }
-            //        }
-
-            //        if (left.Count == 0) return null;
-
-            //        return left[^1];
-            //    }
-
-
-
-            //    BinaryExpression queries = GetQueries(queryParams.Queries);
-
-            //    if (queries != null)
-            //    {
-            //        var exp = Expression.Lambda<Func<Product, bool>>(queries, product);
-            //        source = source.Where(exp);
-            //        hasWhere = true;
-            //    }
-
-            //}
+            if (expression != null)
+            {
+                source = source.Where(expression);
+                hasWhere = true;
+            }
 
 
 

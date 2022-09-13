@@ -120,7 +120,7 @@ namespace Services
                 image = new Image
                 {
                     Name = x.Media.Name,
-                    Src = x.Media.ImageMd
+                    Src = x.Media.ImageSm
                 },
                 mediaCount = x.ProductMedia.Count(),
                 OneStar = x.OneStar,
