@@ -40,7 +40,12 @@ namespace Manager.Controllers
         [Route("Count")]
         public async Task<ActionResult> GetNotificationCount(int currentCount)
         {
-            var newCount = await unitOfWork.Notifications.GetCount(x => x.NotificationGroup.ArchiveDate == null && !x.MessageArchived);
+            var newCount = await unitOfWork.Notifications.GetCount(x =>
+            // Count all the notifications that DO NOT belong to an archived group
+            x.NotificationGroup.ArchiveDate == null ||
+            // but if it's a message notification that belongs to an archive group and
+            // that message notification has NOT been archived, then count that one too
+            (x.Type == 0 && !x.MessageArchived));
 
             if (currentCount != newCount)
             {
@@ -51,11 +56,6 @@ namespace Manager.Controllers
             {
                 return Ok();
             }
-
-
-
-
-
         }
 
 
@@ -146,23 +146,91 @@ namespace Manager.Controllers
         [Route("Archive")]
         public async Task ArchiveNotification(ArchiveNotification archiveNotification)
         {
+            var messageCount = 0;
             DateTime archiveDate = DateTime.Now;
             NotificationGroup notificationGroup = await unitOfWork.NotificationGroups.Get(archiveNotification.NotificationGroupId);
 
 
-            if (notificationGroup.ArchiveDate == null)
+
+
+
+            // ------------ Notification Group ------------ \\
+
+            // If a notification needs to be archived
+            if (!archiveNotification.Restore)
             {
+                // Stamp its notification group with an archive date
                 notificationGroup.ArchiveDate = archiveDate;
             }
+
+            // But if a notification needs to be restored
             else
             {
-                notificationGroup.ArchiveDate = null;
+                // If just one message is getting restored
+                if (archiveNotification.NotificationId > 0)
+                {
+                    // Check to see if there are other messages from the same sender that are still in archive
+                    messageCount = await unitOfWork.Notifications.GetCount(x => x.NotificationGroupId == archiveNotification.NotificationGroupId && x.MessageArchived);
+                }
+
+                // Remove the archive date from its notification group as long as we're not restoring a message notification that still has other messages in archive
+                if (messageCount <= 1)
+                {
+                    notificationGroup.ArchiveDate = null;
+                }
             }
 
 
+
+
+
+            // ------------ One Message ------------ \\
+
+            // If just one message is getting archived
+            if (archiveNotification.NotificationId > 0 && !archiveNotification.Restore ||
+                // OR if just one message is getting restored
+                archiveNotification.NotificationId > 0 && archiveNotification.Restore)
+            {
+                // Mark the message accordingly
+                Notification notification = await unitOfWork.Notifications.Get(archiveNotification.NotificationId);
+                notification.MessageArchived = !archiveNotification.Restore;
+                unitOfWork.Notifications.Update(notification);
+            }
+
+
+
+
+
+
+            // ------------ All Messages In Group ------------ \\
+
+            // If all messages in a group are getting archived
+            if (archiveNotification.ArchiveAllMessagesInGroup ||
+                // OR if all messages in a group are getting restored
+                archiveNotification.RestoreAllMessagesInGroup)
+            {
+                // Get all messages in the group
+                IEnumerable<Notification> messageNotifications = await unitOfWork.Notifications.GetCollection(x => x.NotificationGroupId == archiveNotification.NotificationGroupId);
+
+                // Mark each message accordingly
+                foreach (var messageNotification in messageNotifications)
+                {
+                    messageNotification.MessageArchived = archiveNotification.ArchiveAllMessagesInGroup;
+                }
+                unitOfWork.Notifications.UpdateRange(messageNotifications);
+            }
+
+
+
+
+            // Update the notification group
             unitOfWork.NotificationGroups.Update(notificationGroup);
             await unitOfWork.Save();
         }
+
+
+
+
 
 
 
