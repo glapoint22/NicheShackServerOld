@@ -26,21 +26,40 @@ namespace Manager.Repositories
 
         public async Task<List<NotificationItem>> GetNotifications(bool isNew)
         {
-            var allNotifications = await context.Notifications.Where(x => isNew ? x.NotificationGroup.ArchiveDate == null || !x.MessageArchived : x.NotificationGroup.ArchiveDate != null || x.MessageArchived).Select(x => new
-            {
-                // Id = x.Id,
-                NotificationGroupId = x.NotificationGroupId,
-                Email = x.Type == 0 ?
+            var allNotifications = await context.Notifications.Where(x => isNew ?
+
+            // ---- NEW LIST ---- \\
+
+            // Count all the notifications that DO NOT belong to an archived group
+            x.NotificationGroup.ArchiveDate == null ||
+            // but if it's a message notification that belongs to an archive group and
+            // that message notification has NOT been archived, then count that one too
+            (x.Type == 0 && !x.MessageArchived) :
+
+
+            // ---- ARCHIVE LIST ---- \\
+
+            // Count all the notifications that DO belong to an archived group
+            x.NotificationGroup.ArchiveDate != null ||
+            // but if it's a message notification that DOES NOT belong to an archive group and
+            // that message notification HAS been archived, then count that one too
+            (x.Type == 0 && x.MessageArchived))
+
+                .Select(x => new
+                {
+                    Id = x.Id,
+                    NotificationGroupId = x.NotificationGroupId,
+                    Email = x.Type == 0 ?
                     x.NonAccountUserEmail != null ? x.NonAccountUserEmail :
                     x.Customer.Email :
                     null,
-                ProductName = x.Product.Name,
-                ProductImage = x.Product.Media.Thumbnail,
-                NotificationType = x.Type,
-                CreationDate = x.CreationDate,
-                ArchiveDate = x.NotificationGroup.ArchiveDate,
-                Count = x.Type == 0 ? x.NotificationGroup.Notifications.Where(y => isNew ? !y.MessageArchived : y.MessageArchived).Count() : x.NotificationGroup.Notifications.Count()
-            }).ToListAsync();
+                    ProductName = x.Product.Name,
+                    ProductImage = x.Product.Media.Thumbnail,
+                    NotificationType = x.Type,
+                    CreationDate = x.CreationDate,
+                    ArchiveDate = x.NotificationGroup.ArchiveDate,
+                    Count = x.Type == 0 ? x.NotificationGroup.Notifications.Where(y => isNew ? !y.MessageArchived : y.MessageArchived).Count() : x.NotificationGroup.Notifications.Count()
+                }).ToListAsync();
 
 
             List<NotificationItem> notifications = allNotifications
@@ -54,7 +73,7 @@ namespace Manager.Repositories
             .OrderByDescending(x => isNew ? x.CreationDate : x.ArchiveDate)
             .Select(x => new NotificationItem
             {
-                // Id = x.Id,
+                Id = x.Id,
                 NotificationGroupId = x.NotificationGroupId,
                 NotificationType = x.NotificationType,
                 Name = x.Email != null ? x.Email : GetNotificationName(x.NotificationType),
