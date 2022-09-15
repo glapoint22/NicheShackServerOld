@@ -29,7 +29,7 @@ namespace DataAccess.Models
         public string Description { get; set; }
 
         public int TotalReviews { get; set; }
-        public int Rating { get; set; }
+        public double Rating { get; set; }
         public int OneStar { get; set; }
         public int TwoStars { get; set; }
         public int ThreeStars { get; set; }

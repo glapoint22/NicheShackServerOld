@@ -158,7 +158,7 @@ namespace Services.Classes
 
                 case QueryType.Rating:
                     MemberExpression rating = Expression.Property(parameter, "Rating");
-                    ConstantExpression value = Expression.Constant(queryRow.Integer);
+                    ConstantExpression value = Expression.Constant(Convert.ToDouble(queryRow.Integer));
                     expression = GetComparisonOperatorExpression((ComparisonOperatorType)queryRow.ComparisonOperatorType, rating, value);
                     break;
 
