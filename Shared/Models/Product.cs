@@ -29,7 +29,7 @@ namespace DataAccess.Models
         public string Description { get; set; }
 
         public int TotalReviews { get; set; }
-        public double Rating { get; set; }
+        public int Rating { get; set; }
         public int OneStar { get; set; }
         public int TwoStars { get; set; }
         public int ThreeStars { get; set; }
@@ -37,8 +37,8 @@ namespace DataAccess.Models
         public int FiveStars { get; set; }
 
 
-        public double MinPrice { get; set; }
-        public double MaxPrice { get; set; }
+        //public double MinPrice { get; set; }
+        //public double MaxPrice { get; set; }
 
         public int RebillFrequency { get; set; }
 
@@ -83,6 +83,7 @@ namespace DataAccess.Models
         public virtual ICollection<SubgroupProduct> SubgroupProducts { get; set; }
         public virtual ICollection<KeywordGroup_Belonging_To_Product> KeywordGroups_Belonging_To_Product { get; set; }
         public virtual ICollection<Subproduct> Subproducts { get; set; }
+        public virtual ICollection<ProductPrice> ProductPrices { get; set; }
 
 
 
@@ -101,6 +102,7 @@ namespace DataAccess.Models
             SubgroupProducts = new HashSet<SubgroupProduct>();
             KeywordGroups_Belonging_To_Product = new HashSet<KeywordGroup_Belonging_To_Product>();
             Subproducts = new HashSet<Subproduct>();
+            ProductPrices = new HashSet<ProductPrice>();
         }
     }
 }

@@ -12,6 +12,7 @@ using Services.Classes;
 using Services;
 using Manager.ViewModels;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace Manager.Controllers
 {
@@ -27,6 +28,151 @@ namespace Manager.Controllers
             this.unitOfWork = unitOfWork;
             this.queryService = queryService;
         }
+
+
+
+        [HttpGet]
+        [Route("SetData")]
+        public async Task<ActionResult> SetData()
+        {
+            var productData = TempProducts.GetProductData();
+
+            var tempProducts = JsonSerializer.Deserialize<TempProducts>(productData, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            foreach (TempProduct product in tempProducts.Products)
+            {
+                string description = GetDescription(product.Description);
+            }
+
+
+
+
+            return Ok();
+
+        }
+
+
+
+
+        private string GetDescription(string description)
+        {
+            Regex regex = new Regex(@"(?:(.+?)~~)?(?:(.+?)~~)?(?:(.+?)~~)?(?:(.+?)~~)?(?:(.+?)~~)?(.+)");
+
+
+            MatchCollection matchCollection = regex.Matches(description);
+
+
+            List<string> textList = matchCollection[0].Groups.Values
+                .Skip(1)
+                .Where(x => x.Value != string.Empty)
+                .Select(x => x.Value)
+                .ToList();
+
+            List<TextBoxData> textBoxDataList = new List<TextBoxData>();
+
+            for (int i = 0; i < textList.Count; i++)
+            {
+                string text = textList[i];
+
+                // Text
+                textBoxDataList.Add(new TextBoxData()
+                {
+                    ElementType = ElementType.Div,
+                    Children = new List<TextBoxData>()
+                    {
+                        new TextBoxData()
+                        {
+                            ElementType = ElementType.Text,
+                            Text = text
+                        }
+                    }
+                });
+
+
+                // Break
+                if (i != textList.Count - 1)
+                {
+                    textBoxDataList.Add(new TextBoxData()
+                    {
+                        ElementType = ElementType.Div,
+                        Indent = null,
+                        Children = new List<TextBoxData>()
+                        {
+                            new TextBoxData()
+                            {
+                                ElementType = ElementType.Break,
+                                Indent = null
+                            }
+                        }
+                    });
+                }
+            }
+
+
+            string textBoxDataString = JsonSerializer.Serialize(textBoxDataList, new JsonSerializerOptions
+            {
+                IgnoreNullValues = true
+            });
+
+            return textBoxDataString;
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         [HttpGet]
         public async Task<ActionResult> GetProducts(int parentId)
@@ -89,7 +235,7 @@ namespace Manager.Controllers
         [Route("QueryBuilder")]
         public async Task<ActionResult> GetQueryBuilderProducts(string queryString)
         {
-           Query query = JsonSerializer.Deserialize<Query>(queryString, new JsonSerializerOptions
+            Query query = JsonSerializer.Deserialize<Query>(queryString, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });
@@ -99,7 +245,7 @@ namespace Manager.Controllers
             queryParams.Query = query;
             queryParams.Limit = 24;
             queryParams.UsesFilters = false;
-            
+
 
             return Ok(await queryService.GetProductGroup(queryParams));
         }
@@ -796,7 +942,7 @@ namespace Manager.Controllers
             pricePoint.UnitPrice = pricePointProperties.UnitPrice;
             pricePoint.Unit = pricePointProperties.Unit;
             pricePoint.StrikethroughPrice = pricePointProperties.StrikethroughPrice;
-            pricePoint.Price = pricePointProperties.Price;
+            //pricePoint.Price = pricePointProperties.Price;
             pricePoint.ShippingType = pricePointProperties.ShippingType;
             pricePoint.TrialPeriod = pricePointProperties.RecurringPayment.TrialPeriod;
             pricePoint.RecurringPrice = pricePointProperties.RecurringPayment.RecurringPrice;
@@ -838,8 +984,8 @@ namespace Manager.Controllers
         {
             Product product = await unitOfWork.Products.Get(updatedMinMaxPrice.ProductId);
 
-            product.MinPrice = updatedMinMaxPrice.MinPrice;
-            product.MaxPrice = updatedMinMaxPrice.MaxPrice;
+            //product.MinPrice = updatedMinMaxPrice.MinPrice;
+            //product.MaxPrice = updatedMinMaxPrice.MaxPrice;
 
             // Update and save
             unitOfWork.Products.Update(product);

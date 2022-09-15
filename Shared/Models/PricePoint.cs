@@ -31,7 +31,7 @@ namespace DataAccess.Models
 
 
         public string StrikethroughPrice { get; set; }
-        public double Price { get; set; }
+        //public double Price { get; set; }
         public int ShippingType { get; set; }
         public int TrialPeriod { get; set; }
         public double RecurringPrice { get; set; }

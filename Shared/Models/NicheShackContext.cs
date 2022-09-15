@@ -104,7 +104,7 @@ namespace DataAccess.Models
         public virtual DbSet<ProductOrder> ProductOrders { get; set; }
 
 
-
+        public virtual DbSet<ProductPrice> ProductPrices { get; set; }
 
         public virtual DbSet<ProductReview> ProductReviews { get; set; }
 

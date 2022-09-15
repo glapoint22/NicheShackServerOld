@@ -173,7 +173,7 @@ namespace Website.Controllers
                          (2 * product.TwoStars) +
                          (1 * product.OneStar);
 
-            product.Rating = Math.Round(sum / product.TotalReviews, 1);
+            product.Rating = (int)Math.Round(sum / product.TotalReviews, 1);
 
             // Update the product and save the changes to the database
             unitOfWork.Products.Update(product);

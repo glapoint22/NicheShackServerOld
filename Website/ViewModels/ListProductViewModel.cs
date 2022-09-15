@@ -60,10 +60,10 @@ namespace Website.ViewModels
             switch (orderBy)
             {
                 case "price-asc":
-                    orderResult = source.OrderBy(x => x.Product.MinPrice);
+                    //orderResult = source.OrderBy(x => x.Product.MinPrice);
                     break;
                 case "price-desc":
-                    orderResult = source.OrderByDescending(x => x.Product.MinPrice);
+                    //orderResult = source.OrderByDescending(x => x.Product.MinPrice);
                     break;
                 case "rating":
                     orderResult = source.OrderByDescending(x => x.Product.Rating);

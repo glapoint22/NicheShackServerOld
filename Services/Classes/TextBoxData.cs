@@ -9,6 +9,6 @@ namespace Services.Classes
         public string Text { get; set; }
         public List<StyleData> Styles { get; set; }
         public Link Link { get; set; }
-        public int Indent { get; set; }
+        public int? Indent { get; set; }
     }
 }

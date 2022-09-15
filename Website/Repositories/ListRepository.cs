@@ -149,8 +149,8 @@ namespace Website.Repositories
                     Name = x.Product.Name,
                     Rating = x.Product.Rating,
                     TotalReviews = x.Product.TotalReviews,
-                    MinPrice = x.Product.MinPrice,
-                    MaxPrice = x.Product.MaxPrice,
+                    //MinPrice = x.Product.MinPrice,
+                    //MaxPrice = x.Product.MaxPrice,
                     DateAdded = x.DateAdded.ToString("MMMM dd, yyyy"),
                     Collaborator = new CollaboratorViewModel
                     {

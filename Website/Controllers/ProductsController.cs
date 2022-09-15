@@ -43,8 +43,8 @@ namespace Website.Controllers
                 UrlId = x.UrlId,
                 Rating = x.Rating,
                 TotalReviews = x.TotalReviews,
-                MinPrice = x.MinPrice,
-                MaxPrice = x.MaxPrice,
+                //MinPrice = x.MinPrice,
+                //MaxPrice = x.MaxPrice,
                 OneStar = x.OneStar,
                 TwoStars = x.TwoStars,
                 ThreeStars = x.ThreeStars,
@@ -165,7 +165,7 @@ namespace Website.Controllers
                     UnitPrice = x.UnitPrice,
                     Unit = x.Unit,
                     StrikethroughPrice = x.StrikethroughPrice,
-                    Price = x.Price,
+                    //Price = x.Price,
                     ShippingType = x.ShippingType,
                     RecurringPayment = new RecurringPayment
                     {

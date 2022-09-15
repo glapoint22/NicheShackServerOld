@@ -81,8 +81,8 @@ namespace Manager.Repositories
                     TotalReviews = x.TotalReviews,
                     Hoplink = x.Hoplink,
                     Description = x.Description,
-                    MinPrice = x.MinPrice,
-                    MaxPrice = x.MaxPrice,
+                    //MinPrice = x.MinPrice,
+                    //MaxPrice = x.MaxPrice,
                     ShippingType = x.ShippingType,
                     RecurringPayment = new RecurringPayment
                     {
@@ -119,7 +119,7 @@ namespace Manager.Repositories
                      UnitPrice = x.UnitPrice,
                      Unit = x.Unit,
                      StrikethroughPrice = x.StrikethroughPrice,
-                     Price = x.Price,
+                     //Price = x.Price,
                      ShippingType = x.ShippingType,
                      RecurringPayment = new RecurringPayment
                      {
