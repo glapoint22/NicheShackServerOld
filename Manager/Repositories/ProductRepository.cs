@@ -22,7 +22,33 @@ namespace Manager.Repositories
         }
 
 
+        public async Task<List<TempMedia>> GetTempProductMedia(int productId)
+        {
+            List<int> meidiaIds = await context.TempProductMedia
+                .AsNoTracking()
+                .Where(x => x.ProductId == productId)
+                .Select(x => x.MediaId)
+                .ToListAsync();
 
+            return await context.TempMedia
+                .AsNoTracking()
+                .Where(x => meidiaIds.Contains(x.Id))
+                .ToListAsync();
+        }
+
+
+
+
+        public async Task<List<double>> GetTempProductPrices(int productId)
+        {
+            return await context.TempProductPricePoints
+                .AsNoTracking()
+                .OrderBy(x => x.Index)
+                .Where(x => x.ProductId == productId)
+                .Select(x => x.WholeNumber + (x.Decimal * .01))
+                .ToListAsync();
+
+        }
 
 
 

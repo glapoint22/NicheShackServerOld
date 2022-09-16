@@ -297,6 +297,32 @@ namespace Manager.Controllers
 
 
 
+        public async Task<Item> TempNewVideo(MediaViewModel video)
+        {
+            var thumbnail = await GetVideoThumbnail(video);
+
+            if (thumbnail == null) return null;
+
+            Media newVideo = new Media
+            {
+                Name = video.Name.Trim(),
+                VideoId = video.VideoId,
+                MediaType = (int)MediaType.Video,
+                VideoType = video.VideoType,
+                Thumbnail = thumbnail
+            };
+
+            // Add the new video
+            unitOfWork.Media.Add(newVideo);
+            await unitOfWork.Save();
+
+
+            return new Item
+            {
+                Id = newVideo.Id
+            };
+        }
+
 
 
 

@@ -11,6 +11,12 @@ namespace DataAccess.Models
         }
 
         // Tables
+        public virtual DbSet<TempProductPricePoint> TempProductPricePoints { get; set; }
+
+        public virtual DbSet<TempMedia> TempMedia { get; set; }
+
+        public virtual DbSet<TempProductMedia> TempProductMedia { get; set; }
+
 
         public virtual DbSet<BlockedNonAccountEmail> BlockedNonAccountEmails { get; set; }
 

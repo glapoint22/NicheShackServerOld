@@ -10,5 +10,7 @@ namespace Manager.Repositories
     {
         Task<IEnumerable<ProductFilterViewModel>> GetProductFilters(int productId, int filterId);
         Task<ProductViewModel> GetProduct(int productId);
+        Task<List<double>> GetTempProductPrices(int productId);
+        Task<List<TempMedia>> GetTempProductMedia(int productId);
     }
 }
