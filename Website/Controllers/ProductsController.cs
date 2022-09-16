@@ -153,7 +153,7 @@ namespace Website.Controllers
 
 
                 // Price Points
-                product.PricePoints = await unitOfWork.ProductPrices.GetCollection(x => x.ProductId == product.Id, x => new PricePointViewModel
+                product.PricePoints = await unitOfWork.PricePoints.GetCollection(x => x.ProductPrice.ProductId == product.Id, x => new PricePointViewModel
                 {
                     Image = new ImageViewModel
                     {
@@ -165,7 +165,7 @@ namespace Website.Controllers
                     UnitPrice = x.UnitPrice,
                     Unit = x.Unit,
                     StrikethroughPrice = x.StrikethroughPrice,
-                    //Price = x.Price,
+                    Price = x.ProductPrice.Price,
                     ShippingType = x.ShippingType,
                     RecurringPayment = new RecurringPayment
                     {
