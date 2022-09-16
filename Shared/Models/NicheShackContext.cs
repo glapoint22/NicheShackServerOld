@@ -494,6 +494,16 @@ namespace DataAccess.Models
 
 
 
+            
+            //modelBuilder.Entity<Notification>(entity =>
+            //{
+            //    entity.HasOne(x => x.NotificationEmployeeMessage)
+            //    .WithOne(x => x.Notification)
+            //    .OnDelete(DeleteBehavior.Cascade);
+            //});
+
+
+
 
 
             // OrderProducts

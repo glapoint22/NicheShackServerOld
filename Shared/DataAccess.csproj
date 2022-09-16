@@ -71,6 +71,8 @@
     <Compile Remove="Migrations\20220825182818_Notifications.Designer.cs" />
     <Compile Remove="Migrations\20220906191700_AddedNotificationEmployeeMessagesTable.cs" />
     <Compile Remove="Migrations\20220906191700_AddedNotificationEmployeeMessagesTable.Designer.cs" />
+    <Compile Remove="Migrations\20220916162057_tet.cs" />
+    <Compile Remove="Migrations\20220916162057_tet.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>
