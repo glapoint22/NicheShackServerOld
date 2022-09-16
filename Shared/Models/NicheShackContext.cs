@@ -18,6 +18,23 @@ namespace DataAccess.Models
         public virtual DbSet<TempProductMedia> TempProductMedia { get; set; }
 
 
+        public virtual DbSet<TempCategory> TempCategories { get; set; }
+
+
+        public virtual DbSet<TempNiche> TempNiches { get; set; }
+
+        public virtual DbSet<TempVendor> TempVendors { get; set; }
+
+
+
+
+
+
+
+
+
+
+
         public virtual DbSet<BlockedNonAccountEmail> BlockedNonAccountEmails { get; set; }
 
         public virtual DbSet<Category> Categories { get; set; }
@@ -141,12 +158,12 @@ namespace DataAccess.Models
 
 
             // Categories
-            modelBuilder.Entity<Category>(entity =>
-            {
-                entity.HasOne(x => x.Media)
-                .WithMany(x => x.Categtories)
-                .OnDelete(DeleteBehavior.Restrict);
-            });
+            //modelBuilder.Entity<Category>(entity =>
+            //{
+            //    entity.HasOne(x => x.Media)
+            //    .WithMany(x => x.Categtories)
+            //    .OnDelete(DeleteBehavior.Restrict);
+            //});
 
 
 

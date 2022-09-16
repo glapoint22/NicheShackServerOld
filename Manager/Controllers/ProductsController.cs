@@ -49,9 +49,17 @@ namespace Manager.Controllers
             {
                 Product product = new Product();
 
+                // Vendor
+                //product.VendorId = await unitOfWork.Products.GetVendorId(tempProduct.VendorId);
+
+                // Categories & Niches
+                //product.NicheId = await unitOfWork.Products.GetNicheId(tempProduct.NicheId);
+
+
+
                 // Name
-                product.Name = tempProduct.Name;
-                product.UrlName = GetUrlName(tempProduct.Name.Trim());
+                product.Name = tempProduct.Name.Trim();
+                product.UrlName = GetUrlName(product.Name);
 
 
                 // UrlId
@@ -63,7 +71,7 @@ namespace Manager.Controllers
 
 
                 // Media
-               product.ImageId = await SetProductMedia(tempProduct.Id);
+                //product.ImageId = await SetProductMedia(tempProduct.Id);
 
 
                 // Prices

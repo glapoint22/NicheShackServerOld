@@ -43,46 +43,46 @@ namespace Services.Classes
 
         public override async Task SetData(NicheShackContext context, QueryParams queryParams)
         {
-            List<ItemData> itemData = null;
+            //List<ItemData> itemData = null;
 
 
-            if (ShopType == ShopType.Category)
-            {
-                itemData = await context.Categories
-                .AsNoTracking()
-                .Where(x => Items.Select(z => z.Id).ToList().Contains(x.Id))
-                .Select(x => new ItemData
-                {
-                    Id = x.Id,
-                    Name = x.Name,
-                    ImageId = (int)x.ImageId
-                })
-                .ToListAsync();
-            }
-            else
-            {
-                itemData = await context.Niches
-                .AsNoTracking()
-                .Where(x => Items.Select(z => z.Id).ToList().Contains(x.Id))
-                .Select(x => new ItemData
-                {
-                    Id = x.Id,
-                    Name = x.Name,
-                    ImageId = (int)x.ImageId
-                })
-                .ToListAsync();
-            }
+            //if (ShopType == ShopType.Category)
+            //{
+            //    itemData = await context.Categories
+            //    .AsNoTracking()
+            //    .Where(x => Items.Select(z => z.Id).ToList().Contains(x.Id))
+            //    .Select(x => new ItemData
+            //    {
+            //        Id = x.Id,
+            //        Name = x.Name,
+            //        ImageId = (int)x.ImageId
+            //    })
+            //    .ToListAsync();
+            //}
+            //else
+            //{
+            //    itemData = await context.Niches
+            //    .AsNoTracking()
+            //    .Where(x => Items.Select(z => z.Id).ToList().Contains(x.Id))
+            //    .Select(x => new ItemData
+            //    {
+            //        Id = x.Id,
+            //        Name = x.Name,
+            //        ImageId = (int)x.ImageId
+            //    })
+            //    .ToListAsync();
+            //}
 
 
-            foreach (ShopItem item in Items)
-            {
-                ItemData data = itemData.Where(x => x.Id == item.Id).Single();
-                item.Name = data.Name;
-                item.Icon = new Image();
-                item.Icon.Id = data.ImageId;
-                await item.Icon.SetData(context);
-                //if (item.Link != null) await item.Link.SetData(context);
-            }
+            //foreach (ShopItem item in Items)
+            //{
+            //    ItemData data = itemData.Where(x => x.Id == item.Id).Single();
+            //    item.Name = data.Name;
+            //    item.Icon = new Image();
+            //    item.Icon.Id = data.ImageId;
+            //    await item.Icon.SetData(context);
+            //    //if (item.Link != null) await item.Link.SetData(context);
+            //}
         }
     }
 
