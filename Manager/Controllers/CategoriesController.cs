@@ -41,11 +41,11 @@ namespace Manager.Controllers
                 id = x.Id,
                 name = x.Name,
                 urlName = x.UrlName,
-                icon = new
-                {
-                    name = x.Media.Name,
-                    url = x.Media.ImageAnySize
-                }
+                //icon = new
+                //{
+                //    name = x.Media.Name,
+                //    url = x.Media.ImageAnySize
+                //}
             }));
         }
 
@@ -59,11 +59,11 @@ namespace Manager.Controllers
                 id = x.Id,
                 name = x.Name,
                 urlName = x.UrlName,
-                icon = new
-                {
-                    name = x.Media.Name,
-                    url = x.Media.ImageAnySize
-                }
+                //icon = new
+                //{
+                //    name = x.Media.Name,
+                //    url = x.Media.ImageAnySize
+                //}
             }));
         }
 
@@ -123,35 +123,35 @@ namespace Manager.Controllers
 
 
 
-        [HttpPut]
-        [Route("Image")]
-        public async Task<ActionResult> UpdateCategoryImage(UpdatedProperty updatedProperty)
-        {
-            Category category = await unitOfWork.Categories.Get(updatedProperty.ItemId);
+        //[HttpPut]
+        //[Route("Image")]
+        //public async Task<ActionResult> UpdateCategoryImage(UpdatedProperty updatedProperty)
+        //{
+        //    Category category = await unitOfWork.Categories.Get(updatedProperty.ItemId);
 
-            category.ImageId = updatedProperty.PropertyId;
+        //    category.ImageId = updatedProperty.PropertyId;
 
-            // Update and save
-            unitOfWork.Categories.Update(category);
-            await unitOfWork.Save();
+        //    // Update and save
+        //    unitOfWork.Categories.Update(category);
+        //    await unitOfWork.Save();
 
-            return Ok();
-        }
-
-
+        //    return Ok();
+        //}
 
 
-        [HttpGet]
-        [Route("Image")]
-        public async Task<ActionResult> GetCategoryImage(int categoryId)
-        {
-            return Ok(await unitOfWork.Media.Get(x => x.Id == x.Categtories.Where(y => y.Id == categoryId).Select(y => y.ImageId).FirstOrDefault(), x => new ImageViewModel
-            {
-                Id = x.Id,
-                Name = x.Name,
-                Src = x.ImageAnySize
-            }));
-        }
+
+
+        //[HttpGet]
+        //[Route("Image")]
+        //public async Task<ActionResult> GetCategoryImage(int categoryId)
+        //{
+        //    return Ok(await unitOfWork.Media.Get(x => x.Id == x.Categtories.Where(y => y.Id == categoryId).Select(y => y.ImageId).FirstOrDefault(), x => new ImageViewModel
+        //    {
+        //        Id = x.Id,
+        //        Name = x.Name,
+        //        Src = x.ImageAnySize
+        //    }));
+        //}
 
 
 

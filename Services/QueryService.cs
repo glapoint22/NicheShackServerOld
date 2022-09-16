@@ -476,7 +476,7 @@ namespace Services
 
 
             // ******Rating Filter********
-            IEnumerable<int> productRatings;
+            IEnumerable<double> productRatings;
             List<QueryFilterOption> ratingOptions = new List<QueryFilterOption>();
 
             // Check to see if we have a customer rating filter selected
@@ -489,7 +489,7 @@ namespace Services
                 productRatings = await GetProducts(queryParams, x => x.Rating);
                 queryParams.RatingFilter = ratingFilter;
 
-                List<int> selectedRatingOptions = ratingFilter.Options.Select(x => x.Id).ToList();
+                List<double> selectedRatingOptions = ratingFilter.Options.Select(x => Convert.ToDouble(x.Id)).ToList();
                 productRatings = productRatings.Concat(selectedRatingOptions).ToList();
             }
             else

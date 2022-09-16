@@ -72,8 +72,6 @@ namespace DataAccess.Models
         public virtual ICollection<Product> Products { get; set; }
         public virtual ICollection<ProductMedia> ProductMedia { get; set; }
         public virtual ICollection<PricePoint> ProductPrices { get; set; }
-        public virtual ICollection<Category> Categtories { get; set; }
-        public virtual ICollection<Niche> Niches { get; set; }
         public virtual ICollection<Subproduct> Subproducts { get; set; }
 
 
@@ -82,8 +80,6 @@ namespace DataAccess.Models
             Products = new HashSet<Product>();
             ProductMedia = new HashSet<ProductMedia>();
             ProductPrices = new HashSet<PricePoint>();
-            Categtories = new HashSet<Category>();
-            Niches = new HashSet<Niche>();
             Subproducts = new HashSet<Subproduct>();
         }
     }

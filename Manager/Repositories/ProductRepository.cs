@@ -2,6 +2,7 @@
 using DataAccess.Models;
 using DataAccess.Repositories;
 using DataAccess.ViewModels;
+using Manager.Classes;
 using Manager.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using Services.Classes;
@@ -23,6 +24,137 @@ namespace Manager.Repositories
 
 
 
+        public async Task<int> GetVendorId(int tempVendorId)
+        {
+            TempVendor tempVendor = await context.TempVendors
+                .AsNoTracking()
+                .Where(x => x.Id == tempVendorId)
+                .SingleAsync();
+
+
+            if (await context.Vendors.AnyAsync(x => x.Name == tempVendor.Name) == false)
+            {
+                Vendor vendor = new Vendor
+                {
+                    Name = tempVendor.Name,
+                    PrimaryEmail = tempVendor.PrimaryEmail,
+                    PrimaryFirstName = tempVendor.PrimaryFirstName,
+                    PrimaryLastName = tempVendor.PrimaryLastName
+                };
+
+                context.Add(vendor);
+
+                await context.SaveChangesAsync();
+
+                return vendor.Id;
+            }
+            else
+            {
+                return await context.Vendors
+                    .AsNoTracking()
+                    .Where(x => x.Name == tempVendor.Name)
+                    .Select(x => x.Id)
+                    .SingleAsync();
+            }
+        }
+
+
+
+
+
+        public async Task<int> GetNicheId(int tempNicheId)
+        {
+            Niche tempNiche = await context.TempNiches
+                .AsNoTracking()
+                .Where(x => x.Id == tempNicheId)
+                .Select(x => new Niche
+                {
+                    CategoryId = x.CategoryId,
+                    Name = x.Name.Trim()
+                })
+                .SingleOrDefaultAsync();
+
+            string categoryName = await context.TempCategories
+                .AsNoTracking()
+                .Where(x => x.Id == tempNiche.CategoryId)
+                .Select(x => x.Name)
+                .SingleOrDefaultAsync();
+
+            categoryName = categoryName.Trim();
+
+            if (await context.Categories.AnyAsync(x => x.Name == categoryName) == false)
+            {
+                Category category = new Category
+                {
+                    Name = categoryName,
+                    UrlName = Utility.GetUrlName(categoryName),
+                    UrlId = Utility.GetUrlId()
+                };
+
+                context.Add(category);
+
+                await context.SaveChangesAsync();
+
+                Niche niche = new Niche
+                {
+                    CategoryId = category.Id,
+                    Name = tempNiche.Name,
+                    UrlName = Utility.GetUrlName(tempNiche.Name),
+                    UrlId = Utility.GetUrlId()
+                };
+
+                context.Add(niche);
+
+                await context.SaveChangesAsync();
+
+                return niche.Id;
+            }
+            else
+            {
+                int categoryId = await context.Categories
+                    .AsNoTracking()
+                    .Where(x => x.Name == categoryName)
+                    .Select(x => x.Id)
+                    .SingleAsync();
+
+                return await context.Niches
+                    .AsNoTracking()
+                    .Where(x => x.CategoryId == categoryId)
+                    .Select(x => x.Id)
+                    .SingleAsync();
+            }
+        }
+
+
+
+
+        public async Task<List<TempMedia>> GetTempProductMedia(int productId)
+        {
+            List<int> meidiaIds = await context.TempProductMedia
+                .AsNoTracking()
+                .Where(x => x.ProductId == productId)
+                .Select(x => x.MediaId)
+                .ToListAsync();
+
+            return await context.TempMedia
+                .AsNoTracking()
+                .Where(x => meidiaIds.Contains(x.Id))
+                .ToListAsync();
+        }
+
+
+
+
+        public async Task<List<double>> GetTempProductPrices(int productId)
+        {
+            return await context.TempProductPricePoints
+                .AsNoTracking()
+                .OrderBy(x => x.Index)
+                .Where(x => x.ProductId == productId)
+                .Select(x => x.WholeNumber + (x.Decimal * .01))
+                .ToListAsync();
+
+        }
 
 
 

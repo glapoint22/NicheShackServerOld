@@ -323,11 +323,11 @@ namespace Manager.Controllers
                 id = x.Id,
                 name = x.Name,
                 urlName = x.UrlName,
-                icon = new
-                {
-                    name = x.Media.Name,
-                    url = x.Media.ImageAnySize
-                }
+                //icon = new
+                //{
+                //    name = x.Media.Name,
+                //    url = x.Media.ImageAnySize
+                //}
             }));
         }
 
@@ -344,11 +344,11 @@ namespace Manager.Controllers
                 id = x.Id,
                 name = x.Name,
                 urlName = x.UrlName,
-                icon = new
-                {
-                    name = x.Media.Name,
-                    url = x.Media.ImageAnySize
-                }
+                //icon = new
+                //{
+                //    name = x.Media.Name,
+                //    url = x.Media.ImageAnySize
+                //}
             }));
         }
 
@@ -375,35 +375,35 @@ namespace Manager.Controllers
 
 
 
-        [HttpPut]
-        [Route("Image")]
-        public async Task<ActionResult> UpdateNicheImage(UpdatedProperty updatedProperty)
-        {
-            Niche niche = await unitOfWork.Niches.Get(updatedProperty.ItemId);
+        //[HttpPut]
+        //[Route("Image")]
+        //public async Task<ActionResult> UpdateNicheImage(UpdatedProperty updatedProperty)
+        //{
+        //    Niche niche = await unitOfWork.Niches.Get(updatedProperty.ItemId);
 
-            niche.ImageId = updatedProperty.PropertyId;
+        //    niche.ImageId = updatedProperty.PropertyId;
 
-            // Update and save
-            unitOfWork.Niches.Update(niche);
-            await unitOfWork.Save();
+        //    // Update and save
+        //    unitOfWork.Niches.Update(niche);
+        //    await unitOfWork.Save();
 
-            return Ok();
-        }
-
-
+        //    return Ok();
+        //}
 
 
-        [HttpGet]
-        [Route("Image")]
-        public async Task<ActionResult> GetNicheImage(int nicheId)
-        {
-            return Ok(await unitOfWork.Media.Get(x => x.Id == x.Niches.Where(y => y.Id == nicheId).Select(y => y.ImageId).FirstOrDefault(), x => new ImageViewModel
-            {
-                Id = x.Id,
-                Name = x.Name,
-                Src = x.ImageAnySize
-            }));
-        }
+
+
+        //[HttpGet]
+        //[Route("Image")]
+        //public async Task<ActionResult> GetNicheImage(int nicheId)
+        //{
+        //    return Ok(await unitOfWork.Media.Get(x => x.Id == x.Niches.Where(y => y.Id == nicheId).Select(y => y.ImageId).FirstOrDefault(), x => new ImageViewModel
+        //    {
+        //        Id = x.Id,
+        //        Name = x.Name,
+        //        Src = x.ImageAnySize
+        //    }));
+        //}
 
 
 

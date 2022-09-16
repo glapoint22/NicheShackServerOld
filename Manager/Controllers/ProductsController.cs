@@ -13,6 +13,9 @@ using Services;
 using Manager.ViewModels;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Net.Http;
+using System.IO;
+using static Manager.Classes.Utility;
 
 namespace Manager.Controllers
 {
@@ -42,20 +45,185 @@ namespace Manager.Controllers
                 PropertyNameCaseInsensitive = true
             });
 
-            foreach (TempProduct product in tempProducts.Products)
+            foreach (TempProduct tempProduct in tempProducts.Products)
             {
-                string description = GetDescription(product.Description);
+                Product product = new Product();
+
+                // Vendor
+                //product.VendorId = await unitOfWork.Products.GetVendorId(tempProduct.VendorId);
+
+                // Categories & Niches
+                //product.NicheId = await unitOfWork.Products.GetNicheId(tempProduct.NicheId);
+
+
+
+                // Name
+                product.Name = tempProduct.Name.Trim();
+                product.UrlName = GetUrlName(product.Name);
+
+
+                // UrlId
+                product.UrlId = GetUrlId();
+
+
+                // Hoplink
+                product.Hoplink = tempProduct.Hoplink;
+
+
+                // Media
+                //product.ImageId = await SetProductMedia(tempProduct.Id);
+
+
+                // Prices
+                await SetProductPrices(tempProduct.Id);
+
+                // Description
+                product.Description = GetDescription(tempProduct.Description);
             }
 
 
-
-
             return Ok();
-
         }
 
 
 
+
+        private async Task<int> SetProductMedia(int productId)
+        {
+            List<TempMedia> tempMedia = await unitOfWork.Products.GetTempProductMedia(productId);
+            int index = 0;
+            foreach (TempMedia media in tempMedia)
+            {
+                ProductMedia productMedia = null;
+
+                if (media.Type == 6)
+                {
+
+                    using (var formData = new MultipartFormDataContent())
+                    {
+                        using (FileStream fs = new FileStream("C:/inetpub/wwwroot/Manager/wwwroot/images/" + media.Url, FileMode.Open, FileAccess.Read))
+                        {
+                            using (HttpClient client = new HttpClient())
+                            {
+                                HttpContent fileStreamContent = new StreamContent(fs);
+                                HttpContent imageName = new StringContent(media.Name);
+                                HttpContent imageSize = new StringContent("500");
+
+                                formData.Add(fileStreamContent, "image", media.Url);
+                                formData.Add(imageName, "name");
+                                formData.Add(imageSize, "imageSize");
+
+                                var response = await client.PostAsync("http://localhost:9999/api/Media/Image", formData);
+
+                                var contents = await response.Content.ReadAsStringAsync();
+
+                                var image = JsonSerializer.Deserialize<Item>(contents, new JsonSerializerOptions
+                                {
+                                    PropertyNameCaseInsensitive = true
+                                });
+
+                                productMedia = new ProductMedia
+                                {
+                                    ProductId = productId,
+                                    MediaId = image.Id,
+                                    Index = index
+                                };
+
+
+                            }
+
+                        }
+                    }
+                }
+                else if (media.Type == 8)
+                {
+                    VideoType videoType = VideoType.Vimeo;
+                    string videoId = null;
+
+                    Regex regex = new Regex(@"youtube");
+                    if (regex.IsMatch(media.Url))
+                    {
+                        videoType = VideoType.YouTube;
+                        regex = new Regex(@"https://www\.youtube\.com/embed/(.+)");
+
+                        Match match = regex.Match(media.Url);
+                        videoId = match.Groups[1].Value;
+                    }
+                    else
+                    {
+                        videoType = VideoType.Vimeo;
+                        regex = new Regex(@"https://player\.vimeo\.com/video/(.+)");
+
+                        Match match = regex.Match(media.Url);
+                        videoId = match.Groups[1].Value;
+                    }
+
+                    MediaViewModel video = new MediaViewModel
+                    {
+                        VideoType = (int)videoType,
+                        VideoId = videoId,
+                        Name = media.Name
+                    };
+
+                    MediaController mediaController = new MediaController(unitOfWork);
+
+                    Item newVideo = await mediaController.TempNewVideo(video);
+
+
+
+                    productMedia = new ProductMedia
+                    {
+                        ProductId = productId,
+                        MediaId = newVideo.Id,
+                        Index = index
+                    };
+                }
+
+                if (productMedia != null)
+                    unitOfWork.ProductMedia.Add(productMedia);
+
+                index++;
+            }
+
+
+            await unitOfWork.Save();
+
+            return tempMedia[0].Id;
+        }
+
+
+
+        private async Task SetProductPrices(int productId)
+        {
+            List<double> prices = await unitOfWork.Products.GetTempProductPrices(productId);
+
+            if (prices.Count() == 1)
+            {
+                unitOfWork.ProductPrices.Add(new ProductPrice
+                {
+                    ProductId = productId,
+                    Price = prices[0]
+                });
+            }
+            else
+            {
+                foreach (double price in prices)
+                {
+                    unitOfWork.ProductPrices.Add(new ProductPrice
+                    {
+                        ProductId = productId,
+                        Price = price
+                    });
+
+                    unitOfWork.PricePoints.Add(new PricePoint
+                    {
+                        ProductId = productId
+                    });
+                }
+            }
+
+            //await unitOfWork.Save();
+        }
 
         private string GetDescription(string description)
         {
