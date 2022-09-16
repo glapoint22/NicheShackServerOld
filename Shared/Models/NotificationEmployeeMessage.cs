@@ -20,6 +20,23 @@ namespace DataAccess.Models
 
 
 
+
+        //[ForeignKey("Notification")]
+        //[Required]
+        //public int NotificationId { get; set; }
+
+        //public virtual Notification Notification { get; set; }
+
+
+
+
+
+
+
+
+
+
+
         public virtual Customer Customer { get; set; }
     }
 }

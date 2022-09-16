@@ -166,14 +166,15 @@ namespace Manager.Controllers
             // But if a notification needs to be restored
             else
             {
-                // If just one message is getting restored
+                // If just a single message is getting restored (NOT a message notification)
                 if (archiveNotification.NotificationId > 0)
                 {
                     // Check to see if there are other messages from the same sender that are still in archive
                     messageCount = await unitOfWork.Notifications.GetCount(x => x.NotificationGroupId == archiveNotification.NotificationGroupId && x.MessageArchived);
                 }
 
-                // Remove the archive date from its notification group as long as we're not restoring a message notification that still has other messages in archive
+                // Remove the archive date from its notification group as long as we're not restoring a single message
+                // from a message notification and that message notification doesn't still have other messages in archive
                 if (messageCount <= 1)
                 {
                     notificationGroup.ArchiveDate = null;
@@ -325,12 +326,32 @@ namespace Manager.Controllers
 
 
         [HttpDelete]
-        public async Task DeleteNotification(int notificationGroupId)
+        public async Task DeleteNotification(int notificationGroupId, int notificationId)
         {
-            var notificationGroup = await unitOfWork.NotificationGroups.Get(notificationGroupId);
+            var messageCount = 0;
 
-            unitOfWork.NotificationGroups.Remove(notificationGroup);
-            await unitOfWork.Save();
+            // If just a single message is getting deleted (NOT a message notification)
+            // Or if a message notification is getting deleted but it only has one message
+            if (notificationId > 0)
+            {
+                // Delete that message
+                Notification notification = await unitOfWork.Notifications.Get(notificationId);
+                unitOfWork.Notifications.Remove(notification);
+
+                // Check to see if there are other messages from the same sender that still have NOT been deleted
+                messageCount = await unitOfWork.Notifications.GetCount(x => x.NotificationGroupId == notificationGroupId && x.Id != notificationId);
+            }
+
+            // Remove the notification group as long as we're not deleting a single message from a message
+            // notification and that message notification doesn't still have other messages that aren't deleted yet
+            if (messageCount <= 1)
+            {
+                var notificationGroup = await unitOfWork.NotificationGroups.Get(notificationGroupId);
+                unitOfWork.NotificationGroups.Remove(notificationGroup);
+            }
+
+
+            //await unitOfWork.Save();
         }
     }
 }
