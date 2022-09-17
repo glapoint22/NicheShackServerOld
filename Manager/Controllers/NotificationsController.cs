@@ -326,32 +326,31 @@ namespace Manager.Controllers
 
 
         [HttpDelete]
-        public async Task DeleteNotification(int notificationGroupId, int notificationId)
+        public async Task DeleteNotification(int notificationGroupId, int notificationId, [FromQuery] int[] employeeMessageIds)
         {
-            var messageCount = 0;
 
-            // If just a single message is getting deleted (NOT a message notification)
-            // Or if a message notification is getting deleted but it only has one message
-            if (notificationId > 0)
-            {
-                // Delete that message
-                Notification notification = await unitOfWork.Notifications.Get(notificationId);
-                unitOfWork.Notifications.Remove(notification);
-
-                // Check to see if there are other messages from the same sender that still have NOT been deleted
-                messageCount = await unitOfWork.Notifications.GetCount(x => x.NotificationGroupId == notificationGroupId && x.Id != notificationId);
-            }
-
-            // Remove the notification group as long as we're not deleting a single message from a message
-            // notification and that message notification doesn't still have other messages that aren't deleted yet
-            if (messageCount <= 1)
+            if (notificationGroupId > 0)
             {
                 var notificationGroup = await unitOfWork.NotificationGroups.Get(notificationGroupId);
                 unitOfWork.NotificationGroups.Remove(notificationGroup);
+
+            }
+            else
+            {
+                Notification notification = await unitOfWork.Notifications.Get(notificationId);
+                unitOfWork.Notifications.Remove(notification);
             }
 
+            await unitOfWork.Save();
 
-            //await unitOfWork.Save();
+
+
+
+            if (employeeMessageIds.Length > 0)
+            {
+                unitOfWork.NotificationEmployeeMessages.RemoveRange(await unitOfWork.NotificationEmployeeMessages.GetCollection(x => employeeMessageIds.Contains(x.Id)));
+                await unitOfWork.Save();
+            }
         }
     }
 }

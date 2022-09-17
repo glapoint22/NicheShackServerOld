@@ -107,6 +107,7 @@ namespace Manager.Repositories
                 Date = x.CreationDate,
                 NoncompliantStrikes = x.Customer.NoncompliantStrikes,
                 BlockNotificationSending = x.NonAccountUserEmail != null ? context.BlockedNonAccountEmails.Where(y => y.Email == x.NonAccountUserEmail).FirstOrDefault() == null ? false : true : x.Customer.BlockNotificationSending,
+                EmployeeMessageId = x.EmployeeMessageId,
                 EmployeeFirstName = x.NotificationEmployeeMessage.Customer.FirstName,
                 EmployeeLastName = x.NotificationEmployeeMessage.Customer.LastName,
                 EmployeeImage = x.NotificationEmployeeMessage.Customer.Image,
@@ -196,14 +197,6 @@ namespace Manager.Repositories
 
 
 
-
-
-
-
-
-
-
-
         public async Task<NotificationProduct> GetProductNotification(int notificationGroupId)
         {
             var product = await context.Notifications.Where(x => x.NotificationGroupId == notificationGroupId).Select(x => new
@@ -251,6 +244,7 @@ namespace Manager.Repositories
 
             return notification;
         }
+
 
 
 
