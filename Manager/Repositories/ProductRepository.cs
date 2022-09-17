@@ -213,8 +213,6 @@ namespace Manager.Repositories
                     TotalReviews = x.TotalReviews,
                     Hoplink = x.Hoplink,
                     Description = x.Description,
-                    //MinPrice = x.MinPrice,
-                    //MaxPrice = x.MaxPrice,
                     ShippingType = x.ShippingType,
                     RecurringPayment = new RecurringPayment
                     {
@@ -224,19 +222,27 @@ namespace Manager.Repositories
                         TimeFrameBetweenRebill = x.TimeFrameBetweenRebill,
                         SubscriptionDuration = x.SubscriptionDuration
                     },
-                    //Image = new ImageViewModel
-                    //{
-                    //    Id = x.Media.Id,
-                    //    Name = x.Media.Name,
-                    //    Src = x.Media.ImageMd
-                    //}
                 }).SingleOrDefaultAsync();
+
+
+            List<double> prices = await context.ProductPrices
+                .AsNoTracking()
+                .Where(x => x.ProductId == productId)
+                .Select(x => x.Price)
+                .ToListAsync();
+
+            product.MinPrice = prices.Min();
+
+            if (prices.Count() > 1)
+            {
+                product.MaxPrice = prices.Max();
+            }
 
 
             // Product Price Points
             product.PricePoints = await context.PricePoints
                  .AsNoTracking()
-                 .Where(x => x.ProductId == productId)
+                 .Where(x => x.ProductPrice.ProductId == productId)
                  .Select(x => new PricePointViewModel
                  {
                      Id = x.Id,
@@ -251,7 +257,7 @@ namespace Manager.Repositories
                      UnitPrice = x.UnitPrice,
                      Unit = x.Unit,
                      StrikethroughPrice = x.StrikethroughPrice,
-                     //Price = x.Price,
+                     Price = x.ProductPrice.Price,
                      ShippingType = x.ShippingType,
                      RecurringPayment = new RecurringPayment
                      {

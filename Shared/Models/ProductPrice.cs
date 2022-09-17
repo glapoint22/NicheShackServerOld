@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
 
 namespace DataAccess.Models
 {
@@ -16,5 +14,13 @@ namespace DataAccess.Models
 
 
         public virtual Product Product { get; set; }
+
+        public virtual ICollection<PricePoint> PricePoints { get; set; }
+
+
+        public ProductPrice()
+        {
+            PricePoints = new HashSet<PricePoint>();
+        }
     }
 }

@@ -31,7 +31,7 @@ namespace Website.Repositories
         IRepository<ProductFilter> ProductFilters { get; }
         IRepository<Niche> Niches { get; }
         IRepository<PageReferenceItem> PageReferenceItems { get; }
-        IRepository<PricePoint> ProductPrices { get; }
+        IRepository<PricePoint> PricePoints { get; }
         //IRepository<ProductAdditionalInfo> AdditionalInfo { get; }
         IRepository<Subproduct> Subproducts { get; }
         IRepository<OneTimePassword> OneTimePasswords { get; }

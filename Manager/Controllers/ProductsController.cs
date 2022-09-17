@@ -58,16 +58,16 @@ namespace Manager.Controllers
 
 
                 // Name
-                product.Name = tempProduct.Name.Trim();
-                product.UrlName = GetUrlName(product.Name);
+                //product.Name = tempProduct.Name.Trim();
+                //product.UrlName = GetUrlName(product.Name);
 
 
                 // UrlId
-                product.UrlId = GetUrlId();
+                //product.UrlId = GetUrlId();
 
 
                 // Hoplink
-                product.Hoplink = tempProduct.Hoplink;
+                //product.Hoplink = tempProduct.Hoplink;
 
 
                 // Media
@@ -75,10 +75,10 @@ namespace Manager.Controllers
 
 
                 // Prices
-                await SetProductPrices(tempProduct.Id);
+                //await SetProductPrices(tempProduct.Id);
 
                 // Description
-                product.Description = GetDescription(tempProduct.Description);
+                //product.Description = GetDescription(tempProduct.Description);
             }
 
 
@@ -209,20 +209,27 @@ namespace Manager.Controllers
             {
                 foreach (double price in prices)
                 {
-                    unitOfWork.ProductPrices.Add(new ProductPrice
+                    ProductPrice productPrice = new ProductPrice
                     {
                         ProductId = productId,
                         Price = price
-                    });
+                    };
+
+                    unitOfWork.ProductPrices.Add(productPrice);
+
+
+                    await unitOfWork.Save();
 
                     unitOfWork.PricePoints.Add(new PricePoint
                     {
-                        ProductId = productId
+                        ProductPriceId = productPrice.Id
                     });
+
+                    await unitOfWork.Save();
                 }
             }
 
-            //await unitOfWork.Save();
+            
         }
 
         private string GetDescription(string description)
@@ -1079,9 +1086,21 @@ namespace Manager.Controllers
         [Route("PricePoint")]
         public async Task<ActionResult> AddPricePoint(PricePointProperties pricePointProperties)
         {
+            ProductPrice productPrice = new ProductPrice
+            {
+                ProductId = pricePointProperties.ProductId,
+                Price = 0
+            };
+
+            unitOfWork.ProductPrices.Add(productPrice);
+
+
+            await unitOfWork.Save();
+
+
             PricePoint pricePoint = new PricePoint
             {
-                ProductId = pricePointProperties.ProductId
+                ProductPriceId = productPrice.Id
             };
 
             // Add and save
@@ -1110,7 +1129,7 @@ namespace Manager.Controllers
             pricePoint.UnitPrice = pricePointProperties.UnitPrice;
             pricePoint.Unit = pricePointProperties.Unit;
             pricePoint.StrikethroughPrice = pricePointProperties.StrikethroughPrice;
-            //pricePoint.Price = pricePointProperties.Price;
+            pricePoint.ProductPrice.Price = pricePointProperties.Price;
             pricePoint.ShippingType = pricePointProperties.ShippingType;
             pricePoint.TrialPeriod = pricePointProperties.RecurringPayment.TrialPeriod;
             pricePoint.RecurringPrice = pricePointProperties.RecurringPayment.RecurringPrice;

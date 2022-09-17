@@ -7,11 +7,11 @@ namespace DataAccess.Models
     {
         public int Id { get; set; }
 
-        [ForeignKey("Product")]
+        [ForeignKey("ProductPrice")]
         [Required]
-        public int ProductId { get; set; }
-        
-        
+        public int ProductPriceId { get; set; }
+
+
         [ForeignKey("Media")]
         public int? ImageId { get; set; }
 
@@ -31,7 +31,6 @@ namespace DataAccess.Models
 
 
         public string StrikethroughPrice { get; set; }
-        //public double Price { get; set; }
         public int ShippingType { get; set; }
         public int TrialPeriod { get; set; }
         public double RecurringPrice { get; set; }
@@ -41,7 +40,7 @@ namespace DataAccess.Models
 
 
 
-        public virtual Product Product { get; set; }
+        public virtual ProductPrice ProductPrice { get; set; }
         public virtual Media Media { get; set; }
     }
 }

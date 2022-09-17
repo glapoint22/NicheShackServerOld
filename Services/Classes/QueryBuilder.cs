@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 
 namespace Services.Classes
 {
@@ -125,8 +124,7 @@ namespace Services.Classes
                         "Where",
                         new Type[] { typeof(SubgroupProduct) },
                         SubgroupProductsProperty,
-                        Expression.Lambda<Func<SubgroupProduct,
-                        bool>>(Expression.Equal(subgroupIdProperty, subgroupId), subgroupProductParameter));
+                        Expression.Lambda<Func<SubgroupProduct, bool>>(Expression.Equal(subgroupIdProperty, subgroupId), subgroupProductParameter));
 
 
 
@@ -151,9 +149,49 @@ namespace Services.Classes
                     break;
 
                 case QueryType.Price:
-                    MemberExpression minPriceProperty = Expression.Property(parameter, "MinPrice");
+                    // Product properties
+                    MemberExpression ProductPricesProperty = Expression.Property(parameter, "ProductPrices");
+                    MemberExpression id_Property = Expression.Property(parameter, "Id");
+
+
+                    // ProductPrice param and its properties
+                    ParameterExpression ProductPriceParameter = Expression.Parameter(typeof(ProductPrice), "z");
+                    MemberExpression PriceProperty = Expression.Property(ProductPriceParameter, "Price");
+                    MemberExpression productId_Property = Expression.Property(ProductPriceParameter, "ProductId");
+
+
+                    // Price
                     ConstantExpression price = Expression.Constant(queryRow.Price);
-                    expression = GetComparisonOperatorExpression((ComparisonOperatorType)queryRow.ComparisonOperatorType, minPriceProperty, price);
+
+
+                    // Where
+                    MethodCallExpression where_Exp = Expression.Call(
+                        typeof(Enumerable),
+                        "Where",
+                        new Type[] { typeof(ProductPrice) },
+                        ProductPricesProperty,
+                        Expression.Lambda<Func<ProductPrice,
+                        bool>>(GetComparisonOperatorExpression((ComparisonOperatorType)queryRow.ComparisonOperatorType, PriceProperty, price), ProductPriceParameter));
+
+
+
+                    // Select
+                    MethodCallExpression select_Exp = Expression.Call(
+                        typeof(Enumerable),
+                        "Select",
+                        new Type[] { typeof(ProductPrice), typeof(int) },
+                        where_Exp,
+                        Expression.Lambda<Func<ProductPrice, int>>(productId_Property, ProductPriceParameter));
+
+
+                    // Contains
+                    expression = Expression.Call(
+                        typeof(Enumerable),
+                        "Contains",
+                        new[] { typeof(int) },
+                        select_Exp,
+                        id_Property);
+
                     break;
 
                 case QueryType.Rating:
@@ -215,6 +253,14 @@ namespace Services.Classes
                     break;
 
                 case QueryType.Auto:
+                    // Select no products
+                    expression = Expression.Equal(Expression.Property(parameter, "Id"), Expression.Constant(0));
+
+                    break;
+
+                default:
+                    // Select no products
+                    expression = Expression.Equal(Expression.Property(parameter, "Id"), Expression.Constant(0));
                     break;
             }
 
