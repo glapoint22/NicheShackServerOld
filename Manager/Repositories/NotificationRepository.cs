@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using static Manager.Classes.Utility;
 
 namespace Manager.Repositories
 {
@@ -34,7 +35,7 @@ namespace Manager.Repositories
             x.NotificationGroup.ArchiveDate == null ||
             // but if it's a message notification that belongs to an archive group and
             // that message notification has NOT been archived, then count that one too
-            (x.Type == 0 && !x.MessageArchived) :
+            (x.Type == (int)NotificationType.Message && !x.MessageArchived) :
 
 
             // ---- ARCHIVE LIST ---- \\
@@ -43,22 +44,23 @@ namespace Manager.Repositories
             x.NotificationGroup.ArchiveDate != null ||
             // but if it's a message notification that DOES NOT belong to an archive group and
             // that message notification HAS been archived, then count that one too
-            (x.Type == 0 && x.MessageArchived))
+            (x.Type == (int)NotificationType.Message && x.MessageArchived))
 
                 .Select(x => new
                 {
                     Id = x.Id,
                     NotificationGroupId = x.NotificationGroupId,
-                    Email = x.Type == 0 ?
+                    Email = x.Type == (int)NotificationType.Message ?
                     x.NonAccountUserEmail != null ? x.NonAccountUserEmail :
                     x.Customer.Email :
                     null,
+                    ProductId = x.ProductId,
                     ProductName = x.Product.Name,
                     ProductImage = x.Product.Media.Thumbnail,
                     NotificationType = x.Type,
                     CreationDate = x.CreationDate,
                     ArchiveDate = x.NotificationGroup.ArchiveDate,
-                    Count = x.Type == 0 ? x.NotificationGroup.Notifications.Where(y => isNew ? !y.MessageArchived : y.MessageArchived).Count() : x.NotificationGroup.Notifications.Count()
+                    Count = x.Type == (int)NotificationType.Message ? x.NotificationGroup.Notifications.Where(y => isNew ? !y.MessageArchived : y.MessageArchived).Count() : x.NotificationGroup.Notifications.Count()
                 }).ToListAsync();
 
 
@@ -76,7 +78,8 @@ namespace Manager.Repositories
                 Id = x.Id,
                 NotificationGroupId = x.NotificationGroupId,
                 NotificationType = x.NotificationType,
-                Name = x.Email != null ? x.Email : GetNotificationName(x.NotificationType),
+                Email = x.Email,
+                ProductId = x.ProductId,
                 ProductName = x.ProductName,
                 Image = x.ProductImage,
                 IsNew = isNew,
@@ -201,7 +204,6 @@ namespace Manager.Repositories
         {
             var product = await context.Notifications.Where(x => x.NotificationGroupId == notificationGroupId).Select(x => new
             {
-                Id = x.ProductId,
                 Hoplink = x.Product.Hoplink,
                 Disabled = x.Product.Disabled
             }).FirstOrDefaultAsync();
@@ -235,7 +237,6 @@ namespace Manager.Repositories
 
             NotificationProduct notification = new NotificationProduct
             {
-                ProductId = product.Id,
                 ProductHoplink = product.Hoplink,
                 ProductDisabled = product.Disabled,
                 Users = users,
@@ -243,116 +244,6 @@ namespace Manager.Repositories
             };
 
             return notification;
-        }
-
-
-
-
-
-
-
-
-
-
-        string GetNotificationName(int notificationType)
-        {
-            string notificationName = "";
-
-            switch (notificationType)
-            {
-                case 1:
-                    notificationName = "Review Complaint";
-                    break;
-
-                case 2:
-                    notificationName = "Product Name Doesn\'t Match With Product Description";
-                    break;
-
-                case 3:
-                    notificationName = "Product Name Doesn\'t Match With Product Image";
-                    break;
-
-                case 4:
-                    notificationName = "Product Name (Other)";
-                    break;
-
-                case 5:
-                    notificationName = "Product Price Too High";
-                    break;
-
-                case 6:
-                    notificationName = "Product Price Not Correct";
-                    break;
-
-                case 7:
-                    notificationName = "Product Price (Other)";
-                    break;
-
-                case 8:
-                    notificationName = "Videos & Images are Different From Product";
-                    break;
-
-                case 9:
-                    notificationName = "Not Enough Videos & Images";
-                    break;
-
-                case 10:
-                    notificationName = "Videos & Images Not Clear";
-                    break;
-
-                case 11:
-                    notificationName = "Videos & Images Misleading";
-                    break;
-
-                case 12:
-                    notificationName = "Videos & Images (Other)";
-                    break;
-
-                case 13:
-                    notificationName = "Product Description Incorrect";
-                    break;
-
-                case 14:
-                    notificationName = "Product Description Too Vague";
-                    break;
-
-                case 15:
-                    notificationName = "Product Description Misleading";
-                    break;
-
-                case 16:
-                    notificationName = "Product Description (Other)";
-                    break;
-
-                case 17:
-                    notificationName = "Product Reported As Illegal";
-                    break;
-
-                case 18:
-                    notificationName = "Product Reported As Having Adult Content";
-                    break;
-
-                case 19:
-                    notificationName = "Offensive Product (Other)";
-                    break;
-
-
-                case 20:
-                    notificationName = "Product Inactive";
-                    break;
-
-                case 21:
-                    notificationName = "Product site no longer in service";
-                    break;
-
-
-                case 22:
-                    notificationName = "Missing Product (Other)";
-                    break;
-            }
-
-
-            return notificationName;
         }
     }
 }

@@ -61,13 +61,42 @@ namespace Manager.Classes
         }
 
 
-        
 
 
-        
+
+        public enum NotificationType
+        {
+            ProfileImage,
+            Message,
+            ReviewComplaint,
+            ProductNameDoesNotMatchWithProductDescription,
+            ProductNameDoesNotMatchWithProductImage,
+            ProductNameOther,
+            ProductPriceTooHigh,
+            ProductPriceNotCorrect,
+            ProductPriceOther,
+            VideosAndImagesAreDifferentFromProduct,
+            NotEnoughVideosAndImages,
+            VideosAndImagesNotClear,
+            VideosAndImagesMisleading,
+            VideosAndImagesOther,
+            ProductDescriptionIncorrect,
+            ProductDescriptionTooVague,
+            ProductDescriptionMisleading,
+            ProductDescriptionOther,
+            ProductReportedAsIllegal,
+            ProductReportedAsHavingAdultContent,
+            OffensiveProductOther,
+            ProductInactive,
+            ProductSiteNolongerInService,
+            MissingProductOther,
+        }
 
 
-        
+
+
+
+
 
 
 

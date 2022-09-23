@@ -3,6 +3,7 @@ using DataAccess.Models;
 using DataAccess.Repositories;
 using DataAccess.ViewModels;
 using Manager.Classes;
+using Manager.Classes.Notifications;
 using Manager.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using Services.Classes;
@@ -10,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using static Manager.Classes.Utility;
 
 namespace Manager.Repositories
 {
@@ -193,11 +195,94 @@ namespace Manager.Repositories
 
 
 
+        //private List<NotificationItem> GetNotificationItems(ProductViewModel product)
+        //{
+
+            
+
+
+
+
+        //    return new List<NotificationItem>();
+        //}
+
+
+
+
+
+
+
+
+
+
+
+        public async Task<List<NotificationItem>> GetNotificationItems(int productId)
+        {
+            var allNotifications = await context.Notifications.Where(x => x.ProductId == productId).Select(x => new
+                {
+                    Id = x.Id,
+                    NotificationGroupId = x.NotificationGroupId,
+                    ProductId = x.ProductId,
+                    ProductName = x.Product.Name,
+                    ProductImage = x.Product.Media.Thumbnail,
+                    NotificationType = x.Type,
+                    CreationDate = x.CreationDate,
+                    IsNew = x.NotificationGroup.ArchiveDate == null
+                }).ToListAsync();
+
+
+            List<NotificationItem> notifications = allNotifications
+            // Group each notification by the group they belong to
+            .GroupBy(x => x.NotificationGroupId, (key, n) => n
+            // Then order each notification in each group by the most recent date
+            .OrderByDescending(y => y.CreationDate)
+            // And then return a list that consists of only the first notification of each group
+            .FirstOrDefault())
+            // Then take that list and order it by either the creation date (if we're compiling a New list) or the archive date (if we're compiling an Archive list)
+            .OrderByDescending(x => x.CreationDate)
+            .Select(x => new NotificationItem
+            {
+                Id = x.Id,
+                NotificationGroupId = x.NotificationGroupId,
+                NotificationType = x.NotificationType,
+                ProductId = x.ProductId,
+                ProductName = x.ProductName,
+                Image = x.ProductImage,
+                IsNew = x.IsNew,
+                CreationDate = x.CreationDate,
+            }).ToList();
+
+            return notifications;
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         public async Task<ProductViewModel> GetProduct(int productId)
         {
 
-            var product = await context.Products
+            ProductViewModel product = await context.Products
                 .AsNoTracking()
                 .Where(x => x.Id == productId)
                 .Select(x => new ProductViewModel
@@ -238,6 +323,69 @@ namespace Manager.Repositories
                 product.MaxPrice = prices.Max();
             }
 
+
+
+
+
+
+
+
+
+
+
+
+            var allNotifications = await context.Notifications.Where(x => x.ProductId == productId && x.Type > (int)NotificationType.ReviewComplaint && x.Type < (int)NotificationType.ProductReportedAsIllegal).Select(x => new
+            {
+                Id = x.Id,
+                NotificationGroupId = x.NotificationGroupId,
+                ProductId = x.ProductId,
+                ProductName = x.Product.Name,
+                ProductImage = x.Product.Media.Thumbnail,
+                NotificationType = x.Type,
+                CreationDate = x.CreationDate,
+                IsNew = x.NotificationGroup.ArchiveDate == null,
+                Count = x.NotificationGroup.Notifications.Count()
+            }).ToListAsync();
+
+
+
+
+
+
+
+
+
+            product.NotificationItems = allNotifications
+            // Group each notification by the group they belong to
+            .GroupBy(x => x.NotificationGroupId, (key, n) => n
+            // Then order each notification in each group by the most recent date
+            .OrderByDescending(y => y.CreationDate)
+            // And then return a list that consists of only the first notification of each group
+            .FirstOrDefault())
+            // Then take that list and order it by either the creation date (if we're compiling a New list) or the archive date (if we're compiling an Archive list)
+            .OrderByDescending(x => x.CreationDate)
+            .Select(x => new NotificationItem
+            {
+                Id = x.Id,
+                NotificationGroupId = x.NotificationGroupId,
+                NotificationType = x.NotificationType,
+                ProductId = x.ProductId,
+                ProductName = x.ProductName,
+                Image = x.ProductImage,
+                IsNew = x.IsNew,
+                CreationDate = x.CreationDate,
+                Count = x.Count
+            }).ToList();
+
+
+
+
+
+
+
+
+
+            
 
             // Product Price Points
             product.PricePoints = await context.PricePoints

@@ -1,4 +1,5 @@
 ﻿using DataAccess.ViewModels;
+using Manager.Classes.Notifications;
 using Services.Classes;
 using System.Collections.Generic;
 
@@ -13,6 +14,7 @@ namespace Manager.ViewModels
         public double Rating { get; set; }
         public int TotalReviews { get; set; }
         public string Description { get; set; }
+        public IEnumerable<NotificationItem> NotificationItems { get; set; }
         public IEnumerable<ProductContentViewModel> Content { get; set; }
         public IEnumerable<PricePointViewModel> PricePoints { get; set; }
         //public ImageViewModel Image { get; set; }

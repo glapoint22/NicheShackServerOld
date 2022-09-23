@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DataAccess.Models;
-using Manager.Classes;
 using Manager.Classes.Notifications;
 using Manager.Repositories;
-using Manager.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using static Manager.Classes.Utility;
 
 namespace Manager.Controllers
 {
@@ -45,7 +44,7 @@ namespace Manager.Controllers
             x.NotificationGroup.ArchiveDate == null ||
             // but if it's a message notification that belongs to an archive group and
             // that message notification has NOT been archived, then count that one too
-            (x.Type == 0 && !x.MessageArchived));
+            (x.Type == (int)NotificationType.Message && !x.MessageArchived));
 
             if (currentCount != newCount)
             {
