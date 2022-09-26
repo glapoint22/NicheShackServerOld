@@ -7,7 +7,8 @@ namespace Manager.Classes.Notifications
         public int Id { get; set; }
         public int NotificationGroupId { get; set; }
         public int NotificationType { get; set; }
-        public string Name { get; set; }
+        public string Email { get; set; }
+        public int? ProductId { get; set; }
         public string ProductName { get; set; }
         public string Image { get; set; }
         public bool IsNew { get; set; }
