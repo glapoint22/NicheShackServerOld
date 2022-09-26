@@ -34,7 +34,7 @@ namespace Manager.Controllers
 
         [Route("Options/Parent")]
         [HttpGet]
-        public async Task<ActionResult> GetFilterOptionParent(int childId)
+        public async Task<ActionResult> GetFilter(int childId)
         {
             var parentId = await unitOfWork.FilterOptions.Get(x => x.Id == childId, x => x.FilterId);
             var parent = await unitOfWork.Filters.Get(x => x.Id == parentId);
@@ -156,7 +156,7 @@ namespace Manager.Controllers
 
         [HttpGet]
         [Route("Options")]
-        public async Task<ActionResult> GetFilters(int parentId, int productId)
+        public async Task<ActionResult> GetFilterOptions(int parentId, int productId)
         {
 
             if (productId == 0)
@@ -174,7 +174,7 @@ namespace Manager.Controllers
 
 
 
-
+        // Not using!!! using validation!!
         [Route("Options/CheckDuplicate")]
         [HttpGet]
         public async Task<ActionResult> CheckDuplicateFilterOption(int childId, string childName)

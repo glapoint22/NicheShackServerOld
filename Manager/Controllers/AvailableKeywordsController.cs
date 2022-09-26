@@ -23,7 +23,7 @@ namespace Manager.Controllers
 
         [HttpGet]
         [Route("Groups")]
-        public async Task<ActionResult> GetKeywordGroups(int productId)
+        public async Task<ActionResult> GetAvailableKeywordGroups(int productId)
         {
 
             if(productId == 0)
@@ -53,7 +53,7 @@ namespace Manager.Controllers
 
 
         [HttpGet]
-        public async Task<ActionResult> GetKeywords(int parentId)
+        public async Task<ActionResult> GetAvailableKeywords(int parentId)
         {
             var keywords = await unitOfWork.Keywords_In_KeywordGroup.GetCollection(x => x.KeywordGroupId == parentId, x => new
             {
@@ -67,7 +67,7 @@ namespace Manager.Controllers
 
         [Route("Parent")]
         [HttpGet]
-        public async Task<ActionResult> GetKeywordParent(int childId)
+        public async Task<ActionResult> GetAvailableKeywordGroup(int childId)
         {
             var parentId = await unitOfWork.Keywords_In_KeywordGroup.Get(x => x.KeywordId == childId, x => x.KeywordGroupId);
             var parent = await unitOfWork.KeywordGroups.Get(x => x.Id == parentId);
@@ -98,7 +98,7 @@ namespace Manager.Controllers
 
         [HttpPost]
         [Route("Groups")]
-        public async Task<ActionResult> AddKeywordGroup(ItemViewModel keywordGroup)
+        public async Task<ActionResult> AddAvailableKeywordGroup(ItemViewModel keywordGroup)
         {
 
 
@@ -122,7 +122,7 @@ namespace Manager.Controllers
 
 
         [HttpPost]
-        public async Task<ActionResult> AddKeyword(ItemViewModel item)
+        public async Task<ActionResult> AddAvailableKeyword(ItemViewModel item)
         {
             Keyword newKeyword = new Keyword
             {
@@ -201,7 +201,7 @@ namespace Manager.Controllers
 
 
         [HttpDelete]
-        public async Task<ActionResult> DeleteKeyword(int id, int keywordGroupId)
+        public async Task<ActionResult> DeleteAvailableKeyword(int id, int keywordGroupId)
         {
             var keywordCount = await unitOfWork.Keywords_In_KeywordGroup.GetCount(x => x.KeywordId == id);
 
@@ -231,7 +231,7 @@ namespace Manager.Controllers
 
         [HttpDelete]
         [Route("Groups")]
-        public async Task<ActionResult> DeleteKeywordGroup(int id)
+        public async Task<ActionResult> DeleteAvailableKeywordGroup(int id)
         {
             KeywordGroup keywordGroup = await unitOfWork.KeywordGroups.Get(id);
 
@@ -250,7 +250,7 @@ namespace Manager.Controllers
 
         [HttpDelete]
         [Route("Remove")]
-        public async Task<ActionResult> RemoveKeyword([FromQuery] int[] ids)
+        public async Task<ActionResult> RemoveAvailableKeyword([FromQuery] int[] ids)
         {
             Keyword_In_KeywordGroup keyword_In_KeywordGroup = await unitOfWork.Keywords_In_KeywordGroup.Get(x => x.KeywordGroupId == ids[0] && x.KeywordId == ids[1]);
 
@@ -264,7 +264,7 @@ namespace Manager.Controllers
 
         [HttpGet]
         [Route("Groups/Search")]
-        public async Task<ActionResult> SearchKeywordGroup(int productId, string searchWords)
+        public async Task<ActionResult> SearchAvailableKeywords(int productId, string searchWords)
         {
             var keywordGroupIds = await unitOfWork.KeywordGroups_Belonging_To_Product.GetCollection(x => x.ProductId == productId, x => x.KeywordGroupId);
             var keywordGroups = await unitOfWork.KeywordGroups.GetCollection(x => !x.ForProduct, searchWords, x => new KeywordSearchItem { Id = x.Id, Name = x.Name, Type = "Group", ForProduct = keywordGroupIds.Contains(x.Id) });
@@ -275,7 +275,7 @@ namespace Manager.Controllers
         }
 
             
-
+        // Not using!!! using validation!!
         [Route("CheckDuplicate")]
         [HttpGet]
         public async Task<ActionResult> CheckDuplicateKeyword(int childId, string childName)

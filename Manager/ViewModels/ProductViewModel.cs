@@ -17,7 +17,6 @@ namespace Manager.ViewModels
         public IEnumerable<NotificationItem> NotificationItems { get; set; }
         public IEnumerable<ProductContentViewModel> Content { get; set; }
         public IEnumerable<PricePointViewModel> PricePoints { get; set; }
-        //public ImageViewModel Image { get; set; }
         public IEnumerable<ProductMediaViewModel> Media { get; set; }
         public IEnumerable<ItemViewModel> Keywords { get; set; }
         public IEnumerable<ItemViewModel> Subgroups { get; set; }

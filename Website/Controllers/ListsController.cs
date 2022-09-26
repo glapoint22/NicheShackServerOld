@@ -34,10 +34,10 @@ namespace Website.Controllers
 
 
 
-        // ..................................................................................Get List......................................................................
+        // ..................................................................................Get Shared List......................................................................
         [HttpGet]
-        [Route("List")]
-        public async Task<ActionResult> GetList(string listId, string sort)
+        [Route("SharedList")]
+        public async Task<ActionResult> GetSharedList(string listId, string sort)
         {
             var listName = await unitOfWork.Lists.Get(x => x.Id == listId, x => x.Name);
 
@@ -56,11 +56,11 @@ namespace Website.Controllers
 
 
 
-        // ..................................................................................Get First List......................................................................
+        // ..................................................................................Get First List Id......................................................................
         [HttpGet]
         [Route("FirstList")]
         [Authorize(Policy = "Account Policy")]
-        public async Task<ActionResult> GetFirstList()
+        public async Task<ActionResult> GetFirstListId()
         {
             // Get the customer Id from the access token
             string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
@@ -77,13 +77,13 @@ namespace Website.Controllers
         // ..................................................................................Get Lists......................................................................
         [HttpGet]
         [Authorize(Policy = "Account Policy")]
-        public async Task<ActionResult> GetLists(string firstList)
+        public async Task<ActionResult> GetLists(string firstListId)
         {
             // Get the customer Id from the access token
             string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
 
-            return Ok(await unitOfWork.Lists.GetLists(customerId,  firstList));
+            return Ok(await unitOfWork.Lists.GetLists(customerId,  firstListId));
         }
 
 
@@ -531,11 +531,11 @@ namespace Website.Controllers
 
 
 
-        // ..................................................................................Add Product....................................................................
+        // ..................................................................................Add List Product....................................................................
         [HttpPost]
         [Route("AddProduct")]
         [Authorize(Policy = "Account Policy")]
-        public async Task<ActionResult> AddProduct(NewListProduct newListProduct)
+        public async Task<ActionResult> AddListProduct(NewListProduct newListProduct)
         {
             string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
@@ -577,11 +577,11 @@ namespace Website.Controllers
 
 
 
-        // .........................................................................Remove Product.....................................................................
+        // .........................................................................Remove List Product.....................................................................
         [Route("Product")]
         [HttpDelete]
         [Authorize(Policy = "Account Policy")]
-        public async Task<ActionResult> RemoveProduct(int productId, int collaboratorId, string listId)
+        public async Task<ActionResult> RemoveListProduct(int productId, int collaboratorId, string listId)
         {
 
             string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
@@ -634,11 +634,11 @@ namespace Website.Controllers
 
 
 
-        // .........................................................................Move Product.....................................................................
+        // .........................................................................Move List Product.....................................................................
         [Route("Product")]
         [HttpPut]
         [Authorize(Policy = "Account Policy")]
-        public async Task<ActionResult> MoveProduct(MovedListProduct movedListProduct)
+        public async Task<ActionResult> MoveListProduct(MovedListProduct movedListProduct)
         {
 
             string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;

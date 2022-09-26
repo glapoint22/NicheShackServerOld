@@ -23,7 +23,7 @@ namespace Manager.Controllers
 
 
         [HttpGet]
-        public async Task<ActionResult> GetSubgroups(int productId)
+        public async Task<ActionResult> GetProductGroups(int productId)
         {
             if (productId == 0)
             {
@@ -42,7 +42,7 @@ namespace Manager.Controllers
 
         [HttpGet]
         [Route("Search")]
-        public async Task<ActionResult> SearchSubgroups(int productId, string searchWords)
+        public async Task<ActionResult> SearchProductGroups(int productId, string searchWords)
         {
             var subgroups = await unitOfWork.Subgroups.GetCollection(searchWords, x => new { Id = x.Id, Name = x.Name, Checked = x.SubgroupProducts.Where(y => y.ProductId == productId).Select(y => y.SubgroupId).Contains(x.Id) });
 
@@ -53,7 +53,7 @@ namespace Manager.Controllers
 
 
         [HttpPost]
-        public async Task<ActionResult> AddSubgroup(ItemViewModel subgroup)
+        public async Task<ActionResult> AddProductGroup(ItemViewModel subgroup)
         {
             string subgroupName = subgroup.Name.Trim();
 
@@ -83,7 +83,7 @@ namespace Manager.Controllers
 
 
         [HttpPut]
-        public async Task<ActionResult> UpdateSubgroup(ItemViewModel updatedSubgroup)
+        public async Task<ActionResult> UpdateProductGroup(ItemViewModel updatedSubgroup)
         {
             string subgroupName = updatedSubgroup.Name.Trim();
 
@@ -104,7 +104,7 @@ namespace Manager.Controllers
 
 
         [HttpDelete]
-        public async Task<ActionResult> DeleteSubgroup(int id)
+        public async Task<ActionResult> DeleteProductGroup(int id)
         {
             Subgroup subgroup = await unitOfWork.Subgroups.Get(id);
 

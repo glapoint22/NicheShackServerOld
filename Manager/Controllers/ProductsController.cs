@@ -380,7 +380,7 @@ namespace Manager.Controllers
 
         [Route("NicheId_SubNicheId")]
         [HttpGet]
-        public async Task<ActionResult> GetNicheAndSubNicheIds(int productId)
+        public async Task<ActionResult> GetNicheIds(int productId)
         {
             var subNicheId = await unitOfWork.Products.Get(x => x.Id == productId, x => x.NicheId);
             var nicheId = await unitOfWork.Niches.Get(x => x.Id == subNicheId, x => x.CategoryId);
@@ -392,7 +392,7 @@ namespace Manager.Controllers
 
         [Route("SubNiches_Products")]
         [HttpGet]
-        public async Task<ActionResult> GetNichesAndSubNiches(int nicheId, int subNicheId)
+        public async Task<ActionResult> GetSubnichesAndProducts(int nicheId, int subNicheId)
         {
             var subNiches = await unitOfWork.Niches.GetCollection<ItemViewModel<Niche>>(x => x.CategoryId == nicheId);
             var products = await unitOfWork.Products.GetCollection<ItemViewModel<Product>>(x => x.NicheId == subNicheId);
@@ -452,7 +452,7 @@ namespace Manager.Controllers
 
 
         [HttpPut]
-        public async Task<ActionResult> UpdateProductName(ItemViewModel product)
+        public async Task<ActionResult> UpdateName(ItemViewModel product)
         {
             Product updatedProduct = await unitOfWork.Products.Get(product.Id);
 
@@ -628,7 +628,7 @@ namespace Manager.Controllers
 
         [Route("Vendor")]
         [HttpPut]
-        public async Task<ActionResult> UpdateVendor(UpdatedProperty updatedProperty)
+        public async Task<ActionResult> UpdateProductVendor(UpdatedProperty updatedProperty)
         {
             Product product = await unitOfWork.Products.Get(updatedProperty.ItemId);
 
@@ -653,7 +653,7 @@ namespace Manager.Controllers
 
         [Route("Filter")]
         [HttpPut]
-        public async Task<ActionResult> UpdateFilter(UpdatedProductItem updatedProductFilter)
+        public async Task<ActionResult> UpdateProductFilter(UpdatedProductItem updatedProductFilter)
         {
 
             if (updatedProductFilter.Checked)
@@ -769,115 +769,115 @@ namespace Manager.Controllers
 
 
 
-        [Route("Keyword")]
-        [HttpPost]
-        public async Task<ActionResult> AddKeyword(ProductItem keyword)
-        {
-            ProductKeyword newKeyword = new ProductKeyword
-            {
-                ProductId = keyword.ProductId,
-                KeywordId = keyword.ItemId
-            };
+        //[Route("Keyword")]
+        //[HttpPost]
+        //public async Task<ActionResult> AddProductKeyword(ProductItem keyword)
+        //{
+        //    ProductKeyword newKeyword = new ProductKeyword
+        //    {
+        //        ProductId = keyword.ProductId,
+        //        KeywordId = keyword.ItemId
+        //    };
 
 
-            // Add and save
-            unitOfWork.ProductKeywords.Add(newKeyword);
-            await unitOfWork.Save();
+        //    // Add and save
+        //    unitOfWork.ProductKeywords.Add(newKeyword);
+        //    await unitOfWork.Save();
 
-            return Ok(newKeyword.Id);
-        }
-
-
-
-
-
-        [HttpDelete]
-        [Route("Keyword")]
-        public async Task<ActionResult> DeleteKeywords([FromQuery] int[] ids)
-        {
-            foreach (int id in ids)
-            {
-                ProductKeyword keyword = await unitOfWork.ProductKeywords.Get(id);
-                unitOfWork.ProductKeywords.Remove(keyword);
-            }
-
-
-            await unitOfWork.Save();
-
-            return Ok();
-        }
+        //    return Ok(newKeyword.Id);
+        //}
 
 
 
 
 
+        //[HttpDelete]
+        //[Route("Keyword")]
+        //public async Task<ActionResult> DeleteProductKeywords([FromQuery] int[] ids)
+        //{
+        //    foreach (int id in ids)
+        //    {
+        //        ProductKeyword keyword = await unitOfWork.ProductKeywords.Get(id);
+        //        unitOfWork.ProductKeywords.Remove(keyword);
+        //    }
 
-        [Route("Subgroup")]
-        [HttpPost]
-        public async Task<ActionResult> AddSubgroup(ProductItem subgroup)
-        {
-            SubgroupProduct newSubgroup = new SubgroupProduct
-            {
-                ProductId = subgroup.ProductId,
-                SubgroupId = subgroup.ItemId
-            };
 
+        //    await unitOfWork.Save();
 
-            // Add and save
-            unitOfWork.SubgroupProducts.Add(newSubgroup);
-            await unitOfWork.Save();
-
-            return Ok(newSubgroup.Id);
-        }
+        //    return Ok();
+        //}
 
 
 
 
-        [HttpDelete]
-        [Route("Subgroup")]
-        public async Task<ActionResult> DeleteSubgroups([FromQuery] int[] ids)
-        {
-            foreach (int id in ids)
-            {
-                SubgroupProduct subgroup = await unitOfWork.SubgroupProducts.Get(id);
-                unitOfWork.SubgroupProducts.Remove(subgroup);
-            }
 
 
-            await unitOfWork.Save();
+        //[Route("Subgroup")]
+        //[HttpPost]
+        //public async Task<ActionResult> AddProductGroup(ProductItem subgroup)
+        //{
+        //    SubgroupProduct newSubgroup = new SubgroupProduct
+        //    {
+        //        ProductId = subgroup.ProductId,
+        //        SubgroupId = subgroup.ItemId
+        //    };
 
-            return Ok();
-        }
+
+        //    // Add and save
+        //    unitOfWork.SubgroupProducts.Add(newSubgroup);
+        //    await unitOfWork.Save();
+
+        //    return Ok(newSubgroup.Id);
+        //}
 
 
 
 
-        [Route("Subgroup")]
-        [HttpPut]
-        public async Task<ActionResult> UpdateSubgroup(UpdatedProductItem updatedProductGroup)
-        {
+        //[HttpDelete]
+        //[Route("Subgroup")]
+        //public async Task<ActionResult> DeleteProductGroups([FromQuery] int[] ids)
+        //{
+        //    foreach (int id in ids)
+        //    {
+        //        SubgroupProduct subgroup = await unitOfWork.SubgroupProducts.Get(id);
+        //        unitOfWork.SubgroupProducts.Remove(subgroup);
+        //    }
 
-            if (updatedProductGroup.Checked)
-            {
-                unitOfWork.SubgroupProducts.Add(new SubgroupProduct { ProductId = updatedProductGroup.ProductId, SubgroupId = updatedProductGroup.Id });
-            }
-            else
-            {
-                SubgroupProduct subgroupProduct = await unitOfWork.SubgroupProducts.Get(x => x.ProductId == updatedProductGroup.ProductId && x.SubgroupId == updatedProductGroup.Id);
-                unitOfWork.SubgroupProducts.Remove(subgroupProduct);
-            }
 
-            await unitOfWork.Save();
+        //    await unitOfWork.Save();
 
-            return Ok();
-        }
+        //    return Ok();
+        //}
+
+
+
+
+        //[Route("Subgroup")]
+        //[HttpPut]
+        //public async Task<ActionResult> UpdateProductGroup(UpdatedProductItem updatedProductGroup)
+        //{
+
+        //    if (updatedProductGroup.Checked)
+        //    {
+        //        unitOfWork.SubgroupProducts.Add(new SubgroupProduct { ProductId = updatedProductGroup.ProductId, SubgroupId = updatedProductGroup.Id });
+        //    }
+        //    else
+        //    {
+        //        SubgroupProduct subgroupProduct = await unitOfWork.SubgroupProducts.Get(x => x.ProductId == updatedProductGroup.ProductId && x.SubgroupId == updatedProductGroup.Id);
+        //        unitOfWork.SubgroupProducts.Remove(subgroupProduct);
+        //    }
+
+        //    await unitOfWork.Save();
+
+        //    return Ok();
+        //}
 
 
 
 
         [Route("Description")]
         [HttpPut]
-        public async Task<ActionResult> UpdateDescription(ProductDescription productDescription)
+        public async Task<ActionResult> UpdateProductDescription(ProductDescription productDescription)
         {
             Product product = await unitOfWork.Products.Get(productDescription.ProductId);
 
@@ -1037,7 +1037,7 @@ namespace Manager.Controllers
 
         [HttpGet]
         [Route("Link")]
-        public async Task<ActionResult> Link(string searchTerm)
+        public async Task<ActionResult> SearchProductsLink(string searchTerm)
         {
             return Ok(await unitOfWork.Products.GetCollection(searchTerm, x => new
             {
@@ -1189,7 +1189,7 @@ namespace Manager.Controllers
 
         [HttpPut]
         [Route("Shipping")]
-        public async Task<ActionResult> UpdateShipping(ProductShipping productShipping)
+        public async Task<ActionResult> UpdateProductShipping(ProductShipping productShipping)
         {
             Product updatedProduct = await unitOfWork.Products.Get(productShipping.Id);
 
@@ -1208,7 +1208,7 @@ namespace Manager.Controllers
 
         [HttpPut]
         [Route("RecurringPayment")]
-        public async Task<ActionResult> UpdateRecurringPayment(ProductRecurringPayment productRecurringPayment)
+        public async Task<ActionResult> UpdateProductRecurringPayment(ProductRecurringPayment productRecurringPayment)
         {
             Product updatedProduct = await unitOfWork.Products.Get(productRecurringPayment.Id);
 
@@ -1230,7 +1230,7 @@ namespace Manager.Controllers
 
         [HttpPut]
         [Route("Hoplink")]
-        public async Task<ActionResult> UpdateHoplink(ProductHoplink productHoplink)
+        public async Task<ActionResult> UpdateProductHoplink(ProductHoplink productHoplink)
         {
             Product product = await unitOfWork.Products.Get(productHoplink.Id);
 

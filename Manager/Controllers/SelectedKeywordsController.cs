@@ -25,7 +25,7 @@ namespace Manager.Controllers
 
         [HttpGet]
         [Route("Groups")]
-        public async Task<ActionResult> GetKeywordGroups(int productId)
+        public async Task<ActionResult> GetSelectedKeywordGroups(int productId)
         {
             IEnumerable<int> keywordGroupIds = await unitOfWork.KeywordGroups_Belonging_To_Product.GetCollection(x => x.ProductId == productId, x => x.KeywordGroupId);
 
@@ -43,7 +43,7 @@ namespace Manager.Controllers
 
 
         [HttpGet]
-        public async Task<ActionResult> GetKeywords(int productId, int parentId)
+        public async Task<ActionResult> GetSelectedKeywords(int productId, int parentId)
         {
             var keywords = await unitOfWork.Keywords_In_KeywordGroup.GetCollection(x => x.KeywordGroupId == parentId, x => new
             {
@@ -62,7 +62,7 @@ namespace Manager.Controllers
 
         [HttpPut]
         [Route("Update")]
-        public async Task<ActionResult> UpdateKeyword(UpdatedProductItem updatedProductItem)
+        public async Task<ActionResult> UpdateSelectedKeyword(UpdatedProductItem updatedProductItem)
         {
 
             if (updatedProductItem.Checked)
@@ -91,7 +91,7 @@ namespace Manager.Controllers
 
         [HttpPost]
         [Route("Groups/Add")]
-        public async Task<ActionResult> AddKeywordGroup(UpdatedProductItem updatedProductItem)
+        public async Task<ActionResult> AddSelectedKeywordGroup(UpdatedProductItem updatedProductItem)
         {
             unitOfWork.KeywordGroups_Belonging_To_Product.Add(new KeywordGroup_Belonging_To_Product
             {
@@ -118,7 +118,7 @@ namespace Manager.Controllers
 
         [HttpPost]
         [Route("Groups/AddKeyword")]
-        public async Task<ActionResult> AddKeywordFromKeywordGroup(NewProductKeyword newProductKeyword)
+        public async Task<ActionResult> AddSelectedKeywordFromKeywordGroup(NewProductKeyword newProductKeyword)
         {
             unitOfWork.KeywordGroups_Belonging_To_Product.Add(new KeywordGroup_Belonging_To_Product
             {
@@ -144,7 +144,7 @@ namespace Manager.Controllers
 
         [HttpPost]
         [Route("Groups")]
-        public async Task<ActionResult> NewKeywordGroup(ItemViewModel item)
+        public async Task<ActionResult> NewSelectedKeywordGroup(ItemViewModel item)
         {
             KeywordGroup keywordGroup = new KeywordGroup
             {
@@ -187,7 +187,7 @@ namespace Manager.Controllers
         // Not Custom
         [HttpPut]
         [Route("Groups/Remove")]
-        public async Task<ActionResult> RemoveKeywordGroup(UpdatedProductItem updatedProductItem)
+        public async Task<ActionResult> RemoveSelectedKeywordGroup(UpdatedProductItem updatedProductItem)
         {
             IEnumerable<int> KeywordIds = await unitOfWork.Keywords_In_KeywordGroup.GetCollection(x => x.KeywordGroupId == updatedProductItem.Id, x => x.KeywordId);
 
@@ -214,7 +214,7 @@ namespace Manager.Controllers
         // Custom
         [HttpDelete]
         [Route("Groups")]
-        public async Task<ActionResult> DeleteKeywordGroup(int id)
+        public async Task<ActionResult> DeleteSelectedKeywordGroup(int id)
         {
             IEnumerable<int> KeywordIds = await unitOfWork.Keywords_In_KeywordGroup.GetCollection(x => x.KeywordGroupId == id, x => x.KeywordId);
 
@@ -238,7 +238,7 @@ namespace Manager.Controllers
 
         // Custom
         [HttpDelete]
-        public async Task<ActionResult> DeleteKeyword(int id)
+        public async Task<ActionResult> DeleteSelectedKeyword(int id)
         {
             Keyword keyword = await unitOfWork.Keywords.Get(id);
 
@@ -263,10 +263,10 @@ namespace Manager.Controllers
 
 
 
-
+        // NOT BEING USED!!!!!!!!!!!
         [HttpPut]
         [Route("Groups")]
-        public async Task<ActionResult> UpdateKeywordGroup(ItemViewModel updatedProperty)
+        public async Task<ActionResult> UpdateSelectedKeywordGroup(ItemViewModel updatedProperty)
         {
             KeywordGroup keywordGroup = await unitOfWork.KeywordGroups.Get(updatedProperty.Id);
 
@@ -290,7 +290,7 @@ namespace Manager.Controllers
 
 
         [HttpPut]
-        public async Task<ActionResult> UpdateKeyword(ItemViewModel updatedProperty)
+        public async Task<ActionResult> UpdateSelectedKeywordName(ItemViewModel updatedProperty)
         {
             string keywordName = updatedProperty.Name.Trim().ToLower();
 
@@ -324,7 +324,7 @@ namespace Manager.Controllers
 
 
         [HttpPost]
-        public async Task<ActionResult> AddKeyword(ItemViewModel item)
+        public async Task<ActionResult> AddSelectedKeyword(ItemViewModel item)
         {
             Keyword newKeyword = new Keyword
             {
@@ -374,7 +374,7 @@ namespace Manager.Controllers
 
         [HttpGet]
         [Route("Groups/Search")]
-        public async Task<ActionResult> SearchKeywordGroup(int productId, string searchWords)
+        public async Task<ActionResult> SearchSelectedKeywordGroup(int productId, string searchWords)
         {
             IEnumerable<int> keywordGroupIds = await unitOfWork.KeywordGroups_Belonging_To_Product.GetCollection(x => x.ProductId == productId, x => x.KeywordGroupId);
             IEnumerable<int> keywordIds = await unitOfWork.Keywords_In_KeywordGroup.GetCollection(x => keywordGroupIds.Contains(x.KeywordGroupId), x => x.Keyword.Id);
@@ -386,10 +386,10 @@ namespace Manager.Controllers
         }
 
 
-
+        // NOT BEING USED!!!!!!!!!!!
         [Route("CheckDuplicate")]
         [HttpGet]
-        public async Task<ActionResult> CheckDuplicateKeyword(int childId, string childName)
+        public async Task<ActionResult> CheckDuplicateSelectedKeyword(int childId, string childName)
         {
             var keywordGroupId = await unitOfWork.Keywords_In_KeywordGroup.Get(x => x.KeywordId == childId, x => x.KeywordGroupId);
             var keywords = await unitOfWork.Keywords_In_KeywordGroup.GetCollection(x => x.KeywordGroupId == keywordGroupId, x => x.Keyword.Name);
@@ -400,10 +400,10 @@ namespace Manager.Controllers
         }
 
 
-
+        // NOT BEING USED!!!!!!!!!!!
         [Route("Parent")]
         [HttpGet]
-        public async Task<ActionResult> GetKeywordParent(int childId)
+        public async Task<ActionResult> GetSelectedKeywordGroup(int childId)
         {
             var parentId = await unitOfWork.Keywords_In_KeywordGroup.Get(x => x.KeywordId == childId, x => x.KeywordGroupId);
             var parent = await unitOfWork.KeywordGroups.Get(x => x.Id == parentId, x => new { id = x.Id, name = x.Name });

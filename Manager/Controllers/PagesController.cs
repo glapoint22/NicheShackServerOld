@@ -134,7 +134,7 @@ namespace Manager.Controllers
 
         [HttpPost]
         [Route("Duplicate")]
-        public async Task<ActionResult> Duplicate(Item page)
+        public async Task<ActionResult> DuplicatePage(Item page)
         {
             // Copy the page properties
             Page currentPage = await unitOfWork.Pages.Get(page.Id);
@@ -206,7 +206,7 @@ namespace Manager.Controllers
 
         [HttpGet]
         [Route("Search")]
-        public async Task<ActionResult> Search(string searchTerm)
+        public async Task<ActionResult> SearchPages(string searchTerm)
         {
             return Ok(await unitOfWork.Pages.GetCollection<ItemViewModel<Page>>(searchTerm));
         }
@@ -221,7 +221,7 @@ namespace Manager.Controllers
 
         [HttpGet]
         [Route("Link")]
-        public async Task<ActionResult> Link(string searchTerm)
+        public async Task<ActionResult> SearchPagesLink(string searchTerm)
         {
             return Ok(await unitOfWork.Pages.GetCollection(x => x.PageType == (int)PageType.Custom || x.PageType == (int)PageType.Browse, searchTerm, x => new LinkSearchItem
             {
@@ -239,7 +239,7 @@ namespace Manager.Controllers
 
         [HttpGet]
         [Route("Niche")]
-        public async Task<ActionResult> GetNiches(int pageId)
+        public async Task<ActionResult> GetPageSubniches(int pageId)
         {
             List<int?> itemIds = (List<int?>)await unitOfWork.PageReferenceItems.GetCollection(x => x.PageId == pageId, x => x.NicheId);
             var pageReferenceItems = await unitOfWork.Niches.GetCollection(x => itemIds.Contains(x.Id), x => new Item
@@ -256,7 +256,7 @@ namespace Manager.Controllers
 
         [HttpPost]
         [Route("Niche")]
-        public async Task<ActionResult> AddNiche(PageReferenceItemViewModel newPageReferenceItem)
+        public async Task<ActionResult> AddPageSubniche(PageReferenceItemViewModel newPageReferenceItem)
         {
             PageReferenceItem pageReferenceItem = new PageReferenceItem
             {
@@ -278,7 +278,7 @@ namespace Manager.Controllers
 
         [HttpDelete]
         [Route("Niche")]
-        public async Task<ActionResult> DeleteNiche(int id, int pageId)
+        public async Task<ActionResult> DeletePageSubniche(int id, int pageId)
         {
             PageReferenceItem pageReferenceItem = await unitOfWork.PageReferenceItems.Get(x => x.NicheId == id && x.PageId == pageId);
             unitOfWork.PageReferenceItems.Remove(pageReferenceItem);
@@ -297,7 +297,7 @@ namespace Manager.Controllers
 
         [HttpGet]
         [Route("Keywords")]
-        public async Task<ActionResult> GetKeywords(int groupId, int pageId)
+        public async Task<ActionResult> GetPageKeywords(int groupId, int pageId)
         {
             var keywords = await unitOfWork.Keywords_In_KeywordGroup.GetCollection(x => x.KeywordGroupId == groupId, x => new
             {
@@ -337,7 +337,7 @@ namespace Manager.Controllers
 
         [HttpPost]
         [Route("KeywordGroup")]
-        public async Task<ActionResult> AddPageReferenceItem(PageReferenceItemViewModel referenceItem)
+        public async Task<ActionResult> AddPageKeywordGroup(PageReferenceItemViewModel referenceItem)
         {
             PageReferenceItem pageReferenceItem = new PageReferenceItem
             {
@@ -368,7 +368,7 @@ namespace Manager.Controllers
 
         [HttpGet]
         [Route("KeywordGroup")]
-        public async Task<ActionResult> GetPageReferenceItems(int pageId)
+        public async Task<ActionResult> GetPageKeywordGroups(int pageId)
         {
             List<int?> itemIds = (List<int?>)await unitOfWork.PageReferenceItems.GetCollection(x => x.PageId == pageId, x => x.KeywordGroupId);
             var pageReferenceItems = await unitOfWork.KeywordGroups.GetCollection(x => itemIds.Contains(x.Id), x => new Item
@@ -385,7 +385,7 @@ namespace Manager.Controllers
 
         [HttpDelete]
         [Route("KeywordGroup")]
-        public async Task<ActionResult> DeletePageReferenceItem(int id, int pageId)
+        public async Task<ActionResult> DeletePageKeywordGroup(int id, int pageId)
         {
             PageReferenceItem pageReferenceItem = await unitOfWork.PageReferenceItems.Get(x => x.KeywordGroupId == id && x.PageId == pageId);
             unitOfWork.PageReferenceItems.Remove(pageReferenceItem);

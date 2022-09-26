@@ -294,8 +294,8 @@ namespace Manager.Repositories
                         Id = x.Vendor.Id,
                         Name = x.Vendor.Name
                     },
-                    Rating = x.Rating,
-                    TotalReviews = x.TotalReviews,
+                    //Rating = x.Rating,
+                    //TotalReviews = x.TotalReviews,
                     Hoplink = x.Hoplink,
                     Description = x.Description,
                     ShippingType = x.ShippingType,
@@ -419,14 +419,14 @@ namespace Manager.Repositories
 
 
             // Keywords
-            product.Keywords = await context.ProductKeywords
-                .AsNoTracking()
-                .Where(x => x.ProductId == productId)
-                .Select(x => new ItemViewModel
-                {
-                    Id = x.Id,
-                    Name = x.Keyword.Name
-                }).ToListAsync();
+            //product.Keywords = await context.ProductKeywords
+            //    .AsNoTracking()
+            //    .Where(x => x.ProductId == productId)
+            //    .Select(x => new ItemViewModel
+            //    {
+            //        Id = x.Id,
+            //        Name = x.Keyword.Name
+            //    }).ToListAsync();
 
 
             // Subgroups

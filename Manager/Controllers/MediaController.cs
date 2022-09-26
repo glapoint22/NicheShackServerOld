@@ -463,7 +463,7 @@ namespace Manager.Controllers
         // ------------------------------------------------------------------------------ Search ----------------------------------------------------------------------------
         [HttpGet]
         [Route("Search")]
-        public async Task<ActionResult> Search(int type, string searchWords)
+        public async Task<ActionResult> SearchMedia(int type, string searchWords)
         {
             return Ok(await unitOfWork.Media.GetCollection(x => x.MediaType == type, searchWords, x => new SearchedMedia
             {
