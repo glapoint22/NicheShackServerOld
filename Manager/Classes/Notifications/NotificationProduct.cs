@@ -7,6 +7,6 @@ namespace Manager.Classes.Notifications
         public string ProductHoplink { get; set; }
         public bool ProductDisabled { get; set; }
         public IEnumerable<NotificationUser> Users { get; set; }
-        public IEnumerable<NotificationProfile> Employees { get; set; }
+        public IEnumerable<NotificationEmployee> Employees { get; set; }
     }
 }

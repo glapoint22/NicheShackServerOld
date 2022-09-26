@@ -1,22 +1,33 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataAccess.Models
 {
     public class Customer : IdentityUser
     {
+
+
         [Required]
         [MaxLength(100)]
         public string FirstName { get; set; }
+
+
         [Required]
         [MaxLength(100)]
         public string LastName { get; set; }
+
+
+        [ForeignKey("Media")]
+        public int? ImageId { get; set; }
+
+
+
         [Required]
         [MaxLength(100)]
         public string ReviewName { get; set; }
-        [MaxLength(50)]
-        public string Image { get; set; }
+
         public bool? EmailPrefNameChange { get; set; }
         public bool? EmailPrefEmailChange { get; set; }
         public bool? EmailPrefPasswordChange { get; set; }
@@ -35,6 +46,9 @@ namespace DataAccess.Models
 
         public bool? Active { get; set; }
 
+
+
+        public virtual Media Media { get; set; }
 
         public virtual ICollection<OneTimePassword> OneTimePassword { get; set; }
         public virtual ICollection<ListCollaborator> ListCollaborators { get; set; }

@@ -4,14 +4,16 @@ using DataAccess.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(NicheShackContext))]
-    partial class NicheShackContextModelSnapshot : ModelSnapshot
+    [Migration("20220924202324_ChangedImageFieldInCustomersTableToImageId")]
+    partial class ChangedImageFieldInCustomersTableToImageId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -759,9 +761,6 @@ namespace DataAccess.Migrations
                     b.Property<string>("UserComment")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("UserImageId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CustomerId");
@@ -773,8 +772,6 @@ namespace DataAccess.Migrations
                     b.HasIndex("ProductId");
 
                     b.HasIndex("ReviewId");
-
-                    b.HasIndex("UserImageId");
 
                     b.ToTable("Notifications");
                 });
@@ -2090,10 +2087,6 @@ namespace DataAccess.Migrations
                     b.HasOne("DataAccess.Models.ProductReview", "ProductReview")
                         .WithMany("Notifications")
                         .HasForeignKey("ReviewId");
-
-                    b.HasOne("DataAccess.Models.Media", "Media")
-                        .WithMany()
-                        .HasForeignKey("UserImageId");
                 });
 
             modelBuilder.Entity("DataAccess.Models.NotificationEmployeeMessage", b =>

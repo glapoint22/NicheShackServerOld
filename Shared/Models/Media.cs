@@ -8,7 +8,6 @@ namespace DataAccess.Models
     {
         public int Id { get; set; }
 
-        [Required]
         [MaxLength(256)]
         public string Name { get; set; }
 
@@ -67,6 +66,11 @@ namespace DataAccess.Models
 
 
         public int VideoType { get; set; }
+
+
+        public virtual Customer Customer { get; set; }
+
+
 
 
         public virtual ICollection<Product> Products { get; set; }

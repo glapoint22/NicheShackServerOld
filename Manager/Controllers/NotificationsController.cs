@@ -91,6 +91,19 @@ namespace Manager.Controllers
 
 
 
+        [HttpGet]
+        [Route("UserImage")]
+        public async Task<ActionResult> GetUserImageNotification(int notificationGroupId)
+        {
+            await unitOfWork.Notifications.GetUserImageNotification(notificationGroupId);
+
+
+            return Ok();
+        }
+
+
+
+
 
 
         [HttpPost]
@@ -317,7 +330,7 @@ namespace Manager.Controllers
         {
             Customer user = await unitOfWork.Customers.Get(noncompliantUser.UserId);
             user.NoncompliantStrikes++;
-            if (noncompliantUser.RemoveProfilePic) user.Image = null;
+            if (noncompliantUser.RemoveProfilePic) user.ImageId = null;
             unitOfWork.Customers.Update(user);
             await unitOfWork.Save();
         }
@@ -327,13 +340,15 @@ namespace Manager.Controllers
         [HttpDelete]
         public async Task DeleteNotification(int notificationGroupId, int notificationId, [FromQuery] int[] employeeMessageIds)
         {
-
+            // If the notification group id has a value greater than zero, then that means everything in that notification group will be deleted.
             if (notificationGroupId > 0)
             {
                 var notificationGroup = await unitOfWork.NotificationGroups.Get(notificationGroupId);
                 unitOfWork.NotificationGroups.Remove(notificationGroup);
 
             }
+            // However, if the notification group id has a value that equals zero, then that means only one notification in the notification group is being deleted
+            // (this only pertains to message notifications)
             else
             {
                 Notification notification = await unitOfWork.Notifications.Get(notificationId);
@@ -341,7 +356,6 @@ namespace Manager.Controllers
             }
 
             await unitOfWork.Save();
-
 
 
 

@@ -12,6 +12,8 @@ namespace DataAccess.Models
         [ForeignKey("NotificationGroup")]
         public int NotificationGroupId { get; set; }
 
+        public int? NotificationId { get; set; }
+
         [ForeignKey("Customer")]
         [Required]
         public string EmployeeId { get; set; }

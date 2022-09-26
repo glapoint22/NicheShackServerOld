@@ -144,6 +144,9 @@ namespace DataAccess.Models
         public virtual DbSet<Subproduct> Subproducts { get; set; }
         public virtual DbSet<SubgroupProduct> SubgroupProducts { get; set; }
 
+
+
+
         public virtual DbSet<Vendor> Vendors { get; set; }
 
 
@@ -171,6 +174,15 @@ namespace DataAccess.Models
             // Customers
             modelBuilder.Entity<Customer>(entity =>
             {
+
+
+
+                entity.HasOne(x => x.Media)
+                .WithOne(x => x.Customer)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+
                 entity.ToTable(name: "Customers");
                 entity.Property(x => x.EmailPrefNameChange).HasDefaultValue(true);
                 entity.Property(x => x.EmailPrefEmailChange).HasDefaultValue(true);
@@ -184,14 +196,14 @@ namespace DataAccess.Models
                 entity.Property(x => x.EmailPrefListNameChange).HasDefaultValue(true);
                 entity.Property(x => x.EmailPrefDeletedList).HasDefaultValue(true);
                 entity.Property(x => x.EmailPrefReview).HasDefaultValue(true);
-                entity
-                .HasIndex(x => x.Id)
-                .IncludeProperties(x => new
-                {
-                    x.FirstName,
-                    x.Image
-                })
-                .IsClustered(false);
+                //entity
+                //.HasIndex(x => x.Id)
+                //.IncludeProperties(x => new
+                //{
+                //    x.FirstName,
+                //    x.Media.Thumbnail
+                //})
+                //.IsClustered(false);
 
                 entity
                 .HasIndex(x => x.EmailPrefDeletedList)
@@ -255,42 +267,42 @@ namespace DataAccess.Models
                 .IsClustered(false);
 
 
-                entity
-                .HasIndex(x => x.NormalizedEmail)
-                .IncludeProperties(x => new
-                {
-                    x.Id,
-                    x.UserName,
-                    x.NormalizedUserName,
-                    x.Email,
-                    x.EmailConfirmed,
-                    x.PasswordHash,
-                    x.SecurityStamp,
-                    x.ConcurrencyStamp,
-                    x.PhoneNumber,
-                    x.PhoneNumberConfirmed,
-                    x.TwoFactorEnabled,
-                    x.LockoutEnd,
-                    x.LockoutEnabled,
-                    x.AccessFailedCount,
-                    x.FirstName,
-                    x.LastName,
-                    x.ReviewName,
-                    x.Image,
-                    x.EmailPrefAddedListItem,
-                    x.EmailPrefDeletedList,
-                    x.EmailPrefEmailChange,
-                    x.EmailPrefListNameChange,
-                    x.EmailPrefMovedListItem,
-                    x.EmailPrefNameChange,
-                    x.EmailPrefNewCollaborator,
-                    x.EmailPrefPasswordChange,
-                    x.EmailPrefProfilePicChange,
-                    x.EmailPrefRemovedCollaborator,
-                    x.EmailPrefRemovedListItem,
-                    x.EmailPrefReview
-                })
-                .IsClustered(false);
+                //entity
+                //.HasIndex(x => x.NormalizedEmail)
+                //.IncludeProperties(x => new
+                //{
+                //    x.Id,
+                //    x.UserName,
+                //    x.NormalizedUserName,
+                //    x.Email,
+                //    x.EmailConfirmed,
+                //    x.PasswordHash,
+                //    x.SecurityStamp,
+                //    x.ConcurrencyStamp,
+                //    x.PhoneNumber,
+                //    x.PhoneNumberConfirmed,
+                //    x.TwoFactorEnabled,
+                //    x.LockoutEnd,
+                //    x.LockoutEnabled,
+                //    x.AccessFailedCount,
+                //    x.FirstName,
+                //    x.LastName,
+                //    x.ReviewName,
+                //    x.Media.Thumbnail,
+                //    x.EmailPrefAddedListItem,
+                //    x.EmailPrefDeletedList,
+                //    x.EmailPrefEmailChange,
+                //    x.EmailPrefListNameChange,
+                //    x.EmailPrefMovedListItem,
+                //    x.EmailPrefNameChange,
+                //    x.EmailPrefNewCollaborator,
+                //    x.EmailPrefPasswordChange,
+                //    x.EmailPrefProfilePicChange,
+                //    x.EmailPrefRemovedCollaborator,
+                //    x.EmailPrefRemovedListItem,
+                //    x.EmailPrefReview
+                //})
+                //.IsClustered(false);
 
                 entity.Property(e => e.Active).HasDefaultValue(true);
             });
@@ -495,7 +507,7 @@ namespace DataAccess.Models
 
 
 
-          
+
 
 
             // OrderProducts

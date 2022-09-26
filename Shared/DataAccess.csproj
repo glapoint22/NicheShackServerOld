@@ -75,6 +75,28 @@
     <Compile Remove="Migrations\20220916162057_tet.Designer.cs" />
     <Compile Remove="Migrations\20220916172102_ImplementedNotificatonMessageCascade.cs" />
     <Compile Remove="Migrations\20220916172102_ImplementedNotificatonMessageCascade.Designer.cs" />
+    <Compile Remove="Migrations\20220923182744_AddedNewFieldToNotificationEmployeeNotesTable.cs" />
+    <Compile Remove="Migrations\20220923182744_AddedNewFieldToNotificationEmployeeNotesTable.Designer.cs" />
+    <Compile Remove="Migrations\20220923185347_AddedNewFieldToNotificationEmployeeNotesTable.cs" />
+    <Compile Remove="Migrations\20220923185347_AddedNewFieldToNotificationEmployeeNotesTable.Designer.cs" />
+    <Compile Remove="Migrations\20220923191132_AddedNewFieldToNotificationEmployeeNotesTable.cs" />
+    <Compile Remove="Migrations\20220923191132_AddedNewFieldToNotificationEmployeeNotesTable.Designer.cs" />
+    <Compile Remove="Migrations\20220923191906_AddedNewFieldToNotificationEmployeeNotesTable.cs" />
+    <Compile Remove="Migrations\20220923191906_AddedNewFieldToNotificationEmployeeNotesTable.Designer.cs" />
+    <Compile Remove="Migrations\20220923192112_AddedNewFieldToNotificationEmployeeNotesTable.cs" />
+    <Compile Remove="Migrations\20220923192112_AddedNewFieldToNotificationEmployeeNotesTable.Designer.cs" />
+    <Compile Remove="Migrations\20220923192909_AddedNewFieldToNotificationEmployeeNotesTable.cs" />
+    <Compile Remove="Migrations\20220923192909_AddedNewFieldToNotificationEmployeeNotesTable.Designer.cs" />
+    <Compile Remove="Migrations\20220924185015_trumpy.cs" />
+    <Compile Remove="Migrations\20220924185015_trumpy.Designer.cs" />
+    <Compile Remove="Migrations\20220924195008_trumpy.cs" />
+    <Compile Remove="Migrations\20220924195008_trumpy.Designer.cs" />
+    <Compile Remove="Migrations\20220924195414_ChangedImageFieldInCustomersTableToImageId.cs" />
+    <Compile Remove="Migrations\20220924195414_ChangedImageFieldInCustomersTableToImageId.Designer.cs" />
+    <Compile Remove="Migrations\20220924202027_ChangedImageFieldInCustomersTableToImageId.cs" />
+    <Compile Remove="Migrations\20220924202027_ChangedImageFieldInCustomersTableToImageId.Designer.cs" />
+    <Compile Remove="Migrations\20220924202206_ChangedImageFieldInCustomersTableToImageId.cs" />
+    <Compile Remove="Migrations\20220924202206_ChangedImageFieldInCustomersTableToImageId.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

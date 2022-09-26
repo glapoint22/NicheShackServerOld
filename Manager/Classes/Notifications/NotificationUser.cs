@@ -1,9 +1,13 @@
-﻿namespace Manager.Classes.Notifications
+﻿using System.Collections.Generic;
+
+namespace Manager.Classes.Notifications
 {
-    public class NotificationUser : NotificationProfile
+    public class NotificationUser : NotificationEmployee
     {
         public string UserId { get; set; }
         public int NoncompliantStrikes { get; set; }
         public bool BlockNotificationSending { get; set; }
+
+        public string UserImages { get; set; }
     }
 }

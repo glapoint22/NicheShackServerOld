@@ -2,7 +2,7 @@
 
 namespace Manager.Classes.Notifications
 {
-    public class NotificationProfile
+    public class NotificationEmployee
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }

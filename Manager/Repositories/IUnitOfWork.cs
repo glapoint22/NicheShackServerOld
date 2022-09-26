@@ -42,8 +42,6 @@ namespace Manager.Repositories
         IRepository<BlockedNonAccountEmail> BlockedNonAccountEmails { get; }
         IRepository<ProductPrice> ProductPrices { get; }
 
-
-
         // Custom Repositories
         IProductRepository Products { get; }
         INotificationRepository Notifications { get; }

@@ -4,14 +4,16 @@ using DataAccess.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(NicheShackContext))]
-    partial class NicheShackContextModelSnapshot : ModelSnapshot
+    [Migration("20220924185540_ChangedNameFieldInMediaTableToNullable")]
+    partial class ChangedNameFieldInMediaTableToNullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -153,8 +155,9 @@ namespace DataAccess.Migrations
                         .HasColumnType("nvarchar(100)")
                         .HasMaxLength(100);
 
-                    b.Property<int?>("ImageId")
-                        .HasColumnType("int");
+                    b.Property<string>("Image")
+                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(50);
 
                     b.Property<string>("LastName")
                         .IsRequired()
@@ -252,12 +255,14 @@ namespace DataAccess.Migrations
                         .HasAnnotation("SqlServer:Clustered", false)
                         .HasAnnotation("SqlServer:Include", new[] { "Id" });
 
-                    b.HasIndex("ImageId")
-                        .IsUnique()
-                        .HasFilter("[ImageId] IS NOT NULL");
+                    b.HasIndex("Id")
+                        .HasAnnotation("SqlServer:Clustered", false)
+                        .HasAnnotation("SqlServer:Include", new[] { "FirstName", "Image" });
 
                     b.HasIndex("NormalizedEmail")
-                        .HasName("EmailIndex");
+                        .HasName("EmailIndex")
+                        .HasAnnotation("SqlServer:Clustered", false)
+                        .HasAnnotation("SqlServer:Include", new[] { "Id", "UserName", "NormalizedUserName", "Email", "EmailConfirmed", "PasswordHash", "SecurityStamp", "ConcurrencyStamp", "PhoneNumber", "PhoneNumberConfirmed", "TwoFactorEnabled", "LockoutEnd", "LockoutEnabled", "AccessFailedCount", "FirstName", "LastName", "ReviewName", "Image", "EmailPrefAddedListItem", "EmailPrefDeletedList", "EmailPrefEmailChange", "EmailPrefListNameChange", "EmailPrefMovedListItem", "EmailPrefNameChange", "EmailPrefNewCollaborator", "EmailPrefPasswordChange", "EmailPrefProfilePicChange", "EmailPrefRemovedCollaborator", "EmailPrefRemovedListItem", "EmailPrefReview" });
 
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
@@ -759,9 +764,6 @@ namespace DataAccess.Migrations
                     b.Property<string>("UserComment")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("UserImageId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CustomerId");
@@ -773,8 +775,6 @@ namespace DataAccess.Migrations
                     b.HasIndex("ProductId");
 
                     b.HasIndex("ReviewId");
-
-                    b.HasIndex("UserImageId");
 
                     b.ToTable("Notifications");
                 });
@@ -1954,14 +1954,6 @@ namespace DataAccess.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
-            modelBuilder.Entity("DataAccess.Models.Customer", b =>
-                {
-                    b.HasOne("DataAccess.Models.Media", "Media")
-                        .WithOne("Customer")
-                        .HasForeignKey("DataAccess.Models.Customer", "ImageId")
-                        .OnDelete(DeleteBehavior.Restrict);
-                });
-
             modelBuilder.Entity("DataAccess.Models.FilterOption", b =>
                 {
                     b.HasOne("DataAccess.Models.Filter", "Filter")
@@ -2090,10 +2082,6 @@ namespace DataAccess.Migrations
                     b.HasOne("DataAccess.Models.ProductReview", "ProductReview")
                         .WithMany("Notifications")
                         .HasForeignKey("ReviewId");
-
-                    b.HasOne("DataAccess.Models.Media", "Media")
-                        .WithMany()
-                        .HasForeignKey("UserImageId");
                 });
 
             modelBuilder.Entity("DataAccess.Models.NotificationEmployeeMessage", b =>

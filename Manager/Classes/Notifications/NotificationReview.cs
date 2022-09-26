@@ -8,6 +8,6 @@ namespace Manager.Classes.Notifications
         public bool ReviewDeleted { get; set; }
         public IEnumerable<NotificationUser> Users { get; set; }
         public NotificationReviewWriter ReviewWriter { get; set; }
-        public IEnumerable<NotificationProfile> Employees { get; set; }
+        public IEnumerable<NotificationEmployee> Employees { get; set; }
     }
 }

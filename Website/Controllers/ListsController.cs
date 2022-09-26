@@ -849,7 +849,7 @@ namespace Website.Controllers
             {
                 listId = list.Id,
                 ownerName = customer != null ? customer.FirstName + " " + customer.LastName : null,
-                profilePic = customer != null ? customer.Image : null,
+                profilePic = customer != null ? customer.Media.Thumbnail : null,
                 listName = list.Name,
                 exists
             });

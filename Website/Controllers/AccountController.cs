@@ -373,7 +373,7 @@ namespace Website.Controllers
         // ..................................................................................Get Customer Data.....................................................................
         private string GetCustomerData(Customer customer, ExternalLogin externalLogin)
         {
-            return customer.FirstName + "," + customer.LastName + "," + customer.Email + "," + customer.Image + (externalLogin != null && externalLogin.Provider != null ? "," + externalLogin.Provider : "") + (externalLogin != null && externalLogin.HasPassword ? "," + externalLogin.HasPassword : "");
+            return customer.FirstName + "," + customer.LastName + "," + customer.Email + "," + customer.Media.Thumbnail + (externalLogin != null && externalLogin.Provider != null ? "," + externalLogin.Provider : "") + (externalLogin != null && externalLogin.HasPassword ? "," + externalLogin.HasPassword : "");
         }
 
 
@@ -789,7 +789,7 @@ namespace Website.Controllers
             if (customer != null)
             {
                 //Update the customer's profile picture
-                customer.Image = imageName;
+                customer.Media.Thumbnail = imageName;
 
                 // Update the database
                 IdentityResult result = await userManager.UpdateAsync(customer);
@@ -1067,7 +1067,7 @@ namespace Website.Controllers
                             FirstName = customer.FirstName,
                             LastName = customer.LastName,
                             Email = customer.Email,
-                            Image = customer.Image
+                            Image = customer.Media.Thumbnail
                         };
                     }
                 }

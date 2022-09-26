@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -51,6 +52,8 @@ namespace DataAccess.Models
         public bool MessageArchived { get; set; }
 
 
+        [ForeignKey("Media")]
+        public int? UserImageId { get; set; }
 
 
         [ForeignKey("NotificationEmployeeMessage")]
@@ -77,11 +80,8 @@ namespace DataAccess.Models
         public virtual NotificationGroup NotificationGroup { get; set; }
         public virtual Product Product { get; set; }
         public virtual Customer Customer { get; set; }
+        public virtual Media Media { get; set; }
         public virtual NotificationEmployeeMessage NotificationEmployeeMessage { get; set; }
         public virtual ProductReview ProductReview { get; set; }
-
-
-
-
     }
 }

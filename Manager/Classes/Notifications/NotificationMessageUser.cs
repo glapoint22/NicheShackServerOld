@@ -1,4 +1,5 @@
-﻿using Manager.Classes.Notifications;
+﻿using DataAccess.Models;
+using Manager.Classes.Notifications;
 using System;
 
 namespace Manager.Classes

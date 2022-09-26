@@ -11,6 +11,7 @@ namespace Manager.Classes.Notifications
         public int? ProductId { get; set; }
         public string ProductName { get; set; }
         public string Image { get; set; }
+        public string UserImage { get; set; }
         public bool IsNew { get; set; }
         public DateTime CreationDate { get; set; }
         public int Count { get; set; }
