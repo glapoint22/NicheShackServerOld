@@ -95,7 +95,7 @@ namespace Manager.Controllers
 
         [HttpPost]
         [Route("Duplicate")]
-        public async Task<ActionResult> Duplicate(Item page)
+        public async Task<ActionResult> DuplicateEmail(Item page)
         {
             // Copy the page properties
             Email currentEmail = await unitOfWork.Emails.Get(page.Id);
@@ -139,7 +139,7 @@ namespace Manager.Controllers
 
         [HttpGet]
         [Route("Search")]
-        public async Task<ActionResult> Search(string searchTerm)
+        public async Task<ActionResult> SearchEmail(string searchTerm)
         {
             return Ok(await unitOfWork.Emails.GetCollection<ItemViewModel<Email>>(searchTerm));
         }

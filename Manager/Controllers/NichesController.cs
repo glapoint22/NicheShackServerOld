@@ -24,7 +24,7 @@ namespace Manager.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult> GetNiches(int parentId)
+        public async Task<ActionResult> GetSubniches(int parentId)
         {
             //return Ok(await unitOfWork.Niches.GetCollection<ItemViewModel<Niche>>(x => x.CategoryId == parentId));
 
@@ -44,7 +44,7 @@ namespace Manager.Controllers
         
         [Route("All")]
         [HttpGet]
-        public async Task<ActionResult> GetAllNiches()
+        public async Task<ActionResult> GetAllSubniches()
         {
             return Ok(await unitOfWork.Niches.GetCollection<ItemViewModel<Niche>>());
         }
@@ -53,7 +53,7 @@ namespace Manager.Controllers
 
         [Route("Parent")]
         [HttpGet]
-        public async Task<ActionResult> GetNicheParent(int childId)
+        public async Task<ActionResult> GetSubnicheParent(int childId)
         {
             var parentCategory = await unitOfWork.Niches.Get(x => x.Id == childId, x => x.Category);
             return Ok(new {id = parentCategory.Id, name = parentCategory.Name});
@@ -64,7 +64,7 @@ namespace Manager.Controllers
 
 
         [HttpPut]
-        public async Task<ActionResult> UpdateNicheName(ItemViewModel niche)
+        public async Task<ActionResult> UpdateSubnicheName(ItemViewModel niche)
         {
             Niche updatedNiche = await unitOfWork.Niches.Get(niche.Id);
 
@@ -83,7 +83,7 @@ namespace Manager.Controllers
 
 
         [HttpPost]
-        public async Task<ActionResult> AddNiche(ItemViewModel niche)
+        public async Task<ActionResult> AddSubniche(ItemViewModel niche)
         {
             Niche newNiche = new Niche
             {
@@ -103,7 +103,7 @@ namespace Manager.Controllers
 
         [Route("Move")]
         [HttpPut]
-        public async Task<ActionResult> MoveNiche(MoveItemViewModel moveItem)
+        public async Task<ActionResult> MoveSubniche(MoveItemViewModel moveItem)
         {
             Niche nicheToBeMoved = await unitOfWork.Niches.Get(moveItem.ItemToBeMovedId);
 
@@ -122,7 +122,7 @@ namespace Manager.Controllers
 
 
         [HttpDelete]
-        public async Task<ActionResult> DeleteNiche(int id)
+        public async Task<ActionResult> DeleteSubniche(int id)
         {
             Niche niche = await unitOfWork.Niches.Get(id);
 
@@ -406,7 +406,7 @@ namespace Manager.Controllers
         //}
 
 
-
+        // Not using!!! using validation!!
         [Route("CheckDuplicate")]
         [HttpGet]
         public async Task<ActionResult> CheckDuplicateNiche(int childId, string childName)
@@ -421,7 +421,7 @@ namespace Manager.Controllers
 
         [Route("Children")]
         [HttpGet]
-        public async Task<ActionResult> GetChildren(int parentId)
+        public async Task<ActionResult> GetSubnicheChildren(int parentId)
         {
             var products = await unitOfWork.Products.GetCollection(x => x.NicheId == parentId, x => new ItemViewModel { Id = x.Id, Name = x.Name });
             return Ok(products);
@@ -432,7 +432,7 @@ namespace Manager.Controllers
 
         [HttpGet]
         [Route("Search")]
-        public async Task<ActionResult> Search(string searchTerm)
+        public async Task<ActionResult> SearchSubniches(string searchTerm)
         {
             return Ok(await unitOfWork.Niches.GetCollection<ItemViewModel<Niche>>(searchTerm));
         }

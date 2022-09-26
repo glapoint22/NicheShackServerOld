@@ -13,9 +13,7 @@ namespace Manager.ViewModels
         public double Rating { get; set; }
         public int TotalReviews { get; set; }
         public string Description { get; set; }
-        public IEnumerable<ProductContentViewModel> Content { get; set; }
         public IEnumerable<PricePointViewModel> PricePoints { get; set; }
-        //public ImageViewModel Image { get; set; }
         public IEnumerable<ProductMediaViewModel> Media { get; set; }
         public IEnumerable<ItemViewModel> Keywords { get; set; }
         public IEnumerable<ItemViewModel> Subgroups { get; set; }

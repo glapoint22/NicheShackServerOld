@@ -33,11 +33,11 @@ namespace Website.Controllers
 
 
 
-        // ..................................................................................Get Filters.....................................................................
+        // ..................................................................................Get Order Filters.....................................................................
         [HttpGet]
         [Authorize(Policy = "Account Policy")]
         [Route("Filters")]
-        public async Task<ActionResult> GetFilters()
+        public async Task<ActionResult> GetOrderFilters()
         {
             var filters = await unitOfWork.ProductOrders.GetOrderFilters(User.FindFirst(ClaimTypes.NameIdentifier).Value);
 

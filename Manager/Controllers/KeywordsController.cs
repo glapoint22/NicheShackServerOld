@@ -19,7 +19,7 @@ namespace Manager.Controllers
 
 
         [HttpGet]
-        public async Task<ActionResult> GetCategories()
+        public async Task<ActionResult> GetKeywordGroups()
         {
             return Ok(await unitOfWork.KeywordGroups.GetCollection<ItemViewModel<KeywordGroup>>(x => !x.ForProduct));
         }
@@ -28,7 +28,7 @@ namespace Manager.Controllers
 
         [HttpGet]
         [Route("Search")]
-        public async Task<ActionResult> Search(string searchTerm)
+        public async Task<ActionResult> SearchKeywordGroups(string searchTerm)
         {
             return Ok(await unitOfWork.KeywordGroups.GetCollection<ItemViewModel<KeywordGroup>>(x => !x.ForProduct, searchTerm));
         }

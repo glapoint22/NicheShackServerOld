@@ -24,7 +24,7 @@ namespace Manager.Controllers
 
 
         [HttpGet]
-        public async Task<ActionResult> GetCategories()
+        public async Task<ActionResult> GetNiches()
         {
             return Ok(await unitOfWork.Categories.GetCollection<ItemViewModel<Category>>());
         }
@@ -70,7 +70,7 @@ namespace Manager.Controllers
 
 
         [HttpPut]
-        public async Task<ActionResult> UpdateCategoryName(ItemViewModel category)
+        public async Task<ActionResult> UpdateNicheName(ItemViewModel category)
         {
             Category updatedCategory = await unitOfWork.Categories.Get(category.Id);
 
@@ -89,7 +89,7 @@ namespace Manager.Controllers
 
 
         [HttpPost]
-        public async Task<ActionResult> AddCategory(ItemViewModel category)
+        public async Task<ActionResult> AddNiche(ItemViewModel category)
         {
             Category newCategory = new Category
             {
@@ -109,7 +109,7 @@ namespace Manager.Controllers
 
 
         [HttpDelete]
-        public async Task<ActionResult> DeleteCategory(int id)
+        public async Task<ActionResult> DeleteNiche(int id)
         {
             Category category = await unitOfWork.Categories.Get(id);
 
@@ -170,7 +170,7 @@ namespace Manager.Controllers
 
         [Route("Children")]
         [HttpGet]
-        public async Task<ActionResult> GetChildren(int parentId)
+        public async Task<ActionResult> GetNicheChildren(int parentId)
         {
             var subNiches = await unitOfWork.Niches.GetCollection(x => x.CategoryId == parentId, x => new ItemViewModel { Id = x.Id, Name = x.Name });
             var products = await unitOfWork.Products.GetCollection(x => subNiches.Select(y => y.Id).Contains(x.NicheId), x => new ItemViewModel { Id = x.Id, Name = x.Name });

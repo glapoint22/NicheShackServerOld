@@ -27,7 +27,7 @@ namespace Website.Repositories
 
 
         // ................................................................................Get Lists.....................................................................
-        public async Task<IEnumerable<ListViewModel>> GetLists(string customerId, string firstList)
+        public async Task<IEnumerable<ListViewModel>> GetLists(string customerId, string firstListId)
         {
             // Get the list ids
             var listCollaborators = await context.ListCollaborators
@@ -44,7 +44,7 @@ namespace Website.Repositories
                     x.DeleteList,
                     x.MoveItem,
                     x.RemoveItem,
-                    isFirstList = x.ListId == firstList ? 0 : 1
+                    isFirstList = x.ListId == firstListId ? 0 : 1
                 })
                 .ToListAsync();
 

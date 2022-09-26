@@ -18,19 +18,21 @@ namespace Manager.Controllers
             this.unitOfWork = unitOfWork;
         }
 
-        [HttpGet]
-        public async Task<ActionResult> GetVendors()
-        {
-            return Ok(await unitOfWork.Vendors.GetCollection<ItemViewModel<Vendor>>());
-        }
+        // Not sure if this is needed
+        //[HttpGet]
+        //public async Task<ActionResult> GetVendors()
+        //{
+        //    return Ok(await unitOfWork.Vendors.GetCollection<ItemViewModel<Vendor>>());
+        //}
 
 
-        [Route("Vendor")]
-        [HttpGet]
-        public async Task<ActionResult> GetVendor(int vendorId)
-        {
-            return Ok(await unitOfWork.Vendors.Get(vendorId));
-        }
+        // Not sure if this is needed
+        //[Route("Vendor")]
+        //[HttpGet]
+        //public async Task<ActionResult> GetVendor(int vendorId)
+        //{
+        //    return Ok(await unitOfWork.Vendors.Get(vendorId));
+        //}
 
 
 
@@ -107,7 +109,7 @@ namespace Manager.Controllers
 
         [Route("Products")]
         [HttpGet]
-        public async Task<ActionResult> GetProducts(int vendorId)
+        public async Task<ActionResult> GetVendorProducts(int vendorId)
         {
             return Ok(await unitOfWork.Products.GetCollection(x => x.VendorId == vendorId, x => new { 
                 x.Id,
@@ -118,19 +120,19 @@ namespace Manager.Controllers
         }
 
 
-
-        [Route("ProductCount")]
-        [HttpGet]
-        public async Task<ActionResult> GetProductCount(int vendorId)
-        {
-            return Ok(await unitOfWork.Products.GetCount(x => x.VendorId == vendorId));
-        }
+        // Not sure if this is being used
+        //[Route("ProductCount")]
+        //[HttpGet]
+        //public async Task<ActionResult> GetVendorProductCount(int vendorId)
+        //{
+        //    return Ok(await unitOfWork.Products.GetCount(x => x.VendorId == vendorId));
+        //}
 
 
 
         [HttpGet]
         [Route("Search")]
-        public async Task<ActionResult> Search(string searchTerm)
+        public async Task<ActionResult> SearchVendors(string searchTerm)
         {
 
             var vendor = await unitOfWork.Vendors.GetCollection(searchTerm, x => new VendorViewModel { Id = x.Id, Name = x.Name, PrimaryEmail = x.PrimaryEmail, PrimaryFirstName = x.PrimaryFirstName, PrimaryLastName = x.PrimaryLastName});
@@ -139,7 +141,7 @@ namespace Manager.Controllers
         }
 
 
-
+        // Not using!!!
         [HttpGet]
         [Route("Duplicate")]
         public async Task<ActionResult> CheckDuplicate(string vendorName)

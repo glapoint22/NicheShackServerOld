@@ -647,9 +647,9 @@ namespace Website.Controllers
 
         // ..................................................................................Update Password.....................................................................
         [HttpPut]
-        [Route("UpdatePassword")]
+        [Route("ChangePassword")]
         [Authorize(Policy = "Account Policy")]
-        public async Task<ActionResult> UpdatePassword(UpdatedPassword updatedPassword)
+        public async Task<ActionResult> ChangePassword(UpdatedPassword updatedPassword)
         {
             // Get the customer from the database based on the customer id from the claims via the access token
             Customer customer = await userManager.FindByIdAsync(User.FindFirst(ClaimTypes.NameIdentifier).Value);
@@ -691,7 +691,7 @@ namespace Website.Controllers
         [HttpPost, DisableRequestSizeLimit]
         [Route("ChangeProfilePicture")]
         [Authorize(Policy = "Account Policy")]
-        public async Task<ActionResult> NewImage()
+        public async Task<ActionResult> ChangeProfilePicture()
         {
             string wwwroot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
             string imagesFolder = Path.Combine(wwwroot, "images");
