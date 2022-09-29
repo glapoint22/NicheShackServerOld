@@ -23,7 +23,7 @@ namespace Services
         // ..................................................................................Get Grid Data.....................................................................
         public async Task<GridData> GetGridData(QueryParams queryParams)
         {
-            await queryParams.Init(context);
+            //await queryParams.Init(context);
 
             List<QueryResult> products = await QueryProducts(queryParams);
             QueryBuilder queryBuilder = new QueryBuilder(queryParams);
@@ -60,7 +60,7 @@ namespace Services
             //    return new List<QueriedProduct>();
             //}
 
-            await queryParams.Init(context);
+            //await queryParams.Init(context);
 
             
 
@@ -85,9 +85,12 @@ namespace Services
         {
             QueryBuilder queryBuilder = new QueryBuilder(queryParams);
 
+
             return await context.Products
                 .AsNoTracking()
                 .Where(queryBuilder)
+                //.Where(x => x.ProductFilters.Where(z => z.FilterOptionId == 2 || z.FilterOptionId == 30).Select(z => z.ProductId).Contains(x.Id) && 
+                //            x.ProductFilters.Where(z => z.FilterOptionId == 7 || z.FilterOptionId == 8).Select(z => z.ProductId).Contains(x.Id))
                 .Select(select)
                 .ToListAsync();
         }
@@ -393,79 +396,79 @@ namespace Services
 
 
             // ******Price Filter********
-            //List<PriceFilterOption> priceFilterOptions = new List<PriceFilterOption>();
-            //var priceRanges = await context.PriceRanges.AsNoTracking().ToListAsync();
+            List<PriceFilterOption> priceFilterOptions = new List<PriceFilterOption>();
+            var priceRanges = await context.PriceRanges.AsNoTracking().ToListAsync();
 
-            //if (queryParams.PriceFilter != null)
-            //{
-            //    // Clear the price filter
-            //    var priceFilter = queryParams.PriceFilter;
-            //    queryParams.PriceFilter = null;
+            if (queryParams.PriceFilter != null)
+            {
+                // Clear the price filter
+                var priceFilter = queryParams.PriceFilter;
+                queryParams.PriceFilter = null;
 
-            //    // Query products without the price filter
-            //    var prods = await GetProducts(queryParams, x => new
-            //    {
-            //        x.MinPrice,
-            //        x.MaxPrice
-            //    });
+                // Query products without the price filter
+                var prods = await GetProducts(queryParams, x => new
+                {
+                    MinPrice = 5,
+                    MaxPrice = 20
+                });
 
-            //    // Get the selected price filter options
-            //    var selectedPriceFilterOptions = priceFilter.Options
-            //        .Select(x => x.Label.Split('-')
-            //            .Select(z => int.Parse(z))
-            //            .ToArray())
-            //            .Select(z => new
-            //            {
-            //                min = z[0],
-            //                max = z[1]
-            //            })
-            //        .ToList();
-
-
-            //    // Get the price filter options based on the queried products
-            //    priceFilterOptions =
-            //    (from pr in priceRanges
-            //     from p in prods
-            //     orderby pr.Id
-            //     where ((p.MinPrice >= pr.Min && p.MinPrice < pr.Max) || selectedPriceFilterOptions.Contains(new
-            //     {
-            //         min = pr.Min,
-            //         max = pr.Max
-            //     }))
-            //     select new PriceFilterOption
-            //     {
-            //         Label = pr.Label,
-            //         Min = pr.Min,
-            //         Max = pr.Max
-            //     }).ToList();
+                // Get the selected price filter options
+                var selectedPriceFilterOptions = priceFilter.Options
+                    .Select(x => x.Label.Split('-')
+                        .Select(z => int.Parse(z))
+                        .ToArray())
+                        .Select(z => new
+                        {
+                            min = z[0],
+                            max = z[1]
+                        })
+                    .ToList();
 
 
-            //    queryParams.PriceFilter = priceFilter;
-            //}
-            //else
-            //{
-            //    priceFilterOptions =
-            //    (from pr in priceRanges
-            //     from p in products
-            //     orderby pr.Id
-            //     where (p.MinPrice >= pr.Min && p.MinPrice < pr.Max)
-            //     select new PriceFilterOption
-            //     {
-            //         Label = pr.Label,
-            //         Min = pr.Min,
-            //         Max = pr.Max
-            //     }).ToList();
-            //}
+                // Get the price filter options based on the queried products
+                priceFilterOptions =
+                (from pr in priceRanges
+                 from p in prods
+                 orderby pr.Id
+                 where ((p.MinPrice >= pr.Min && p.MinPrice < pr.Max) || selectedPriceFilterOptions.Contains(new
+                 {
+                     min = pr.Min,
+                     max = pr.Max
+                 }))
+                 select new PriceFilterOption
+                 {
+                     Label = pr.Label,
+                     Min = pr.Min,
+                     Max = pr.Max
+                 }).ToList();
+
+
+                queryParams.PriceFilter = priceFilter;
+            }
+            else
+            {
+                priceFilterOptions =
+                (from pr in priceRanges
+                 from p in products
+                 orderby pr.Id
+                 where (p.MinPrice >= pr.Min && p.MinPrice < pr.Max)
+                 select new PriceFilterOption
+                 {
+                     Label = pr.Label,
+                     Min = pr.Min,
+                     Max = pr.Max
+                 }).ToList();
+            }
 
 
 
-            //List<PriceFilterOption> options = priceFilterOptions.Distinct().ToList();
+            List<PriceFilterOption> options = priceFilterOptions.Distinct().ToList();
 
-            //filters.PriceFilter = new PriceFilter
-            //{
-            //    Caption = "Price",
-            //    Options = options
-            //};
+            filters.PriceFilter = new PriceFilter
+            {
+                Caption = "Price",
+                Options = options
+            };
 
 
 

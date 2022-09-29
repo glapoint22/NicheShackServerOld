@@ -14,5 +14,6 @@ namespace Services.Classes
         public DateTime? Date { get; set; }
         public double? Price { get; set; }
         public AutoQueryType? Auto { get; set; }
+        public string? StringValue { get; set; }
     }
 }

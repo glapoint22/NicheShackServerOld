@@ -31,11 +31,11 @@ namespace Services.Classes
 
             //if (queryParams.Queries != null || queryParams.Search != null || queryParams.CategoryId != null || queryParams.NicheId != null)
             //{
-            //    queryParams.Limit = 40;
-            //    queryParams.UsesFilters = true;
-            //    if (queryParams.Page == 0) queryParams.Page = 1;
-            //    QueryService queryService = new QueryService(context);
-            //    GridData = await queryService.GetGridData(queryParams);
+            queryParams.Limit = 40;
+            queryParams.UsesFilters = true;
+            if (queryParams.Page == 0) queryParams.Page = 1;
+            QueryService queryService = new QueryService(context);
+            GridData = await queryService.GetGridData(queryParams);
             //}
 
         }

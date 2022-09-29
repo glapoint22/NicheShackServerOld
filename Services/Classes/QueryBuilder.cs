@@ -6,6 +6,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
+using System.Text.RegularExpressions;
+using System.Web;
 
 namespace Services.Classes
 {
@@ -84,7 +87,7 @@ namespace Services.Classes
 
         private Expression GetRowExpression(QueryRow queryRow, ParameterExpression parameter)
         {
-            Expression expression = null;
+            Expression expression;
 
             switch (queryRow.QueryType)
             {
@@ -258,6 +261,32 @@ namespace Services.Classes
 
                     break;
 
+                case QueryType.Search:
+                    string[] searchWordsArray = queryRow.StringValue.Split(' ').ToArray();
+
+                    MemberExpression nameProperty = Expression.Property(parameter, "Name");
+
+                    // EF.Functions.Like
+                    MethodInfo efLikeMethod = typeof(DbFunctionsExtensions).GetMethod("Like",
+                        BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic,
+                        null,
+                        new[] { typeof(DbFunctions), typeof(string), typeof(string) },
+                        null);
+
+                    expression = Expression.Constant(false);
+
+                    // Loop through each word
+                    foreach (string word in searchWordsArray)
+                    {
+                        ConstantExpression pattern = Expression.Constant("%" + word + "%");
+                        MethodCallExpression methodCall = Expression.Call(efLikeMethod,
+                            Expression.Property(null, typeof(EF), nameof(EF.Functions)), nameProperty, pattern);
+
+                        expression = Expression.OrElse(expression, methodCall);
+                    }
+
+                    break;
+
                 default:
                     // Select no products
                     expression = Expression.Equal(Expression.Property(parameter, "Id"), Expression.Constant(0));
@@ -303,15 +332,43 @@ namespace Services.Classes
         public IQueryable<Product> SetWhere(IQueryable<Product> source)
         {
 
-            Expression<Func<Product, bool>> expression = BuildQuery<Product>(queryParams.Query);
+            //Expression<Func<Product, bool>> expression = BuildQuery<Product>(queryParams.Query);
 
-            if (expression != null)
+            //if (expression != null)
+            //{
+            //    source = source.Where(expression);
+            //    hasWhere = true;
+            //}
+
+
+
+
+
+
+
+
+
+            Regex regex = new Regex(@".+?\|(?:\d(?:,|-)?)+\|");
+            var filters = HttpUtility.UrlDecode(queryParams.Filters);
+
+            MatchCollection matches = regex.Matches(filters);
+
+            foreach (Match match in matches)
             {
-                source = source.Where(expression);
-                hasWhere = true;
+                Regex filterRegex = new Regex(@"(^[a-zA-Z\s]+)\|");
+
+                var foo = filterRegex.Match(match.Value).Groups[1].Value;
+
+                //Regex rgex = new Regex(@"\d+");
+
+                //var value = match.Value;
+                //var filterOptionIds = rgex.Matches(value);
+
+                //foreach (var filterOptionId in filterOptionIds)
+                //{
+                //    var a = 0;
+                //}
             }
-
-
 
             if (!queryParams.UsesFilters) return source;
 
@@ -353,33 +410,33 @@ namespace Services.Classes
 
 
             //Price Filter
-            if (queryParams.PriceFilter != null || queryParams.PriceRangeFilter != null)
-            {
-                List<Expression<Func<Product, bool>>> priceRangeQueries = new List<Expression<Func<Product, bool>>>();
-                List<string> priceRanges = new List<string>();
+            //if (queryParams.PriceFilter != null || queryParams.PriceRangeFilter != null)
+            //{
+            //    List<Expression<Func<Product, bool>>> priceRangeQueries = new List<Expression<Func<Product, bool>>>();
+            //    List<string> priceRanges = new List<string>();
 
-                // Get all price ranges from the price filter
-                if (queryParams.PriceFilter != null)
-                {
-                    priceRanges = queryParams.PriceFilter.Options.Select(x => x.Label).ToList();
-                }
+            //    // Get all price ranges from the price filter
+            //    if (queryParams.PriceFilter != null)
+            //    {
+            //        priceRanges = queryParams.PriceFilter.Options.Select(x => x.Label).ToList();
+            //    }
 
-                // Get the price range from the price range filter
-                if (queryParams.PriceRangeFilter != null)
-                {
-                    priceRanges.Add(queryParams.PriceRangeFilter.Options.Select(x => x.Label).Single());
-                }
+            //    // Get the price range from the price range filter
+            //    if (queryParams.PriceRangeFilter != null)
+            //    {
+            //        priceRanges.Add(queryParams.PriceRangeFilter.Options.Select(x => x.Label).Single());
+            //    }
 
-                // Loop through the price ranges and add them to the query
-                //foreach (string priceRange in priceRanges)
-                //{
-                //    var priceRangeArray = priceRange.Split('-').Select(x => double.Parse(x)).OrderBy(x => x).ToArray();
-                //    priceRangeQueries.Add(x => x.MinPrice >= priceRangeArray[0] && x.MinPrice <= priceRangeArray[1]);
-                //}
+            //    // Loop through the price ranges and add them to the query
+            //    //foreach (string priceRange in priceRanges)
+            //    //{
+            //    //    var priceRangeArray = priceRange.Split('-').Select(x => double.Parse(x)).OrderBy(x => x).ToArray();
+            //    //    priceRangeQueries.Add(x => x.MinPrice >= priceRangeArray[0] && x.MinPrice <= priceRangeArray[1]);
+            //    //}
 
-                source = source.WhereAny(priceRangeQueries.ToArray());
-                hasWhere = true;
-            }
+            //    source = source.WhereAny(priceRangeQueries.ToArray());
+            //    hasWhere = true;
+            //}
 
 
 
