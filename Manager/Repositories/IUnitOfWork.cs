@@ -36,7 +36,6 @@ namespace Manager.Repositories
         IRepository<PageKeyword> PageKeywords { get; }
         IRepository<Subproduct> Subproducts { get; }
         IRepository<NotificationEmployeeNote> NotificationEmployeeNotes { get; }
-        IRepository<NotificationEmployeeMessage> NotificationEmployeeMessages { get; }
         IRepository<NotificationGroup> NotificationGroups { get; }
         IRepository<Customer> Customers { get; }
         IRepository<BlockedNonAccountEmail> BlockedNonAccountEmails { get; }

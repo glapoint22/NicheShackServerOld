@@ -28,7 +28,12 @@ namespace DataAccess.Models
 
 
         [ForeignKey("Customer")]
-        public string CustomerId { get; set; }
+        public string UserId { get; set; }
+
+
+
+        [MaxLength(50)]
+        public string UserImage { get; set; }
 
 
 
@@ -49,15 +54,8 @@ namespace DataAccess.Models
 
 
 
-        public bool MessageArchived { get; set; }
+        
 
-
-        [ForeignKey("Media")]
-        public int? UserImageId { get; set; }
-
-
-        [ForeignKey("NotificationEmployeeMessage")]
-        public int? EmployeeMessageId { get; set; }
 
 
 
@@ -65,6 +63,7 @@ namespace DataAccess.Models
         public int? ReviewId { get; set; }
 
 
+        public bool IsArchived { get; set; }
 
         public DateTime CreationDate { get; set; }
 
@@ -80,8 +79,6 @@ namespace DataAccess.Models
         public virtual NotificationGroup NotificationGroup { get; set; }
         public virtual Product Product { get; set; }
         public virtual Customer Customer { get; set; }
-        public virtual Media Media { get; set; }
-        public virtual NotificationEmployeeMessage NotificationEmployeeMessage { get; set; }
         public virtual ProductReview ProductReview { get; set; }
     }
 }

@@ -69,7 +69,7 @@ namespace Website.Repositories
                             ProfilePic = new ProfilePicInfo
                             {
                                 Name = y.Customer.FirstName + " " + y.Customer.LastName,
-                                Url = y.Customer.Media.Thumbnail != null ? "images/" + y.Customer.Media.Thumbnail : "assets/no-account-pic.png"
+                                Url = y.Customer.Image != null ? "images/" + y.Customer.Image : "assets/no-account-pic.png"
                             }
 
                         }).FirstOrDefault(),
@@ -158,7 +158,7 @@ namespace Website.Repositories
                         Name = x.Collaborator.CustomerId == customerId ? "you" : x.Collaborator.Customer.FirstName,
                         Image = new ProfilePicInfo
                         {
-                            Url = x.Collaborator.Customer.Media.Thumbnail,
+                            Url = x.Collaborator.Customer.Image,
                             Name = x.Collaborator.Customer.FirstName + " " + x.Collaborator.Customer.LastName
                         }
                     },

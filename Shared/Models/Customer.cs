@@ -19,8 +19,8 @@ namespace DataAccess.Models
         public string LastName { get; set; }
 
 
-        [ForeignKey("Media")]
-        public int? ImageId { get; set; }
+        [MaxLength(50)]
+        public string Image { get; set; }
 
 
 
@@ -48,7 +48,6 @@ namespace DataAccess.Models
 
 
 
-        public virtual Media Media { get; set; }
 
         public virtual ICollection<OneTimePassword> OneTimePassword { get; set; }
         public virtual ICollection<ListCollaborator> ListCollaborators { get; set; }

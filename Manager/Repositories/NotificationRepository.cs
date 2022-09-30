@@ -31,20 +31,30 @@ namespace Manager.Repositories
 
             // ---- NEW LIST ---- \\
 
-            // Count all the notifications that DO NOT belong to an archived group
+            // Count all the notifications that DO (NOT) belong to an archived group
             x.NotificationGroup.ArchiveDate == null ||
-            // but if it's a message notification that belongs to an archive group and
-            // that message notification has NOT been archived, then count that one too
-            (x.Type == (int)NotificationType.Message && !x.MessageArchived) :
+
+
+            // but if it's a UserName, UserImage, or a Message that does belong to an
+            // archive group and that notification has NOT been archived, then count that one too
+            (x.Type == (int)NotificationType.UserName ||
+            x.Type == (int)NotificationType.UserImage ||
+            x.Type == (int)NotificationType.Message) &&
+            !x.IsArchived :
 
 
             // ---- ARCHIVE LIST ---- \\
 
             // Count all the notifications that DO belong to an archived group
-            x.NotificationGroup.ArchiveDate != null ||
-            // but if it's a message notification that DOES NOT belong to an archive group and
-            // that message notification HAS been archived, then count that one too
-            (x.Type == (int)NotificationType.Message && x.MessageArchived))
+            (x.Type != (int)NotificationType.UserName &&
+            x.Type != (int)NotificationType.UserImage &&
+            x.Type != (int)NotificationType.Message &&
+            x.NotificationGroup.ArchiveDate != null)  ||
+
+
+            // but if it's a UserName, UserImage, or a Message that DOES NOT belong to an
+            // archive group and that notification HAS been archived, then count that one too
+             x.IsArchived)
 
                 .Select(x => new
                 {
@@ -57,11 +67,14 @@ namespace Manager.Repositories
                     ProductId = x.ProductId,
                     ProductName = x.Product.Name,
                     ProductImage = x.Product.Media.Thumbnail,
-                    UserImage = x.Media.Thumbnail,
+                    UserImage = x.UserImage,
                     NotificationType = x.Type,
                     CreationDate = x.CreationDate,
                     ArchiveDate = x.NotificationGroup.ArchiveDate,
-                    Count = x.Type == (int)NotificationType.Message ? x.NotificationGroup.Notifications.Where(y => isNew ? !y.MessageArchived : y.MessageArchived).Count() : x.NotificationGroup.Notifications.Count()
+                    Count =
+                    x.Type == (int)NotificationType.Message || x.Type == (int)NotificationType.UserImage ?
+                        x.NotificationGroup.Notifications.Where(y => isNew ? !y.IsArchived : y.IsArchived).Count() :
+                        x.NotificationGroup.Notifications.Count()
                 }).ToListAsync();
 
 
@@ -97,29 +110,68 @@ namespace Manager.Repositories
 
 
 
+
+
+        public async Task<List<NotificationUserImage>> GetUserImageNotification(int notificationGroupId, bool isNew)
+        {
+            List<NotificationUserImage> userImages = await context.Notifications.Where(x => x.NotificationGroupId == notificationGroupId && (isNew ? !x.IsArchived : x.IsArchived)).Select(x => new NotificationUserImage
+            {
+                NotificationId = x.Id,
+                UserId = x.Customer.Id,
+                FirstName = x.Customer.FirstName,
+                LastName = x.Customer.LastName,
+                Image = x.Customer.Image,
+                Email = x.Customer.Email,
+                Text = x.UserComment,
+                Date = x.CreationDate,
+                NoncompliantStrikes = x.Customer.NoncompliantStrikes,
+                BlockNotificationSending = x.Customer.BlockNotificationSending,
+                UserImage = x.UserImage,
+                EmployeeIndex = 0,
+                EmployeeNotes = context.NotificationEmployeeNotes.Where(y => y.NotificationId == x.Id).Select(y => new NotificationEmployee
+                {
+                    FirstName = y.Customer.FirstName,
+                    LastName = y.Customer.LastName,
+                    Image = y.Customer.Image,
+                    Email = y.Customer.Email,
+                    Text = y.Note,
+                    Date = y.CreationDate
+                }).ToList()
+            }).OrderByDescending(x => x.Date).ToListAsync();
+
+            return userImages;
+        }
+
+
+
+
+
+
         public async Task<List<NotificationMessage>> GetMessageNotification(int notificationGroupId, bool isNew)
         {
-            List<NotificationMessage> messages = await context.Notifications.Where(x => x.NotificationGroupId == notificationGroupId && (isNew ? !x.MessageArchived : x.MessageArchived)).Select(x => new NotificationMessage
+            List<NotificationMessage> messages = await context.Notifications.Where(x => x.NotificationGroupId == notificationGroupId && (isNew ? !x.IsArchived : x.IsArchived)).Select(x => new NotificationMessage
             {
                 NotificationId = x.Id,
                 UserId = x.Customer.Id,
                 UserName = x.NonAccountUserName,
                 FirstName = x.Customer.FirstName,
                 LastName = x.Customer.LastName,
-                Image = x.Customer.Media.Thumbnail,
+                Image = x.Customer.Image,
                 Email = x.NonAccountUserEmail != null ? x.NonAccountUserEmail : x.Customer.Email,
                 Text = x.UserComment,
                 Date = x.CreationDate,
                 NoncompliantStrikes = x.Customer.NoncompliantStrikes,
                 BlockNotificationSending = x.NonAccountUserEmail != null ? context.BlockedNonAccountEmails.Where(y => y.Email == x.NonAccountUserEmail).FirstOrDefault() == null ? false : true : x.Customer.BlockNotificationSending,
-                EmployeeMessageId = x.EmployeeMessageId,
-                EmployeeFirstName = context.NotificationEmployeeNotes.Where(y => y.NotificationId == x.Id).Select(y => y.Customer.FirstName).FirstOrDefault(),
-                EmployeeLastName = context.NotificationEmployeeNotes.Where(y => y.NotificationId == x.Id).Select(y => y.Customer.LastName).FirstOrDefault(),
-                EmployeeImage = x.NotificationEmployeeMessage.Customer.Media.Thumbnail,
-                EmployeeMessageDate = x.NotificationEmployeeMessage.CreationDate,
-                EmployeeMessage = x.NotificationEmployeeMessage.Message
+                EmployeeMessage = context.NotificationEmployeeNotes.Where(y => y.NotificationId == x.Id).Select(y => new NotificationEmployee
+                {
+                    FirstName = y.Customer.FirstName,
+                    LastName = y.Customer.LastName,
+                    Image = y.Customer.Image,
+                    Email = y.Customer.Email,
+                    Text = y.Note,
+                    Date = y.CreationDate
+                }).FirstOrDefault()
             }).OrderByDescending(x => x.Date).ToListAsync();
-
 
             return messages;
         }
@@ -143,7 +195,7 @@ namespace Manager.Repositories
                 UserId = x.Customer.Id,
                 FirstName = x.Customer.FirstName,
                 LastName = x.Customer.LastName,
-                Image = x.Customer.Media.Thumbnail,
+                Image = x.Customer.Image,
                 Email = x.Customer.Email,
                 Text = x.UserComment,
                 Date = x.CreationDate,
@@ -161,7 +213,7 @@ namespace Manager.Repositories
                 UserId = x.Customer.Id,
                 FirstName = x.Customer.FirstName,
                 LastName = x.Customer.LastName,
-                Image = x.Customer.Media.Thumbnail,
+                Image = x.Customer.Image,
                 Email = x.Customer.Email,
                 Text = x.Text,
                 Date = x.Date,
@@ -178,7 +230,7 @@ namespace Manager.Repositories
             {
                 FirstName = x.Customer.FirstName,
                 LastName = x.Customer.LastName,
-                Image = x.Customer.Media.Thumbnail,
+                Image = x.Customer.Image,
                 Email = x.Customer.Email,
                 Text = x.Note,
                 Date = x.CreationDate
@@ -218,7 +270,7 @@ namespace Manager.Repositories
                 UserId = x.Customer.Id,
                 FirstName = x.Customer.FirstName,
                 LastName = x.Customer.LastName,
-                Image = x.Customer.Media.Thumbnail,
+                Image = x.Customer.Image,
                 Email = x.Customer.Email,
                 Text = x.UserComment,
                 Date = x.CreationDate,
@@ -231,7 +283,7 @@ namespace Manager.Repositories
             {
                 FirstName = x.Customer.FirstName,
                 LastName = x.Customer.LastName,
-                Image = x.Customer.Media.Thumbnail,
+                Image = x.Customer.Image,
                 Email = x.Customer.Email,
                 Text = x.Note,
                 Date = x.CreationDate
@@ -258,52 +310,7 @@ namespace Manager.Repositories
 
 
 
-        public async Task GetUserImageNotification(int notificationGroupId)
-        {
-            var product = await context.Notifications.Where(x => x.NotificationGroupId == notificationGroupId).Select(x => new
-            {
-                Hoplink = x.Product.Hoplink,
-                Disabled = x.Product.Disabled
-            }).FirstOrDefaultAsync();
-
-
-
-            List<NotificationUser> users = await context.Notifications.Where(x => x.NotificationGroupId == notificationGroupId).Select(x => new NotificationUser
-            {
-                //UserId = x.Customer.Id,
-                //FirstName = x.Customer.FirstName,
-                //LastName = x.Customer.LastName,
-                //Image = x.Customer.Media.Thumbnail,
-                //Email = x.Customer.Email,
-                //Text = x.UserComment,
-                //Date = x.CreationDate,
-                //NoncompliantStrikes = x.Customer.NoncompliantStrikes,
-                //BlockNotificationSending = x.Customer.BlockNotificationSending,
-                UserImages = x.Media.Thumbnail
-            }).ToListAsync();
-
-
-            List<NotificationEmployee> employees = await context.NotificationEmployeeNotes.Where(x => x.NotificationGroupId == notificationGroupId).Select(x => new NotificationEmployee
-            {
-                FirstName = x.Customer.FirstName,
-                LastName = x.Customer.LastName,
-                Image = x.Customer.Media.Thumbnail,
-                Email = x.Customer.Email,
-                Text = x.Note,
-                Date = x.CreationDate
-            }).ToListAsync();
-
-
-            NotificationProduct notification = new NotificationProduct
-            {
-                ProductHoplink = product.Hoplink,
-                ProductDisabled = product.Disabled,
-                Users = users,
-                Employees = employees
-            };
-
-            //return notification;
-        }
+        
 
 
 

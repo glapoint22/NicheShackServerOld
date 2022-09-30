@@ -13,6 +13,6 @@ namespace Manager.Repositories
         Task<List<NotificationMessage>> GetMessageNotification(int notificationGroupId, bool isNew);
         Task<NotificationReview> GetReviewNotification(int notificationGroupId);
         Task<NotificationProduct> GetProductNotification(int notificationGroupId);
-        Task GetUserImageNotification(int notificationGroupId);
+        Task<List<NotificationUserImage>> GetUserImageNotification(int notificationGroupId, bool isNew);
     }
 }

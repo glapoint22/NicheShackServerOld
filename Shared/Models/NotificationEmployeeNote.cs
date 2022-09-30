@@ -23,9 +23,16 @@ namespace DataAccess.Models
         public DateTime CreationDate { get; set; }
 
 
+        
 
 
         public virtual NotificationGroup NotificationGroup { get; set; }
+
+
         public virtual Customer Customer { get; set; }
+
+
+
+
     }
 }

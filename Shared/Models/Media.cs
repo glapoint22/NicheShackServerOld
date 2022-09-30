@@ -68,7 +68,6 @@ namespace DataAccess.Models
         public int VideoType { get; set; }
 
 
-        public virtual Customer Customer { get; set; }
 
 
 

@@ -73,7 +73,7 @@ namespace Website.ViewModels
                 ProfileImage = new ImageViewModel
                 {
                     Name = x.Customer.FirstName + " " + x.Customer.LastName,
-                    Src = x.Customer.Media.Thumbnail
+                    Src = x.Customer.Image
                 },
                 Date = x.Date.ToString("MMMM dd, yyyy"),
                 IsVerified = x.Product.ProductOrders.Count(z => z.CustomerId == x.CustomerId && z.ProductId == x.ProductId) > 0,

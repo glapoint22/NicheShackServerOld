@@ -89,7 +89,6 @@ namespace DataAccess.Models
         public virtual DbSet<Notification> Notifications { get; set; }
 
 
-        public virtual DbSet<NotificationEmployeeMessage> NotificationEmployeeMessages { get; set; }
 
         public virtual DbSet<NotificationEmployeeNote> NotificationEmployeeNotes { get; set; }
 
@@ -177,9 +176,7 @@ namespace DataAccess.Models
 
 
 
-                entity.HasOne(x => x.Media)
-                .WithOne(x => x.Customer)
-                .OnDelete(DeleteBehavior.Restrict);
+               
 
 
 
@@ -506,6 +503,13 @@ namespace DataAccess.Models
 
 
 
+            // Notification Groups
+            modelBuilder.Entity<NotificationGroup>(entity =>
+            {
+                entity.HasMany(x => x.NotificationEmployeeNotes)
+                .WithOne(x => x.NotificationGroup)
+                .OnDelete(DeleteBehavior.NoAction);
+            });
 
 
 

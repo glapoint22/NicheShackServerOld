@@ -8,6 +8,7 @@ namespace Manager.Classes.Notifications
     public class NewNotificationEmployeeNote
     {
         public int NotificationGroupId { get; set; }
+        public int? NotificationId { get; set; }
         public string Note { get; set; }
     }
 }

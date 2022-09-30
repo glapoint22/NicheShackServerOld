@@ -40,11 +40,18 @@ namespace Manager.Controllers
         public async Task<ActionResult> GetNotificationCount(int currentCount)
         {
             var newCount = await unitOfWork.Notifications.GetCount(x =>
+
             // Count all the notifications that DO NOT belong to an archived group
             x.NotificationGroup.ArchiveDate == null ||
-            // but if it's a message notification that belongs to an archive group and
-            // that message notification has NOT been archived, then count that one too
-            (x.Type == (int)NotificationType.Message && !x.MessageArchived));
+
+
+            // but if it's a UserName, UserImage, or a Message that does belong to an
+            // archive group and that notification has NOT been archived, then count that one too
+            (x.Type == (int)NotificationType.UserName ||
+            x.Type == (int)NotificationType.UserImage ||
+            x.Type == (int)NotificationType.Message) &&
+            !x.IsArchived);
+
 
             if (currentCount != newCount)
             {
@@ -93,12 +100,9 @@ namespace Manager.Controllers
 
         [HttpGet]
         [Route("UserImage")]
-        public async Task<ActionResult> GetUserImageNotification(int notificationGroupId)
+        public async Task<ActionResult> GetUserImageNotification(int notificationGroupId, bool isNew)
         {
-            await unitOfWork.Notifications.GetUserImageNotification(notificationGroupId);
-
-
-            return Ok();
+            return Ok(await unitOfWork.Notifications.GetUserImageNotification(notificationGroupId, isNew));
         }
 
 
@@ -114,6 +118,7 @@ namespace Manager.Controllers
             NotificationEmployeeNote notificationEmployeeNote = new NotificationEmployeeNote
             {
                 NotificationGroupId = newNotificationEmployeeNote.NotificationGroupId,
+                NotificationId = newNotificationEmployeeNote.NotificationId > 0 ? newNotificationEmployeeNote.NotificationId : null,
                 EmployeeId = "835529FC9A",
                 Note = newNotificationEmployeeNote.Note,
                 CreationDate = DateTime.Now
@@ -127,28 +132,6 @@ namespace Manager.Controllers
 
 
 
-        [HttpPost]
-        [Route("PostMessage")]
-        public async Task PostMessage(NewNotificationEmployeeMessage newNotificationEmployeeMessage)
-        {
-            // Post the new message
-            NotificationEmployeeMessage notificationEmployeeMessage = new NotificationEmployeeMessage
-            {
-                EmployeeId = "835529FC9A",
-                Message = newNotificationEmployeeMessage.Message,
-                CreationDate = DateTime.Now,
-            };
-            unitOfWork.NotificationEmployeeMessages.Add(notificationEmployeeMessage);
-            await unitOfWork.Save();
-
-            // Store the id of the new message in the Notifications table so that the associated notification has reference to it 
-            Notification notification = await unitOfWork.Notifications.Get(x => x.Id == newNotificationEmployeeMessage.NotificationId);
-            notification.EmployeeMessageId = notificationEmployeeMessage.Id;
-            unitOfWork.Notifications.Update(notification);
-            await unitOfWork.Save();
-        }
-
-
 
 
 
@@ -159,7 +142,6 @@ namespace Manager.Controllers
         public async Task ArchiveNotification(ArchiveNotification archiveNotification)
         {
             var messageCount = 0;
-            DateTime archiveDate = DateTime.Now;
             NotificationGroup notificationGroup = await unitOfWork.NotificationGroups.Get(archiveNotification.NotificationGroupId);
 
 
@@ -172,7 +154,7 @@ namespace Manager.Controllers
             if (!archiveNotification.Restore)
             {
                 // Stamp its notification group with an archive date
-                notificationGroup.ArchiveDate = archiveDate;
+                notificationGroup.ArchiveDate = DateTime.Now;
             }
 
             // But if a notification needs to be restored
@@ -182,7 +164,7 @@ namespace Manager.Controllers
                 if (archiveNotification.NotificationId > 0)
                 {
                     // Check to see if there are other messages from the same sender that are still in archive
-                    messageCount = await unitOfWork.Notifications.GetCount(x => x.NotificationGroupId == archiveNotification.NotificationGroupId && x.MessageArchived);
+                    messageCount = await unitOfWork.Notifications.GetCount(x => x.NotificationGroupId == archiveNotification.NotificationGroupId && x.IsArchived);
                 }
 
                 // Remove the archive date from its notification group as long as we're not restoring a single message
@@ -206,7 +188,7 @@ namespace Manager.Controllers
             {
                 // Mark the message accordingly
                 Notification notification = await unitOfWork.Notifications.Get(archiveNotification.NotificationId);
-                notification.MessageArchived = !archiveNotification.Restore;
+                notification.IsArchived = !archiveNotification.Restore;
                 unitOfWork.Notifications.Update(notification);
             }
 
@@ -228,7 +210,7 @@ namespace Manager.Controllers
                 // Mark each message accordingly
                 foreach (var messageNotification in messageNotifications)
                 {
-                    messageNotification.MessageArchived = archiveNotification.ArchiveAllMessagesInGroup;
+                    messageNotification.IsArchived = archiveNotification.ArchiveAllMessagesInGroup;
                 }
                 unitOfWork.Notifications.UpdateRange(messageNotifications);
             }
@@ -330,7 +312,7 @@ namespace Manager.Controllers
         {
             Customer user = await unitOfWork.Customers.Get(noncompliantUser.UserId);
             user.NoncompliantStrikes++;
-            if (noncompliantUser.RemoveProfilePic) user.ImageId = null;
+            if (noncompliantUser.RemoveProfilePic) user.Image = null;
             unitOfWork.Customers.Update(user);
             await unitOfWork.Save();
         }
@@ -338,32 +320,40 @@ namespace Manager.Controllers
 
 
         [HttpDelete]
-        public async Task DeleteNotification(int notificationGroupId, int notificationId, [FromQuery] int[] employeeMessageIds)
+        public async Task DeleteNotification(int notificationGroupId, [FromQuery] List<int?> notificationIds)
         {
-            // If the notification group id has a value greater than zero, then that means everything in that notification group will be deleted.
-            if (notificationGroupId > 0)
+            var notificationCount = await unitOfWork.Notifications.GetCount(x => x.NotificationGroupId == notificationGroupId);
+            var employeeNotes = await unitOfWork.NotificationEmployeeNotes.GetCollection(x => notificationIds.Count > 0 ? notificationIds.Contains(x.NotificationId) : x.NotificationGroupId == notificationGroupId);
+
+
+            // If we're deleting a UserName, UserImage, or a Message
+            if (notificationIds.Count > 0)
             {
+                // And (NOT) every notification in the group is getting deleted
+                // (i.e. Some notifications in the group still remain in the NEW list or only one Message in the group is getting deleted)
+                if (notificationCount > notificationIds.Count)
+                {
+                    // Then only delete the notifications that contains the ids that are in the 'notificationIds' list
+                    var notifications = await unitOfWork.Notifications.GetCollection(x => notificationIds.Contains(x.Id));
+                    unitOfWork.Notifications.RemoveRange(notifications);
+                }
+            }
+
+            // But if we're (NOT) deleting a UserName, UserImage, and a Message
+            if (notificationIds.Count == 0
+               // Or we (ARE) deleting a UserName, UserImage, or a Message, but we're deleting every notification in its group
+               || (notificationIds.Count > 0 && notificationCount == notificationIds.Count))
+            {
+                // Then just remove the entire group
                 var notificationGroup = await unitOfWork.NotificationGroups.Get(notificationGroupId);
                 unitOfWork.NotificationGroups.Remove(notificationGroup);
-
-            }
-            // However, if the notification group id has a value that equals zero, then that means only one notification in the notification group is being deleted
-            // (this only pertains to message notifications)
-            else
-            {
-                Notification notification = await unitOfWork.Notifications.Get(notificationId);
-                unitOfWork.Notifications.Remove(notification);
             }
 
+            // Remove the employee notes (if any)
+            unitOfWork.NotificationEmployeeNotes.RemoveRange(employeeNotes);
+
+            // Save
             await unitOfWork.Save();
-
-
-
-            if (employeeMessageIds.Length > 0)
-            {
-                unitOfWork.NotificationEmployeeMessages.RemoveRange(await unitOfWork.NotificationEmployeeMessages.GetCollection(x => employeeMessageIds.Contains(x.Id)));
-                await unitOfWork.Save();
-            }
         }
     }
 }

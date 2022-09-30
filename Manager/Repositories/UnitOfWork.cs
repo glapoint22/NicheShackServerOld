@@ -35,7 +35,6 @@ namespace Manager.Repositories
         public IRepository<PageKeyword> PageKeywords { get; }
         public IRepository<Subproduct> Subproducts { get; }
         public IRepository<NotificationEmployeeNote> NotificationEmployeeNotes { get; }
-        public IRepository<NotificationEmployeeMessage> NotificationEmployeeMessages { get; }
         public IRepository<NotificationGroup> NotificationGroups { get; }
         public IRepository<Customer> Customers { get; }
         public IRepository<BlockedNonAccountEmail> BlockedNonAccountEmails { get; }
@@ -78,7 +77,6 @@ namespace Manager.Repositories
             PageKeywords = new Repository<PageKeyword>(context);
             Subproducts = new Repository<Subproduct>(context);
             NotificationEmployeeNotes = new Repository<NotificationEmployeeNote>(context);
-            NotificationEmployeeMessages = new Repository<NotificationEmployeeMessage>(context);
             NotificationGroups = new Repository<NotificationGroup>(context);
             Customers = new Repository<Customer>(context);
             BlockedNonAccountEmails = new Repository<BlockedNonAccountEmail>(context);

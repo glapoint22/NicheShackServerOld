@@ -97,6 +97,16 @@
     <Compile Remove="Migrations\20220924202027_ChangedImageFieldInCustomersTableToImageId.Designer.cs" />
     <Compile Remove="Migrations\20220924202206_ChangedImageFieldInCustomersTableToImageId.cs" />
     <Compile Remove="Migrations\20220924202206_ChangedImageFieldInCustomersTableToImageId.Designer.cs" />
+    <Compile Remove="Migrations\20220927155905_RenamedImageIdFieldInCustomersTableBackToImage.cs" />
+    <Compile Remove="Migrations\20220927155905_RenamedImageIdFieldInCustomersTableBackToImage.Designer.cs" />
+    <Compile Remove="Migrations\20220927163438_UpdatedUserImageIdFieldToUserImageFieldInNotificationsTable.cs" />
+    <Compile Remove="Migrations\20220927163438_UpdatedUserImageIdFieldToUserImageFieldInNotificationsTable.Designer.cs" />
+    <Compile Remove="Migrations\20220927170759_RenamedFieldsInNotificationsTable.cs" />
+    <Compile Remove="Migrations\20220927170759_RenamedFieldsInNotificationsTable.Designer.cs" />
+    <Compile Remove="Migrations\20220928220333_trumpy.cs" />
+    <Compile Remove="Migrations\20220928220333_trumpy.Designer.cs" />
+    <Compile Remove="Migrations\20220930161102_RemovedNotificationEmployeeMessages.cs" />
+    <Compile Remove="Migrations\20220930161102_RemovedNotificationEmployeeMessages.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

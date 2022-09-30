@@ -7,7 +7,5 @@ namespace Manager.Classes.Notifications
         public string UserId { get; set; }
         public int NoncompliantStrikes { get; set; }
         public bool BlockNotificationSending { get; set; }
-
-        public string UserImages { get; set; }
     }
 }

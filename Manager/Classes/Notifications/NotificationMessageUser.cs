@@ -1,6 +1,5 @@
-﻿using DataAccess.Models;
-using Manager.Classes.Notifications;
-using System;
+﻿using Manager.Classes.Notifications;
+using System.Collections.Generic;
 
 namespace Manager.Classes
 {
@@ -8,11 +7,8 @@ namespace Manager.Classes
     {
         public int NotificationId { get; set; }
         public string UserName { get; set; }
-        public int? EmployeeMessageId { get; set; }
-        public string EmployeeFirstName { get; set; }
-        public string EmployeeLastName { get; set; }
-        public string EmployeeImage { get; set; }
-        public DateTime? EmployeeMessageDate { get; set; }
-        public string EmployeeMessage { get; set; }
+
+
+        public NotificationEmployee EmployeeMessage { get; set; }
     }
 }
