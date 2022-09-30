@@ -15,7 +15,8 @@ namespace Services.Classes
         Rating,
         KeywordGroup,
         Date,
-        Auto
+        Auto,
+        Search
     }
 
 

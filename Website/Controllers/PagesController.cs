@@ -130,7 +130,7 @@ namespace Website.Controllers
 
         [Route("GridData")]
         [HttpPost]
-        public async Task<ActionResult> GridData(QueryParams queryParams)
+        public async Task<ActionResult> GetGridData(QueryParams queryParams)
         {
             GridWidget gridWidget = new GridWidget();
             await gridWidget.SetData(context, queryParams);

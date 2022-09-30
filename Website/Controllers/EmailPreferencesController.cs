@@ -22,7 +22,7 @@ namespace Website.Controllers
         // ..................................................................................Get Preferences.....................................................................
         [HttpGet]
         [Authorize(Policy = "Account Policy")]
-        public async Task<ActionResult> GetPreferences()
+        public async Task<ActionResult> GetEmailPreferences()
         {
             string customerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
@@ -54,7 +54,7 @@ namespace Website.Controllers
         // ..................................................................................Set Preferences.....................................................................
         [HttpPut]
         [Authorize(Policy = "Account Policy")]
-        public async Task<ActionResult> SetPreferences(EmailPreferences emailPreferences)
+        public async Task<ActionResult> SetEmailPreferences(EmailPreferences emailPreferences)
         {
 
             Customer customer = await unitOfWork.Customers.Get(User.FindFirst(ClaimTypes.NameIdentifier).Value);
