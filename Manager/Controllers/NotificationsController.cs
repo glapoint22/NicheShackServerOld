@@ -41,12 +41,12 @@ namespace Manager.Controllers
         {
             var newCount = await unitOfWork.Notifications.GetCount(x =>
 
-            // Count all the notifications that DO NOT belong to an archived group
+            // Count all the notifications that (DO NOT) belong to an archived group
             x.NotificationGroup.ArchiveDate == null ||
 
 
-            // but if it's a UserName, UserImage, or a Message that does belong to an
-            // archive group and that notification has NOT been archived, then count that one too
+            // but if it's a UserName, UserImage, or a Message that (DOES) belong to an
+            // archive group and that notification has (NOT) been archived, then count that one too
             (x.Type == (int)NotificationType.UserName ||
             x.Type == (int)NotificationType.UserImage ||
             x.Type == (int)NotificationType.Message) &&
@@ -319,6 +319,11 @@ namespace Manager.Controllers
 
 
 
+
+
+
+
+
         [HttpDelete]
         public async Task DeleteNotification(int notificationGroupId, [FromQuery] List<int?> notificationIds)
         {
@@ -333,7 +338,7 @@ namespace Manager.Controllers
                 // (i.e. Some notifications in the group still remain in the NEW list or only one Message in the group is getting deleted)
                 if (notificationCount > notificationIds.Count)
                 {
-                    // Then only delete the notifications that contains the ids that are in the 'notificationIds' list
+                    // Then delete only the notifications that contains the ids that are in the 'notificationIds' list
                     var notifications = await unitOfWork.Notifications.GetCollection(x => notificationIds.Contains(x.Id));
                     unitOfWork.Notifications.RemoveRange(notifications);
                 }

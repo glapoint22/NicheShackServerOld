@@ -31,12 +31,12 @@ namespace Manager.Repositories
 
             // ---- NEW LIST ---- \\
 
-            // Count all the notifications that DO (NOT) belong to an archived group
+            // Count all the notifications that (DO NOT) belong to an archived group
             x.NotificationGroup.ArchiveDate == null ||
 
 
-            // but if it's a UserName, UserImage, or a Message that does belong to an
-            // archive group and that notification has NOT been archived, then count that one too
+            // but if it's a UserName, UserImage, or a Message that (DOES) belong to an
+            // archive group and that notification has (NOT) been archived, then count that one too
             (x.Type == (int)NotificationType.UserName ||
             x.Type == (int)NotificationType.UserImage ||
             x.Type == (int)NotificationType.Message) &&
@@ -45,15 +45,15 @@ namespace Manager.Repositories
 
             // ---- ARCHIVE LIST ---- \\
 
-            // Count all the notifications that DO belong to an archived group
+            // Count all the notifications that (DO) belong to an archived group
             (x.Type != (int)NotificationType.UserName &&
             x.Type != (int)NotificationType.UserImage &&
             x.Type != (int)NotificationType.Message &&
             x.NotificationGroup.ArchiveDate != null)  ||
 
 
-            // but if it's a UserName, UserImage, or a Message that DOES NOT belong to an
-            // archive group and that notification HAS been archived, then count that one too
+            // but if it's a UserName, UserImage, or a Message that (DOES NOT) belong to an
+            // archive group and that notification (HAS) been archived, then count that one too
              x.IsArchived)
 
                 .Select(x => new
@@ -300,30 +300,5 @@ namespace Manager.Repositories
 
             return notification;
         }
-
-
-
-
-
-
-
-
-
-
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
 }
