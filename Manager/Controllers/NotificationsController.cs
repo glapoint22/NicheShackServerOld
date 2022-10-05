@@ -335,14 +335,14 @@ namespace Manager.Controllers
             Customer user = await unitOfWork.Customers.Get(noncompliantUser.UserId);
 
             // If we're removing a name
-            if (noncompliantUser.Name != null)
+            if (noncompliantUser.UserName != null)
             {
                 bool nameRemovalSuccessful = false;
 
                 // As long as the user's current first and last name and the name in the notification are the same
                 // (They could be different because of a rare situation where the user changes their
                 //  name right before the notification gets submitted)
-                if ((user.FirstName + " " + user.LastName) == noncompliantUser.Name)
+                if ((user.FirstName + " " + user.LastName) == noncompliantUser.UserName)
                 {
                     nameRemovalSuccessful = true;
                     user.NoncompliantStrikes++;
@@ -355,14 +355,14 @@ namespace Manager.Controllers
 
 
             }// If we're removing an image
-            else if (noncompliantUser.Image != null)
+            else if (noncompliantUser.UserImage != null)
             {
                 bool imageRemovalSuccessful = false;
 
                 // As long as the user's current image and the image in the notification are the same
                 // (They could be different because of a rare situation where the user changes their
                 //  image right before the notification gets submitted)
-                if (user.Image == noncompliantUser.Image)
+                if (user.Image == noncompliantUser.UserImage)
                 {
                     imageRemovalSuccessful = true;
                     user.NoncompliantStrikes++;
@@ -391,26 +391,31 @@ namespace Manager.Controllers
         [Route("CreateNotification")]
         public async Task<ActionResult> CreateNotification(NewNotification newNotification)
         {
+            // First, check to see if a notification group for the type of notification that we're going to create already exists
             NotificationGroup notificationGroup = await unitOfWork.Notifications.Get(x => x.UserId == newNotification.UserId && x.Type == newNotification.NotificationType, x => x.NotificationGroup);
 
-
-            if(notificationGroup == null)
+            // If a notification group already exitsts
+            if (notificationGroup != null)
             {
+                // Update the archive date with a new date
+                notificationGroup.ArchiveDate = DateTime.Now;
+                unitOfWork.NotificationGroups.Update(notificationGroup);
+            }
+
+            // But if a notification group does NOT exists
+            else
+            {
+                // Create a new notification group
                 notificationGroup = new NotificationGroup
                 {
                     ArchiveDate = DateTime.Now
                 };
-
                 unitOfWork.NotificationGroups.Add(notificationGroup);
-                //await unitOfWork.Save();
             }
-            else
-            {
-                notificationGroup.ArchiveDate = DateTime.Now;
-                unitOfWork.NotificationGroups.Update(notificationGroup);
-                //await unitOfWork.Save();
-            }
+            await unitOfWork.Save();
 
+
+            // Now create the new notification
             var notification = new Notification()
             {
                 NotificationGroupId = notificationGroup.Id,
@@ -421,14 +426,14 @@ namespace Manager.Controllers
                 IsArchived = true,
                 CreationDate = DateTime.Now
             };
-
             unitOfWork.Notifications.Add(notification);
-            //await unitOfWork.Save();
+            await unitOfWork.Save();
 
 
-
+            // If notes were written
             if (newNotification.EmployeeNotes != null)
             {
+                // Save the notes
                 NotificationEmployeeNote notificationEmployeeNote = new NotificationEmployeeNote
                 {
                     NotificationGroupId = notification.NotificationGroupId,
@@ -438,10 +443,10 @@ namespace Manager.Controllers
                     CreationDate = DateTime.Now
                 };
                 unitOfWork.NotificationEmployeeNotes.Add(notificationEmployeeNote);
-                //await unitOfWork.Save();
+                await unitOfWork.Save();
             }
 
-
+            // Return the notification item
             var NotificationItem = new NotificationItem
             {
                 Id = notification.Id,
