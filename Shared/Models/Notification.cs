@@ -16,8 +16,11 @@ namespace DataAccess.Models
         public int NotificationGroupId { get; set; }
 
 
-        public int Type { get; set; }
 
+
+
+        [ForeignKey("Customer")]
+        public string UserId { get; set; }
 
 
 
@@ -27,8 +30,26 @@ namespace DataAccess.Models
 
 
 
-        [ForeignKey("Customer")]
-        public string UserId { get; set; }
+
+        [ForeignKey("ProductReview")]
+        public int? ReviewId { get; set; }
+
+
+
+
+
+        public int Type { get; set; }
+
+
+
+
+
+
+        [MaxLength(200)]
+        public string UserName { get; set; }
+
+
+
 
 
 
@@ -52,15 +73,6 @@ namespace DataAccess.Models
         public string NonAccountUserEmail { get; set; }
 
 
-
-
-        
-
-
-
-
-        [ForeignKey("ProductReview")]
-        public int? ReviewId { get; set; }
 
 
         public bool IsArchived { get; set; }

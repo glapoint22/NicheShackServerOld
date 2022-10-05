@@ -24,17 +24,6 @@ namespace Manager.Controllers
 
 
 
-
-        [HttpGet]
-        public async Task<ActionResult> GetNotifications(bool isNew)
-        {
-            return Ok(await unitOfWork.Notifications.GetNotifications(isNew));
-        }
-
-
-
-
-
         [HttpGet]
         [Route("Count")]
         public async Task<ActionResult> GetNotificationCount(int currentCount)
@@ -62,6 +51,38 @@ namespace Manager.Controllers
             {
                 return Ok();
             }
+        }
+
+
+
+
+
+        [HttpGet]
+        public async Task<ActionResult> GetNotifications(bool isNew)
+        {
+            return Ok(await unitOfWork.Notifications.GetNotifications(isNew));
+        }
+
+
+
+
+
+        [HttpGet]
+        [Route("UserName")]
+        public async Task<ActionResult> GetUserNameNotification(int notificationGroupId, bool isNew)
+        {
+            return Ok(await unitOfWork.Notifications.GetUserNameNotification(notificationGroupId, isNew));
+        }
+
+
+
+
+
+        [HttpGet]
+        [Route("UserImage")]
+        public async Task<ActionResult> GetUserImageNotification(int notificationGroupId, bool isNew)
+        {
+            return Ok(await unitOfWork.Notifications.GetUserImageNotification(notificationGroupId, isNew));
         }
 
 
@@ -98,12 +119,7 @@ namespace Manager.Controllers
 
 
 
-        [HttpGet]
-        [Route("UserImage")]
-        public async Task<ActionResult> GetUserImageNotification(int notificationGroupId, bool isNew)
-        {
-            return Ok(await unitOfWork.Notifications.GetUserImageNotification(notificationGroupId, isNew));
-        }
+
 
 
 
@@ -141,87 +157,90 @@ namespace Manager.Controllers
         [Route("Archive")]
         public async Task ArchiveNotification(ArchiveNotification archiveNotification)
         {
-            var messageCount = 0;
+            var notificationCount = 0;
             NotificationGroup notificationGroup = await unitOfWork.NotificationGroups.Get(archiveNotification.NotificationGroupId);
-
-
-
 
 
             // ------------ Notification Group ------------ \\
 
-            // If a notification needs to be archived
-            if (!archiveNotification.Restore)
+            // If the notification group exists
+            // (It's possible that it could be deleted)
+            if (notificationGroup != null)
             {
-                // Stamp its notification group with an archive date
-                notificationGroup.ArchiveDate = DateTime.Now;
-            }
-
-            // But if a notification needs to be restored
-            else
-            {
-                // If just a single message is getting restored (NOT a message notification)
-                if (archiveNotification.NotificationId > 0)
+                // If a UserName, UserImage, or Message needs to be archived
+                if (!archiveNotification.Restore)
                 {
-                    // Check to see if there are other messages from the same sender that are still in archive
-                    messageCount = await unitOfWork.Notifications.GetCount(x => x.NotificationGroupId == archiveNotification.NotificationGroupId && x.IsArchived);
+                    // Stamp its notification group with an archive date (or update it with a new date)
+                    notificationGroup.ArchiveDate = DateTime.Now;
                 }
 
-                // Remove the archive date from its notification group as long as we're not restoring a single message
-                // from a message notification and that message notification doesn't still have other messages in archive
-                if (messageCount <= 1)
+                // But if a notification needs to be restored
+                else
                 {
-                    notificationGroup.ArchiveDate = null;
+                    // If just a single message is getting restored (NOT a message notification)
+                    if (archiveNotification.NotificationId > 0)
+                    {
+                        // Check to see if there are other messages from the same sender that are still in archive
+                        notificationCount = await unitOfWork.Notifications.GetCount(x => x.NotificationGroupId == archiveNotification.NotificationGroupId && x.IsArchived);
+                    }
+
+                    // Remove the archive date from its notification group as long as we're not restoring a single message
+                    // from a message notification and that the message notification doesn't still have other messages in archive
+                    if (notificationCount <= 1)
+                    {
+                        notificationGroup.ArchiveDate = null;
+                    }
                 }
+
+                // Update the notification group
+                unitOfWork.NotificationGroups.Update(notificationGroup);
             }
 
 
 
+            // ------------ Archive/Restore One ------------ \\
 
-
-            // ------------ One Message ------------ \\
-
-            // If just one message is getting archived
+            // If just one UserName, UserImage, or Message is getting archived
             if (archiveNotification.NotificationId > 0 && !archiveNotification.Restore ||
                 // OR if just one message is getting restored
                 archiveNotification.NotificationId > 0 && archiveNotification.Restore)
             {
-                // Mark the message accordingly
+                // Find the UserName, UserImage, or Message notification
                 Notification notification = await unitOfWork.Notifications.Get(archiveNotification.NotificationId);
-                notification.IsArchived = !archiveNotification.Restore;
-                unitOfWork.Notifications.Update(notification);
+
+                // If that UserName, UserImage, or Message notification was found
+                // (It's possible that it could be deleted)
+                if (notification != null)
+                {
+                    // Set its archived state accordingly
+                    notification.IsArchived = !archiveNotification.Restore;
+                    unitOfWork.Notifications.Update(notification);
+                }
             }
 
 
 
+            // ------------ Archive/Restore All ------------ \\
 
-
-
-            // ------------ All Messages In Group ------------ \\
-
-            // If all messages in a group are getting archived
+            // If every UserName, UserImage, or Message in the group are getting archived
             if (archiveNotification.ArchiveAllMessagesInGroup ||
-                // OR if all messages in a group are getting restored
+                // OR if all messages in the group are getting restored
                 archiveNotification.RestoreAllMessagesInGroup)
             {
-                // Get all messages in the group
-                IEnumerable<Notification> messageNotifications = await unitOfWork.Notifications.GetCollection(x => x.NotificationGroupId == archiveNotification.NotificationGroupId);
+                // Get all notifications in the group
+                IEnumerable<Notification> notifications = await unitOfWork.Notifications.GetCollection(x => x.NotificationGroupId == archiveNotification.NotificationGroupId);
 
-                // Mark each message accordingly
-                foreach (var messageNotification in messageNotifications)
+                // Set each notification accordingly
+                foreach (var messageNotification in notifications)
                 {
                     messageNotification.IsArchived = archiveNotification.ArchiveAllMessagesInGroup;
                 }
-                unitOfWork.Notifications.UpdateRange(messageNotifications);
+                unitOfWork.Notifications.UpdateRange(notifications);
             }
 
-
-
-
-            // Update the notification group
-            unitOfWork.NotificationGroups.Update(notificationGroup);
             await unitOfWork.Save();
         }
+
 
 
 
@@ -258,8 +277,8 @@ namespace Manager.Controllers
 
 
         [HttpPut]
-        [Route("NotificationSending")]
-        public async Task NotificationSending(NoncompliantUser noncompliantUser)
+        [Route("BlockNotificationSending")]
+        public async Task BlockNotificationSending(NoncompliantUser noncompliantUser)
         {
             Customer user = await unitOfWork.Customers.Get(noncompliantUser.UserId);
             user.BlockNotificationSending = !user.BlockNotificationSending;
@@ -270,7 +289,7 @@ namespace Manager.Controllers
 
 
         [HttpPost]
-        [Route("BlockEmail")]
+        [Route("BlockNonAccountEmail")]
         public async Task BlockEmail(NoncompliantUser noncompliantUser)
         {
             var email = await unitOfWork.BlockedNonAccountEmails.Get(x => x.Email == noncompliantUser.Email);
@@ -291,7 +310,7 @@ namespace Manager.Controllers
 
 
         [HttpDelete]
-        [Route("UnblockEmail")]
+        [Route("UnblockNonAccountEmail")]
         public async Task UnblockEmail(string blockedEmail)
         {
             var email = await unitOfWork.BlockedNonAccountEmails.Get(x => x.Email == blockedEmail);
@@ -306,19 +325,136 @@ namespace Manager.Controllers
 
 
 
+
+
+
         [HttpPut]
         [Route("AddNoncompliantStrike")]
-        public async Task AddNoncompliantStrike(NoncompliantUser noncompliantUser)
+        public async Task<ActionResult> AddNoncompliantStrike(NoncompliantUser noncompliantUser)
         {
             Customer user = await unitOfWork.Customers.Get(noncompliantUser.UserId);
-            user.NoncompliantStrikes++;
-            if (noncompliantUser.RemoveProfilePic) user.Image = null;
-            unitOfWork.Customers.Update(user);
-            await unitOfWork.Save();
+
+            // If we're removing a name
+            if (noncompliantUser.Name != null)
+            {
+                bool nameRemovalSuccessful = false;
+
+                // As long as the user's current first and last name and the name in the notification are the same
+                // (They could be different because of a rare situation where the user changes their
+                //  name right before the notification gets submitted)
+                if ((user.FirstName + " " + user.LastName) == noncompliantUser.Name)
+                {
+                    nameRemovalSuccessful = true;
+                    user.NoncompliantStrikes++;
+                    user.FirstName = "NicheShack";
+                    user.LastName = "User";
+                    unitOfWork.Customers.Update(user);
+                    await unitOfWork.Save();
+                }
+                return Ok(nameRemovalSuccessful);
+
+
+            }// If we're removing an image
+            else if (noncompliantUser.Image != null)
+            {
+                bool imageRemovalSuccessful = false;
+
+                // As long as the user's current image and the image in the notification are the same
+                // (They could be different because of a rare situation where the user changes their
+                //  image right before the notification gets submitted)
+                if (user.Image == noncompliantUser.Image)
+                {
+                    imageRemovalSuccessful = true;
+                    user.NoncompliantStrikes++;
+                    user.Image = null;
+                    unitOfWork.Customers.Update(user);
+                    //await unitOfWork.Save();
+                }
+                return Ok(imageRemovalSuccessful);
+
+
+            }// If we're removing a review
+            else
+            {
+                user.NoncompliantStrikes++;
+                unitOfWork.Customers.Update(user);
+                await unitOfWork.Save();
+                return Ok();
+            }
         }
 
 
 
+
+
+        [HttpPost]
+        [Route("CreateNotification")]
+        public async Task<ActionResult> CreateNotification(NewNotification newNotification)
+        {
+            NotificationGroup notificationGroup = await unitOfWork.Notifications.Get(x => x.UserId == newNotification.UserId && x.Type == newNotification.NotificationType, x => x.NotificationGroup);
+
+
+            if(notificationGroup == null)
+            {
+                notificationGroup = new NotificationGroup
+                {
+                    ArchiveDate = DateTime.Now
+                };
+
+                unitOfWork.NotificationGroups.Add(notificationGroup);
+                //await unitOfWork.Save();
+            }
+            else
+            {
+                notificationGroup.ArchiveDate = DateTime.Now;
+                unitOfWork.NotificationGroups.Update(notificationGroup);
+                //await unitOfWork.Save();
+            }
+
+            var notification = new Notification()
+            {
+                NotificationGroupId = notificationGroup.Id,
+                UserId = newNotification.UserId,
+                Type = newNotification.NotificationType,
+                UserName = newNotification.UserName,
+                UserImage = newNotification.UserImage,
+                IsArchived = true,
+                CreationDate = DateTime.Now
+            };
+
+            unitOfWork.Notifications.Add(notification);
+            //await unitOfWork.Save();
+
+
+
+            if (newNotification.EmployeeNotes != null)
+            {
+                NotificationEmployeeNote notificationEmployeeNote = new NotificationEmployeeNote
+                {
+                    NotificationGroupId = notification.NotificationGroupId,
+                    NotificationId = notification.Id,
+                    EmployeeId = "835529FC9A",
+                    Note = newNotification.EmployeeNotes,
+                    CreationDate = DateTime.Now
+                };
+                unitOfWork.NotificationEmployeeNotes.Add(notificationEmployeeNote);
+                //await unitOfWork.Save();
+            }
+
+
+            var NotificationItem = new NotificationItem
+            {
+                Id = notification.Id,
+                NotificationGroupId = notification.NotificationGroupId,
+                NotificationType = notification.Type,
+                UserName = notification.UserName,
+                UserImage = notification.UserImage,
+                IsNew = false,
+                CreationDate = notification.CreationDate,
+                Name = newNotification.NotificationType == (int)NotificationType.UserName ? "User Name" : "User Image"
+            };
+            return Ok(NotificationItem);
+        }
 
 
 
