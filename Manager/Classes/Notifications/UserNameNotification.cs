@@ -1,6 +1,6 @@
 ﻿namespace Manager.Classes.Notifications
 {
-    public class NotificationUserName : NotificationUserAccount
+    public class UserNameNotification : UserAccountNotification
     {
         public string UserName { get; set; }
     }

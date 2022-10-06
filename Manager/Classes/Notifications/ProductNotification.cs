@@ -2,11 +2,11 @@
 
 namespace Manager.Classes.Notifications
 {
-    public class NotificationProduct
+    public class ProductNotification
     {
         public string ProductHoplink { get; set; }
         public bool ProductDisabled { get; set; }
         public IEnumerable<NotificationUser> Users { get; set; }
-        public IEnumerable<NotificationEmployee> Employees { get; set; }
+        public IEnumerable<NotificationEmployee> EmployeeNotes { get; set; }
     }
 }

@@ -121,6 +121,18 @@ namespace Manager.Controllers
 
 
 
+        [HttpGet]
+        [Route("Error")]
+        public async Task<ActionResult> GetErrorNotification(int notificationGroupId)
+        {
+            return Ok(await unitOfWork.Notifications.GetErrorNotification(notificationGroupId));
+        }
+
+
+
+
+
+
 
 
 
@@ -368,7 +380,7 @@ namespace Manager.Controllers
                     user.NoncompliantStrikes++;
                     user.Image = null;
                     unitOfWork.Customers.Update(user);
-                    //await unitOfWork.Save();
+                    await unitOfWork.Save();
                 }
                 return Ok(imageRemovalSuccessful);
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Manager.Classes
 {
-    public class NotificationMessage : NotificationUser
+    public class MessageNotification : NotificationUser
     {
         public int NotificationId { get; set; }
         public string NonAccountUserName { get; set; }

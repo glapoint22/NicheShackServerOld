@@ -58,7 +58,7 @@ namespace DataAccess.Models
 
 
 
-        public string UserComment { get; set; }
+        public string Text { get; set; }
 
 
 

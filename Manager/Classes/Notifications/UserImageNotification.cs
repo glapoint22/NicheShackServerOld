@@ -1,6 +1,6 @@
 ﻿namespace Manager.Classes.Notifications
 {
-    public class NotificationUserImage : NotificationUserAccount
+    public class UserImageNotification : UserAccountNotification
     {
         public string UserImage { get; set; }
     }

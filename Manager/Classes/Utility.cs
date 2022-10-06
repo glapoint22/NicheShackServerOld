@@ -91,6 +91,7 @@ namespace Manager.Classes
             ProductInactive,
             ProductSiteNolongerInService,
             MissingProductOther,
+            Error
         }
 
 

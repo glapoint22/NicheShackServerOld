@@ -2,7 +2,7 @@
 
 namespace Manager.Classes.Notifications
 {
-    public class NotificationUserAccount : NotificationUser
+    public class UserAccountNotification : NotificationUser
     {
         public int NotificationId { get; set; }
         public int EmployeeIndex { get; set; }
