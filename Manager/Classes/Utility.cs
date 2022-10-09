@@ -69,7 +69,7 @@ namespace Manager.Classes
             UserName,
             UserImage,
             Message,
-            ReviewComplaint,
+            Review,
             ProductNameDoesNotMatchWithProductDescription,
             ProductNameDoesNotMatchWithProductImage,
             ProductNameOther,

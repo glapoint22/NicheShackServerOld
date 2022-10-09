@@ -11,6 +11,7 @@ namespace Website.Repositories
         IProductReviewRepository ProductReviews { get; }
         IListRepository Lists { get; }
         IProductOrderRepository ProductOrders { get; }
+        INotificationRepository Notifications { get; }
 
 
         // Generic repositories
@@ -21,7 +22,7 @@ namespace Website.Repositories
         IRepository<Customer> Customers { get; }
         IRepository<ListProduct> ListProducts { get; }
         IRepository<Media> Media { get; }
-        IRepository<Notification> Notifications { get; }
+        //IRepository<Notification> Notifications { get; }
         //IRepository<NotificationDetails> NotificationText { get; }
         IRepository<Page> Pages { get; }
         IRepository<OrderProduct> OrderProducts { get; }
@@ -35,6 +36,7 @@ namespace Website.Repositories
         //IRepository<ProductAdditionalInfo> AdditionalInfo { get; }
         IRepository<Subproduct> Subproducts { get; }
         IRepository<OneTimePassword> OneTimePasswords { get; }
+        IRepository<NotificationGroup> NotificationGroups { get; }
 
 
         Task<int> Save();

@@ -61,8 +61,8 @@ namespace Manager.Repositories
                     Id = x.Id,
                     NotificationGroupId = x.NotificationGroupId,
                     Email = x.Type == (int)NotificationType.Message ?
-                        x.NonAccountUserEmail != null ?
-                        x.NonAccountUserEmail :
+                        x.NonAccountEmail != null ?
+                        x.NonAccountEmail :
                         x.Customer.Email :
                         null,
                     ProductId = x.ProductId,
@@ -171,7 +171,7 @@ namespace Manager.Repositories
                     Date = y.CreationDate
                 }).ToList()
             }).OrderByDescending(x => x.Date).ToListAsync();
-
+            
             return userImages;
         }
 
@@ -186,15 +186,15 @@ namespace Manager.Repositories
             {
                 NotificationId = x.Id,
                 UserId = x.Customer.Id,
-                NonAccountUserName = x.NonAccountUserName,
+                NonAccountName = x.NonAccountName,
                 FirstName = x.Customer.FirstName,
                 LastName = x.Customer.LastName,
                 Image = x.Customer.Image,
-                Email = x.NonAccountUserEmail != null ? x.NonAccountUserEmail : x.Customer.Email,
+                Email = x.NonAccountEmail != null ? x.NonAccountEmail : x.Customer.Email,
                 Text = x.Text,
                 Date = x.CreationDate,
                 NoncompliantStrikes = x.Customer.NoncompliantStrikes,
-                BlockNotificationSending = x.NonAccountUserEmail != null ? context.BlockedNonAccountEmails.Where(y => y.Email == x.NonAccountUserEmail).FirstOrDefault() == null ? false : true : x.Customer.BlockNotificationSending,
+                BlockNotificationSending = x.NonAccountEmail != null ? context.BlockedNonAccountEmails.Where(y => y.Email == x.NonAccountEmail).FirstOrDefault() == null ? false : true : x.Customer.BlockNotificationSending,
                 EmployeeMessage = context.NotificationEmployeeNotes.Where(y => y.NotificationId == x.Id).Select(y => new NotificationEmployee
                 {
                     FirstName = y.Customer.FirstName,

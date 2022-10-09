@@ -10,6 +10,7 @@ namespace Website.Repositories
         public IProductReviewRepository ProductReviews { get; private set; }
         public IListRepository Lists { get; }
         public IProductOrderRepository ProductOrders { get; }
+        public INotificationRepository Notifications { get; }
 
 
         // Generic repositories
@@ -20,7 +21,7 @@ namespace Website.Repositories
         public IRepository<Customer> Customers { get; }
         public IRepository<ListProduct> ListProducts { get; }
         public IRepository<Media> Media { get; }
-        public IRepository<Notification> Notifications { get; }
+        //public IRepository<Notification> Notifications { get; }
         //public IRepository<NotificationDetails> NotificationText { get; }
         public IRepository<Page> Pages { get; }
         public IRepository<OrderProduct> OrderProducts { get; }
@@ -34,6 +35,7 @@ namespace Website.Repositories
         //public IRepository<ProductAdditionalInfo> AdditionalInfo { get; }
         public IRepository<Subproduct> Subproducts { get; }
         public IRepository<OneTimePassword> OneTimePasswords { get; }
+        public IRepository<NotificationGroup> NotificationGroups { get; }
 
 
         // Declare the Nicheshack context
@@ -47,6 +49,7 @@ namespace Website.Repositories
             ProductReviews = new ProductReviewRepository(context);
             Lists = new ListRepository(context);
             ProductOrders = new ProductOrderRepository(context);
+            Notifications = new NotificationRepository(context);
 
             // Generic repositories
             Products = new Repository<Product>(context);
@@ -56,7 +59,7 @@ namespace Website.Repositories
             Customers = new Repository<Customer>(context);
             ListProducts = new Repository<ListProduct>(context);
             Media = new Repository<Media>(context);
-            Notifications = new Repository<Notification>(context);
+            //Notifications = new Repository<Notification>(context);
             //NotificationText = new Repository<NotificationDetails>(context);
             Pages = new Repository<Page>(context);
             OrderProducts = new Repository<OrderProduct>(context);
@@ -70,6 +73,7 @@ namespace Website.Repositories
             //AdditionalInfo = new Repository<ProductAdditionalInfo>(context);
             Subproducts = new Repository<Subproduct>(context);
             OneTimePasswords = new Repository<OneTimePassword>(context);
+            NotificationGroups = new Repository<NotificationGroup>(context);
         }
 
 

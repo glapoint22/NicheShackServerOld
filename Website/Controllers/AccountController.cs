@@ -27,6 +27,7 @@ using static Website.Classes.Enums;
 using System.Drawing.Drawing2D;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using Website.Classes.Notifications;
 
 namespace Website.Controllers
 {
@@ -170,10 +171,20 @@ namespace Website.Controllers
                 string oneTimePassword = await SetOneTimePassword(OtpType.ActivateAccount, customer.Id, async () => await userManager.GenerateEmailConfirmationTokenAsync(customer));
 
                 // Send an email to activate the account
-                await SendAccountActivationEmail(customer, oneTimePassword);
+                //await SendAccountActivationEmail(customer, oneTimePassword);
 
                 // Create the first list
-                await CreateList(customer);
+                //await CreateList(customer);
+
+
+
+                //Create the UserName notification
+                NewNotification newNotification = new NewNotification
+                {
+                    Type = (int)NotificationType.UserName,
+                    UserName = customer.FirstName + " " + customer.LastName
+                };
+                await unitOfWork.Notifications.CreateNotification(newNotification, customer.Id);
 
 
                 // The new customer was successfully added to the database
@@ -604,9 +615,16 @@ namespace Website.Controllers
                     }
 
 
-
                     UpdateCustomerCookie(customer);
 
+
+                    // Create the UserName notification
+                    NewNotification newNotification = new NewNotification
+                    {
+                        Type = (int)NotificationType.UserName,
+                        UserName = customer.FirstName + " " + customer.LastName
+                    };
+                    await unitOfWork.Notifications.CreateNotification(newNotification, customer.Id);
 
 
                     return Ok();
@@ -785,7 +803,7 @@ namespace Website.Controllers
             // Get the customer from the database based on the customer id from the claims via the access token
             Customer customer = await userManager.FindByIdAsync(User.FindFirst(ClaimTypes.NameIdentifier).Value);
 
-            // If the customer is found, update his/her name
+            // If the customer is found
             if (customer != null)
             {
                 //Update the customer's profile picture
@@ -796,18 +814,32 @@ namespace Website.Controllers
 
                 if (result.Succeeded)
                 {
-                    // Send a confirmation email that the customer name has been changed
-                    if (customer.EmailPrefProfilePicChange == true)
-                    {
-                        await emailService.SendEmail(EmailType.ProfilePicChange, "Updated profile picture", new Recipient
-                        {
-                            FirstName = customer.FirstName,
-                            LastName = customer.LastName,
-                            Email = customer.Email
-                        });
-                    }
+                    // Send a confirmation email that the customer image has been changed
+                    //if (customer.EmailPrefProfilePicChange == true)
+                    //{
+                    //    await emailService.SendEmail(EmailType.ProfilePicChange, "Updated profile picture", new Recipient
+                    //    {
+                    //        FirstName = customer.FirstName,
+                    //        LastName = customer.LastName,
+                    //        Email = customer.Email
+                    //    });
+                    //}
 
                     UpdateCustomerCookie(customer);
+
+
+
+
+                    // Create the UserName notification
+                    NewNotification newNotification = new NewNotification
+                    {
+                        Type = (int)NotificationType.UserImage,
+                        UserImage = customer.Image
+                    };
+                    await unitOfWork.Notifications.CreateNotification(newNotification, customer.Id);
+
+
+
 
                     return Ok();
                 }

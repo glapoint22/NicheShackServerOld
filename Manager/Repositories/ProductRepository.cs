@@ -334,7 +334,7 @@ namespace Manager.Repositories
 
 
 
-            var allNotifications = await context.Notifications.Where(x => x.ProductId == productId && x.Type > (int)NotificationType.ReviewComplaint && x.Type < (int)NotificationType.ProductReportedAsIllegal).Select(x => new
+            var allNotifications = await context.Notifications.Where(x => x.ProductId == productId && x.Type > (int)NotificationType.Review && x.Type < (int)NotificationType.ProductReportedAsIllegal).Select(x => new
             {
                 Id = x.Id,
                 NotificationGroupId = x.NotificationGroupId,

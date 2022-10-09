@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using DataAccess.Models;
 using Manager.Classes.Notifications;
@@ -400,22 +399,14 @@ namespace Manager.Controllers
 
 
         [HttpPost]
-        [Route("CreateNotification")]
-        public async Task<ActionResult> CreateNotification(NewNotification newNotification)
+        [Route("Post")]
+        public async Task<ActionResult> PostNotification(NewNotification newNotification)
         {
             // First, check to see if a notification group for the type of notification that we're going to create already exists
-            NotificationGroup notificationGroup = await unitOfWork.Notifications.Get(x => x.UserId == newNotification.UserId && x.Type == newNotification.NotificationType, x => x.NotificationGroup);
+            NotificationGroup notificationGroup = await unitOfWork.Notifications.Get(x => x.UserId == newNotification.UserId && x.Type == newNotification.Type, x => x.NotificationGroup);
 
-            // If a notification group already exitsts
-            if (notificationGroup != null)
-            {
-                // Update the archive date with a new date
-                notificationGroup.ArchiveDate = DateTime.Now;
-                unitOfWork.NotificationGroups.Update(notificationGroup);
-            }
-
-            // But if a notification group does NOT exists
-            else
+            // If a notification group does (NOT) exists
+            if (notificationGroup == null)
             {
                 // Create a new notification group
                 notificationGroup = new NotificationGroup
@@ -423,8 +414,17 @@ namespace Manager.Controllers
                     ArchiveDate = DateTime.Now
                 };
                 unitOfWork.NotificationGroups.Add(notificationGroup);
+                await unitOfWork.Save();
             }
-            await unitOfWork.Save();
+
+            // But if a notification group already exitsts
+            else
+            {
+                // Update the archive date with a new date
+                notificationGroup.ArchiveDate = DateTime.Now;
+                unitOfWork.NotificationGroups.Update(notificationGroup);
+            }
+            
 
 
             // Now create the new notification
@@ -432,7 +432,7 @@ namespace Manager.Controllers
             {
                 NotificationGroupId = notificationGroup.Id,
                 UserId = newNotification.UserId,
-                Type = newNotification.NotificationType,
+                Type = newNotification.Type,
                 UserName = newNotification.UserName,
                 UserImage = newNotification.UserImage,
                 IsArchived = true,
@@ -468,7 +468,7 @@ namespace Manager.Controllers
                 UserImage = notification.UserImage,
                 IsNew = false,
                 CreationDate = notification.CreationDate,
-                Name = newNotification.NotificationType == (int)NotificationType.UserName ? "User Name" : "User Image"
+                Name = newNotification.Type == (int)NotificationType.UserName ? "User Name" : "User Image"
             };
             return Ok(NotificationItem);
         }

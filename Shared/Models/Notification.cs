@@ -64,13 +64,13 @@ namespace DataAccess.Models
 
 
         [MaxLength(256)]
-        public string NonAccountUserName { get; set; }
+        public string NonAccountName { get; set; }
 
 
 
 
         [MaxLength(256)]
-        public string NonAccountUserEmail { get; set; }
+        public string NonAccountEmail { get; set; }
 
 
 
