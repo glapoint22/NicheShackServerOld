@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using DataAccess.Models;
 using Manager.Classes.Notifications;
@@ -309,7 +310,8 @@ namespace Manager.Controllers
             {
                 var newBlockedEmail = new BlockedNonAccountEmail
                 {
-                    Email = noncompliantUser.Email
+                    Email = noncompliantUser.Email,
+                    Name = noncompliantUser.UserName
                 };
 
                 unitOfWork.BlockedNonAccountEmails.Add(newBlockedEmail);
@@ -336,6 +338,27 @@ namespace Manager.Controllers
 
 
 
+        [HttpGet]
+        [Route("BlockedUsers")]
+        public async Task<ActionResult> GetBlockedUsers()
+        {
+            var blockedUsers = await unitOfWork.Customers.GetCollection(x => x.BlockNotificationSending,x => new
+            {
+                UserId = x.Id,
+                Email = "",
+                Name = x.FirstName + " " + x.LastName
+            });
+
+
+            var blockedNonAccountEmails = await unitOfWork.BlockedNonAccountEmails.GetCollection(x => new
+            {
+                UserId = "",
+                x.Email,
+                x.Name
+            });
+
+            return Ok(blockedUsers.Concat(blockedNonAccountEmails).OrderBy(x => x.Name));
+        }
 
 
 
@@ -397,6 +420,22 @@ namespace Manager.Controllers
 
 
 
+        [HttpGet]
+        [Route("NoncompliantUsers")]
+        public async Task<ActionResult> GetNoncompliantUsers()
+        {
+            var noncompliantUsers = await unitOfWork.Customers.GetCollection(x => x.NoncompliantStrikes > 0, x => new
+            {
+                Name = x.FirstName + " " + x.LastName,
+                Strikes = x.NoncompliantStrikes.ToString(),
+            });
+
+            return Ok(noncompliantUsers);
+        }
+
+
+
+
 
         [HttpPost]
         [Route("Post")]
@@ -424,7 +463,7 @@ namespace Manager.Controllers
                 notificationGroup.ArchiveDate = DateTime.Now;
                 unitOfWork.NotificationGroups.Update(notificationGroup);
             }
-            
+
 
 
             // Now create the new notification
