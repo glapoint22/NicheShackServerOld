@@ -50,35 +50,35 @@ namespace Manager.Controllers
                 Product product = new Product();
 
                 // Vendor
-                //product.VendorId = await unitOfWork.Products.GetVendorId(tempProduct.VendorId);
+                product.VendorId = await unitOfWork.Products.GetVendorId(tempProduct.VendorId);
 
                 // Categories & Niches
-                //product.NicheId = await unitOfWork.Products.GetNicheId(tempProduct.NicheId);
+                product.NicheId = await unitOfWork.Products.GetNicheId(tempProduct.NicheId);
 
 
 
                 // Name
-                //product.Name = tempProduct.Name.Trim();
-                //product.UrlName = GetUrlName(product.Name);
+                product.Name = tempProduct.Name.Trim();
+                product.UrlName = GetUrlName(product.Name);
 
 
                 // UrlId
-                //product.UrlId = GetUrlId();
+                product.UrlId = GetUrlId();
 
 
                 // Hoplink
-                //product.Hoplink = tempProduct.Hoplink;
+                product.Hoplink = tempProduct.Hoplink;
 
 
                 // Media
-                //product.ImageId = await SetProductMedia(tempProduct.Id);
+                product.ImageId = await SetProductMedia(tempProduct.Id);
 
 
                 // Prices
-                //await SetProductPrices(tempProduct.Id);
+                await SetProductPrices(tempProduct.Id);
 
                 // Description
-                //product.Description = GetDescription(tempProduct.Description);
+                product.Description = GetDescription(tempProduct.Description);
             }
 
 
