@@ -1128,7 +1128,7 @@ namespace Manager.Controllers
             }
 
 
-            if (thumbnailUrl != string.Empty)
+            if (thumbnailUrl != string.Empty && thumbnailUrl != null)
             {
                 // Download the thumbnail to the images folder
                 using (WebClient client = new WebClient())

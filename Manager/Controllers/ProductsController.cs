@@ -45,6 +45,7 @@ namespace Manager.Controllers
                 PropertyNameCaseInsensitive = true
             });
 
+
             foreach (TempProduct tempProduct in tempProducts.Products)
             {
                 Product product = new Product();
@@ -62,6 +63,8 @@ namespace Manager.Controllers
                 product.UrlName = GetUrlName(product.Name);
 
 
+
+
                 // UrlId
                 product.UrlId = GetUrlId();
 
@@ -70,15 +73,22 @@ namespace Manager.Controllers
                 product.Hoplink = tempProduct.Hoplink;
 
 
+                // Description
+                product.Description = GetDescription(tempProduct.Description);
+
+
+                unitOfWork.Products.Add(product);
+
+
+                await unitOfWork.Save();
+
+
                 // Media
-                product.ImageId = await SetProductMedia(tempProduct.Id);
+                await SetProductMedia(tempProduct.Id, product);
 
 
                 // Prices
-                await SetProductPrices(tempProduct.Id);
-
-                // Description
-                product.Description = GetDescription(tempProduct.Description);
+                await SetProductPrices(tempProduct.Id, product);
             }
 
 
@@ -88,7 +98,7 @@ namespace Manager.Controllers
 
 
 
-        private async Task<int> SetProductMedia(int productId)
+        private async Task SetProductMedia(int productId, Product product)
         {
             List<TempMedia> tempMedia = await unitOfWork.Products.GetTempProductMedia(productId);
             int index = 0;
@@ -122,12 +132,20 @@ namespace Manager.Controllers
                                     PropertyNameCaseInsensitive = true
                                 });
 
+
+
                                 productMedia = new ProductMedia
                                 {
-                                    ProductId = productId,
+                                    ProductId = product.Id,
                                     MediaId = image.Id,
                                     Index = index
                                 };
+
+                                if (index == 0)
+                                {
+                                    product.ImageId = image.Id;
+                                }
+
 
 
                             }
@@ -170,13 +188,16 @@ namespace Manager.Controllers
                     Item newVideo = await mediaController.TempNewVideo(video);
 
 
-
-                    productMedia = new ProductMedia
+                    if (newVideo != null)
                     {
-                        ProductId = productId,
-                        MediaId = newVideo.Id,
-                        Index = index
-                    };
+                        productMedia = new ProductMedia
+                        {
+                            ProductId = product.Id,
+                            MediaId = newVideo.Id,
+                            Index = index
+                        };
+                    }
+
                 }
 
                 if (productMedia != null)
@@ -188,12 +209,12 @@ namespace Manager.Controllers
 
             await unitOfWork.Save();
 
-            return tempMedia[0].Id;
+            //return tempMedia[0].Id;
         }
 
 
 
-        private async Task SetProductPrices(int productId)
+        private async Task SetProductPrices(int productId, Product product)
         {
             List<double> prices = await unitOfWork.Products.GetTempProductPrices(productId);
 
@@ -201,9 +222,11 @@ namespace Manager.Controllers
             {
                 unitOfWork.ProductPrices.Add(new ProductPrice
                 {
-                    ProductId = productId,
+                    ProductId = product.Id,
                     Price = prices[0]
                 });
+
+                await unitOfWork.Save();
             }
             else
             {
@@ -211,7 +234,7 @@ namespace Manager.Controllers
                 {
                     ProductPrice productPrice = new ProductPrice
                     {
-                        ProductId = productId,
+                        ProductId = product.Id,
                         Price = price
                     };
 
@@ -229,7 +252,7 @@ namespace Manager.Controllers
                 }
             }
 
-            
+
         }
 
         private string GetDescription(string description)
@@ -289,7 +312,8 @@ namespace Manager.Controllers
 
             string textBoxDataString = JsonSerializer.Serialize(textBoxDataList, new JsonSerializerOptions
             {
-                IgnoreNullValues = true
+                IgnoreNullValues = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             });
 
             return textBoxDataString;

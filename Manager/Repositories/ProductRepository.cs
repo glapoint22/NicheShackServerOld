@@ -117,13 +117,31 @@ namespace Manager.Repositories
                     .AsNoTracking()
                     .Where(x => x.Name == categoryName)
                     .Select(x => x.Id)
-                    .SingleAsync();
+                    .SingleOrDefaultAsync();
 
-                return await context.Niches
-                    .AsNoTracking()
-                    .Where(x => x.CategoryId == categoryId)
-                    .Select(x => x.Id)
-                    .SingleAsync();
+                if (await context.Niches.AnyAsync(x => x.Name == tempNiche.Name))
+                {
+                    return await context.Niches
+                        .AsNoTracking()
+                        .Where(x => x.Name == tempNiche.Name)
+                        .Select(x => x.Id)
+                        .FirstOrDefaultAsync();
+                }
+
+
+                Niche niche = new Niche
+                {
+                    CategoryId = categoryId,
+                    Name = tempNiche.Name,
+                    UrlName = Utility.GetUrlName(tempNiche.Name),
+                    UrlId = Utility.GetUrlId()
+                };
+
+                context.Add(niche);
+
+                await context.SaveChangesAsync();
+
+                return niche.Id;
             }
         }
 
@@ -198,7 +216,7 @@ namespace Manager.Repositories
         //private List<NotificationItem> GetNotificationItems(ProductViewModel product)
         //{
 
-            
+
 
 
 
@@ -219,16 +237,16 @@ namespace Manager.Repositories
         public async Task<List<NotificationItem>> GetNotificationItems(int productId)
         {
             var allNotifications = await context.Notifications.Where(x => x.ProductId == productId).Select(x => new
-                {
-                    Id = x.Id,
-                    NotificationGroupId = x.NotificationGroupId,
-                    ProductId = x.ProductId,
-                    ProductName = x.Product.Name,
-                    ProductImage = x.Product.Media.Thumbnail,
-                    NotificationType = x.Type,
-                    CreationDate = x.CreationDate,
-                    IsNew = x.NotificationGroup.ArchiveDate == null
-                }).ToListAsync();
+            {
+                Id = x.Id,
+                NotificationGroupId = x.NotificationGroupId,
+                ProductId = x.ProductId,
+                ProductName = x.Product.Name,
+                ProductImage = x.Product.Media.Thumbnail,
+                NotificationType = x.Type,
+                CreationDate = x.CreationDate,
+                IsNew = x.NotificationGroup.ArchiveDate == null
+            }).ToListAsync();
 
 
             List<NotificationItem> notifications = allNotifications
@@ -385,7 +403,7 @@ namespace Manager.Repositories
 
 
 
-            
+
 
             // Product Price Points
             product.PricePoints = await context.PricePoints
