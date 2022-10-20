@@ -115,7 +115,7 @@ namespace Manager.Controllers
                 x.Id,
                 x.Name,
                 //x.Hoplink,
-                x.Media.Thumbnail
+                Image = x.Media.Thumbnail
             }));
         }
 

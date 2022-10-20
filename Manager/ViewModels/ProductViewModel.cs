@@ -8,6 +8,8 @@ namespace Manager.ViewModels
     public struct ProductViewModel
     {
         public int Id { get; set; }
+        public ItemViewModel Niche { get; set; }
+        public ItemViewModel SubNiche { get; set; }
         public ItemViewModel Vendor { get; set; }
         public string Hoplink { get; set; }
         public string Name { get; set; }

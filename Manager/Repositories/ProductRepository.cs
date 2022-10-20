@@ -307,6 +307,23 @@ namespace Manager.Repositories
                 {
                     Id = x.Id,
                     Name = x.Name,
+
+
+                    Niche = new ItemViewModel
+                    {
+                        Id = x.Niche.CategoryId,
+                        Name = x.Niche.Category.Name
+                    },
+
+
+                    SubNiche = new ItemViewModel
+                    {
+                        Id = x.NicheId,
+                        Name = x.Niche.Name
+                    },
+
+                    
+
                     Vendor = new ItemViewModel
                     {
                         Id = x.Vendor.Id,
@@ -326,6 +343,16 @@ namespace Manager.Repositories
                         SubscriptionDuration = x.SubscriptionDuration
                     },
                 }).SingleOrDefaultAsync();
+
+
+
+
+
+           
+
+
+
+
 
 
             List<double> prices = await context.ProductPrices
