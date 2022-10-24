@@ -1147,13 +1147,20 @@ namespace Manager.Controllers
         {
             PricePoint pricePoint = await unitOfWork.PricePoints.Get(x => x.Id == pricePointProperties.Id);
 
+
+            ProductPrice productPrice = await unitOfWork.ProductPrices.Get(pricePoint.ProductPriceId);
+
+            productPrice.Price = pricePointProperties.Price;
+            unitOfWork.ProductPrices.Update(productPrice);
+
+
             pricePoint.Header = pricePointProperties.Header;
             pricePoint.Quantity = pricePointProperties.Quantity;
             pricePoint.ImageId = pricePointProperties.ImageId;
             pricePoint.UnitPrice = pricePointProperties.UnitPrice;
             pricePoint.Unit = pricePointProperties.Unit;
             pricePoint.StrikethroughPrice = pricePointProperties.StrikethroughPrice;
-            pricePoint.ProductPrice.Price = pricePointProperties.Price;
+            //pricePoint.ProductPrice.Price = pricePointProperties.Price;
             pricePoint.ShippingType = pricePointProperties.ShippingType;
             pricePoint.TrialPeriod = pricePointProperties.RecurringPayment.TrialPeriod;
             pricePoint.RecurringPrice = pricePointProperties.RecurringPayment.RecurringPrice;
@@ -1173,15 +1180,17 @@ namespace Manager.Controllers
 
         [HttpDelete]
         [Route("PricePoint")]
-        public async Task<ActionResult> DeletePricePoint(int pricePointId)
+        public async Task DeletePricePoint(int pricePointId)
         {
             PricePoint pricePoint = await unitOfWork.PricePoints.Get(x => x.Id == pricePointId);
+            ProductPrice productPrice = await unitOfWork.ProductPrices.Get(x => x.Id == pricePoint.ProductPriceId);
 
             // Remove and save
             unitOfWork.PricePoints.Remove(pricePoint);
-            await unitOfWork.Save();
+            unitOfWork.ProductPrices.Remove(productPrice);
 
-            return Ok();
+
+            await unitOfWork.Save();
         }
 
 
