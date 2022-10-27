@@ -361,7 +361,19 @@ namespace Manager.Repositories
                 .Select(x => x.Price)
                 .ToListAsync();
 
-            product.MinPrice = prices.Min();
+
+
+
+
+            if(prices.Count() == 0)
+            {
+                product.MinPrice = null;
+            }else
+            {
+                product.MinPrice = prices.Min();
+            }
+
+            
 
             if (prices.Count() > 1)
             {

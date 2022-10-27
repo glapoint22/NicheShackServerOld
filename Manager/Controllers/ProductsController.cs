@@ -1104,6 +1104,57 @@ namespace Manager.Controllers
 
 
 
+        [Route("Price")]
+        [HttpPost]
+        public async Task AddPrice(ProductPriceItem newProductPrice)
+        {
+            ProductPrice productPrice = new ProductPrice
+            {
+                ProductId = newProductPrice.ProductId,
+                Price = newProductPrice.Price
+            };
+
+
+            // Update and save
+            unitOfWork.ProductPrices.Add(productPrice);
+            await unitOfWork.Save();
+        }
+
+
+
+
+
+        [Route("Price")]
+        [HttpPut]
+        public async Task UpdatePrice(ProductPriceItem updatedProductPrice)
+        {
+            ProductPrice productPrice = await unitOfWork.ProductPrices.Get(updatedProductPrice.ProductId);
+            productPrice.Price = updatedProductPrice.Price;
+
+            // Update and save
+            unitOfWork.ProductPrices.Update(productPrice);
+            await unitOfWork.Save();
+        }
+
+
+
+
+
+
+        [HttpDelete]
+        [Route("Price")]
+        public async Task DeletePrice(int productId)
+        {
+            ProductPrice productPrice = await unitOfWork.ProductPrices.Get(x => x.ProductId == productId);
+
+            // Remove and save
+            unitOfWork.ProductPrices.Remove(productPrice);
+
+
+            await unitOfWork.Save();
+        }
+
+
 
 
         [HttpPost]
@@ -1182,8 +1233,8 @@ namespace Manager.Controllers
         [Route("PricePoint")]
         public async Task DeletePricePoint(int pricePointId)
         {
-            PricePoint pricePoint = await unitOfWork.PricePoints.Get(x => x.Id == pricePointId);
-            ProductPrice productPrice = await unitOfWork.ProductPrices.Get(x => x.Id == pricePoint.ProductPriceId);
+            PricePoint pricePoint = await unitOfWork.PricePoints.Get(pricePointId);
+            ProductPrice productPrice = await unitOfWork.ProductPrices.Get(pricePoint.ProductPriceId);
 
             // Remove and save
             unitOfWork.PricePoints.Remove(pricePoint);
@@ -1197,22 +1248,7 @@ namespace Manager.Controllers
 
 
 
-
-        [Route("MinMaxPrice")]
-        [HttpPut]
-        public async Task<ActionResult> UpdateMinMaxPrice(UpdatedMinMaxPrice updatedMinMaxPrice)
-        {
-            Product product = await unitOfWork.Products.Get(updatedMinMaxPrice.ProductId);
-
-            //product.MinPrice = updatedMinMaxPrice.MinPrice;
-            //product.MaxPrice = updatedMinMaxPrice.MaxPrice;
-
-            // Update and save
-            unitOfWork.Products.Update(product);
-            await unitOfWork.Save();
-
-            return Ok();
-        }
+        
 
 
 
